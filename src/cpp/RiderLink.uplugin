@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "RiderLink",
+	"Description": "",
+	"Category": "Other",
+	"CreatedBy": "JetBrains",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "RiderLink",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}

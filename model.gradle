@@ -1,0 +1,80 @@
+def modelDir = new File(repoRoot, "protocol/src/main/kotlin/model")
+def hashBaseDir = new File(repoRoot, "build/rdgen")
+
+// TODO: Think about adding an msbuild task for rdgen
+
+task generateRiderModel(type: tasks.getByName('rdgen').class) {
+    def csOutput = new File(repoRoot, "src/rider/backend/RdRiderProtocol")
+    def ktOutput = new File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
+   
+
+    // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
+    // intellij SDK, which is extracted in afterEvaluate
+    params {
+        verbose = true
+        classpath "$rdLibDirectory/rider-model.jar"
+        sources "$modelDir/rider"
+        packages = "model.rider"
+        hashFolder = "$hashBaseDir/rider"
+
+        generator {
+            language = "kotlin"
+            transform = "asis"
+            root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
+//            namespace = "com.jetbrains.rider.plugins.unreal"
+            namespace = "com.jetbrains.rider.model"
+            directory = "$ktOutput"
+            
+        }
+
+        generator {
+            language = "csharp"
+            transform = "reversed"
+            root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
+            namespace = "JetBrains.Rider.Model"
+            directory = "$csOutput"
+        }
+        properties["model.out.src.rider.csharp.dir"]="$csOutput"
+        properties["model.out.src.rider.kotlin.dir"]="$ktOutput"
+    }
+}
+
+task generateEditorPluginModel(type: tasks.getByName('rdgen').class) {
+    def backendCsOutput = new File(repoRoot, "src/dotnet/model/RdEditorProtocol")
+    def unrealEditorCppOutput = new File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
+
+    params {
+        verbose = true
+        classpath "$rdLibDirectory/rider-model.jar"
+        sources "$modelDir/editorPlugin"
+        hashFolder = "$hashBaseDir/editorPlugin"
+        packages = "model.editorPlugin"
+
+        generator {
+            language = "csharp"
+            transform = "asis"
+            namespace = "JetBrains.Platform.Unreal.EditorPluginModel"
+            root = "model.editorPlugin.RdEditorModel"
+            directory = "$backendCsOutput"
+        }
+
+        generator {
+            language = "cpp"
+            transform = "reversed"
+            namespace = "jetbrains_editorplugin"
+            root = "model.editorPlugin.RdEditorModel"
+            directory = "$unrealEditorCppOutput"
+        }
+        properties["model.out.src.editorPlugin.csharp.dir"]="$backendCsOutput"
+        properties["model.out.src.editorPlugin.cpp.dir"]="$unrealEditorCppOutput"
+    }
+}
+
+task generateModel {
+    group = 'protocol'
+    description = 'Generates protocol models.'
+    dependsOn generateRiderModel, generateEditorPluginModel
+}
+
+jar.dependsOn generateModel
+// Make sure the dotnet build tasks depend on model, too
