@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using JetBrains.DataFlow;
+using JetBrains.Diagnostics;
+using JetBrains.Lifetimes;
 using JetBrains.Platform.RdFramework;
 using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.Util.Logging;

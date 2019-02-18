@@ -15,8 +15,7 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Wave" Version="$(WaveVersion)" />
+    </PackageReference>    
   </ItemGroup>
   
   <ItemGroup>
