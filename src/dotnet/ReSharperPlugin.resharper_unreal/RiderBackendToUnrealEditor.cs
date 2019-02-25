@@ -1,13 +1,13 @@
 using System;
 using System.IO;
+using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
-using JetBrains.Platform.RdFramework;
-using JetBrains.Platform.RdFramework.Base;
-using JetBrains.Platform.RdFramework.Impl;
-using JetBrains.Platform.RdFramework.Util;
 using JetBrains.Platform.Unreal.EditorPluginModel;
 using JetBrains.ProjectModel;
+using JetBrains.Rd;
+using JetBrains.Rd.Base;
+using JetBrains.Rd.Impl;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
 using JetBrains.Util;
 
@@ -47,7 +47,7 @@ namespace ReSharperPlugin.UnrealEditor
             wire.Connected.WhenTrue(lifetime, lf =>
             {
                 myLogger.Info("WireConnected");
-                var protocol = new Protocol("UnrealEditorPlugin", new Serializers(), new Identities(IdKind.Client), myDispatcher, wire);
+                var protocol = new Protocol("UnrealEditorPlugin", new Serializers(), new Identities(IdKind.Client), myDispatcher, wire, lf);
                 myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
                 myEditorModel.View(lf, (lf2, model) =>
                 {

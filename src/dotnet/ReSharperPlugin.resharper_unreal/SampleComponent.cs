@@ -1,6 +1,5 @@
 ﻿using JetBrains.Application;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
-using JetBrains.ReSharper.Intentions.CSharp.QuickFixes;
 
 namespace ReSharperPlugin.resharper_unreal
 {
@@ -9,7 +8,7 @@ namespace ReSharperPlugin.resharper_unreal
     {
         public SampleQuickFixRegistrarComponent(IQuickFixes table)
         {
-            table.RegisterQuickFix<SampleHighlighting>(null, h => new SampleFix(h.Declaration), typeof(SampleFix));
+            table.RegisterQuickFix<SampleHighlighting>(default, h => new SampleFix(h.Declaration), typeof(SampleFix));
         }
     }
 }
