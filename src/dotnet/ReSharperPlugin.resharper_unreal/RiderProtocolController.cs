@@ -5,6 +5,8 @@ using System.Text;
 using JetBrains.Collections.Viewable;
 using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
+using JetBrains.Platform.RdFramework;
+using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.Rd.Impl;
 
 namespace JetBrains.Rider.Unity.Editor.NonUnity

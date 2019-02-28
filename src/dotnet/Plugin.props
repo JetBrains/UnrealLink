@@ -1,16 +1,7 @@
 <Project>
   <PropertyGroup>
-    <SdkVersion>191.0.20190213.235500-eap01d</SdkVersion>
+    <SdkVersion>191.0.20190228.30532-eap01d</SdkVersion>
     
     <Title>resharper_unreal</Title>
-    <Description>Description</Description>
-  
-    <Authors>Author</Authors>
-    <Copyright>Copyright $([System.DateTime]::Now.Year) Maintainers of resharper_unreal</Copyright>
-    <PackageTags>resharper plugin</PackageTags>
-  
-    <PackageProjectUrl></PackageProjectUrl>
-    <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageIconUrl></PackageIconUrl>
   </PropertyGroup>
 </Project>

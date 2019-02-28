@@ -32,7 +32,7 @@ void FRiderLinkModule::StartupModule()
 	});
 	
 	outputDevice.onSerializeMessage.BindLambda([this](const TCHAR * msg){
-		rdConnection.unrealToBackendModel.get_unreal_log().set(msg);
+		rdConnection.unrealToBackendModel.get_unreal_log().fire(msg);
 	});
 	// Quick forced check of availability before anyone touches the module
 	RiderSourceCodeAccessor.RefreshAvailability();

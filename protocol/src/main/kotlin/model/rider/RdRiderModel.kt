@@ -9,8 +9,7 @@ object RdRiderModel: Ext(SolutionModel.Solution){
     init {
 
         property("test_connection", int.nullable)
-        property("unreal_log", string)
+        signal("unreal_log", string)
         property("play", bool)
-//        property("test_string", string)
     }
 }

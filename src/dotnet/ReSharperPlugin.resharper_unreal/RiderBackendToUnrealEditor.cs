@@ -3,10 +3,12 @@ using System.IO;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
+using JetBrains.Platform.RdFramework;
+using JetBrains.Platform.RdFramework.Impl;
+using JetBrains.Platform.RdFramework.Util;
 using JetBrains.Platform.Unreal.EditorPluginModel;
 using JetBrains.ProjectModel;
 using JetBrains.Rd;
-using JetBrains.Rd.Base;
 using JetBrains.Rd.Impl;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
 using JetBrains.Util;
@@ -51,7 +53,7 @@ namespace ReSharperPlugin.UnrealEditor
                 myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
                 myEditorModel.View(lf, (lf2, model) =>
                 {
-                    model.Unreal_log.Advise(lf, s => myUnrealHost.PerformModelAction(m => m.Unreal_log.Set(s)));
+                    model.Unreal_log.Advise(lf, s => myUnrealHost.PerformModelAction(m => m.Unreal_log.Fire(s)));
                 });
             });
             
