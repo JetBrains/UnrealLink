@@ -4,7 +4,7 @@ def hashBaseDir = new File(repoRoot, "build/rdgen")
 // TODO: Think about adding an msbuild task for rdgen
 
 task generateRiderModel(type: tasks.getByName('rdgen').class) {
-    def csOutput = new File(repoRoot, "src/rider/backend/RdRiderProtocol")
+    def csOutput = new File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdRiderProtocol")
     def ktOutput = new File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
    
 
@@ -40,7 +40,7 @@ task generateRiderModel(type: tasks.getByName('rdgen').class) {
 }
 
 task generateEditorPluginModel(type: tasks.getByName('rdgen').class) {
-    def backendCsOutput = new File(repoRoot, "src/dotnet/model/RdEditorProtocol")
+    def backendCsOutput = new File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdEditorProtocol")
     def unrealEditorCppOutput = new File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
 
     params {

@@ -100,16 +100,6 @@ task findMsBuild {
     }
 }
 
-task compileDotNet {
-    dependsOn findMsBuild
-    doLast {
-        exec {
-            executable findMsBuild.executable
-            args "/t:Restore;Rebuild","$dotnetSolution","/v:minimal","/p:Configuration=$BuildConfiguration"
-        }
-    }
-}
-
 task patchPropsFile {
     def getFiles =  new FileNameFinder().getFileNames("$reSharperHostSdkDirectory", "JetBrains.Rider.SDK.*.nupkg")
     def riderSdkFile = getFiles.find { !it.contains('Test')}
@@ -120,15 +110,26 @@ task patchPropsFile {
     pluginPropsFile.text = """<Project>
   <PropertyGroup>
     <SdkVersion>${version}</SdkVersion>
-    
+
     <Title>resharper_unreal</Title>
   </PropertyGroup>
 </Project>"""
 }
 
-buildPlugin {
+task compileDotNet {
     dependsOn findMsBuild
     dependsOn patchPropsFile
+    doLast {
+        exec {
+            executable findMsBuild.executable
+            args "/t:Restore;Rebuild","$dotnetSolution","/v:minimal","/p:Configuration=$BuildConfiguration"
+        }
+    }
+}
+
+
+buildPlugin {
+    dependsOn findMsBuild
     outputs.upToDateWhen { false }
     doLast {
         copy {
