@@ -13,7 +13,7 @@ buildscript {
 plugins {
     id 'java'
     id 'org.jetbrains.intellij'
-    id 'com.jetbrains.rdgen' version '0.191.54'
+    id 'com.jetbrains.rdgen' version '0.192.36'
     id 'org.jetbrains.kotlin.jvm' version '1.3.21'
 }
 dependencies {
@@ -96,9 +96,9 @@ task findMsBuild {
 task patchPropsFile {
     def getFiles =  new FileNameFinder().getFileNames("$reSharperHostSdkDirectory", "JetBrains.Rider.SDK.*.nupkg")
     def riderSdkFile = getFiles.find { !it.contains('Test')}
-    def versionGroup = (riderSdkFile =~ /JetBrains\.Rider\.SDK\.([\d\.]+.*)\.nupkg/)
+    def versionGroup = (riderSdkFile =~ /JetBrains\.Rider\.SDK\.([\d.]+.*)\.nupkg/)
     assert versionGroup.hasGroup()
-    assert 1 == versionGroup.size()
+    assert 1L == versionGroup.size()
     def version = versionGroup[0][1]
     pluginPropsFile.text = """<Project>
   <PropertyGroup>

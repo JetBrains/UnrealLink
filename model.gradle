@@ -61,7 +61,7 @@ task generateEditorPluginModel(type: tasks.getByName('rdgen').class) {
         generator {
             language = "cpp"
             transform = "reversed"
-            namespace = "jetbrains_editorplugin"
+            namespace = "jetbrains.editorplugin"
             root = "model.editorPlugin.RdEditorModel"
             directory = "$unrealEditorCppOutput"
         }
