@@ -23,7 +23,7 @@ dependencies {
 ext {
     repoRoot = project.file(".")
     isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
-    sdkVersion = "2019.1"
+    sdkVersion = "2019.2"
     rdLibDirectory = new File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/rd")
     reSharperHostSdkDirectory = new File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/ReSharperHostSdk")
     dotNetDir = new File(repoRoot, "src/dotnet")
@@ -80,14 +80,7 @@ task findMsBuild {
     doLast {
         ByteArrayOutputStream stdout = new ByteArrayOutputStream()
         if (isWindows) {
-            exec {
-                executable "$repoRoot/tools/vswhere.exe"
-                args '-latest','-property','installationPath'
-                standardOutput = stdout
-                workingDir project.rootDir
-            }
-            List<String> files = new FileNameFinder().getFileNames("${stdout.toString().trim()}/MSBuild", "**/MSBuild.exe")
-            ext.executable = files.get(0)
+            ext.executable = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe"
         } else {
             exec {
                 executable 'which'
