@@ -5,8 +5,6 @@ using System.Text;
 using JetBrains.Collections.Viewable;
 using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
-using JetBrains.Platform.RdFramework;
-using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.Rd.Impl;
 
 namespace JetBrains.Rider.Unity.Editor.NonUnity
@@ -23,7 +21,7 @@ namespace JetBrains.Rider.Unity.Editor.NonUnity
       {
         ourLogger.Verbose("Start ControllerTask...");
 
-        Wire = new SocketWire.Server(lifetime, mainThreadScheduler, null, "UnityServer", true);
+        Wire = new SocketWire.Server(lifetime, mainThreadScheduler, null, "UnityServer");
         ourLogger.Verbose($"Created SocketWire with port = {Wire.Port}");
       }
       catch (Exception ex)

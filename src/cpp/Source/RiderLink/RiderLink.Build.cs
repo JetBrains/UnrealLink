@@ -67,6 +67,7 @@ public class RiderLink : ModuleRules
 
             string[] paths = new string[] {
                  "include"
+				,"include/nonstd"
 				,"include/clsocket"
 				,"include/clsocket/src"
 				,"include/mpark"

@@ -1,0 +1,30 @@
+task cloneRdCpp(/*type: Exec*/) {
+//    executable 'git'
+//    args 'clone', 'https://github.com/jetbrains/rd.git', "$buildDir/rd", "--quiet"
+}
+
+def rdCppFolder = "$buildDir/rd/rd-cpp"
+
+task buildRdCpp(type: Exec, dependsOn: cloneRdCpp) {
+    commandLine "cmd", "/c", "$rdCppFolder/build.cmd"
+    //windows only
+}
+
+
+task installRdCpp(dependsOn: buildRdCpp) {
+    doLast {
+        def UE4RootPath = "${rootProject.projectDir}"//todo
+        def includeDir = "$UE4RootPath/src/cpp/Source/RiderLink/include"
+        def libDir =  "$UE4RootPath/src/cpp/Source/RiderLink/libs"
+
+        delete(files(includeDir, libDir))
+        copy {
+            from "$rdCppFolder/export/include"
+            into includeDir
+        }
+        copy {
+            from "$rdCppFolder/export/Libs"
+            into libDir
+        }
+    }
+}
