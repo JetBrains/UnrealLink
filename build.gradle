@@ -94,19 +94,21 @@ task findMsBuild {
 }
 
 task patchPropsFile {
-    def getFiles =  new FileNameFinder().getFileNames("$reSharperHostSdkDirectory", "JetBrains.Rider.SDK.*.nupkg")
-    def riderSdkFile = getFiles.find { !it.contains('Test')}
-    def versionGroup = (riderSdkFile =~ /JetBrains\.Rider\.SDK\.([\d.]+.*)\.nupkg/)
-    assert versionGroup.hasGroup()
-    assert 1L == versionGroup.size()
-    def version = versionGroup[0][1]
-    pluginPropsFile.text = """<Project>
+    doLast {
+        def getFiles = new FileNameFinder().getFileNames("$reSharperHostSdkDirectory", "JetBrains.Rider.SDK.*.nupkg")
+        def riderSdkFile = getFiles.find { !it.contains('Test') }
+        def versionGroup = (riderSdkFile =~ /JetBrains\.Rider\.SDK\.([\d.]+.*)\.nupkg/)
+        assert versionGroup.hasGroup()
+        assert 1L == versionGroup.size()
+        def version = versionGroup[0][1]
+        pluginPropsFile.text = """<Project>
   <PropertyGroup>
     <SdkVersion>${version}</SdkVersion>
 
     <Title>resharper_unreal</Title>
   </PropertyGroup>
 </Project>"""
+    }
 }
 
 task compileDotNet {
@@ -115,7 +117,7 @@ task compileDotNet {
     doLast {
         exec {
             executable findMsBuild.executable
-            args "/t:Restore;Rebuild","$dotnetSolution","/v:minimal","/p:Configuration=$BuildConfiguration"
+            args "/t:Restore;Rebuild", "$dotnetSolution", "/v:minimal", "/p:Configuration=$BuildConfiguration"
         }
     }
 }
@@ -138,7 +140,7 @@ buildPlugin {
 
         exec {
             executable findMsBuild.executable
-            args "/t:Pack","$dotnetSolution","/v:minimal","/p:Configuration=$BuildConfiguration","/p:PackageOutputPath=$rootDir/output","/p:PackageReleaseNotes=$changeNotes","/p:PackageVersion=$version"
+            args "/t:Pack", "$dotnetSolution", "/v:minimal", "/p:Configuration=$BuildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$version"
         }
     }
 }
