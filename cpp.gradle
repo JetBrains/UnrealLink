@@ -1,6 +1,8 @@
-task cloneRdCpp(/*type: Exec*/) {
-//    executable 'git'
-//    args 'clone', 'https://github.com/jetbrains/rd.git', "$buildDir/rd", "--quiet"
+task cloneRdCpp(type: Exec) {
+    executable 'git'
+    def branch = 'rd-cpp'
+    args 'clone', '--branch', branch, 'https://github.com/jetbrains/rd.git', "$buildDir/rd", "--quiet"
+    enabled = !(new File("$buildDir/rd").exists())
 }
 
 def rdCppFolder = "$buildDir/rd/rd-cpp"

@@ -5,13 +5,13 @@ pluginManagement {
         maven { url "https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap" }
         maven { url "https://cache-redirector.jetbrains.com/myget.org.rd-snapshots.maven" }
     }
-    resolutionStrategy {
+    /*resolutionStrategy {
         eachPlugin {
             if (requested.id.id == "com.jetbrains.rdgen") {
                 useModule("com.jetbrains.rd:rd-gen:${requested.version}")
             }
         }
-    }
+    }*/
 }
 
 rootProject.name = 'resharper_unreal'

@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <SdkVersion>192.0.20190728.120214-eap07d</SdkVersion>
+    <SdkVersion>192.0.20190730.34642-eap07d</SdkVersion>
 
     <Title>resharper_unreal</Title>
   </PropertyGroup>

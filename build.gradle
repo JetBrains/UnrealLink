@@ -1,31 +1,56 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 buildscript {
+    apply from: 'versions.gradle.kts'
 
     repositories {
         maven { url "https://cache-redirector.jetbrains.com/intellij-repository/snapshots" }
         maven { url "https://cache-redirector.jetbrains.com/maven-central" }
         maven { url "https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap" }
+//        flatDir { dirs "./buildSrc/build/plugins/buildSrc/lib/"}
+        flatDir { dirs "$rootProject.rootDir/buildSrc/build/idea-sandbox/plugins/buildSrc/lib" }
+        flatDir { dirs "$rootProject.rootDir/buildSrc/build" }
     }
 
+    /*dependencies {
+        classpath 'gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:$gradleintellijplugin_version'
+    }*/
 
+//    apply plugin: 'org.jetbrains.intellij'
+
+    /*intellij {
+        type = 'RD'
+        version = "2019.2-SNAPSHOT"
+        downloadSources = false
+    }*/
+
+    dependencies {
+        classpath files("$rootProject.projectDir/buildSrc/build/riderRD-2019.2-SNAPSHOT/lib/rd/rd-gen.jar")
+        classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:$gradleintellijplugin_version"
+//        classpath "org.jetbrains.rd:rd-gen"
+//        println "CLASSPATH:$sourceSets.main.runtimeClasspath.asPath"
+    }
 }
+
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij'
-    id 'com.jetbrains.rdgen' version '0.192.36'
+//    id 'org.jetbrains.intellij'
+//    id 'com.jetbrains.rdgen' version '0.192.68'
     id 'org.jetbrains.kotlin.jvm' version '1.3.21'
 }
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+//    compile "gradle.plugin.org.jetbrains.intellij.plugins"
+
 }
 
 ext {
     repoRoot = project.file(".")
     isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
-    sdkVersion = "2019.2"
-    rdLibDirectory = new File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/rd")
-    reSharperHostSdkDirectory = new File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/ReSharperHostSdk")
+    sdkDirectory = new File(repoRoot, "buildSrc/build/riderRD-$sdk_version-SNAPSHOT")
+    rdLibDirectory = new File(sdkDirectory, "lib/rd")
+    reSharperHostSdkDirectory = new File(sdkDirectory, "lib/ReSharperHostSdk")
     dotNetDir = new File(repoRoot, "src/dotnet")
     pluginPropsFile = new File(dotNetDir, "Plugin.props")
     dotNetRootId = "ReSharperPlugin"
@@ -103,7 +128,7 @@ task patchPropsFile {
         def version = versionGroup[0][1]
         pluginPropsFile.text = """<Project>
   <PropertyGroup>
-    <SdkVersion>${version}</SdkVersion>
+    <sdk_version>${version}</sdk_version>
 
     <Title>resharper_unreal</Title>
   </PropertyGroup>
@@ -122,6 +147,7 @@ task compileDotNet {
     }
 }
 
+apply plugin: 'org.jetbrains.intellij'
 
 buildPlugin {
     dependsOn findMsBuild
@@ -145,11 +171,28 @@ buildPlugin {
     }
 }
 
+/*
 intellij {
     type = 'RD'
-    version = "$sdkVersion-SNAPSHOT"
+    version = "$sdk_version-SNAPSHOT"
     downloadSources = false
+
+    */
+/*doLast {
+        apply plugin: com.jetbrains.rd.generator.gradle.RdgenPlugin
+    }*//*
+
 }
+*/
+
+//task applyRdPlugin() {
+//    dependsOn prepareSandbox
+
+//    println("SD -- applying rd plugin")
+//    apply plugin: com.jetbrains.rd.generator.gradle.RdgenPlugin
+//}
+
+//println "Plugins:${intellij.plugins.toString()}"
 
 apply plugin: 'com.jetbrains.rdgen'
 apply from: 'model.gradle'
