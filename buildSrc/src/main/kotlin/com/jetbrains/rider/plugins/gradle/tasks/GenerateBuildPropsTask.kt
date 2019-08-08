@@ -18,10 +18,10 @@ open class GenerateBuildPropsTask: DefaultTask() {
     var msBuildParameter: String = ""
 
     @Input
-    var packageVersion = project.providers.provider({ parsePackageVersion() })
+    var packageVersion = project.providers.provider { parsePackageVersion() }
 
     @OutputFile
-    var propsFile = project.providers.provider({ File("${project.projectDir}/../resharper/$packageName.generated.props") })
+    var propsFile = project.providers.provider { File("${project.projectDir}/../resharper/$packageName.generated.props") }
 
     @TaskAction
     fun generate() {

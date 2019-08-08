@@ -46,7 +46,8 @@ class BackendPaths(private val project: Project, logger: Logger, val repositoryR
 
         val intellij = project.extensions.findByType(IntelliJPluginExtension::class.java)!!
 
-        var root = File(repositoryRoot, "rider/build/riderRD-$productVersion-SNAPSHOT")
+//        var root = File(repositoryRoot, "rider/build/riderRD-$productVersion-SNAPSHOT")
+        var root = File("C:\\Work\\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win")
         if (intellij.ideaDependencyCachePath != null) {
             root = File(intellij.ideaDependencyCachePath)
         }

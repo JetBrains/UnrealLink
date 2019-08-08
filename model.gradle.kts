@@ -1,17 +1,20 @@
 import com.jetbrains.rd.generator.gradle.RdgenParams
 import com.jetbrains.rd.generator.gradle.RdgenTask
+import java.nio.file.Files
+import kotlin.reflect.full.memberProperties
 
 buildscript {
     repositories {
+        flatDir { dirs("C:\\Work\\rd-gen\\") }
         maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
+//        maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/myget.org.rd-snapshots.maven") }
+//        maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
+//        maven { setUrl("https://cache-redirector.jetbrains.com/myget.org.rd-snapshots.maven") }
     }
 
     dependencies {
-        classpath("com.jetbrains.rd:rd-gen:0.192.36")
+        classpath(BuildPlugins.rdGenPlugin)
     }
 }
 
@@ -20,12 +23,10 @@ val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
 
 // TODO: Think about adding an msbuild task for rdgen
-//apply(plugin = "com.jetbrains.rdgen")
 
 tasks {
     create<RdgenTask>("generateRiderModel") {
         configure<RdgenParams> {
-            //task generateRiderModel(type: tasks.getByName("rdgen").class) {
             val csOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdRiderProtocol")
             val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
 
@@ -33,7 +34,7 @@ tasks {
             // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
             // intellij SDK, which is extracted in afterEvaluate
             verbose = true
-            classpath("${project.extra["rdLibDirectory"]}/rider-model.jar")
+            classpath("${rootProject.extra["rdLibDirectory"]}/rider-model.jar")
             sources("$modelDir/rider")
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
@@ -60,6 +61,7 @@ tasks {
         }
     }
 
+
     create<RdgenTask>("generateEditorPluginModel") {
         configure<RdgenParams> {
             val backendCsOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdEditorProtocol")
@@ -67,10 +69,11 @@ tasks {
 
 
             verbose = true
-            classpath("${project.extra["rdLibDirectory"]}/rider-model.jar")
+            classpath("${rootProject.extra["rdLibDirectory"]}/rider-model.jar")
             sources("$modelDir/editorPlugin")
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
+//            changeCompiled()
 
             generator {
                 language = "csharp"
@@ -95,7 +98,7 @@ tasks {
     create("generateModel") {
         group = "protocol"
         description = "Generates protocol models."
-        dependsOn("generateRiderModel", "generateEditorPluginModel")
+        dependsOn("generateRiderModel"/*, "generateEditorPluginModel"*/)
     }
     withType<Jar> {
         dependsOn("generateModel")
