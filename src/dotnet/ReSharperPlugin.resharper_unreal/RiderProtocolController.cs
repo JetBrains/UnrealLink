@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using JetBrains.Collections.Viewable;
 using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.Rd.Impl;
 
-namespace JetBrains.Rider.Unity.Editor.NonUnity
+namespace ReSharperPlugin.UnrealEditor
 {
   // ReSharper disable once UnusedMember.Global
   public class RiderProtocolController
@@ -22,38 +19,14 @@ namespace JetBrains.Rider.Unity.Editor.NonUnity
         ourLogger.Verbose("Start ControllerTask...");
 
         Wire = new SocketWire.Server(lifetime, mainThreadScheduler, null, "UnityServer");
-        ourLogger.Verbose($"Created SocketWire with port = {Wire.Port}");
+        ourLogger.Verbose("Created SocketWire with port = {0}", Wire.Port);
       }
       catch (Exception ex)
       {
-        ourLogger.Error("RiderProtocolController.ctor. " + ex);
+        ourLogger.Error(ex, "RiderProtocolController.ctor. ");
       }
     }
   }
   
 //  [Serializable]
-  class ProtocolInstance
-  {
-    public int Port;
-    public string SolutionName;
-
-    public ProtocolInstance(int port, string solutionName)
-    {
-      Port = port;
-      SolutionName = solutionName;
-    }
-
-    public static string ToJson(List<ProtocolInstance> connections)
-    {
-        //return JsonConvert.SerializeObject(connections); //turns out to be slow https://github.com/JetBrains/resharper-unity/issues/728 
-      var sb = new StringBuilder("[");
-
-      sb.Append(connections
-        .Select(connection=> "{" + $"\"Port\":{connection.Port},\"SolutionName\":\"{connection.SolutionName}\"" + "}")
-        .Aggregate((a, b) => a + "," + b));
-
-      sb.Append("]");
-      return sb.ToString();
-    }
-  }
 }

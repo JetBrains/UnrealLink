@@ -78,7 +78,7 @@ tasks {
             generator {
                 language = "csharp"
                 transform = "asis"
-                namespace = "JetBrains.Platform.Unreal.EditorPluginModel"
+                namespace = "JetBrains.Platform.Unreal.EditorPluginRoot"
                 root = "model.editorPlugin.RdEditorModel"
                 directory = "$backendCsOutput"
             }
@@ -95,10 +95,18 @@ tasks {
         }
     }
 
+    val prepare = create("prepareGeneration") {
+        dependsOn(rootProject.project("protocol").tasks.getByName("build"))
+    }
+
+    withType<RdGenTask> {
+        dependsOn(prepare)
+    }
+
     create("generateModel") {
         group = "protocol"
         description = "Generates protocol models."
-        dependsOn("generateRiderModel"/*, "generateEditorPluginModel"*/)
+        dependsOn("generateRiderModel", "generateEditorPluginModel")
     }
     withType<Jar> {
         dependsOn("generateModel")

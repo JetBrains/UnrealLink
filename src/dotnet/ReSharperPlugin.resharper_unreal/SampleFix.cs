@@ -6,7 +6,7 @@ using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.TextControl;
 using JetBrains.Util;
 
-namespace ReSharperPlugin.resharper_unreal
+namespace ReSharperPlugin.UnrealEditor
 {
     public sealed class SampleFix : QuickFixBase
     {

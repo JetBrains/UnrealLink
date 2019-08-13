@@ -1,7 +1,7 @@
 ﻿using JetBrains.Application;
 using JetBrains.ReSharper.Feature.Services.QuickFixes;
 
-namespace ReSharperPlugin.resharper_unreal
+namespace ReSharperPlugin.UnrealEditor
 {
     [ShellComponent]
     internal class SampleQuickFixRegistrarComponent

@@ -1,9 +1,7 @@
-﻿using JetBrains.ReSharper.Daemon.Stages.Dispatcher;
-using JetBrains.ReSharper.Feature.Services.Daemon;
+﻿using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 
-namespace ReSharperPlugin.resharper_unreal
+namespace ReSharperPlugin.UnrealEditor
 {
     // Types mentioned in this attribute are used for performance optimizations
     [ElementProblemAnalyzer(

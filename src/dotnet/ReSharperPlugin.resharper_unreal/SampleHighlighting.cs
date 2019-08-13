@@ -2,9 +2,7 @@ using JetBrains.DocumentModel;
 using JetBrains.ReSharper.Feature.Services.Daemon;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.Util;
-using ReSharperPlugin.resharper_unreal;
+using ReSharperPlugin.UnrealEditor;
 
 [assembly: RegisterConfigurableSeverity(
     SampleHighlighting.SeverityId,
@@ -14,7 +12,7 @@ using ReSharperPlugin.resharper_unreal;
     Description: SampleHighlighting.Description,
     DefaultSeverity: Severity.WARNING)]
 
-namespace ReSharperPlugin.resharper_unreal
+namespace ReSharperPlugin.UnrealEditor
 {
     [ConfigurableSeverityHighlighting(
         SeverityId,

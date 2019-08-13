@@ -13,9 +13,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>    
+    <Reference Include="C:\Work\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win\lib\ReSharperHost\Jetbrains.*.dll" />
+    <Reference Include="C:\Work\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win\lib\ReSharperHost\Jetbrains.*.exe" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="model" />
   </ItemGroup>
 
   <!-- TODO: uncomment for xaml icons -->
