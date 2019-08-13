@@ -8,8 +8,8 @@ import com.intellij.openapi.wm.impl.status.StatusBarUtil
 import com.intellij.ui.content.ContentManagerAdapter
 import com.intellij.ui.content.ContentManagerEvent
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
-import com.jetbrains.rider.plugins.unity.toolWindow.log.UnrealLogPanelModel
-import com.jetbrains.rider.plugins.unity.toolWindow.log.UnrealLogPanelView
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelModel
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelView
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 
 class UnrealToolWindowFactory(project: Project,

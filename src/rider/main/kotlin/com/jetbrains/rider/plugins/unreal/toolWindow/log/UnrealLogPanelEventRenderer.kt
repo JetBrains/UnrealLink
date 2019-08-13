@@ -1,8 +1,6 @@
-package com.jetbrains.rider.plugins.unity.toolWindow.log
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.RowIcon
-import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import javax.swing.JList
 

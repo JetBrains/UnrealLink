@@ -25,10 +25,10 @@ class UnrealToolWindowManager(project: Project,
 //            }
 //        }
 
-        host.model.unreal_log.advise(componentLifetime) { message ->
+        host.model.unrealLog.advise(componentLifetime) { message ->
             val context = unrealToolWindowFactory.getOrCreateContext()
 
-             context.addEvent(message)
+             context.addEvent(message.unrealLogMessage.message)
         }
     }
 }

@@ -11,9 +11,17 @@ class UnrealHost(project: Project): LifetimedProjectComponent(project) {
     companion object {
         val logger = getLogger<UnrealHost>()
         fun getInstance(project: Project) = project.getComponent<UnrealHost>()
+
+        private const val PortVariableName = "UNREALPROTOCOLPORT"
     }
     val model = project.solution.rdRiderModel
     init {
+/*
+        model.rider_backend_to_unreal_editor_port.adviseNotNull(componentLifetime) { port ->
+
+            assert(System.getenv(PortVariableName) == port.toString())
+        }
+*/
 //        var port = 0
 
 //        val appDataLocal = "LOCALAPPDATA"
@@ -48,12 +56,8 @@ class UnrealHost(project: Project): LifetimedProjectComponent(project) {
 //            }
 //        }
 
-        model.test_connection.advise(componentLifetime) {
+        model.testConnection.advise(componentLifetime) {
             println("Connection UE $it")
         }
-//        this.model?.unreal_log.advise(appLifetime) {
-//            println("UE_LOG: $it" )
-//            logger.info("UE_LOG: $it")
-//        }
     }
 }

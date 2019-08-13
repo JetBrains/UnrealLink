@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.unity.toolWindow.log
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*

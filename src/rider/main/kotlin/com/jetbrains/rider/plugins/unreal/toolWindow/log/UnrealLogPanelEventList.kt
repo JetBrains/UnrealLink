@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.unity.toolWindow.log
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.ide.CopyProvider
 import com.intellij.openapi.actionSystem.DataContext
@@ -48,7 +48,7 @@ class UnrealLogPanelEventList(project:Project) : JBList<LogPanelItem>(emptyList(
             if (index<0)
                 return null
             val path = node.message.substring(0, index)
-            val regex = Regex("^\\(\\d{1,}\\,\\d{1,}\\)")
+            val regex = Regex("^\\(\\d+,\\d{1,}\\)")
             val res = regex.find(node.message.substring(index), 0) ?: return null
             val coordinates = res.value.substring(1, res.value.length-1).split(",")
             val line = (coordinates[0])

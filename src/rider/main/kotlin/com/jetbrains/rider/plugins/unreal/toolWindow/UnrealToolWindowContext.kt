@@ -2,7 +2,7 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.openapi.wm.ToolWindow
 //import com.jetbrains.rider.plugins.unity.editorPlugin.model.*
-import com.jetbrains.rider.plugins.unity.toolWindow.log.UnrealLogPanelModel
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelModel
 
 class UnrealToolWindowContext(private val toolWindow: ToolWindow,
                               private val logModel: UnrealLogPanelModel) {
