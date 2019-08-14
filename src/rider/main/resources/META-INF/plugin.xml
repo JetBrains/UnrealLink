@@ -7,13 +7,14 @@
   <depends>com.intellij.modules.rider</depends>
 
   <description>
-<![CDATA[
-<p>Sample description</p>
-]]>
+
   </description>
   <project-components>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory</implementation-class></component>
+    <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowContextFactory</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
+      <component>
+          <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class>
+      </component>
   </project-components>
 </idea-plugin>
