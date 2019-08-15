@@ -5,14 +5,10 @@ import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
+import model.lib.ue4.UE4Library.FString
 
 @Suppress("unused")
 object RdRiderModel : Ext(SolutionModel.Solution) {
-    private val stringRange = structdef("stringRange") {
-        field("left", int)
-        field("right", int)
-    }
-
     init {
         setting(CSharp50Generator.AdditionalUsings) {
             listOf("JetBrains.Unreal.Lib")
@@ -25,10 +21,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("testConnection", int.nullable)
         property("play", bool)
 
-        signal("unrealLog", structdef("rdLogMessage") {
-            field("message", UE4Library.UnrealLogMessage)
-            field("urlRanges", array(stringRange))
-            field("blueprintRanges", array(stringRange))
-        })
+        signal("unrealLog", UE4Library.UnrealLogMessage)
+
+        call("rdApplyFilter", FString, array(UE4Library.BlueprintHighlighter)).async
     }
 }

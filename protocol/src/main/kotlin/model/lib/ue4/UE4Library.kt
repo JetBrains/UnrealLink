@@ -1,14 +1,14 @@
 package model.lib.ue4
 
 import com.jetbrains.rd.generator.nova.*
-import com.jetbrains.rd.generator.nova.PredefinedType.dateTime
-import com.jetbrains.rd.generator.nova.PredefinedType.string
+import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.cpp.CppIntrinsicType
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import model.editorPlugin.RdEditorRoot
+import model.rider.RdRiderModel
 
-object UE4Library : Root(*RdEditorRoot.generators) {
+object UE4Library : Root() {
     init {
         setting(CSharp50Generator.Namespace, "JetBrains.Unreal.Lib")
     }
@@ -18,6 +18,11 @@ object UE4Library : Root(*RdEditorRoot.generators) {
             setting(Cpp17Generator.Intrinsic, intrinsic)
             setting(CSharp50Generator.Namespace, "JetBrains.Unreal.Lib")
         }
+    }
+
+    private val StringRange = structdef("StringRange") {
+        field("left", PredefinedType.int)
+        field("right", PredefinedType.int)
     }
 
     val FString = declare(CppIntrinsicType("FString", "Runtime/Core/Public/Containers/UnrealString.h")) {
@@ -73,11 +78,17 @@ object UE4Library : Root(*RdEditorRoot.generators) {
         }
     }
 
+
     val UnrealLogMessage = structdef("UnrealLogMessage") {
         field("message", FString)
         field("type", VerbosityType)
         field("category", FString)
         field("time", dateTime.nullable)
+    }
+
+    val BlueprintHighlighter = structdef("BlueprintHighlighter") {
+        field("start", int)
+        field("end", int)
     }
 }
 

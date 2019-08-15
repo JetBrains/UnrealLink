@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Diagnostics;
@@ -10,8 +8,9 @@ using JetBrains.Platform.Unreal.EditorPluginModel;
 using JetBrains.ProjectModel;
 using JetBrains.Rd;
 using JetBrains.Rd.Impl;
+using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
-using JetBrains.Rider.Model;
+using JetBrains.Unreal.Lib;
 using JetBrains.Util;
 
 namespace ReSharperPlugin.UnrealEditor
@@ -41,53 +40,48 @@ namespace ReSharperPlugin.UnrealEditor
             var modelLifetime = modelLifetimeDefinition.Lifetime;
             myEditorModel = new Property<RdEditorModel>(modelLifetime, "RiderTounrealModel");
 
-            /*string portString;
-            try
-            {
-                portString = Environment.GetEnvironmentVariable(PortFileName);
-            }
-            catch (SecurityException e)
-            {
-                myLogger.Error($"Couldn't get environment variable:{PortFileName}", e);
-                throw;
-            }*/
 
-
-/*
-            if (portString != null)
-            {
-                //Editor's already opened
-                if (int.TryParse(portString, out int port))
-                {
-                    wire = new SocketWire.Client(lifetime, myDispatcher, port, "UnrealEditorClient");
-                    protocol = () => new Protocol("UnrealRiderClient", new Serializers(), new Identities(IdKind.Client),
-                        myDispatcher, wire, lifetime);
-                }
-                else
-                {
-                    throw new ArgumentException($"Invalid port:{port}");
-                }
-            }
-            else
-            {
-                //Editor's not opened yet
-                wire = new SocketWire.Server(lifetime, myDispatcher, null, "UnrealServer");
-                protocol = () => new Protocol("UnrealRiderServer", new Serializers(), new Identities(IdKind.Server),
-                    myDispatcher, wire, lifetime);
-                var unrealProtocolPortProperty = myUnrealHost.GetValue(model => model.Rider_backend_to_unreal_editor_port);
-                wire.Connected.WhenTrue(lifetime, lf => unrealProtocolPortProperty.Value = wire.Port);
-            }
-*/
             var projectName = mySolution.Name;
             var portDirectoryFullPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..",
                 "Local", "Jetbrains", "Rider", "Unreal", projectName, "Ports");
+
+
+            var watcher = new FileSystemWatcher(portDirectoryFullPath) {Filter = $"*{ClosedFileExtension}"};
+
+            OnCreated(watcher, modelLifetime, projectName, portDirectoryFullPath);
+
+            OnDeleted(lifetime, watcher, modelLifetimeDefinition);
+
+            StartWatcher(watcher);
+
+            myLogger.Info("RiderBackendToUnrealEditor building finished");
+        }
+
+        private static void StartWatcher(FileSystemWatcher watcher)
+        {
+            watcher.EnableRaisingEvents = true;
+        }
+
+        private void OnDeleted(Lifetime lifetime, FileSystemWatcher watcher,
+            LifetimeDefinition modelLifetimeDefinition)
+        {
+            watcher.Deleted += (sender, args) =>
+            {
+                myLogger.Info("File with port's deleted");
+
+                modelLifetimeDefinition.Terminate();
+                modelLifetimeDefinition = lifetime.CreateNested();
+            };
+        }
+
+        private void OnCreated(FileSystemWatcher watcher, Lifetime modelLifetime, string projectName,
+            string portDirectoryFullPath)
+        {
             var portFileFullPath = Path.Combine(portDirectoryFullPath, PortFileName);
 
             var portFileClosedPath = Path.Combine(portDirectoryFullPath, $"{PortFileName}{ClosedFileExtension}");
             Directory.CreateDirectory(portDirectoryFullPath);
-
-            var watcher = new FileSystemWatcher(portDirectoryFullPath) {Filter = $"*{ClosedFileExtension}"};
             watcher.Created += (_, e) =>
             {
                 Assertion.Assert(portFileClosedPath.Equals(e.FullPath), "Invalid event received from watcher");
@@ -111,40 +105,29 @@ namespace ReSharperPlugin.UnrealEditor
                     var identities = new Identities(IdKind.Client);
                     var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
                         myDispatcher, wire, modelLifetime);
-                    myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
-                    myEditorModel.View(lf,
-                        (lf2, model) =>
-                        {
-                            model.UnrealLog.Advise(lf, s =>
-                            {
-                                //parse url, blueprints, etc...
 
-                                var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b",
-                                    RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                                StringRange[] array = linkParser.Matches(s.Message.Data)
-                                    .OfType<Match>()
-                                    .Select(match => new StringRange(match.Index, match.Index + match.Length))
-                                    .ToArray();
-
-                                myUnrealHost.PerformModelAction(m =>
-                                    m.UnrealLog.Fire(new RdLogMessage(s, array, array)));
-                            });
-                        });
+                    ResetModel(lf, protocol);
                 });
             };
+        }
 
-
-            watcher.Deleted += (sender, args) =>
-            {
-                myLogger.Info("File with port's deleted");
-
-                modelLifetimeDefinition.Terminate();
-                modelLifetimeDefinition = lifetime.CreateNested();
-            };
-
-            watcher.EnableRaisingEvents = true;
-
-            myLogger.Info("RiderBackendToUnrealEditor building finished");
+        private void ResetModel(Lifetime lf, IProtocol protocol)
+        {
+            myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
+            myEditorModel.View(lf,
+                (lf2, model) =>
+                {
+                    model.UnrealLog.Advise(lf, s =>
+                    {
+                        myUnrealHost.PerformModelAction(m =>
+                            m.UnrealLog.Fire(s));
+                    });
+                    myUnrealHost.PerformModelAction(riderModel =>
+                    {
+                        riderModel.RdApplyFilter.Reset((lifetime, s) =>
+                            model.ApplyFilter.Start(s) as RdTask<BlueprintHighlighter[]>);
+                    });
+                });
         }
     }
 }

@@ -5,7 +5,10 @@ import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
+import model.lib.ue4.UE4Library
 import model.lib.ue4.UE4Library.UnrealLogMessage
+import model.lib.ue4.UE4Library.BlueprintHighlighter
+import model.lib.ue4.UE4Library.FString
 import java.io.File
 
 @Suppress("unused")
@@ -30,6 +33,6 @@ object RdEditorModel : Ext(RdEditorRoot) {
         property("testConnection", int.nullable)
         signal("unrealLog", UnrealLogMessage)
         property("play", bool)
-        call("checkIfBlueprint", string, bool)
+        call("applyFilter", FString, array(UE4Library.BlueprintHighlighter)).async
     }
 }

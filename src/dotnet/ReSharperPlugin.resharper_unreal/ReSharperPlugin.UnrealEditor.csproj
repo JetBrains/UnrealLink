@@ -18,7 +18,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="model" />
+    <Folder Include="model\RdRiderProtocol" />
   </ItemGroup>
 
   <!-- TODO: uncomment for xaml icons -->
