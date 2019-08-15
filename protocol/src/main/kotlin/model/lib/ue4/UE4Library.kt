@@ -5,12 +5,19 @@ import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.cpp.CppIntrinsicType
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
+import com.jetbrains.rd.generator.nova.kotlin.Kotlin11Generator
+import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.editorPlugin.RdEditorRoot
 import model.rider.RdRiderModel
+import java.io.File
 
-object UE4Library : Root() {
+object UE4Library : Root(
+        CSharp50Generator(FlowTransform.AsIs, "JetBrains.Unreal.Lib", File(syspropertyOrInvalid("model.out.src.lib.ue4.csharp.dir"))),
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains.EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir"))),
+        Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
+) {
     init {
-        setting(CSharp50Generator.Namespace, "JetBrains.Unreal.Lib")
+        setting(Cpp17Generator.MarshallerHeaders, listOf("UE4TypesMarshallers.h"))
     }
 
     private fun <T : Declaration> declare(intrinsic: CppIntrinsicType, factory: Toplevel.() -> T): T {
@@ -70,11 +77,11 @@ object UE4Library : Root() {
 
             // Log masks and special Enum values
 
-            +"All"//				= VeryVerbose,
-            +"NumVerbosity"
-            +"VerbosityMask"//	= 0xf,
-            +"SetColor"//		= 0x40, // not actually a verbosity, used to set the color of an output device
-            +"BreakOnLog"//		= 0x80
+            const("All", int, 0x40) //				= VeryVerbose,
+//            +"NumVerbosity"
+            const("VerbosityMask", int, 0xf)
+            const("SetColor", int, 0x40).doc("not actually a verbosity, used to set the color of an output device")
+            const("BreakOnLog", int, 0x80)
         }
     }
 

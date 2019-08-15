@@ -282,21 +282,6 @@ tasks {
             packages = "model.editorPlugin"
 //            changeCompiled()
 
-            generator {
-                language = "csharp"
-                transform = "asis"
-                namespace = "JetBrains.Platform.Unreal.EditorPluginModel"
-                root = "model.editorPlugin.RdEditorRoot"
-                directory = "$csEditorOutput"
-            }
-
-            generator {
-                language = "cpp"
-                transform = "reversed"
-                namespace = "Jetbrains.EditorPlugin"
-                root = "model.editorPlugin.RdEditorRoot"
-                directory = "$unrealEditorCppOutput"
-            }
             properties["model.out.src.editorPlugin.csharp.dir"] = "$csEditorOutput"
             properties["model.out.src.editorPlugin.cpp.dir"] = "$unrealEditorCppOutput"
         }
@@ -333,9 +318,9 @@ tasks {
                 root = "model.lib.ue4.UE4Library"
                 directory = "$unrealEditorCppOutput"
             }
-            properties["model.out.src.editorPlugin.csharp.dir"] = "$csLibraryOutput"
-            properties["model.out.src.editorPlugin.cpp.dir"] = "$unrealEditorCppOutput"
-            properties["model.out.src.rider.kotlin.dir"] = "$ktOutput"
+            properties["model.out.src.lib.ue4.csharp.dir"] = "$csLibraryOutput"
+            properties["model.out.src.lib.ue4.cpp.dir"] = "$unrealEditorCppOutput"
+            properties["model.out.src.lib.ue4.kt.dir"] = "$ktOutput"
         }
     }
 

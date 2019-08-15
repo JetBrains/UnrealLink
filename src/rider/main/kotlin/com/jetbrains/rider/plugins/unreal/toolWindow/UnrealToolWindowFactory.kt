@@ -6,7 +6,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rd.util.string.println
 import com.jetbrains.rider.model.UnrealLogMessage
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.UnrealPane
@@ -35,12 +37,16 @@ class UnrealToolWindowFactory(val project: Project,
 
     fun print(s : UnrealLogMessage) {
         showTab(Any(), Lifetime.Eternal)
-        UnrealPane.publicConsoleView.print(s.type.toString(), ConsoleViewContentType.LOG_ERROR_OUTPUT)
-        UnrealPane.publicConsoleView.print(s.message.data, ConsoleViewContentType.LOG_WARNING_OUTPUT)
-        UnrealPane.publicConsoleView.print(s.category.data, ConsoleViewContentType.LOG_INFO_OUTPUT)
+        val timeString = s.time?.toString() ?: " ".repeat(28)
         s.time?.let {
             UnrealPane.publicConsoleView.print(it.toString(), ConsoleViewContentType.LOG_DEBUG_OUTPUT)
         }
+        val verbosity = s.type.toString()
+        UnrealPane.publicConsoleView.print(verbosity, ConsoleViewContentType.LOG_ERROR_OUTPUT)
+        UnrealPane.publicConsoleView.print(s.message.data, ConsoleViewContentType.LOG_WARNING_OUTPUT)
+        UnrealPane.publicConsoleView.print(s.category.data, ConsoleViewContentType.LOG_INFO_OUTPUT)
+        UnrealPane.publicConsoleView.print(eol, ConsoleViewContentType.NORMAL_OUTPUT)
+        UnrealPane.publicConsoleView.flushDeferredText()
     }
 
 }

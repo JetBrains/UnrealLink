@@ -19,6 +19,7 @@ class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) :
 
     init {
         publicConsoleView = consoleView
+        publicConsoleView.allowHeavyFilters()
 
         val actionGroup = DefaultActionGroup().apply {
 

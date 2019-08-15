@@ -21,6 +21,6 @@ class UnrealLogViewerManager(
     }
 
     override fun getDefaultFilters(project: Project): Array<Filter> {
-        return arrayOf<Filter>(UrlFilter(), UnrealLogFilter(project,highlighterRegistrationHost))
+        return arrayOf<Filter>(UrlFilter(), UnrealLogFilter(project, highlighterRegistrationHost))
     }
 }

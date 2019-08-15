@@ -23,6 +23,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         signal("unrealLog", UE4Library.UnrealLogMessage)
 
-        call("rdApplyFilter", FString, array(UE4Library.BlueprintHighlighter)).async
+        call("rdApplyFilter", FString, bool).async
     }
 }

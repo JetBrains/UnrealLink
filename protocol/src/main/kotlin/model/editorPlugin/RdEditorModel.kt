@@ -13,16 +13,13 @@ import java.io.File
 
 @Suppress("unused")
 object RdEditorRoot : Root(
-        CSharp50Generator(FlowTransform.AsIs, "JetBrains.Platform.UnrealEngine.Model", File(syspropertyOrInvalid("model.out.src.editorPlugin.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "com.jetbrains.rider.plugins.unrealengine", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")))
+        CSharp50Generator(FlowTransform.AsIs, "JetBrains.Platform.Unreal.EditorPluginModel", File(syspropertyOrInvalid("model.out.src.editorPlugin.csharp.dir"))),
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains.EditorPlugin", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")))
 ) {
     init {
         setting(CSharp50Generator.AdditionalUsings) {
             listOf("JetBrains.Unreal.Lib")
         }
-    }
-
-    init {
         setting(Cpp17Generator.MarshallerHeaders, listOf("UE4TypesMarshallers.h"))
     }
 }
@@ -33,6 +30,6 @@ object RdEditorModel : Ext(RdEditorRoot) {
         property("testConnection", int.nullable)
         signal("unrealLog", UnrealLogMessage)
         property("play", bool)
-        call("applyFilter", FString, array(UE4Library.BlueprintHighlighter)).async
+        call("applyFilter", FString, bool).async
     }
 }
