@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
 import com.jetbrains.rd.framework.RdTaskResult
 import com.jetbrains.rdclient.daemon.HighlighterRegistrationHost
+import com.jetbrains.rider.model.FString
 import com.jetbrains.rider.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.stacktrace.filters.RiderHeavyExceptionFilter
@@ -29,7 +30,7 @@ class UnrealLogFilter(val project: Project, private val registrationHost: Highli
 
     override fun shouldRunHeavy() = true
 
-    private val filterModel = project.solution.rdRiderModel.applyFilter
+    private val filterModel = project.solution.rdRiderModel.rdApplyFilter
 
     override fun getUpdateMessage() = "Looking for valid Blueprint"
 
@@ -39,7 +40,7 @@ class UnrealLogFilter(val project: Project, private val registrationHost: Highli
             return
         }
 
-        val task = filterModel.start("")//todo
+        val task = filterModel.start(FString(copiedFragment.text))//todo
         task.result.advise(project.lifetime) { rdTaskResult ->
             when (rdTaskResult) {
                 is RdTaskResult.Success -> {
