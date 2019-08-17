@@ -17,4 +17,9 @@
           <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class>
       </component>
   </project-components>
+
+  <extensions defaultExtensionNs="com.intellij">
+      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager" />
+      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
+  </extensions>
 </idea-plugin>

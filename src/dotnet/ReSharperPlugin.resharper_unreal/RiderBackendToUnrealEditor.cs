@@ -70,8 +70,8 @@ namespace ReSharperPlugin.UnrealEditor
             {
                 myLogger.Info("File with port's deleted");
 
-                modelLifetimeDefinition.Terminate();
-                modelLifetimeDefinition = lifetime.CreateNested();
+                //modelLifetimeDefinition.Terminate();
+                //modelLifetimeDefinition = lifetime.CreateNested();
             };
         }
 
@@ -82,7 +82,7 @@ namespace ReSharperPlugin.UnrealEditor
 
             var portFileClosedPath = Path.Combine(portDirectoryFullPath, $"{PortFileName}{ClosedFileExtension}");
             Directory.CreateDirectory(portDirectoryFullPath);
-            watcher.Created += (_, e) =>
+            FileSystemEventHandler handler = (_, e) =>
             {
                 Assertion.Assert(portFileClosedPath.Equals(e.FullPath), "Invalid event received from watcher");
                 myLogger.Info("File with port's created");
@@ -109,6 +109,8 @@ namespace ReSharperPlugin.UnrealEditor
                     ResetModel(lf, protocol);
                 });
             };
+            watcher.Created += handler;
+            watcher.Changed += handler;
         }
 
         private void ResetModel(Lifetime lf, IProtocol protocol)
@@ -124,8 +126,8 @@ namespace ReSharperPlugin.UnrealEditor
                     });
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
-                        riderModel.RdApplyFilter.Reset((lifetime, s) =>
-                            model.ApplyFilter.Start(s) as RdTask<BlueprintHighlighter[]>);
+                        riderModel.IsBlueprint.Reset((lifetime, s) =>
+                            model.IsBlueprint.Start(s) as RdTask<bool>);
                     });
                 });
         }

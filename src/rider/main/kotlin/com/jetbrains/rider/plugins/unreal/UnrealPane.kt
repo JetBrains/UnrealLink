@@ -20,13 +20,14 @@ class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) :
     init {
         publicConsoleView = consoleView
         publicConsoleView.allowHeavyFilters()
+        publicConsoleView.setUpdateFoldingsEnabled(true)
 
         val actionGroup = DefaultActionGroup().apply {
 
             addAll(consoleView.createConsoleActions()
                     .filter {
                         !(it is PreviousOccurenceToolbarAction ||
-                                it is NextOccurenceToolbarAction || it is ConsoleViewImpl.ClearAllAction)
+                                it is NextOccurenceToolbarAction/* || it is ConsoleViewImpl.ClearAllAction*/)
                     }.toList())
         }
 

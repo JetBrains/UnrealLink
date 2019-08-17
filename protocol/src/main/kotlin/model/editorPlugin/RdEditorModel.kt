@@ -30,6 +30,8 @@ object RdEditorModel : Ext(RdEditorRoot) {
         property("testConnection", int.nullable)
         signal("unrealLog", UnrealLogMessage)
         property("play", bool)
-        call("applyFilter", FString, bool).async
+
+        call("isBlueprint", FString, bool).async
+        signal("navigate", FString)
     }
 }

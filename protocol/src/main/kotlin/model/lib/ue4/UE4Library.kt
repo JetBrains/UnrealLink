@@ -97,5 +97,10 @@ object UE4Library : Root(
         field("start", int)
         field("end", int)
     }
+
+//    val UnrealFilterProvider = aggregatedef("UnrealFilterProvider") {
+//        call("isBlueprint", FString, bool).readonly.async
+//        signal("navigate", FString)
+//    }
 }
 
