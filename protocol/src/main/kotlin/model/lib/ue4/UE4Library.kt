@@ -40,44 +40,39 @@ object UE4Library : Root(
 
     val VerbosityType = declare(CppIntrinsicType("ELogVerbosity::Type", "Logging/LogVerbosity.h")) {
         enum("VerbosityType") {
-            +"NoLogging" //		= 0,
+            +("NoLogging").doc("= 0")
 
-            /** Always prints a fatal error to console (and log file) and crashes (even if logging is disabled) */
-            +"Fatal"
 
-            /**
-             * Prints an error to console (and log file).
-             * Command lets and the editor collect and report errors. Error messages result in command let failure.
-             */
-            +"Error"
+            (+"Fatal").doc(
+                    "Always prints a fatal error to console (and log file) and crashes (even if logging is disabled)"
+            )
 
-            /**
-             * Prints a warning to console (and log file).
-             * Command lets and the editor collect and report warnings. Warnings can be treated as an error.
-             */
-            +"Warning"
+            (+"Error").doc(
+                    "Prints an error to console (and log file)." +
+                            "Command lets and the editor collect and report errors. Error messages result in command let failure."
+            )
 
-            /** Prints a message to console (and log file) */
-            +"Display"
+            (+"Warning").doc(
+                    "Prints a warning to console (and log file)." +
+                            "Command lets and the editor collect and report warnings. Warnings can be treated as an error.")
 
-            /** Prints a message to a log file (does not print to console) */
-            +"Log"
+            (+"Display").doc(
+                    "Prints a message to console (and log file)"
+            )
 
-            /**
-             * Prints a verbose message to a log file (if Verbose logging is enabled for the given category,
-             * usually used for detailed logging)
-             */
-            +"Verbose"
+            (+"Log").doc("Prints a message to a log file (does not print to console)")
 
-            /**
-             * Prints a verbose message to a log file (if VeryVerbose logging is enabled,
-             * usually used for detailed logging that would otherwise spam output)
-             */
-            +"VeryVerbose"
+            (+"Verbose").doc(
+                    "Prints a verbose message to a log file (if Verbose logging is enabled for the given category, usually used for detailed logging)"
+            )
+
+            (+"VeryVerbose").doc(
+                    "Prints a verbose message to a log file (if VeryVerbose logging is enabled, usually used for detailed logging that would otherwise spam output)"
+            )
 
             // Log masks and special Enum values
 
-            const("All", int, 0x40) //				= VeryVerbose,
+            const("All", int, 0x40).doc("=VeryVerbose")
 //            +"NumVerbosity"
             const("VerbosityMask", int, 0xf)
             const("SetColor", int, 0x40).doc("not actually a verbosity, used to set the color of an output device")
@@ -96,6 +91,11 @@ object UE4Library : Root(
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
         field("start", int)
         field("end", int)
+    }
+
+    val BlueprintStruct = structdef("BlueprintStruct") {
+        field("pathName", FString)
+        field("graphName", FString)
     }
 
 //    val UnrealFilterProvider = aggregatedef("UnrealFilterProvider") {

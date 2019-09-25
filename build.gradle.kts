@@ -9,25 +9,20 @@ import java.nio.file.Paths
 
 buildscript {
     repositories {
-        mavenLocal()
         maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
         maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
         maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
-//    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
 //    maven { setUrl("https://repo.labs.intellij.net/central-proxy") }
 //    maven { setUrl("https://cache-redirector.jetbrains.com/myget.org.rd-snapshots.maven") }
         maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
-
-//        flatDir { dirs("C:\\Work\\riderRD-2019.2-SNAPSHOT\\lib\\rd") }
-        flatDir { dirs("C:\\Work\\rd\\rd-kt\\rd-gen\\build\\libs") }
+        mavenLocal()
     }
 
     dependencies {
         classpath(BuildPlugins.gradleIntellijPlugin)
-//        classpath(BuildPlugins.rdGenPlugin)
-        classpath("com.jetbrains.rd:rd-gen")
+        classpath(BuildPlugins.rdGenPlugin)
     }
 }
 
@@ -44,16 +39,15 @@ dependencies {
 }
 
 val repoRoot = project.rootDir
-//val rdLibDirectory = File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/rd")
-val rdLibDirectory = File("C:\\Work\\riderRD-2019.2-SNAPSHOT\\lib\\rd")
-//val reSharperHostSdkDirectory = File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT/lib/ReSharperHostSdk")
-val sdkDirectory = File("C:\\Work\\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win")
-val reSharperHostSdkDirectory = File(sdkDirectory, "lib\\ReSharperHost")
+val sdkDirectory = File(buildDir, "riderRD-$sdkVersion-SNAPSHOT")
+val reSharperHostSdkDirectory = File(sdkDirectory, "/lib/ReSharperHostSdk")
+val rdLibDirectory = File(sdkDirectory, "lib/rd")
 
 val dotNetDir = File(repoRoot, "src/dotnet")
 val dotNetSolutionId = "resharper_unreal"
 val dotNetRootId = "ReSharperPlugin"
 val dotNetPluginId = "$dotNetRootId.UnrealEditor"
+val pluginPropsFile = File(dotNetDir, "Plugin.props")
 
 extra.apply {
     set("repoRoot", repoRoot)
@@ -62,7 +56,7 @@ extra.apply {
     set("rdLibDirectory", rdLibDirectory)
     set("reSharperHostSdkDirectory", reSharperHostSdkDirectory)
     set("dotNetDir", dotNetDir)
-    set("pluginPropsFile", File(dotNetDir, "Plugin.props"))
+    set("pluginPropsFile", pluginPropsFile)
     set("dotNetRootId", dotNetRootId)
     set("dotNetPluginId", dotNetPluginId)
     set("dotNetSolutionId", dotNetSolutionId)
@@ -70,12 +64,13 @@ extra.apply {
 }
 
 repositories {
+//    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 //  maven { url "https://repo.labs.intellij.net/jitpack.io" }
 //  mavenLocal()
-    flatDir { dirs(rdLibDirectory.absolutePath) }
+//    flatDir { dirs(sdkDirectory.absolutePath) }
 }
 
 java {
@@ -106,7 +101,7 @@ tasks {
     }
 //    val version = "11_0_2b159"
 //    val version = "11_0_3b304"
-    val f = File(sdkDirectory, "jbr/bin/java.exe")
+    val f = File(reSharperHostSdkDirectory, "jbr/bin/java.exe")
     withType<RunIdeTask> {
         //        setJbrVersion(version)
         setExecutable(f)
@@ -144,8 +139,33 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+val nugetPackagesPath by lazy {
+    val sdkPath = intellij.ideaDependency.classes
+
+    println("SDK path: $sdkPath")
+    val path = File(sdkPath, "lib/ReSharperHostSdk")
+
+    println("NuGet packages: $path")
+    if (!path.isDirectory) error("$path does not exist or not a directory")
+
+    return@lazy path
+}
+
+val riderSdkPackageVersion by lazy {
+    val sdkPackageName = "JetBrains.Rider.SDK"
+
+    val regex = Regex("${Regex.escape(sdkPackageName)}\\.([\\d\\.]+.*)\\.nupkg")
+    val version = nugetPackagesPath
+            .listFiles()
+            .mapNotNull { regex.matchEntire(it.name)?.groupValues?.drop(1)?.first() }
+            .singleOrNull() ?: error("$sdkPackageName package is not found in $nugetPackagesPath (or multiple matches)")
+    println("$sdkPackageName version is $version")
+
+    return@lazy version
+}
+
 tasks {
-    create("findMsBuild") {
+    val findMsBuild by creating {
         doLast {
             val stdout = ByteArrayOutputStream()
 
@@ -165,40 +185,38 @@ tasks {
         }
     }
 
-    create("patchPropsFile") {
+    val patchPropsFile by creating {
         doLast {
-            val version = File(reSharperHostSdkDirectory, "DeploymentPackagingIdentity.txt").bufferedReader().readLine()
+//            val version = File(sdkDirectory, "build.txt").bufferedReader().readLine().drop(3)
+            //drop "RD-" prefix
 
-            (project.extra["pluginPropsFile"] as File).writeText("""
+            pluginPropsFile.writeText("""
             |<Project>
             |   <PropertyGroup>
-            |       <SdkVersion>$version</SdkVersion>
+            |       <SdkVersion>${riderSdkPackageVersion}</SdkVersion>
             |       <Title>resharper_unreal</Title>
             |   </PropertyGroup>
             |</Project>""".trimMargin())
         }
     }
 
-    create("compileDotNet") {
-        dependsOn("findMsBuild")
-        dependsOn("patchPropsFile")
+    val compileDotNet by creating {
+        dependsOn(findMsBuild)
+        dependsOn(patchPropsFile)
         doLast {
             exec {
-                executable = project.tasks.getByName("findMsBuild").extra["executable"] as String
+                executable = findMsBuild.extra["executable"] as String
                 args = listOf("/t:Restore;Rebuild", "${project.extra["dotnetSolution"]}", "/v:minimal", "/p:Configuration=$buildConfiguration")
             }
         }
     }
-}
 
-
-tasks {
-    named<Zip>("buildPlugin") {
+    val buildPlugin by getting(Zip::class) {
         dependsOn("findMsBuild")
         outputs.upToDateWhen { false }
         doLast {
             copy {
-                from("$buildDir/distributions/${rootProject.name}-$version.zip")
+                from("$buildDir/distributions/${rootProject.name}-$archiveVersion.zip")
                 into("$rootDir/output")
             }
 
@@ -217,10 +235,9 @@ tasks {
 }
 
 intellij {
-    //    type = "RD"
-//    version = "$sdkVersion-SNAPSHOT"
-    localPath = "C:\\Work\\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win"
-    downloadSources = false
+    type = "RD"
+    version = "$sdkVersion-SNAPSHOT"
+//    downloadSources = false
 }
 
 apply(plugin = Libraries.rdGenPluginId)
@@ -231,11 +248,12 @@ val hashBaseDir = File(repoRoot, "build/rdgen")
 
 configure<RdgenParams> {
     verbose = true
-    classpath("${rootProject.extra["rdLibDirectory"]}/rider-model.jar", "C:\\Work\\resharper-unreal\\protocol\\build\\classes\\kotlin\\main")
+    classpath("${rootProject.extra["rdLibDirectory"]}/rider-model.jar", "" +
+            "C:\\Work\\resharper-unreal\\protocol\\build\\classes\\kotlin\\main")
 }
 
 tasks {
-//    val unrealEditorCppOutput = File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
+    //    val unrealEditorCppOutput = File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
     val unrealEditorCppOutput = File("C:\\Work\\UnrealEngine\\Engine\\Plugins\\Developer\\RiderLink\\Source\\RiderLink\\Private\\RdEditorProtocol")
     val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdEditorProtocol")
     val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdRiderProtocol")
@@ -277,7 +295,7 @@ tasks {
 
     create<RdgenTask>("generateEditorPluginModel") {
         configure<RdgenParams> {
-//            verbose = true
+            //            verbose = true
 //            classpath("${rootProject.extra["rdLibDirectory"]}/rider-model.jar")
             sources("$modelDir/editorPlugin")
             hashFolder = "$hashBaseDir/editorPlugin"

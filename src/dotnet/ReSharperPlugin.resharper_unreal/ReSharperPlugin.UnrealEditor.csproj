@@ -11,14 +11,17 @@
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <Reference Include="C:\Work\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win\lib\ReSharperHost\Jetbrains.*.dll" />
-    <Reference Include="C:\Work\JetBrains.Rider-2019.2-EAP7D-192.5895.894.Checked.win\lib\ReSharperHost\Jetbrains.*.exe" />
+        <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)">
+        <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="model\RdRiderProtocol" />
+    <Folder Include=".\model\RdRiderProtocol" />
+    <Folder Include=".\model\RdEditorProtocol" />
+    <Folder Include=".\model\Library" />
   </ItemGroup>
 
   <!-- TODO: uncomment for xaml icons -->

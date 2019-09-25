@@ -5,13 +5,17 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.reactive.ISignal
-import com.jetbrains.rider.model.FString
+import com.jetbrains.rider.model.BlueprintStruct
 
-class BlueprintHyperLinkInfo(private val navigation: ISignal<FString>, private val link : String) : HyperlinkInfo {
+class BlueprintHyperLinkInfo(private val navigation: ISignal<BlueprintStruct>, private val struct: BlueprintStruct) : HyperlinkInfo {
+    companion object {
+        val logger = getLogger<BlueprintHyperLinkInfo>()
+    }
+
     override fun navigate(project: Project) {
-        getLogger<BlueprintHyperLinkInfo>().info { "BlueprintHyperLinkInfo:navigate by link=$link" }
+        logger.info { "BlueprintHyperLinkInfo:navigate by link=$struct" }
 
-        navigation.fire(FString(link))
+        navigation.fire(struct)
     }
 
 }

@@ -8,6 +8,7 @@ import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.lib.ue4.UE4Library
 import model.lib.ue4.UE4Library.UnrealLogMessage
 import model.lib.ue4.UE4Library.BlueprintHighlighter
+import model.lib.ue4.UE4Library.BlueprintStruct
 import model.lib.ue4.UE4Library.FString
 import java.io.File
 
@@ -31,7 +32,7 @@ object RdEditorModel : Ext(RdEditorRoot) {
         signal("unrealLog", UnrealLogMessage)
         property("play", bool)
 
-        call("isBlueprint", FString, bool).async
-        signal("navigate", FString)
+        call("isBlueprint", BlueprintStruct, bool).async
+        signal("navigate", BlueprintStruct)
     }
 }
