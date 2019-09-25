@@ -40,7 +40,7 @@ object UE4Library : Root(
 
     val VerbosityType = declare(CppIntrinsicType("ELogVerbosity::Type", "Logging/LogVerbosity.h")) {
         enum("VerbosityType") {
-            +("NoLogging").doc("= 0")
+            (+"NoLogging").doc("= 0")
 
 
             (+"Fatal").doc(
