@@ -1,23 +1,30 @@
 tasks {
-    create<Exec>("cloneRdCpp") {
-        //    executable "git"
-//    args "clone", "https://github.com/jetbrains/rd.git", "$buildDir/rd", "--quiet"
+    val cloneRdCpp by creating {
+        doLast {
+            val destinationDir = buildDir.resolve("rd")
+            if (!destinationDir.exists()) {
+                exec {
+                    executable = "git"
+                    setArgs(listOf("clone", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet"))
+                }
+            }
+        }
     }
 
     val rdCppFolder = "$buildDir/rd/rd-cpp"
 
-    create<Exec>("buildRdCpp") {
-        dependsOn("cloneRdCpp")
+    val buildRdCpp by creating(Exec::class) {
+        dependsOn(cloneRdCpp)
         commandLine = listOf("cmd", "/c", "$rdCppFolder/build.cmd")
         //windows only
     }
 
-    create("installRdCpp") {
-        dependsOn("buildRdCpp")
+    val installRdCpp by creating {
+        dependsOn(buildRdCpp)
         doLast {
-            val UE4RootPath = "${rootProject.projectDir}"//todo
-            val includeDir = "$UE4RootPath/src/cpp/Source/RiderLink/include"
-            val libDir = "$UE4RootPath/src/cpp/Source/RiderLink/libs"
+            val UE4RootPath = "C:\\Work\\UnrealEngine\\"//todo
+            val includeDir = "$UE4RootPath/Engine/Plugins/Developer/RiderLink/Source/RiderLink/include"
+            val libDir = "$UE4RootPath/Engine/Plugins/Developer/RiderLink/Source/RiderLink/libs"
 
             delete(files(includeDir, libDir))
             copy {
@@ -29,6 +36,5 @@ tasks {
                 into(libDir)
             }
         }
-
     }
 }
