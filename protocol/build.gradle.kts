@@ -38,10 +38,10 @@ configure<RdgenParams> {
 tasks {
     //    val unrealEditorCppOutput = File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
     val unrealEditorCppOutput = File("C:\\Work\\UnrealEngine\\Engine\\Plugins\\Developer\\RiderLink\\Source\\RiderLink\\Private\\RdEditorProtocol")
-    val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdEditorProtocol")
-    val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/RdRiderProtocol")
-    val csLibraryOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/model/Library")
-    val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
+    val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdEditorProtocol")
+    val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdRiderProtocol")
+    val csLibraryOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/Library")
+    val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/obj/model/RdRiderProtocol")
 
 
     val generateRiderModel by creating(RdgenTask::class) {

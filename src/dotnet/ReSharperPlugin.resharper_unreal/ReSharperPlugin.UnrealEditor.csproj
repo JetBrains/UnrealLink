@@ -1,5 +1,4 @@
 ﻿<Project>
-
   <PropertyGroup>
     <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
   </PropertyGroup>
@@ -19,9 +18,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include=".\model\RdRiderProtocol" />
-    <Folder Include=".\model\RdEditorProtocol" />
-    <Folder Include=".\model\Library" />
+    <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
   <!-- TODO: uncomment for xaml icons -->
