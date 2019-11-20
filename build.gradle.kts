@@ -79,7 +79,7 @@ tasks {
 
 val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
 
-project.version = (ext.properties.getOrPut("pluginVersion") { "1.3.3.7" } as String)
+project.version = (ext.properties.getOrPut("pluginVersion") { "0.0.0.1" } as String)
 
 tasks {
     withType<PublishTask> {
@@ -91,7 +91,7 @@ tasks {
     val version = "11_0_2b159"
 //    val version = "11_0_3b304"
     withType<RunIdeTask> {
-        setJbrVersion(version)
+        jvmArgs("-Xmx4096m")
     }
     withType<BuildSearchableOptionsTask> {
         setJbrVersion(version)
@@ -150,10 +150,15 @@ tasks {
         doLast {
             val stdout = ByteArrayOutputStream()
 
-            val hostOs = System.getProperty("os.name")
-            val isWindows by extra(hostOs.startsWith("Windows"))
             if (isWindows) {
-                extra["executable"] = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                exec {
+                    executable = "${project.rootDir}/tools/vswhere.exe"
+                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "Microsoft.NET.Sdk", "-property", "installationPath")
+                    standardOutput = stdout
+                    workingDir = project.rootDir
+                }
+                val vsRootDir = stdout.toString().trim()
+                extra["executable"] = "$vsRootDir\\MSBuild\\15.0\\Bin\\MSBuild.exe"
             } else {
                 exec {
                     executable = "which"
@@ -181,20 +186,33 @@ tasks {
     val compileDotNet by creating {
         dependsOn(findMsBuild)
         dependsOn(patchPropsFile)
+
         doLast {
-            exec {
+            val stdout = ByteArrayOutputStream()
+            val result = exec {
                 executable = findMsBuild.extra["executable"] as String
-                args = listOf("/t:Restore;Rebuild", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration")
+                standardOutput = stdout
+                args = listOf("/t:Restore;Rebuild", dotnetSolution.absolutePath, "/v:detailed", "/p:Configuration=$buildConfiguration")
+                isIgnoreExitValue = true
+            }
+
+            if (result.exitValue != 0) {
+                println("${stdout.toString().trim()}")
+                throw GradleException("Problems with compileDotNet task")
             }
         }
     }
 
+
     val buildPlugin by getting(Zip::class) {
-        dependsOn("findMsBuild")
+        dependsOn(compileDotNet)
         outputs.upToDateWhen { false }
+        getByName("buildSearchableOptions") {
+            enabled = buildConfiguration == "Release"
+        }
         doLast {
             copy {
-                from("$buildDir/distributions/${rootProject.name}-$archiveVersion.zip")
+                from("$buildDir/distributions/${rootProject.name}-${project.version}.zip")
                 into("$rootDir/output")
             }
 
@@ -246,10 +264,9 @@ tasks {
                 File(outputFolder, "$dotNetPluginId.dll"),
                 File(outputFolder, "$dotNetPluginId.pdb")
         )
-
         dllFiles.forEach { file ->
             copy {
-                from(file.absolutePath)
+                from(file)
                 into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/dotnet")
             }
         }
