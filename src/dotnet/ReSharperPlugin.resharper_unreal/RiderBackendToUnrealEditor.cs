@@ -126,7 +126,7 @@ namespace ReSharperPlugin.UnrealEditor
                     });
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
-                        riderModel.IsBlueprint.Reset((lifetime, s) =>
+                        riderModel.IsBlueprint.Set((lifetime, s) =>
                             model.IsBlueprint.Start(s) as RdTask<bool>);
                     });
                 });
