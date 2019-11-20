@@ -1,5 +1,5 @@
 const val kotlinVersion = "1.3.50"
-const val gradleIntellijPluginVersion = "0.4.10"
+const val gradleIntellijPluginVersion = "0.4.13"
 const val rdGenPluginVersion = "0.193.106"
 
 object BuildPlugins {
