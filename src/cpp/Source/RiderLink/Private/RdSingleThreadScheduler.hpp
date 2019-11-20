@@ -8,7 +8,7 @@
 #include <cassert>
 #include <functional>
 
-class RdSingleThreadScheduler : public IScheduler {
+class RdSingleThreadScheduler : public rd::IScheduler {
 public:
   //  RdSingleThreadScheduler(const std::wstring& name) {
 		//// pool = FQueuedThreadPool::Allocate();

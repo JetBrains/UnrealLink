@@ -2,11 +2,18 @@
 
 #include "RiderLink.h"
 
+#include "UE4TypesMarshallers.h"
+
 #include "Modules/ModuleManager.h"
-#include "Features/IModularFeatures.h"
 #include "HAL/PlatformProcess.h"
 
-#include "UnrealEd.h"
+#include "UnrealEdGlobals.h"
+#include "RdEditorProtocol/UE4Library/UnrealLogMessage.h"
+#include "Editor/UnrealEdEngine.h"
+
+#include "BlueprintProvider.h"
+
+#include "rd_core_cpp/types/DateTime.h"
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
@@ -18,8 +25,6 @@ FRiderLinkModule::~FRiderLinkModule(){}
 
 void FRiderLinkModule::ShutdownModule()
 {
-	// Unbind provider from editor
-	IModularFeatures::Get().UnregisterModularFeature(TEXT("SourceCodeAccessor"), &RiderSourceCodeAccessor);
 }
 
 void FRiderLinkModule::StartupModule()
@@ -27,29 +32,28 @@ void FRiderLinkModule::StartupModule()
 	rdConnection.init();
 
 	UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
-	rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
-		GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
+	rdConnection.scheduler.queue([this] {
+		rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
+			GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
+		});
 	});
-	
-	outputDevice.onSerializeMessage.BindLambda([this](const TCHAR * msg){
-		rdConnection.unrealToBackendModel.get_unreal_log().fire(msg);
-	});
-	// Quick forced check of availability before anyone touches the module
-	RiderSourceCodeAccessor.RefreshAvailability();
+	static const auto START_TIME = FDateTime::Now();
 
-	// Bind our source control provider to the editor
-	IModularFeatures::Get().RegisterModularFeature(TEXT("SourceCodeAccessor"), &RiderSourceCodeAccessor);
+	outputDevice.onSerializeMessage.BindLambda([this](const TCHAR * msg, ELogVerbosity::Type Type, const class FName& Name, TOptional<double> Time){
+		rdConnection.scheduler.queue([this, msg = FString(msg), Type, Name = Name.GetPlainNameString(), Time]() mutable {
+			rd::optional<rd::DateTime> DateTime;
+			if (Time) {
+				DateTime = rd::DateTime(START_TIME.ToUnixTimestamp() + static_cast<int64>(Time.GetValue()));
+			}
+			rdConnection.unrealToBackendModel.get_unrealLog().fire(Jetbrains::EditorPlugin::UnrealLogMessage(msg, Type, Name, DateTime));	
+		});
+	});
 	UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT FINISH"));
 }
 
 bool FRiderLinkModule::SupportsDynamicReloading()
 {
 	return true;
-}
-
-FRiderSourceCodeAccessor& FRiderLinkModule::GetAccessor()
-{
-	return RiderSourceCodeAccessor;
 }
 
 #undef LOCTEXT_NAMESPACE

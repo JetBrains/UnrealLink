@@ -3,22 +3,12 @@
 #pragma once
 
 
-#include "Windows/AllowWindowsPlatformTypes.h"
-
 //The external headers and defines goes here
-#include "RdEditorProtocol/RdEditorModel.h"
-#include "Identities.h"
-#include "wire/SocketWire.h"
-#include "Protocol.h"
-#include "RdProperty.h"
-#include "PumpScheduler.h"
+#include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
+#include "IProtocol.h"
+#include "SingleThreadScheduler.h"
+#include "SimpleScheduler.h"
 
-#include "Windows/HideWindowsPlatformTypes.h"
-
-#include "RdSingleThreadScheduler.hpp"
-
-#include <cstdint>
-#include <string>
 
 class RdConnection
 {
@@ -31,18 +21,16 @@ public:
 	//RdProperty<tl::optional<bool> > unreal_play{ false };
 
 	void init();
-	RdEditorModel unrealToBackendModel;
+	Jetbrains::EditorPlugin::RdEditorModel unrealToBackendModel;
 
-	LifetimeDefinition lifetimeDef;
-	LifetimeDefinition socketLifetimeDef;
+	rd::LifetimeDefinition lifetimeDef;
+	rd::LifetimeDefinition socketLifetimeDef;
 
-	Lifetime lifetime;
-	Lifetime socketLifetime;
+	rd::Lifetime lifetime;
+	rd::Lifetime socketLifetime;
 
-	RdSingleThreadScheduler clientScheduler;
+	rd::SimpleScheduler scheduler;
 
 private:
-
-	std::shared_ptr<IWire> wire;
-	std::unique_ptr<Protocol> clientProtocol;
+	std::unique_ptr<rd::IProtocol> protocol;
 };

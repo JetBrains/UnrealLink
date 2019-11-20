@@ -7,8 +7,6 @@ output
 .tmp
 out/*
 *.generated.*
-src/cpp/model/*
-src/cpp/Source/*
 
 # User-specific files
 *.suo
