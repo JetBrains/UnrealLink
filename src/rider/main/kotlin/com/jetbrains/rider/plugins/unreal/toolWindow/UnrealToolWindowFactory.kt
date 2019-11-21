@@ -15,8 +15,9 @@ import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.plugins.unreal.rider.ui.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
-class UnrealToolWindowFactory(val project: Project,
-                              private val host: UnrealHost)
+class UnrealToolWindowFactory(val project: Project
+//                              ,private val host: UnrealHost
+)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
     companion object {
