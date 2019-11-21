@@ -21,5 +21,5 @@ kotlinDslPluginOptions {
 
 
 dependencies {
-    compile("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.10")
+    compile("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
 }
