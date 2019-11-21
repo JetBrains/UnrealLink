@@ -205,8 +205,9 @@ tasks {
                 throw GradleException("Problems with compileDotNet task")
             }
         }
-    }
 
+        dependsOn(":protocol:generateModel")
+    }
 
     val buildPlugin by getting(Zip::class) {
         dependsOn(compileDotNet)
