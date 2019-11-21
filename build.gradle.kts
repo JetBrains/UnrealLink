@@ -97,16 +97,20 @@ tasks {
         setJbrVersion(version)
     }
 }
-
 kotlin {
     sourceSets {
         main {
             kotlin.srcDir("src/rider/main/kotlin")
-            resources.srcDir("src/rider/main/resources")
         }
         test {
             kotlin.srcDir("src/rider/test/kotlin")
         }
+    }
+}
+
+sourceSets {
+    main {
+        resources.srcDir("src/rider/main/resources")
     }
 }
 
@@ -238,19 +242,23 @@ intellij {
 
     instrumentCode = false
     downloadSources = false
-    updateSinceUntilBuild = false
+    updateSinceUntilBuild = true
+    tasks.withType<PatchPluginXmlTask> {
+//        sinceBuild( prop("sinceBuild"))
+//        untilBuild(prop("untilBuild"))
+    }
 }
 
 tasks {
-    withType<PatchPluginXmlTask> {
-        val changelogText = File("$repoRoot/CHANGELOG.md").readText()
-        val changelogMatches = Regex("""/(?s)(-.+?)(?=##|$)/""").findAll(changelogText)
-
-        setChangeNotes(changelogMatches.map {
-            it.groups[1]!!.value.replace(Regex("/(?s)\r?\n/"), "<br />\n")
-        }.take(1).joinToString("", "", "")
-        )
-    }
+//    withType<PatchPluginXmlTask> {
+//        val changelogText = File("$repoRoot/CHANGELOG.md").readText()
+//        val changelogMatches = Regex("""/(?s)(-.+?)(?=##|$)/""").findAll(changelogText)
+//
+//        setChangeNotes(changelogMatches.map {
+//            it.groups[1]!!.value.replace(Regex("/(?s)\r?\n/"), "<br />\n")
+//        }.take(1).joinToString("", "", "")
+//        )
+//    }
 
     withType<PrepareSandboxTask> {
         dependsOn("compileDotNet")
