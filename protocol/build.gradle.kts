@@ -2,10 +2,7 @@ import com.jetbrains.rd.generator.gradle.RdgenParams
 import com.jetbrains.rd.generator.gradle.RdgenTask
 
 repositories {
-    mavenCentral()
-    mavenLocal()
-    jcenter()
-    maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
 }
 
@@ -13,15 +10,6 @@ plugins {
     id("java")
     kotlin("jvm")
     id("com.jetbrains.rdgen")
-}
-
-dependencies {
-    val rdLibDirectory by rootProject.extra.properties
-
-    implementation(kotlin("stdlib"))
-
-    compile(files("$rdLibDirectory/rider-model.jar"))
-    compile(group = "com.jetbrains.rd", name = "rd-gen", version = rdGenPluginVersion)
 }
 
 val rdLibDirectory: File by rootProject.extra

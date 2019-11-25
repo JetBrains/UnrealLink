@@ -12,26 +12,25 @@ buildscript {
         maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
         maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
         maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
         mavenLocal()
     }
 
     dependencies {
-        classpath(BuildPlugins.gradleIntellijPlugin)
-        classpath(BuildPlugins.rdGenPlugin)
+        classpath("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.13")
+        classpath("com.jetbrains.rd:rd-gen:0.193.106")
     }
 }
 
 plugins {
     id("java")
-    id(Libraries.gradleIntellijPluginId)
-    kotlin("jvm") version kotlinVersion
+    id("org.jetbrains.intellij") version "0.4.13"
+    kotlin("jvm") version "1.3.50"
 }
 
 dependencies {
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
