@@ -6,5 +6,5 @@ class BluePrintProvider {
 public:
 	static bool IsBlueprint(FString const& Path, FString const& Name);
 
-	static void OpenBlueprint(FString const &path, FString const& name);
+	static void OpenBlueprint(FString const &path, FString const& name, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint);
 };

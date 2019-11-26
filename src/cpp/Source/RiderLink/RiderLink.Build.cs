@@ -19,7 +19,9 @@ public class RiderLink : ModuleRules
 				,"DesktopPlatform"
 				,"Engine"
 				,"Json"
-                ,"UnrealEd"
+        ,"UnrealEd"
+        ,"UnrealEdMessages"
+        ,"MessagingCommon"
 				// ... add private dependencies that you statically link with here ...	
 			}
         );

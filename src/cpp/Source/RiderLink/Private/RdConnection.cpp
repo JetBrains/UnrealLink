@@ -17,6 +17,8 @@
 
 #include "BlueprintProvider.h"
 
+#include "MessageEndpointBuilder.h"
+
 
 constexpr TCHAR PORT_FILE_NAME[] = TEXT("UnrealProtocolPort.txt");
 constexpr TCHAR CLOSED_FILE_EXTENSION[] = TEXT(".closed");
@@ -82,11 +84,13 @@ void RdConnection::init() {
 			}
 		});
 
+		auto messageEndpoint = FMessageEndpoint::Builder("FAssetEditorManager").Build();
+		
 		unrealToBackendModel.get_isBlueprint().set([](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
 			return BluePrintProvider::IsBlueprint(s.get_pathName(), s.get_graphName());
 		});
-		unrealToBackendModel.get_navigate().advise(lifetime, [this](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
-			BluePrintProvider::OpenBlueprint(s.get_pathName(), s.get_graphName());
+		unrealToBackendModel.get_navigate().advise(lifetime, [this, messageEndpoint](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
+			BluePrintProvider::OpenBlueprint(s.get_pathName(), s.get_graphName(), messageEndpoint);
 		});
 	});
 }
