@@ -1,5 +1,6 @@
 #include "BlueprintStruct.h"
 
+
 namespace Jetbrains {
     namespace EditorPlugin {
         

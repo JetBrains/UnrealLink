@@ -33,7 +33,7 @@
 
 #include "thirdparty.hpp"
 
-#include "Containers/UnrealString.h"
+#include "Runtime/Core/Public/Containers/UnrealString.h"
 
 #include "UE4TypesMarshallers.h"
 

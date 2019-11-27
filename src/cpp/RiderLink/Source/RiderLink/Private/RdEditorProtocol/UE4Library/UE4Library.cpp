@@ -1,10 +1,12 @@
 #include "UE4Library.h"
 
-#include "StringRange.h"
-#include "UnrealLogMessage.h"
-#include "BlueprintHighlighter.h"
-#include "BlueprintStruct.h"
+#include "../UE4Library/StringRange.h"
+#include "../UE4Library/UnrealLogMessage.h"
+#include "../UE4Library/BlueprintHighlighter.h"
+#include "../UE4Library/BlueprintStruct.h"
 
+#include "../UE4Library/UE4Library.h"
+#include "../UE4Library/UE4Library.h"
 namespace Jetbrains {
     namespace EditorPlugin {
         

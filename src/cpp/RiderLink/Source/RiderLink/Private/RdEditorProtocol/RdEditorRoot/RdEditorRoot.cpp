@@ -1,7 +1,8 @@
 #include "RdEditorRoot.h"
 
-#include "UE4TypesMarshallers.h"
 
+#include "../RdEditorRoot/RdEditorRoot.h"
+#include "../RdEditorRoot/RdEditorRoot.h"
 #include "../RdEditorModel/RdEditorModel.h"
 namespace Jetbrains {
     namespace EditorPlugin {

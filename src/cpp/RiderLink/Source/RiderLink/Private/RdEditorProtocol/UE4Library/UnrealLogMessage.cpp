@@ -1,6 +1,5 @@
 #include "UnrealLogMessage.h"
 
-#include "UE4TypesMarshallers.h"
 
 namespace Jetbrains {
     namespace EditorPlugin {
