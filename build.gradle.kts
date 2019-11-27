@@ -1,5 +1,3 @@
-import com.jetbrains.rd.generator.gradle.RdgenParams
-import com.jetbrains.rd.generator.gradle.RdgenTask
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -36,8 +34,8 @@ dependencies {
 }
 
 val repoRoot by extra { project.rootDir }
-val productVersion : String by project
-val sdkVersion = productVersion
+//val productVersion : String by project
+val sdkVersion = "2019.3"
 val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
 val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/ReSharperHostSdk") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
@@ -88,7 +86,6 @@ tasks {
             setPassword(ext["password"] as String)
     }
     val version = "11_0_2b159"
-//    val version = "11_0_3b304"
     withType<RunIdeTask> {
         jvmArgs("-Xmx4096m")
     }
@@ -188,6 +185,7 @@ tasks {
 
     val compileDotNet by creating {
         dependsOn(findMsBuild)
+        dependsOn(":protocol:generateModel")
         dependsOn(patchPropsFile)
 
         doLast {
@@ -205,7 +203,6 @@ tasks {
             }
         }
 
-        dependsOn(":protocol:generateModel")
     }
 
     val buildPlugin by getting(Zip::class) {

@@ -4,12 +4,21 @@ import com.jetbrains.rd.generator.gradle.RdgenTask
 repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 }
 
 plugins {
     id("java")
     kotlin("jvm")
     id("com.jetbrains.rdgen")
+}
+dependencies {
+    val rdLibDirectory by rootProject.extra.properties
+
+    implementation(kotlin("stdlib"))
+
+    compile(files("$rdLibDirectory/rider-model.jar"))
+    compile(group = "com.jetbrains.rd", name = "rd-gen", version = "0.193.106")
 }
 
 val rdLibDirectory: File by rootProject.extra
@@ -22,10 +31,8 @@ configure<RdgenParams> {
     verbose = true
     classpath("$rdLibDirectory/rider-model.jar", sourceSets.main.get().output)
 }
-
 tasks {
-    //    val unrealEditorCppOutput = File(repoRoot, "src/cpp/Source/RiderLink/Private/RdEditorProtocol")
-    val unrealEditorCppOutput = File("C:\\Work\\UnrealEngine\\Engine\\Plugins\\Developer\\RiderLink\\Source\\RiderLink\\Private\\RdEditorProtocol")
+    val unrealEditorCppOutput = File("src/cpp/Source/RiderLink/Private/RdEditorProtocol")
     val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdEditorProtocol")
     val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdRiderProtocol")
     val csLibraryOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/Library")
@@ -45,7 +52,6 @@ tasks {
                 language = "kotlin"
                 transform = "asis"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
-                //            namespace = "com.jetbrains.rider.plugins.unreal"
                 namespace = "com.jetbrains.rider.model"
                 directory = "$ktOutput"
 
