@@ -73,7 +73,7 @@ void RdConnection::init() {
 			}
 		});
 
-		lifetime->add_action([&, PortFileFullPath] {
+		lifetime->add_action([&, PortFileFullPath, PortFileClosedPath] {
 			if (!PlatformFile.DeleteFile(*PortFileFullPath)) {
 				//log error
 			}
