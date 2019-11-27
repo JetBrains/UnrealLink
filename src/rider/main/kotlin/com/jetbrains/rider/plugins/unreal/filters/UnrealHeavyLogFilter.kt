@@ -20,7 +20,7 @@ import com.jetbrains.rider.util.idea.getLogger
 import com.jetbrains.rider.util.idea.lifetime
 
 class UnrealHeavyLogFilter(val project: Project, private val registrationHost: HighlighterRegistrationHost,
-                           val filter: IRdCall<BlueprintStruct, Boolean>, private val navigate: ISignal<BlueprintStruct>) : Filter, FilterMixin {
+                           private val filter: IRdCall<BlueprintStruct, Boolean>, private val navigate: ISignal<BlueprintStruct>) : Filter, FilterMixin {
     companion object {
         private val logger = getLogger<RiderHeavyExceptionFilter>()
     }
@@ -60,9 +60,11 @@ class UnrealHeavyLogFilter(val project: Project, private val registrationHost: H
             task.result.advise(project.lifetime) { rdTaskResult ->
                 when (rdTaskResult) {
                     is RdTaskResult.Success -> {
-                        val blueprintHyperLinkInfo = BlueprintHyperLinkInfo(navigate, struct)
-                        val resultItems = Filter.ResultItem(range.first + startOffset, range.last + startOffset, blueprintHyperLinkInfo, true)
-                        consumer.consume(AdditionalHighlight(arrayListOf(resultItems)))
+                        if (rdTaskResult.value) {
+                            val blueprintHyperLinkInfo = BlueprintHyperLinkInfo(navigate, struct)
+                            val resultItems = Filter.ResultItem(range.first + startOffset, range.last + startOffset, blueprintHyperLinkInfo, true)
+                            consumer.consume(AdditionalHighlight(arrayListOf(resultItems)))
+                        }
                     }
                     is RdTaskResult.Cancelled -> {
                         logger.debug("Request has been canceled")

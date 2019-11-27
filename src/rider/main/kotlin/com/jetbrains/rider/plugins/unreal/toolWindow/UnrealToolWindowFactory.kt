@@ -45,7 +45,7 @@ class UnrealToolWindowFactory(val project: Project
         showTab(TITLE_ID, Lifetime.Eternal)
         val consoleView = UnrealPane.publicConsoleView
         val timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
-        consoleView.print(timeString, ConsoleViewContentType.LOG_DEBUG_OUTPUT)
+        consoleView.print(timeString, ConsoleViewContentType.SYSTEM_OUTPUT)
         printSpaces()
 
         val verbosityContentType = when (s.type) {
@@ -71,5 +71,4 @@ class UnrealToolWindowFactory(val project: Project
         consoleView.print(eol, ConsoleViewContentType.NORMAL_OUTPUT)
         consoleView.flushDeferredText()
     }
-
 }

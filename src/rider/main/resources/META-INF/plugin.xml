@@ -13,13 +13,12 @@
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
-<!--      <component>-->
-<!--          <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class>-->
-<!--      </component>-->
+      <component>
+          <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class>
+      </component>
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
-<!--      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager" />-->
-<!--      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />-->
+      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
   </extensions>
 </idea-plugin>
