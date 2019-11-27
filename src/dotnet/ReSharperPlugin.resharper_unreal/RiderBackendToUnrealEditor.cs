@@ -30,12 +30,13 @@ namespace ReSharperPlugin.UnrealEditor
         public RiderBackendToUnrealEditor(Lifetime lifetime, IScheduler dispatcher, ISolution solution, ILogger logger,
             UnrealHost unrealHost)
         {
-            myLogger.Info("RiderBackendToUnrealEditor building started");
-            System.Diagnostics.Debugger.Launch();
             myDispatcher = dispatcher;
             mySolution = solution;
             myLogger = logger;
             myUnrealHost = unrealHost;
+
+            myLogger.Info("RiderBackendToUnrealEditor building started");
+
             var modelLifetimeDefinition = lifetime.CreateNested();
             var modelLifetime = modelLifetimeDefinition.Lifetime;
             myEditorModel = new Property<RdEditorModel>(modelLifetime, "RiderTounrealModel");
