@@ -17,7 +17,7 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.13")
-        classpath("com.jetbrains.rd:rd-gen:0.193.106")
+        classpath("com.jetbrains.rd:rd-gen:0.201.3")
     }
 }
 
@@ -42,6 +42,7 @@ val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetSolutionId by extra { "resharper_unreal" }
 val dotNetRootId by extra { "ReSharperPlugin" }
+val dotNetBinDir by extra { dotNetDir.resolve( "$dotNetRootId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$dotNetRootId.UnrealEditor" }
 val pluginPropsFile by extra { File(dotNetDir, "Plugin.props") }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
@@ -187,6 +188,9 @@ tasks {
         dependsOn(":protocol:generateModel")
         dependsOn(patchPropsFile)
 
+        inputs.files(dotNetDir.listFiles())
+        outputs.dirs(dotNetBinDir)
+
         doLast {
             val stdout = ByteArrayOutputStream()
             val result = exec {
@@ -258,12 +262,9 @@ tasks {
 
     withType<PrepareSandboxTask> {
         dependsOn("compileDotNet")
-        val outputFolder = Paths.get(
-                dotNetDir.absolutePath,
-                "$dotNetRootId.$dotNetSolutionId",
-                "bin",
-                dotNetPluginId,
-                buildConfiguration).toFile()
+        val outputFolder = dotNetBinDir
+                .resolve(dotNetPluginId)
+                .resolve(buildConfiguration)
         val dllFiles = listOf(
                 File(outputFolder, "$dotNetPluginId.dll"),
                 File(outputFolder, "$dotNetPluginId.pdb")
