@@ -12,17 +12,15 @@ buildscript {
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
         maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
         maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
-        mavenLocal()
     }
 
     dependencies {
-        classpath("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.13")
-        classpath("com.jetbrains.rd:rd-gen:0.201.3")
+        classpath("gradle.plugin.org.jetbrains.intellij.plugins","gradle-intellij-plugin", "0.4.13")
+        classpath("com.jetbrains.rd", "rd-gen", "0.201.3")
     }
 }
 
 plugins {
-    id("java")
     id("org.jetbrains.intellij") version "0.4.13"
     kotlin("jvm") version "1.3.50"
 }
@@ -250,16 +248,6 @@ intellij {
 }
 
 tasks {
-//    withType<PatchPluginXmlTask> {
-//        val changelogText = File("$repoRoot/CHANGELOG.md").readText()
-//        val changelogMatches = Regex("""/(?s)(-.+?)(?=##|$)/""").findAll(changelogText)
-//
-//        setChangeNotes(changelogMatches.map {
-//            it.groups[1]!!.value.replace(Regex("/(?s)\r?\n/"), "<br />\n")
-//        }.take(1).joinToString("", "", "")
-//        )
-//    }
-
     withType<PrepareSandboxTask> {
         dependsOn("compileDotNet")
         val outputFolder = dotNetBinDir
