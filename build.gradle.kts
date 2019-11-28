@@ -52,25 +52,12 @@ repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
-//    maven { setUrl("https://repo.labs.intellij.net/jitpack.io") }
-//  mavenLocal()
-//    flatDir { dirs(sdkDirectory.absolutePath) }
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-
-/*
-tasks {
-    wrapper {
-        gradleVersion = "5.0"
-        distributionType = Wrapper.DistributionType.ALL
-        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
-    }
-}
-*/
 
 val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
 
@@ -156,7 +143,7 @@ tasks {
                     workingDir = project.rootDir
                 }
                 val vsRootDir = stdout.toString().trim()
-                extra["executable"] = "$vsRootDir\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+                extra["executable"] = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
             } else {
                 exec {
                     executable = "which"
