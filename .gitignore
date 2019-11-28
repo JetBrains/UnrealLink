@@ -19,3 +19,14 @@ out/*
 .vs
 _ReSharper*
 _dotTrace*
+
+# Unreal Plugin generated files
+src/cpp/RiderLink/Binaries
+src/cpp/RiderLink/Intermediate
+
+# Local setup specific files
+UnrealEngineProjectPath.txt
+
+# RD generated files
+src/cpp/RiderLink/Source/RD
+src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol
