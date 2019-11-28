@@ -4,20 +4,22 @@
 	"VersionName": "1.0",
 	"FriendlyName": "RiderLink",
 	"Description": "",
-	"Category": "Other",
+	"Category": "Programming",
 	"CreatedBy": "JetBrains",
-	"CreatedByURL": "",
+	"CreatedByURL": "https://www.jetbrains.com/",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
+	"EnabledByDefault": true,
 	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"Installed": false,
+	"IsBetaVersion": true,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "RiderLink",
 			"Type": "Developer",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [ "Win64" ]
 		}
 	]
 }
