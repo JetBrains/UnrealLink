@@ -244,14 +244,14 @@ tasks {
                 File(outputFolder, "$dotNetPluginId.dll"),
                 File(outputFolder, "$dotNetPluginId.pdb")
         )
-        dllFiles.forEach { file ->
-            copy {
-                from(file)
-                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/dotnet")
-            }
-        }
-
         doLast {
+            dllFiles.forEach { file ->
+                copy {
+                    from(file)
+                    into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/dotnet")
+                }
+            }
+
             dllFiles.forEach { file ->
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
             }
