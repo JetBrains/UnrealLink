@@ -72,8 +72,33 @@ tasks {
             val unrealProjectPath = getUnrealEngineProject.extra["UnrealProjectPath"] as File
             val targetDir = File("$unrealProjectPath/Plugins/RiderLink")
 
-            if(targetDir.exists())
-                throw StopExecutionException()
+            if(targetDir.exists()) {
+                val stdOut = java.io.ByteArrayOutputStream()
+                // Check if it's Junction
+                val result = exec {
+                    commandLine = listOf("cmd.exe", "/c", "fsutil", "reparsepoint", "query", targetDir.absolutePath, "|", "find", "Print Name:")
+                    isIgnoreExitValue = true
+                    standardOutput = stdOut
+                }
+
+                // Check if it's Junction to local RiderLink
+                if(result.exitValue == 0) {
+                    val output = stdOut.toString().trim().split(" ")
+                    if(!output.isEmpty())
+                    {
+                        val pathToJunction = output.last()
+                        if(File(pathToJunction) == File(riderLinkDir)) {
+                            println("Junction is already correct")
+                            throw StopExecutionException()
+                        }
+                    }
+                }
+
+                // If it's not Junction or if it's a Junction but doesn't point to local RiderLink - delete it
+                exec {
+                    commandLine = listOf("cmd.exe", "/c", "rmdir", "/S", "/Q", targetDir.absolutePath)
+                }
+            }
             val stdOut = java.io.ByteArrayOutputStream()
             val result = exec {
                     commandLine = listOf("cmd.exe", "/c", "mklink" , "/J" ,targetDir.absolutePath ,File(riderLinkDir).absolutePath)
