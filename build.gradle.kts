@@ -1,12 +1,14 @@
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.intellij.tasks.*
+import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.file.Paths
 
 buildscript {
     repositories {
+        mavenCentral()
         maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
         maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
@@ -26,7 +28,6 @@ plugins {
 }
 
 dependencies {
-    compile("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
@@ -70,12 +71,8 @@ tasks {
         if (project.extra.has("password"))
             setPassword(ext["password"] as String)
     }
-    val version = "11_0_2b159"
     withType<RunIdeTask> {
         jvmArgs("-Xmx4096m")
-    }
-    withType<BuildSearchableOptionsTask> {
-        setJbrVersion(version)
     }
 }
 kotlin {
@@ -196,7 +193,7 @@ tasks {
     val buildPlugin by getting(Zip::class) {
         dependsOn(compileDotNet)
         outputs.upToDateWhen { false }
-        getByName("buildSearchableOptions") {
+        buildSearchableOptions {
             enabled = buildConfiguration == "Release"
         }
         doLast {
@@ -213,7 +210,7 @@ tasks {
 
             exec {
                 executable = getByName("findMsBuild").extra["executable"] as String
-                args = listOf("/t:Pack", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$version")
+                args = listOf("/t:Pack", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$archiveVersion")
             }
         }
     }
