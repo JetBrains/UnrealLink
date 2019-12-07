@@ -1,4 +1,5 @@
 import java.io.File
+import java.io.ByteArrayOutputStream
 
 tasks {
     val getUnrealEngineProject by creating {
@@ -25,8 +26,9 @@ tasks {
     }
     val cloneRdCpp by creating (Exec::class) {
         val destinationDir = buildDir.resolve("rd")
+        val branchName = "master"
         enabled = !destinationDir.exists()
-        commandLine = listOf("git", "clone", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet")
+        commandLine = listOf("git", "clone", "--branch=${branchName}", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet")
     }
 
     val rdCppFolder = "$buildDir/rd/rd-cpp"
@@ -74,7 +76,7 @@ tasks {
 
             if(targetDir.exists())
                 throw StopExecutionException()
-            val stdOut = java.io.ByteArrayOutputStream()
+            val stdOut = ByteArrayOutputStream()
             val result = exec {
                     commandLine = listOf("cmd.exe", "/c", "mklink" , "/J" ,targetDir.absolutePath ,File(riderLinkDir).absolutePath)
                     errorOutput = stdOut
