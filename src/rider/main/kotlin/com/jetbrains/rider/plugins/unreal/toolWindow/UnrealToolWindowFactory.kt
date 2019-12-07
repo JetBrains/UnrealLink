@@ -8,17 +8,14 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rider.model.UnrealLogMessage
-import com.jetbrains.rider.model.VerbosityType
-import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.plugins.unreal.rider.ui.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
 class UnrealToolWindowFactory(val project: Project
 //                              ,private val host: UnrealHost
-)
-    : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
+) : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
     companion object {
         val TOOLWINDOW_ID = "unreal"
@@ -41,7 +38,7 @@ class UnrealToolWindowFactory(val project: Project
         UnrealPane.publicConsoleView.print(" ".repeat(n), ConsoleViewContentType.NORMAL_OUTPUT)
     }
 
-    fun print(s: UnrealLogMessage) {
+    fun print(s: LogMessage) {
         showTab(TITLE_ID, Lifetime.Eternal)
         val consoleView = UnrealPane.publicConsoleView
         val timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
@@ -67,8 +64,27 @@ class UnrealToolWindowFactory(val project: Project
         consoleView.print(category, ConsoleViewContentType.SYSTEM_OUTPUT)
         printSpaces(CATEGORY_WIDTH - category.length + 1)
 
-        consoleView.print(s.message.data, ConsoleViewContentType.NORMAL_OUTPUT)
+        consoleView.print(s.text.data, ConsoleViewContentType.NORMAL_OUTPUT)
         consoleView.print(eol, ConsoleViewContentType.NORMAL_OUTPUT)
         consoleView.flushDeferredText()
+    }
+
+    fun print(scriptCallStack: IScriptCallStack) {
+        val consoleView = UnrealPane.publicConsoleView
+        when (scriptCallStack) {
+            is EmptyScriptCallStack -> {
+                consoleView.print(scriptCallStack.header.data, ConsoleViewContentType.LOG_ERROR_OUTPUT)
+            }
+            is ScriptCallStack -> {
+                consoleView.print(scriptCallStack.header.data, ConsoleViewContentType.LOG_ERROR_OUTPUT)
+                for (frame in scriptCallStack.frames) {
+                    consoleView.print("${frame.header.data}${frame.blueprintFunction.`class`.name}:${frame.blueprintFunction.methodName}", ConsoleViewContentType.LOG_ERROR_OUTPUT)
+                }
+            }
+            is UnableToDisplayScriptCallStack -> {
+
+            }
+        }
+        //todo foldings
     }
 }

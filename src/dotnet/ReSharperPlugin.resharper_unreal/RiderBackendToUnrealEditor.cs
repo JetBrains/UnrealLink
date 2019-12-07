@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Diagnostics;
@@ -10,6 +11,7 @@ using JetBrains.Rd;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
+using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util;
 
@@ -114,21 +116,51 @@ namespace ReSharperPlugin.UnrealEditor
             watcher.Changed += handler;
         }
 
+        static bool IsBlueprint(BlueprintStruct @struct)
+        {
+            return true;
+        }
+
+        void OnMessageReceived(RdRiderModel riderModel, LogMessageEvent message)
+        {
+            riderModel.UnrealLog.Fire(message);
+        }
+
+        private void OnScriptCallStackReceived(RdRiderModel riderModel, ScriptCallStackEvent scriptCallStackEvent)
+        {
+            riderModel.UnrealLog.Fire(scriptCallStackEvent);
+        }
+
         private void ResetModel(Lifetime lf, IProtocol protocol)
         {
+            myUnrealHost.PerformModelAction(riderModel =>
+                UE4Library.RegisterDeclaredTypesSerializers(riderModel.SerializationContext.Serializers));
+
             myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
             myEditorModel.View(lf,
                 (lf2, model) =>
                 {
-                    model.UnrealLog.Advise(lf, s =>
+                    UE4Library.RegisterDeclaredTypesSerializers(model.SerializationContext.Serializers);
+
+                    model.UnrealLog.Advise(lf, logEvent =>
                     {
-                        myUnrealHost.PerformModelAction(m =>
-                            m.UnrealLog.Fire(s));
+                        myUnrealHost.PerformModelAction(riderModel =>
+                        {
+                            switch (logEvent)
+                            {
+                                case LogMessageEvent unrealLogMessageEvent:
+                                    OnMessageReceived(riderModel, unrealLogMessageEvent);
+                                    break;
+                                case ScriptCallStackEvent scriptCallStackEvent:
+                                    OnScriptCallStackReceived(riderModel, scriptCallStackEvent);
+                                    break;
+                            }
+                        });
                     });
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
-                        riderModel.IsBlueprint.Set((lifetime, s) =>
-                            model.IsBlueprint.Start(s) as RdTask<bool>);
+                        riderModel.FilterBluePrintCandidates.Set((lifetime, candidates) =>
+                            RdTask<bool[]>.Successful(candidates.Select(IsBlueprint).AsArray()));
                     });
                 });
         }

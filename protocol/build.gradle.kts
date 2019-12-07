@@ -18,7 +18,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation(files("$rdLibDirectory/rider-model.jar"))
-    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.3")
+    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.9")
 }
 
 val rdLibDirectory: File by rootProject.extra
@@ -32,7 +32,7 @@ configure<RdgenParams> {
     classpath("$rdLibDirectory/rider-model.jar", sourceSets.main.get().output)
 }
 tasks {
-    val unrealEditorCppOutput = File(repoRoot,"src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol")
+    val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol")
     val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdEditorProtocol")
     val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdRiderProtocol")
     val csLibraryOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/Library")

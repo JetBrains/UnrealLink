@@ -1,21 +1,19 @@
 package model.editorPlugin
 
 import com.jetbrains.rd.generator.nova.*
-import com.jetbrains.rd.generator.nova.PredefinedType.*
+import com.jetbrains.rd.generator.nova.PredefinedType.bool
+import com.jetbrains.rd.generator.nova.PredefinedType.int
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
-import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.UnrealLogMessage
-import model.lib.ue4.UE4Library.BlueprintHighlighter
-import model.lib.ue4.UE4Library.BlueprintStruct
-import model.lib.ue4.UE4Library.FString
+import model.lib.ue4.UE4Library.BlueprintClass
+import model.lib.ue4.UE4Library.LogEvent
 import java.io.File
 
 @Suppress("unused")
 object RdEditorRoot : Root(
         CSharp50Generator(FlowTransform.AsIs, "JetBrains.Platform.Unreal.EditorPluginModel", File(syspropertyOrInvalid("model.out.src.editorPlugin.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains.EditorPlugin", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")))
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")))
 ) {
     init {
         setting(CSharp50Generator.AdditionalUsings) {
@@ -27,12 +25,13 @@ object RdEditorRoot : Root(
 
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
-
         property("testConnection", int.nullable)
-        signal("unrealLog", UnrealLogMessage)
+        signal("unrealLog", LogEvent)
         property("play", bool)
 
-        call("isBlueprint", BlueprintStruct, bool).async
-        signal("navigate", BlueprintStruct)
+//        call("isBlueprint", BlueprintStruct, bool).async
+        signal("navigateToBlueprintClass", BlueprintClass)
+
+        signal("onBlueprintAdded", BlueprintClass)
     }
 }

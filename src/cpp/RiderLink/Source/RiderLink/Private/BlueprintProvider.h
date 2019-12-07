@@ -1,10 +1,17 @@
 #pragma once
 
-#include "Framework/Text/SlateHyperlinkRun.h"
+#include "AssetData.h"
+
+DECLARE_DELEGATE_OneParam(FOnBlueprintAdded, UBlueprint *);
 
 class BluePrintProvider {
+    static void AddBlueprint(UBlueprint* Blueprint);
 public:
-	static bool IsBlueprint(FString const& Path, FString const& Name);
+    static FOnBlueprintAdded OnBlueprintAdded;
 
-	static void OpenBlueprint(FString const &path, FString const& name);
+    static void AddAsset(FAssetData AssetData);
+
+    static bool IsBlueprint(FString const& Word);
+
+    static void OpenBlueprint(FString const& path, FString const& name);
 };

@@ -1,9 +1,7 @@
 #include "RdConnection.hpp"
 
-#include "UE4TypesMarshallers.h"
-
-#include "SocketWire.h"
-#include "Protocol.h"
+#include "wire/SocketWire.h"
+#include "protocol/Protocol.h"
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 
@@ -16,27 +14,48 @@
 #include "Windows/WindowsPlatformMisc.h"
 
 #include "BlueprintProvider.h"
+#include "AssetRegistryModule.h"
+#include "Engine/Blueprint.h"
+#include "RdEditorProtocol/UE4Library/UE4Library.h"
 
 
 constexpr TCHAR PORT_FILE_NAME[] = TEXT("UnrealProtocolPort.txt");
 constexpr TCHAR CLOSED_FILE_EXTENSION[] = TEXT(".closed");
 
 RdConnection::RdConnection():
-	lifetimeDef{rd::Lifetime::Eternal()}
-	, socketLifetimeDef{rd::Lifetime::Eternal()}
-	, lifetime{lifetimeDef.lifetime}
-	, socketLifetime{socketLifetimeDef.lifetime}
-	, scheduler{/*lifetime, "UnrealEditorScheduler"*/} {}
+    lifetimeDef{rd::Lifetime::Eternal()}
+    , socketLifetimeDef{rd::Lifetime::Eternal()}
+    , lifetime{lifetimeDef.lifetime}
+    , socketLifetime{socketLifetimeDef.lifetime}
+    , scheduler{/*lifetime, "UnrealEditorScheduler"*/} {}
 
 RdConnection::~RdConnection() {
-	socketLifetimeDef.terminate();
-	lifetimeDef.terminate();
+    socketLifetimeDef.terminate();
+    lifetimeDef.terminate();
 }
 
 void RdConnection::init() {
-	_CrtDbgBreak();
+    _CrtDbgBreak();
 
-	scheduler.queue([this] {
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+        TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+    Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
+        unrealToBackendModel.get_serialization_context().get_serializers());
+
+    AssetRegistry.OnAssetAdded().AddLambda([](FAssetData AssetData) {
+        BluePrintProvider::AddAsset(AssetData);
+    });
+
+    BluePrintProvider::OnBlueprintAdded.BindLambda([this](UBlueprint* Blueprint) {
+        scheduler.queue([this, Blueprint] {
+            unrealToBackendModel.get_onBlueprintAdded().fire(
+                Jetbrains::EditorPlugin::BlueprintClass(Blueprint->GetPathName()));
+        });
+    });
+
+    scheduler.queue([this] {
 
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
 		TCHAR CAppDataLocalPath[4096];
@@ -69,7 +88,7 @@ void RdConnection::init() {
 				//connected to R#
 			}
 			else {
-				//R# disconnected 
+				//R# disconnected
 			}
 		});
 
@@ -82,13 +101,10 @@ void RdConnection::init() {
 			}
 		});
 
-		unrealToBackendModel.get_isBlueprint().set([](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
-			return BluePrintProvider::IsBlueprint(s.get_pathName(), s.get_graphName());
-		});
-		unrealToBackendModel.get_navigate().advise(lifetime, [this](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
-			BluePrintProvider::OpenBlueprint(s.get_pathName(), s.get_graphName());
-		});
-	});
+        unrealToBackendModel.get_navigate().advise(lifetime, [this](Jetbrains::EditorPlugin::BlueprintClass const& s) {
+            // BluePrintProvider::OpenBlueprint(s.get_pathName(), s.get_graphName());
+        });
+    });
 }
 
 #include "Windows/HideWindowsPlatformTypes.h"

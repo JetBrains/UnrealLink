@@ -7,13 +7,11 @@ import com.jetbrains.rd.generator.nova.cpp.CppIntrinsicType
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.kotlin.Kotlin11Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
-import model.editorPlugin.RdEditorRoot
-import model.rider.RdRiderModel
 import java.io.File
 
 object UE4Library : Root(
         CSharp50Generator(FlowTransform.AsIs, "JetBrains.Unreal.Lib", File(syspropertyOrInvalid("model.out.src.lib.ue4.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains.EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir"))),
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir"))),
         Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
 ) {
     init {
@@ -22,23 +20,35 @@ object UE4Library : Root(
 
     private fun <T : Declaration> declare(intrinsic: CppIntrinsicType, factory: Toplevel.() -> T): T {
         return this.factory().apply {
+            intrinsic.namespace?.let { ns ->
+                setting(Cpp17Generator.Namespace, ns)
+            }
             setting(Cpp17Generator.Intrinsic, intrinsic)
             setting(CSharp50Generator.Namespace, "JetBrains.Unreal.Lib")
         }
     }
 
     private val StringRange = structdef("StringRange") {
-        field("left", PredefinedType.int)
-        field("right", PredefinedType.int)
+        field("left", int)
+        field("right", int)
     }
 
-    val FString = declare(CppIntrinsicType("FString", "Runtime/Core/Public/Containers/UnrealString.h")) {
+    val FString = declare(CppIntrinsicType(null, "FString", "Runtime/Core/Public/Containers/UnrealString.h")) {
         structdef("FString") {
             field("data", string)
         }
     }
 
-    val VerbosityType = declare(CppIntrinsicType("ELogVerbosity::Type", "Logging/LogVerbosity.h")) {
+    val FStringArray = declare(CppIntrinsicType(null, "TArray<FString>", "Runtime/Core/Public/Containers/Array.h")) {
+        structdef("FStringArray") {
+            field("data", array(string))
+        }
+    }
+
+    val VerbosityType = declare(CppIntrinsicType("ELogVerbosity", "Type", "Logging/LogVerbosity.h"))
+    {
+        setting(Cpp17Generator.IsNonScoped, "uint8")
+
         enum("VerbosityType") {
             (+"NoLogging").doc("= 0")
 
@@ -72,35 +82,68 @@ object UE4Library : Root(
 
             // Log masks and special Enum values
 
-            const("All", int, 0x40).doc("=VeryVerbose")
-//            +"NumVerbosity"
-            const("VerbosityMask", int, 0xf)
-            const("SetColor", int, 0x40).doc("not actually a verbosity, used to set the color of an output device")
-            const("BreakOnLog", int, 0x80)
+            (+"All")/*.setting(Cpp17Generator.EnumConstantValue, 7)*/.doc("=VeryVerbose")
+            (+"NumVerbosity")
+            (+"VerbosityMask").setting(Cpp17Generator.EnumConstantValue, 0xf)
+            (+"SetColor").setting(Cpp17Generator.EnumConstantValue, 0x40).doc("not actually a verbosity, used to set the color of an output device")
+            (+"BreakOnLog").setting(Cpp17Generator.EnumConstantValue, 0x80)
         }
     }
 
+    val LogEvent = basestruct("LogEvent") {
+        field("lineNumber", int)
+    }
 
-    val UnrealLogMessage = structdef("UnrealLogMessage") {
-        field("message", FString)
+    private val LogMessage = structdef("LogMessage") {
+        field("text", FString)
         field("type", VerbosityType)
         field("category", FString)
         field("time", dateTime.nullable)
     }
 
+    @Suppress("unused")
+    private val LogMessageEvent = structdef("LogMessageEvent") extends LogEvent {
+        field("message", LogMessage)
+    }
+
+    private val BlueprintFunction = structdef("BlueprintFunction") {
+        field("class", BlueprintClass)
+        field("methodName", FString)
+    }
+
+    private val ScriptCallStackFrame = structdef("ScriptCallStackFrame") {
+        field("header", FString)
+        field("blueprintFunction", BlueprintFunction)
+    }
+
+    private val IScriptCallStack = basestruct("IScriptCallStack") {
+    }
+
+    @Suppress("unused")
+    private val EmptyScriptCallStack = structdef("EmptyScriptCallStack") extends IScriptCallStack {
+        field("header", FString)
+    }
+
+    @Suppress("unused")
+    private val ScriptCallStack = structdef("ScriptCallStack") extends IScriptCallStack {
+        field("header", FString)
+        field("frames", immutableList(ScriptCallStackFrame))
+    }
+
+    private val UnableToDisplayScriptCallStack = structdef("UnableToDisplayScriptCallStack") extends IScriptCallStack {}
+
+    @Suppress("unused")
+    private val ScriptCallStackEvent = structdef("ScriptCallStackEvent") extends LogEvent {
+        field("ScriptCallStack", IScriptCallStack)
+    }
+
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
-        field("start", int)
+        field("begin", int)
         field("end", int)
     }
 
-    val BlueprintStruct = structdef("BlueprintStruct") {
-        field("pathName", FString)
-        field("graphName", FString)
+    val BlueprintClass = structdef("BlueprintClass") {
+        field("name", FString)
     }
-
-//    val UnrealFilterProvider = aggregatedef("UnrealFilterProvider") {
-//        call("isBlueprint", FString, bool).readonly.async
-//        signal("navigate", FString)
-//    }
 }
 

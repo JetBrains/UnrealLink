@@ -20,6 +20,8 @@ public class RiderLink : ModuleRules
 				,"Engine"
 				,"Json"
                 ,"UnrealEd"
+                ,"UnrealEdMessages"
+                ,"MessagingCommon"
 				// ... add private dependencies that you statically link with here ...	
 			}
         );

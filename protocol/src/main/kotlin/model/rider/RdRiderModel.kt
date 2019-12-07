@@ -1,12 +1,12 @@
 package model.rider
 
 import com.jetbrains.rd.generator.nova.*
-import com.jetbrains.rd.generator.nova.PredefinedType.*
+import com.jetbrains.rd.generator.nova.PredefinedType.bool
+import com.jetbrains.rd.generator.nova.PredefinedType.int
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.BlueprintStruct
-import model.lib.ue4.UE4Library.FString
+import model.lib.ue4.UE4Library.BlueprintClass
 
 @Suppress("unused")
 object RdRiderModel : Ext(SolutionModel.Solution) {
@@ -17,14 +17,12 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     }
 
     init {
-
-
         property("testConnection", int.nullable)
         property("play", bool)
 
-        signal("unrealLog", UE4Library.UnrealLogMessage)
+        signal("unrealLog", UE4Library.LogEvent)
 
-        call("isBlueprint", BlueprintStruct, bool).async
-        signal("navigate", BlueprintStruct)
+        call("filterBluePrintCandidates", immutableList(BlueprintClass), array(bool)).async
+        signal("navigateToBlueprintClass", BlueprintClass)
     }
 }
