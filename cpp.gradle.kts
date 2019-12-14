@@ -26,7 +26,7 @@ tasks {
     }
     val cloneRdCpp by creating (Exec::class) {
         val destinationDir = buildDir.resolve("rd")
-        val branchName = "master"
+        val branchName = "ue4-adapt"
         enabled = !destinationDir.exists()
         commandLine = listOf("git", "clone", "--branch=${branchName}", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet")
     }

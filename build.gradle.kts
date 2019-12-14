@@ -17,8 +17,8 @@ buildscript {
     }
 
     dependencies {
-        classpath("gradle.plugin.org.jetbrains.intellij.plugins","gradle-intellij-plugin", "0.4.13")
-        classpath("com.jetbrains.rd", "rd-gen", "0.201.9")
+        classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
+        classpath("com.jetbrains.rd", "rd-gen", "0.201.11")
     }
 }
 
@@ -41,7 +41,7 @@ val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetSolutionId by extra { "resharper_unreal" }
 val dotNetRootId by extra { "ReSharperPlugin" }
-val dotNetBinDir by extra { dotNetDir.resolve( "$dotNetRootId.$dotNetSolutionId").resolve("bin") }
+val dotNetBinDir by extra { dotNetDir.resolve("$dotNetRootId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$dotNetRootId.UnrealEditor" }
 val pluginPropsFile by extra { File(dotNetDir, "Plugin.props") }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
@@ -72,7 +72,7 @@ tasks {
             setPassword(ext["password"] as String)
     }
     withType<RunIdeTask> {
-        jvmArgs("-Xmx4096m")
+        maxHeapSize = "4096m"
     }
 }
 kotlin {
@@ -167,7 +167,7 @@ tasks {
 
     val compileDotNet by creating {
         dependsOn(findMsBuild)
-        dependsOn(":protocol:generateModel")
+//        dependsOn(":protocol:generateModel")
         dependsOn(patchPropsFile)
 
         inputs.files(dotNetDir.listFiles())
@@ -215,25 +215,13 @@ tasks {
         }
     }
 
-    jar.get().dependsOn(":protocol:generateModel")
-}
+//    jar.get().dependsOn(":protocol:generateModel")
 
-intellij {
-    type = "RD"
-    version = "$sdkVersion-SNAPSHOT"
-
-    instrumentCode = false
-    downloadSources = false
-    updateSinceUntilBuild = true
-    tasks.withType<PatchPluginXmlTask> {
-//        sinceBuild( prop("sinceBuild"))
-//        untilBuild(prop("untilBuild"))
-    }
-}
-
-tasks {
     withType<PrepareSandboxTask> {
-        dependsOn("compileDotNet")
+        dependsOn(compileDotNet)
+
+        outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
+
         val outputFolder = dotNetBinDir
                 .resolve(dotNetPluginId)
                 .resolve(buildConfiguration)
@@ -255,5 +243,20 @@ tasks {
         }
     }
 }
+
+
+intellij {
+    type = "RD"
+    version = "$sdkVersion-SNAPSHOT"
+
+    instrumentCode = false
+    downloadSources = false
+    updateSinceUntilBuild = true
+    tasks.withType<PatchPluginXmlTask> {
+        //        sinceBuild( prop("sinceBuild"))
+//        untilBuild(prop("untilBuild"))
+    }
+}
+
 
 apply(from = "cpp.gradle.kts")
