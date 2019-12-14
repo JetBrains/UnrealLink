@@ -117,7 +117,7 @@ namespace ReSharperPlugin.UnrealEditor
             watcher.Created += handler;
             watcher.Changed += handler;
         }
-        
+
 
         void OnMessageReceived(RdRiderModel riderModel, LogMessageEvent message)
         {
@@ -164,7 +164,12 @@ namespace ReSharperPlugin.UnrealEditor
                     });
                 });
         }
-        
+
+        public RdEditorModel GetCurrentEditorModel()
+        {
+            return myEditorModel.Value;
+        }
+
         public RdEditorModel GetCurrentEditorModel()
         {
             return myEditorModel.Value;
