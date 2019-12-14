@@ -16,7 +16,7 @@ void BluePrintProvider::AddAsset(FAssetData AssetData) {
     if (cls) {
         UBlueprint* Blueprint = Cast<UBlueprint>(cls);
         if (Blueprint && Blueprint->IsValidLowLevel()) {
-            AddBlueprint(Blueprint);
+            AddBlueprint(Blueprint);           
         }
     }
 }
@@ -37,10 +37,6 @@ bool BluePrintProvider::IsBlueprint(FString const& Word) {
         }
     }*/
     return false;
-}
-
-static void JumpToGraph(IBlueprintEditor& bpEditor, /*UEdGraph* Graph*/UBlueprint* bp) {
-    bpEditor.JumpToHyperlink(/*Graph*/bp, false);
 }
 
 void BluePrintProvider::OpenBlueprint(FString const& path, FString const& name) {

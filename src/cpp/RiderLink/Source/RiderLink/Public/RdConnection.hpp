@@ -8,6 +8,7 @@
 #include "IProtocol.h"
 #include "SingleThreadScheduler.h"
 #include "SimpleScheduler.h"
+#include "UniquePtr.h"
 
 
 class RdConnection
@@ -32,5 +33,5 @@ public:
 	rd::SimpleScheduler scheduler;
 
 private:
-	std::unique_ptr<rd::IProtocol> protocol;
+	TUniquePtr<rd::IProtocol> protocol;
 };

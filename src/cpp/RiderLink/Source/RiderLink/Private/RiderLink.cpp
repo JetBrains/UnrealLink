@@ -2,6 +2,8 @@
 
 #include "RiderLink.h"
 
+
+#include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
 #include "Modules/ModuleManager.h"
 #include "HAL/PlatformProcess.h"
 
@@ -23,11 +25,10 @@ FRiderLinkModule::~FRiderLinkModule() {}
 
 void FRiderLinkModule::ShutdownModule() {}
 
-
-
 void FRiderLinkModule::StartupModule() {
+    using namespace Jetbrains::EditorPlugin;
+    
     static const auto START_TIME = FDateTime::Now();
-    static int LINE_NUMBER = 0;
 
     static const auto GetTimeNow = [](double Time) -> rd::DateTime {
         return rd::DateTime(static_cast<std::time_t>(START_TIME.ToUnixTimestamp() + static_cast<int64>(Time)));
@@ -53,22 +54,8 @@ void FRiderLinkModule::StartupModule() {
                         if (Time) {
                             DateTime = GetTimeNow(Time.GetValue());
                         }
-
-                        TUniquePtr<Jetbrains::EditorPlugin::LogEvent> Event;
-                        auto OptGetScriptCallStack = LogParser::TryGetScriptCallStack(message);
-                        if (OptGetScriptCallStack) {
-                            Jetbrains::EditorPlugin::IScriptCallStack* Px = OptGetScriptCallStack.Release();
-                            rd::Wrapper<Jetbrains::EditorPlugin::IScriptCallStack> CallStack;
-                            // CallStack.reset(Px);
-                            //todo
-                            Event = MakeUnique<Jetbrains::EditorPlugin::ScriptCallStackEvent>(CallStack, 0);
-                        }
-                        else {
-                            auto Message = Jetbrains::EditorPlugin::LogMessage(
-                                message, Type, Name, DateTime);
-                            Event = MakeUnique<Jetbrains::EditorPlugin::LogMessageEvent>(
-                                Jetbrains::EditorPlugin::LogMessageEvent(std::move(Message), 0));
-                        }
+                        auto MessageInfo = LogMessageInfo(Type, Name, DateTime);
+                        const auto Event = LogParser::GetEvent(std::move(message), std::move(MessageInfo));                        
                         rdConnection.unrealToBackendModel.get_unrealLog().fire(*Event);
                     });
             }
