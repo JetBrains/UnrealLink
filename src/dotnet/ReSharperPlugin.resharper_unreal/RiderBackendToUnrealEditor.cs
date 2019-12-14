@@ -24,18 +24,20 @@ namespace ReSharperPlugin.UnrealEditor
         private readonly ISolution mySolution;
         private readonly ILogger myLogger;
         private readonly UnrealHost myUnrealHost;
+        private readonly UnrealLinkResolver myLinkResolver;
         private readonly IProperty<RdEditorModel> myEditorModel;
 
         private const string PortFileName = "UnrealProtocolPort.txt";
         private const string ClosedFileExtension = ".closed";
 
         public RiderBackendToUnrealEditor(Lifetime lifetime, IScheduler dispatcher, ISolution solution, ILogger logger,
-            UnrealHost unrealHost)
+            UnrealHost unrealHost, UnrealLinkResolver linkResolver)
         {
             myDispatcher = dispatcher;
             mySolution = solution;
             myLogger = logger;
             myUnrealHost = unrealHost;
+            myLinkResolver = linkResolver;
 
             myLogger.Info("RiderBackendToUnrealEditor building started");
 
@@ -115,11 +117,7 @@ namespace ReSharperPlugin.UnrealEditor
             watcher.Created += handler;
             watcher.Changed += handler;
         }
-
-        static bool IsBlueprint(BlueprintStruct @struct)
-        {
-            return true;
-        }
+        
 
         void OnMessageReceived(RdRiderModel riderModel, LogMessageEvent message)
         {
@@ -159,8 +157,10 @@ namespace ReSharperPlugin.UnrealEditor
                     });
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
-                        riderModel.FilterBluePrintCandidates.Set((lifetime, candidates) =>
-                            RdTask<bool[]>.Successful(candidates.Select(IsBlueprint).AsArray()));
+                        riderModel.FilterLinkCandidates.Set((lifetime, candidates) =>
+                            RdTask<ILinkResponse[]>.Successful(candidates.Select(request => myLinkResolver.ResolveLink(request)).AsArray()));
+                        riderModel.IsMethodReference.Set((lifetime, methodReference) =>
+                            RdTask<bool>.Successful(true));
                     });
                 });
         }
