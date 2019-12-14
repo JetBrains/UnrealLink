@@ -164,5 +164,10 @@ namespace ReSharperPlugin.UnrealEditor
                     });
                 });
         }
+        
+        public RdEditorModel GetCurrentEditorModel()
+        {
+            return myEditorModel.Value;
+        }
     }
 }

@@ -4,6 +4,8 @@
 #include "EdGraph/EdGraph.h"
 #include "Toolkits/AssetEditorManager.h"
 #include "BlueprintEditor.h"
+#include "AssetEditorMessages.h"
+#include "MessageEndpointBuilder.h"
 
 FOnBlueprintAdded BluePrintProvider::OnBlueprintAdded{};
 
@@ -39,6 +41,6 @@ bool BluePrintProvider::IsBlueprint(FString const& Word) {
     return false;
 }
 
-void BluePrintProvider::OpenBlueprint(FString const& path, FString const& name) {
-    //TODO
+void BluePrintProvider::OpenBlueprint(FString const& path, FString const& name, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
+    messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
 }
