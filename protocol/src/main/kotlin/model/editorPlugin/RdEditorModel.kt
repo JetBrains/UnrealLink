@@ -7,6 +7,7 @@ import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.lib.ue4.UE4Library.BlueprintClass
+import model.lib.ue4.UE4Library.BlueprintFunction
 import model.lib.ue4.UE4Library.LogEvent
 import java.io.File
 
@@ -19,7 +20,7 @@ object RdEditorRoot : Root(
         setting(CSharp50Generator.AdditionalUsings) {
             listOf("JetBrains.Unreal.Lib")
         }
-        setting(Cpp17Generator.MarshallerHeaders, listOf("UE4TypesMarshallers.h"))
+        setting(Cpp17Generator.AdditionalHeaders, listOf("UE4TypesMarshallers.h"))
     }
 }
 
@@ -29,8 +30,8 @@ object RdEditorModel : Ext(RdEditorRoot) {
         signal("unrealLog", LogEvent)
         property("play", bool)
 
-//        call("isBlueprint", BlueprintStruct, bool).async
         signal("navigateToBlueprintClass", BlueprintClass)
+        signal("navigateToBlueprintFunction", BlueprintFunction)
 
         signal("onBlueprintAdded", BlueprintClass)
     }

@@ -15,7 +15,13 @@ object UE4Library : Root(
         Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
 ) {
     init {
-        setting(Cpp17Generator.MarshallerHeaders, listOf("UE4TypesMarshallers.h"))
+        setting(Cpp17Generator.AdditionalHeaders, listOf(
+                "UE4TypesMarshallers.h",
+                "Runtime/Core/Public/Containers/Array.h",
+                "Runtime/Core/Public/Containers/ContainerAllocationPolicies.h"
+        ))
+        setting(Cpp17Generator.ListType, CppIntrinsicType(null, "TArray", "Runtime/Core/Public/Containers/Array.h"))
+        setting(Cpp17Generator.AllocatorType) { "FDefaultAllocator" }
     }
 
     private fun <T : Declaration> declare(intrinsic: CppIntrinsicType, factory: Toplevel.() -> T): T {
@@ -28,20 +34,14 @@ object UE4Library : Root(
         }
     }
 
-    private val StringRange = structdef("StringRange") {
-        field("left", int)
-        field("right", int)
+    val StringRange = structdef("StringRange") {
+        field("first", int)
+        field("last", int)
     }
 
     val FString = declare(CppIntrinsicType(null, "FString", "Runtime/Core/Public/Containers/UnrealString.h")) {
         structdef("FString") {
             field("data", string)
-        }
-    }
-
-    val FStringArray = declare(CppIntrinsicType(null, "TArray<FString>", "Runtime/Core/Public/Containers/Array.h")) {
-        structdef("FStringArray") {
-            field("data", array(string))
         }
     }
 
@@ -90,52 +90,81 @@ object UE4Library : Root(
         }
     }
 
-    val LogEvent = basestruct("LogEvent") {
-        field("lineNumber", int)
-    }
-
-    private val LogMessage = structdef("LogMessage") {
-        field("text", FString)
+    private val LogMessageInfo = structdef("LogMessageInfo") {
         field("type", VerbosityType)
         field("category", FString)
         field("time", dateTime.nullable)
     }
 
+    val LogEvent = basestruct("LogEvent") {
+        field("info", LogMessageInfo)
+    }
+
     @Suppress("unused")
     private val LogMessageEvent = structdef("LogMessageEvent") extends LogEvent {
-        field("message", LogMessage)
+        field("message", FString)
     }
 
-    private val BlueprintFunction = structdef("BlueprintFunction") {
+    internal val BlueprintFunction = structdef("BlueprintFunction") {
         field("class", BlueprintClass)
         field("methodName", FString)
+
+        const("separator", string, ":")
     }
 
+    //region Script Call Stack
     private val ScriptCallStackFrame = structdef("ScriptCallStackFrame") {
         field("header", FString)
         field("blueprintFunction", BlueprintFunction)
     }
 
     private val IScriptCallStack = basestruct("IScriptCallStack") {
+        const("header", string, "Script call stack:")
     }
 
     @Suppress("unused")
     private val EmptyScriptCallStack = structdef("EmptyScriptCallStack") extends IScriptCallStack {
-        field("header", FString)
+        const("message", string, "Script call stack: [Empty] (FFrame::GetStackTrace() called from native code)")
     }
 
     @Suppress("unused")
     private val ScriptCallStack = structdef("ScriptCallStack") extends IScriptCallStack {
-        field("header", FString)
         field("frames", immutableList(ScriptCallStackFrame))
     }
 
-    private val UnableToDisplayScriptCallStack = structdef("UnableToDisplayScriptCallStack") extends IScriptCallStack {}
+    @Suppress("unused")
+    private val UnableToDisplayScriptCallStack = structdef("UnableToDisplayScriptCallStack") extends IScriptCallStack {
+        const("message", string, "Unable to display Script Callstack. Compile with DO_BLUEPRINT_GUARD=1")
+    }
 
     @Suppress("unused")
     private val ScriptCallStackEvent = structdef("ScriptCallStackEvent") extends LogEvent {
-        field("ScriptCallStack", IScriptCallStack)
+        field("scriptCallStack", IScriptCallStack)
     }
+    //endregion
+
+    //region ScriptMsg
+    private val IScriptMsg = basestruct("IScriptMsg") {
+        const("header", string, "Script msg:")
+    }
+
+    @Suppress("unused")
+    private val ScriptMsgException = structdef("ScriptMsgException") extends IScriptMsg {
+        field("message", FString)
+    }
+
+    @Suppress("unused")
+    private val ScriptMsgCallStack = structdef("ScriptMsgCallStack") extends IScriptMsg {
+        field("message", FString)
+        field("scriptCallStack", IScriptCallStack)
+    }
+
+    @Suppress("unused")
+    private val ScriptMsgEvent = structdef("ScriptMsgEvent") extends LogEvent {
+        field("scriptMsg", IScriptMsg)
+    }
+
+    //endregion
 
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
         field("begin", int)
