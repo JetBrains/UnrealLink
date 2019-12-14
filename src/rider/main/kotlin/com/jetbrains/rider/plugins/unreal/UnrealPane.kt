@@ -12,6 +12,7 @@ import com.jetbrains.rider.ui.components.ComponentFactories
 
 class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     private val consoleView: ConsoleViewImpl = ComponentFactories.getConsoleView(project, lifetime)
+//    private val consoleView: UnrealConsoleView = UnrealConsoleView(project)
 
     companion object {
         lateinit var publicConsoleView : ConsoleViewImpl

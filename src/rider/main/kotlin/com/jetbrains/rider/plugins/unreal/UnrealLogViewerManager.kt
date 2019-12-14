@@ -14,8 +14,7 @@ class UnrealLogViewerManager(
         private val host: UnrealHost
 ) : ProtocolSubscribedProjectComponent(project), ConsoleFilterProvider {
     override fun getDefaultFilters(project: Project): Array<Filter> {
-        val registrationHost = HighlighterRegistrationHost.getInstance()
-        return arrayOf<Filter>(UrlFilter(), UnrealHeavyLogFilter(project, registrationHost, host.model.filterBluePrintCandidates, host.model.navigateToBlueprintClass))
+        return arrayOf<Filter>(UrlFilter(), UnrealHeavyLogFilter(project, host.model))
     }
 }
 

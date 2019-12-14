@@ -1,26 +1,23 @@
 package com.jetbrains.rider.plugins.unreal.filters
 
-import com.intellij.execution.filters.Filter
-import com.intellij.execution.filters.FilterMixin
+import com.intellij.execution.filters.*
 import com.intellij.execution.filters.FilterMixin.AdditionalHighlight
-import com.intellij.execution.filters.UrlFilter
+import com.intellij.ide.browsers.OpenUrlHyperlinkInfo
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
-import com.jetbrains.rd.framework.IRdCall
 import com.jetbrains.rd.framework.RdTaskResult
-import com.jetbrains.rd.util.reactive.ISignal
-import com.jetbrains.rdclient.daemon.HighlighterRegistrationHost
-import com.jetbrains.rider.model.BlueprintClass
-import com.jetbrains.rider.stacktrace.filters.RiderHeavyExceptionFilter
+import com.jetbrains.rider.model.*
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
 import com.jetbrains.rider.util.idea.application
 import com.jetbrains.rider.util.idea.getLogger
 import com.jetbrains.rider.util.idea.lifetime
 
-class UnrealHeavyLogFilter(val project: Project, private val registrationHost: HighlighterRegistrationHost,
-                           private val filter: IRdCall<List<BlueprintClass>, BooleanArray>, private val navigate: ISignal<BlueprintClass>) : Filter, FilterMixin {
+class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel) : Filter, FilterMixin {
     companion object {
-        private val logger = getLogger<RiderHeavyExceptionFilter>()
+        private val logger = getLogger<UnrealHeavyLogFilter>()
     }
 
     private val urlFilter = UrlFilter()
@@ -40,34 +37,80 @@ class UnrealHeavyLogFilter(val project: Project, private val registrationHost: H
         }
 
         val text = copiedFragment.charsSequence
-        BlueprintParser.parse(text).let { candidates ->
-            //todo change regex and send task immediately
-            val request = candidates
-                    .map {
-                        BlueprintParser.split(it.value)
-                    }
-                    .toList()
-            val task = filter.start(request)
+
+        processMethodReferences(text, startOffset, consumer)
+
+        processLinks(text, startOffset, consumer)
+    }
+
+    private fun processMethodReferences(text: CharSequence, startOffset: Int, consumer: Consumer<in AdditionalHighlight>) {
+        LogParser.parseMethodReferences(text).forEach { match ->
+            val range = match.range
+            val (`class`, method) = match.value.split(MethodReference.separator)
+            val methodReference = MethodReference(FString(`class`), FString(method))
+            if (model.isMethodReference.sync(methodReference)) {
+                logger.info("New method reference resolved = $methodReference, startOffset=${startOffset}, match.range.first=${match.range.first}")
+
+                run {
+                    val first = startOffset + range.first
+                    val last = startOffset + range.first + `class`.length
+                    val linkInfo = UnrealClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(FString(`class`)))
+                    consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+                }
+                run {
+                    val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
+                    val first = startOffset + range.last - method.length + 1
+                    val last = startOffset + range.last + 1
+                    consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+                }
+            }
+        }
+    }
+
+    private fun processLinks(text: CharSequence, startOffset: Int, consumer: Consumer<in AdditionalHighlight>) {
+        LogParser.parseLinkCandidates(text).let { candidates ->
+            val request = candidates.toList()
+            val task = model.filterLinkCandidates.start(request.map { LinkRequest(FString(it.value)) })
             task.result.advise(project.lifetime) { rdTaskResult ->
                 when (rdTaskResult) {
                     is RdTaskResult.Success -> {
-                        rdTaskResult.value.let { isBlueprints ->
-                            candidates.filterIndexed { index, _ ->
-                                isBlueprints[index]
-                            }.map { matchResult ->
-                                val range = matchResult.range
-                                val struct = BlueprintParser.split(matchResult.value)
-                                val blueprintHyperLinkInfo = BlueprintHyperLinkInfo(navigate, struct)
-                                val resultItems = Filter.ResultItem(range.first + startOffset, range.last + startOffset, blueprintHyperLinkInfo, true)
-                                consumer.consume(AdditionalHighlight(arrayListOf(resultItems)))
-                            }
+                        rdTaskResult.value.let { response ->
+                            val links = request.zip(response)
+                                    .mapNotNull { (match, value) ->
+                                        val matchStart = startOffset + match.range.first
+                                        when (value) {
+                                            is LinkResponseBlueprint -> {
+                                                val substring = match.value.substring(value.range.first, value.range.last)
+                                                logger.info("Blueprint link = $substring " +
+                                                        "resolved from = ${match.value}, " +
+                                                        "startOffset=${startOffset}, " +
+                                                        "match.range.first=${match.range.first}")
+                                                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(value.fullPath))
+                                                Filter.ResultItem(matchStart + value.range.first, matchStart + value.range.last, hyperLinkInfo, false)
+                                            }
+                                            is LinkResponseFilePath -> {
+                                                val substring = match.value.substring(value.range.first, value.range.last)
+                                                logger.info("File path = $substring " +
+                                                        "resolved from = ${match.value}, " +
+                                                        "startOffset=${startOffset}, " +
+                                                        "match.range.first=${match.range.first}")
+                                                val hyperLinkInfo = OpenUrlHyperlinkInfo(value.fullPath.data)
+                                                Filter.ResultItem(matchStart + value.range.first, matchStart + value.range.last, hyperLinkInfo, false)
+                                            }
+                                            is LinkResponseUnresolved -> {
+                                                null
+                                            }
+                                            else -> null
+                                        }
+                                    }
+                            consumer.consume(AdditionalHighlight(links))
                         }
                     }
                     is RdTaskResult.Cancelled -> {
-                        logger.debug("Request has been canceled")
+                        logger.debug("Request has been canceled: $request")
                     }
                     is RdTaskResult.Fault -> {
-                        logger.error("Request has faulted")
+                        logger.error("Request has faulted: request=$request, result=$rdTaskResult")
                     }
                 }
             }
