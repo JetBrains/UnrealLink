@@ -8,14 +8,14 @@
 
 //region FString
 
-namespace rd {
+namespace rd {  
     template <typename T, typename A>
     int32_t size(TArray<T, A> const& value) {
         return static_cast<int32_t>(value.Num());
     }
 
     template <typename T, typename A>
-    void resize(TArray<T, A> & value, int32_t size) {
+    void resize(TArray<T, A>& value, int32_t size) {
         value.Reserve(size);
     }
 
@@ -27,16 +27,12 @@ namespace rd {
         buffer.write_wstring(wstring_view(GetData(value), value.Len()));
     }
 
-    template <>
-    std::string rd::to_string<FString>(FString const& val) {
-        return TCHAR_TO_UTF8(*val);
-    }
 
     size_t hash<FString>::operator()(const FString& value) const noexcept {
         return GetTypeHash(value);
     }
 
-    
+
 }
 
 template class rd::Polymorphic<FString>;

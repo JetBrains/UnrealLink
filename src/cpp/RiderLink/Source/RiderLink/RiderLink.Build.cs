@@ -22,6 +22,8 @@ public class RiderLink : ModuleRules
                 ,"UnrealEd"
                 ,"UnrealEdMessages"
                 ,"MessagingCommon"
+                ,"AssetRegistry"
+                ,"ContentBrowser"
 				// ... add private dependencies that you statically link with here ...	
 			}
         );

@@ -105,7 +105,7 @@ object UE4Library : Root(
         field("message", FString)
     }
 
-    internal val BlueprintFunction = structdef("BlueprintFunction") {
+    val BlueprintFunction = structdef("BlueprintFunction") {
         field("class", BlueprintClass)
         field("methodName", FString)
 
@@ -172,7 +172,7 @@ object UE4Library : Root(
     }
 
     val BlueprintClass = structdef("BlueprintClass") {
-        field("name", FString)
+        field("pathName", FString)
     }
 }
 

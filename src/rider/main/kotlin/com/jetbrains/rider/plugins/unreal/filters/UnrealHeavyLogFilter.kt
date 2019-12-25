@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
 import com.jetbrains.rd.framework.RdTaskResult
+import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
@@ -48,20 +49,22 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
             val range = match.range
             val (`class`, method) = match.value.split(MethodReference.separator)
             val methodReference = MethodReference(FString(`class`), FString(method))
-            if (model.isMethodReference.sync(methodReference)) {
-                logger.info("New method reference resolved = $methodReference, startOffset=${startOffset}, match.range.first=${match.range.first}")
+            model.isMethodReference.startAndAdviseSuccess(methodReference) {
+                if (it) {
+                    logger.info("New method reference resolved = $methodReference, startOffset=${startOffset}, match.range.first=${match.range.first}")
 
-                run {
-                    val first = startOffset + range.first
-                    val last = startOffset + range.first + `class`.length
-                    val linkInfo = UnrealClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(FString(`class`)))
-                    consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
-                }
-                run {
-                    val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
-                    val first = startOffset + range.last - method.length + 1
-                    val last = startOffset + range.last + 1
-                    consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+                    run {
+                        val first = startOffset + range.first
+                        val last = startOffset + range.first + `class`.length
+                        val linkInfo = UnrealClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(FString(`class`)))
+                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+                    }
+                    run {
+                        val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
+                        val first = startOffset + range.last - method.length + 1
+                        val last = startOffset + range.last + 1
+                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+                    }
                 }
             }
         }

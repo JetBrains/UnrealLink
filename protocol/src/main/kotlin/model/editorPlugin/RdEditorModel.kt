@@ -8,6 +8,7 @@ import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.lib.ue4.UE4Library.BlueprintClass
 import model.lib.ue4.UE4Library.BlueprintFunction
+import model.lib.ue4.UE4Library.FString
 import model.lib.ue4.UE4Library.LogEvent
 import java.io.File
 
@@ -27,12 +28,14 @@ object RdEditorRoot : Root(
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
         property("testConnection", int.nullable)
-        signal("unrealLog", LogEvent)
+        signal("unrealLog", LogEvent).async
         property("play", bool)
 
-        signal("navigateToBlueprintClass", BlueprintClass)
-        signal("navigateToBlueprintFunction", BlueprintFunction)
+        signal("navigateToBlueprintClass", BlueprintClass).async
+        signal("navigateToBlueprintFunction", BlueprintFunction).async
 
-        signal("onBlueprintAdded", BlueprintClass)
+        signal("onBlueprintAdded", BlueprintClass).async
+        call("isBlueprintPathName", FString, bool)
+        call("getPathNameByPath", FString, FString.nullable)
     }
 }

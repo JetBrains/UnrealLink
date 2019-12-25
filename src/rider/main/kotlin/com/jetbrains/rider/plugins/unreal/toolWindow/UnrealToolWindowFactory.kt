@@ -86,7 +86,7 @@ class UnrealToolWindowFactory(val project: Project
                         print(frame.header.data, stackTraceContentType)
 
                         val blueprintClassHyperLinkInfo = BlueprintClassHyperLinkInfo(model.navigateToBlueprintClass, frame.blueprintFunction.`class`)
-                        printHyperlink("${frame.blueprintFunction.`class`.name}", blueprintClassHyperLinkInfo)
+                        printHyperlink("${frame.blueprintFunction.`class`.pathName}", blueprintClassHyperLinkInfo)
 
                         print(BlueprintFunction.separator, stackTraceContentType)
 
@@ -135,6 +135,6 @@ class UnrealToolWindowFactory(val project: Project
 
     fun flush() {
         println()
-        UnrealPane.publicConsoleView.flushDeferredText()
+//        UnrealPane.publicConsoleView.flushDeferredText()
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using JetBrains.Collections.Viewable;
@@ -14,6 +15,7 @@ using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
 using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util;
+using JetBrains.Util.Concurrency;
 
 namespace ReSharperPlugin.UnrealEditor
 {
@@ -136,11 +138,11 @@ namespace ReSharperPlugin.UnrealEditor
 
             myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
             myEditorModel.View(lf,
-                (lf2, model) =>
+                (viewLifetime, unrealModel) =>
                 {
-                    UE4Library.RegisterDeclaredTypesSerializers(model.SerializationContext.Serializers);
+                    UE4Library.RegisterDeclaredTypesSerializers(unrealModel.SerializationContext.Serializers);
 
-                    model.UnrealLog.Advise(lf, logEvent =>
+                    unrealModel.UnrealLog.Advise(viewLifetime, logEvent =>
                     {
                         myUnrealHost.PerformModelAction(riderModel =>
                         {
@@ -155,19 +157,24 @@ namespace ReSharperPlugin.UnrealEditor
                             }
                         });
                     });
+
+                    unrealModel.OnBlueprintAdded.Advise(viewLifetime, blueprintClass =>
+                    {
+                        //todo
+                    });
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
                         riderModel.FilterLinkCandidates.Set((lifetime, candidates) =>
-                            RdTask<ILinkResponse[]>.Successful(candidates.Select(request => myLinkResolver.ResolveLink(request)).AsArray()));
+                            RdTask<ILinkResponse[]>.Successful(candidates
+                                .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName)).AsArray()));
                         riderModel.IsMethodReference.Set((lifetime, methodReference) =>
                             RdTask<bool>.Successful(true));
+                        riderModel.NavigateToBlueprintClass.Advise(viewLifetime, blueprintClass =>
+                        {
+                            unrealModel.NavigateToBlueprintClass.Fire(blueprintClass);
+                        });
                     });
                 });
-        }
-
-        public RdEditorModel GetCurrentEditorModel()
-        {
-            return myEditorModel.Value;
         }
 
         public RdEditorModel GetCurrentEditorModel()
