@@ -12,7 +12,7 @@ import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintFunctionHyperLinkInfo
-import com.jetbrains.rider.plugins.unreal.rider.ui.RiderOnDemandToolWindowFactory
+import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import com.jetbrains.rider.projectView.solution
 import icons.RiderIcons
 
