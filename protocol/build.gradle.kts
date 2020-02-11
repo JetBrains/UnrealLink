@@ -18,7 +18,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation(files("$rdLibDirectory/rider-model.jar"))
-    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.25")
+    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.44")
 }
 
 val rdLibDirectory: File by rootProject.extra

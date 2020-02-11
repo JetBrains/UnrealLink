@@ -3,17 +3,17 @@
 #include "RiderLink.h"
 
 
-#include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
-#include "Modules/ModuleManager.h"
 #include "HAL/PlatformProcess.h"
+#include "Modules/ModuleManager.h"
 
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
+#include "MessageEndpointBuilder.h"
 
-#include "rd_core_cpp/types/DateTime.h"
 #include "LogParser.h"
-#include "RdEditorProtocol/UE4Library/LogMessageEvent.h"
-#include "RdEditorProtocol/UE4Library/ScriptCallStackEvent.h"
+#include "BlueprintProvider.h"
+
+#include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
@@ -27,7 +27,7 @@ void FRiderLinkModule::ShutdownModule() {}
 
 void FRiderLinkModule::StartupModule() {
     using namespace Jetbrains::EditorPlugin;
-    
+
     static const auto START_TIME = FDateTime::Now();
 
     static const auto GetTimeNow = [](double Time) -> rd::DateTime {
@@ -42,10 +42,14 @@ void FRiderLinkModule::StartupModule() {
             GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
         });
     });
-
+    static auto MessageEndpoint = FMessageEndpoint::Builder("FAssetEditorManager").Build();
     outputDevice.onSerializeMessage.BindLambda(
         [this](const TCHAR* msg, ELogVerbosity::Type Type, const class FName& Name,
                TOptional<double> Time) {
+            auto CS = FString(msg);
+            if (CS.StartsWith("!!!")) {
+                BluePrintProvider::OpenBlueprint(CS.Mid(4), MessageEndpoint);
+            }
             if (Type != ELogVerbosity::SetColor) {
                 rdConnection.scheduler.queue(
                     [this, message = FString(msg), Type, Name = Name.GetPlainNameString(),
@@ -55,8 +59,9 @@ void FRiderLinkModule::StartupModule() {
                             DateTime = GetTimeNow(Time.GetValue());
                         }
                         auto MessageInfo = LogMessageInfo(Type, Name, DateTime);
-                        const auto Event = LogParser::GetEvent(std::move(message), std::move(MessageInfo));                        
-                        rdConnection.unrealToBackendModel.get_unrealLog().fire(*Event);
+                        auto Event = LogParser::GetParts(std::move(message));
+                        rdConnection.unrealToBackendModel.get_unrealLog().fire(
+                            UnrealLogEvent(std::move(MessageInfo), std::move(Event)));
                     });
             }
         });

@@ -96,14 +96,18 @@ object UE4Library : Root(
         field("time", dateTime.nullable)
     }
 
-    val LogEvent = basestruct("LogEvent") {
+    val UnrealLogEvent = structdef("UnrealLogEvent") {
         field("info", LogMessageInfo)
+        field("parts", immutableList(LogPart))
     }
 
-    @Suppress("unused")
+    val LogPart = basestruct("LogPart") {
+    }
+
+    /*@Suppress("unused")
     private val LogMessageEvent = structdef("LogMessageEvent") extends LogEvent {
         field("message", FString)
-    }
+    }*/
 
     val BlueprintFunction = structdef("BlueprintFunction") {
         field("class", BlueprintClass)
@@ -114,8 +118,9 @@ object UE4Library : Root(
 
     //region Script Call Stack
     private val ScriptCallStackFrame = structdef("ScriptCallStackFrame") {
-        field("header", FString)
-        field("blueprintFunction", BlueprintFunction)
+        //        field("header", FString)
+//        field("blueprintFunction", BlueprintFunction)
+        field("entry", FString)
     }
 
     private val IScriptCallStack = basestruct("IScriptCallStack") {
@@ -138,7 +143,7 @@ object UE4Library : Root(
     }
 
     @Suppress("unused")
-    private val ScriptCallStackEvent = structdef("ScriptCallStackEvent") extends LogEvent {
+    private val ScriptCallStackPart = structdef("ScriptCallStackPart") extends LogPart {
         field("scriptCallStack", IScriptCallStack)
     }
     //endregion
@@ -159,12 +164,18 @@ object UE4Library : Root(
         field("scriptCallStack", IScriptCallStack)
     }
 
+/*
     @Suppress("unused")
-    private val ScriptMsgEvent = structdef("ScriptMsgEvent") extends LogEvent {
+    private val ScriptMsgEvent = structdef("ScriptMsgEvent") extends LogPart {
         field("scriptMsg", IScriptMsg)
     }
+*/
 
     //endregion
+
+    private val TextPart = structdef("TextPart") extends LogPart {
+        field("text", FString)
+    }
 
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
         field("begin", int)

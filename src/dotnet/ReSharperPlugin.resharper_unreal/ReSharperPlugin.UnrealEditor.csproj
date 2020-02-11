@@ -16,7 +16,7 @@
         <PrivateAssets>all</PrivateAssets>
         </PackageReference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>

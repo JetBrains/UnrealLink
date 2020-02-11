@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using JetBrains.Collections.Viewable;
@@ -15,7 +14,6 @@ using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
 using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util;
-using JetBrains.Util.Concurrency;
 
 namespace ReSharperPlugin.UnrealEditor
 {
@@ -113,7 +111,10 @@ namespace ReSharperPlugin.UnrealEditor
                     var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
                         myDispatcher, wire, modelLifetime);
 
-                    ResetModel(lf, protocol);
+                    myDispatcher.Queue(() =>
+                    {
+                        ResetModel(lf, protocol);
+                    });
                 });
             };
             watcher.Created += handler;
@@ -121,14 +122,9 @@ namespace ReSharperPlugin.UnrealEditor
         }
 
 
-        void OnMessageReceived(RdRiderModel riderModel, LogMessageEvent message)
+        void OnMessageReceived(RdRiderModel riderModel, UnrealLogEvent message)
         {
             riderModel.UnrealLog.Fire(message);
-        }
-
-        private void OnScriptCallStackReceived(RdRiderModel riderModel, ScriptCallStackEvent scriptCallStackEvent)
-        {
-            riderModel.UnrealLog.Fire(scriptCallStackEvent);
         }
 
         private void ResetModel(Lifetime lf, IProtocol protocol)
@@ -144,18 +140,7 @@ namespace ReSharperPlugin.UnrealEditor
 
                     unrealModel.UnrealLog.Advise(viewLifetime, logEvent =>
                     {
-                        myUnrealHost.PerformModelAction(riderModel =>
-                        {
-                            switch (logEvent)
-                            {
-                                case LogMessageEvent unrealLogMessageEvent:
-                                    OnMessageReceived(riderModel, unrealLogMessageEvent);
-                                    break;
-                                case ScriptCallStackEvent scriptCallStackEvent:
-                                    OnScriptCallStackReceived(riderModel, scriptCallStackEvent);
-                                    break;
-                            }
-                        });
+                        myUnrealHost.PerformModelAction(riderModel => { OnMessageReceived(riderModel, logEvent); });
                     });
 
                     unrealModel.OnBlueprintAdded.Advise(viewLifetime, blueprintClass =>
@@ -166,13 +151,12 @@ namespace ReSharperPlugin.UnrealEditor
                     {
                         riderModel.FilterLinkCandidates.Set((lifetime, candidates) =>
                             RdTask<ILinkResponse[]>.Successful(candidates
-                                .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName)).AsArray()));
+                                .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))
+                                .AsArray()));
                         riderModel.IsMethodReference.Set((lifetime, methodReference) =>
                             RdTask<bool>.Successful(true));
-                        riderModel.NavigateToBlueprintClass.Advise(viewLifetime, blueprintClass =>
-                        {
-                            unrealModel.NavigateToBlueprintClass.Fire(blueprintClass);
-                        });
+                        riderModel.NavigateToBlueprintClass.Advise(viewLifetime,
+                            blueprintClass => { unrealModel.NavigateToBlueprintClass.Fire(blueprintClass); });
                     });
                 });
         }

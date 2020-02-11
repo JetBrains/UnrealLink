@@ -41,6 +41,6 @@ bool BluePrintProvider::IsBlueprint(FString const& Word) {
     return false;
 }
 
-void BluePrintProvider::OpenBlueprint(FString const& path, FString const& name, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
+void BluePrintProvider::OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
 }

@@ -47,7 +47,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("testConnection", int.nullable)
         property("play", bool)
 
-        signal("unrealLog", UE4Library.LogEvent)
+        signal("unrealLog", UE4Library.UnrealLogEvent)
 
         call("filterLinkCandidates", immutableList(LinkRequest), array(ILinkResponse)).async
         call("isMethodReference", MethodReference, bool).async

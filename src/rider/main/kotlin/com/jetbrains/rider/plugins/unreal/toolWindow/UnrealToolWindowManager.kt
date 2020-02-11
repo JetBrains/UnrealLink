@@ -2,9 +2,6 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
-import com.jetbrains.rider.model.LogMessageEvent
-import com.jetbrains.rider.model.ScriptCallStackEvent
-import com.jetbrains.rider.model.ScriptMsgEvent
 import com.jetbrains.rider.model.UE4Library
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager
@@ -25,18 +22,7 @@ class UnrealToolWindowManager(project: Project,
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
 
         host.model.unrealLog.advise(componentLifetime) { event ->
-            unrealToolWindowContextFactory.print(event.info)
-            when (event) {
-                is ScriptCallStackEvent -> {
-                    unrealToolWindowContextFactory.print(event.scriptCallStack)
-                }
-                is LogMessageEvent -> {
-                    unrealToolWindowContextFactory.print(event.message)
-                }
-                is ScriptMsgEvent -> {
-                    unrealToolWindowContextFactory.print(event.scriptMsg)
-                }
-            }
+            unrealToolWindowContextFactory.print(event)
             unrealToolWindowContextFactory.flush()
         }
     }

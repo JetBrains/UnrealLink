@@ -8,7 +8,7 @@
 
 //region FString
 
-namespace rd {  
+namespace rd {
     template <typename T, typename A>
     int32_t size(TArray<T, A> const& value) {
         return static_cast<int32_t>(value.Num());

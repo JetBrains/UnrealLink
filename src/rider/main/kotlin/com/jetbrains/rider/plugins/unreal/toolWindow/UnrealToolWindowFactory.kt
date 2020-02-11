@@ -10,10 +10,8 @@ import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
-import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
-import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintFunctionHyperLinkInfo
-import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
 class UnrealToolWindowFactory(val project: Project
@@ -43,8 +41,6 @@ class UnrealToolWindowFactory(val project: Project
     }
 
     fun print(s: LogMessageInfo) {
-        showTab(TITLE_ID, Lifetime.Eternal)
-
         val consoleView = UnrealPane.publicConsoleView
         val timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
         consoleView.print(timeString, SYSTEM_OUTPUT)
@@ -73,7 +69,7 @@ class UnrealToolWindowFactory(val project: Project
     internal val model = project.solution.rdRiderModel
     private val stackTraceContentType = LOG_ERROR_OUTPUT
 
-    fun print(scriptCallStack: IScriptCallStack) {
+    private fun print(scriptCallStack: IScriptCallStack) {
         with(UnrealPane.publicConsoleView) {
             when (scriptCallStack) {
                 is EmptyScriptCallStack -> {
@@ -83,15 +79,7 @@ class UnrealToolWindowFactory(val project: Project
                     print(IScriptCallStack.header, stackTraceContentType)
                     println()
                     for (frame in scriptCallStack.frames) {
-                        print(frame.header.data, stackTraceContentType)
-
-                        val blueprintClassHyperLinkInfo = BlueprintClassHyperLinkInfo(model.navigateToBlueprintClass, frame.blueprintFunction.`class`)
-                        printHyperlink("${frame.blueprintFunction.`class`.pathName}", blueprintClassHyperLinkInfo)
-
-                        print(BlueprintFunction.separator, stackTraceContentType)
-
-                        val blueprintFunctionHyperLinkInfo = BlueprintFunctionHyperLinkInfo(model.navigateToBlueprintFunction, frame.blueprintFunction)
-                        printHyperlink("${frame.blueprintFunction.methodName}", blueprintFunctionHyperLinkInfo)
+                        print(frame.entry.data, stackTraceContentType)
 
                         println()
                     }
@@ -103,13 +91,14 @@ class UnrealToolWindowFactory(val project: Project
         }
     }
 
-    fun print(message: FString) {
+    private fun print(message: FString) {
         with(UnrealPane.publicConsoleView) {
             print(message.data, NORMAL_OUTPUT)
         }
     }
 
-    fun print(scriptMsg: IScriptMsg) {
+/*
+    private fun print(scriptMsg: IScriptMsg) {
         with(UnrealPane.publicConsoleView) {
             print(IScriptMsg.header, NORMAL_OUTPUT)
             println()
@@ -124,6 +113,33 @@ class UnrealToolWindowFactory(val project: Project
                 }
             }
 
+        }
+    }
+*/
+
+    private fun print(it: ScriptCallStackPart) {
+        this.print(it.scriptCallStack)
+    }
+
+    private fun print(it: TextPart) {
+        this.print(it.text)
+    }
+
+    fun print(unrealLogEvent: UnrealLogEvent) {
+        showTab(TITLE_ID, Lifetime.Eternal)
+
+        print(unrealLogEvent.info)
+        unrealLogEvent.parts.forEach {
+            when (it) {
+                is ScriptCallStackPart -> {
+                    this.print(it)
+                }
+                is TextPart -> {
+                    this.print(it)
+                }
+                else -> {
+                }
+            }
         }
     }
 

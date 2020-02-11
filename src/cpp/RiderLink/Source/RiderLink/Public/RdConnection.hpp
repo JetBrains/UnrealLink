@@ -30,7 +30,7 @@ public:
 	rd::Lifetime lifetime;
 	rd::Lifetime socketLifetime;
 
-	rd::SimpleScheduler scheduler;
+	rd::SingleThreadScheduler scheduler;
 
 private:
 	TUniquePtr<rd::IProtocol> protocol;

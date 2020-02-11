@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetData.h"
+#include "MessageEndpoint.h"
 
 DECLARE_DELEGATE_OneParam(FOnBlueprintAdded, UBlueprint *);
 
@@ -13,5 +14,5 @@ public:
 
     static bool IsBlueprint(FString const& Word);
 
-    static void OpenBlueprint(FString const& path, FString const& name);
+    static void OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint);
 };
