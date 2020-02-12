@@ -12,7 +12,7 @@ public:
 
     static void AddAsset(FAssetData AssetData);
 
-    static bool IsBlueprint(FString const& Word);
+    static bool IsBlueprint(FString const& pathName);
 
     static void OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint);
 };

@@ -23,22 +23,8 @@ void BluePrintProvider::AddAsset(FAssetData AssetData) {
     }
 }
 
-bool BluePrintProvider::IsBlueprint(FString const& Word) {
-    /*for (auto it : cache) {
-        auto name = it->GetName();
-        if (name == Word) {
-            return true;
-        }
-        auto FullName = it->GetFullName();
-        if (FullName == Word) {
-            return true;
-        }
-        auto PathName = it->GetPathName();
-        if (PathName == Word) {
-            return true;
-        }
-    }*/
-    return false;
+bool BluePrintProvider::IsBlueprint(FString const& pathName) {
+    return FPackageName::IsValidObjectPath(pathName);
 }
 
 void BluePrintProvider::OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
