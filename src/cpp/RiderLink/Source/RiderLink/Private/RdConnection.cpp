@@ -1,17 +1,19 @@
 #include "RdConnection.hpp"
 
-
-#include "wire/SocketWire.h"
-
 // ReSharper disable once CppUnusedIncludeDirective
+
 #include "Windows/AllowWindowsPlatformTypes.h"
 
 #include "AssetEditorManager.h"
 #include "AssetRegistryModule.h"
-#include "BlueprintProvider.h"
-#include "Engine/Blueprint.h"
 #include "IAssetRegistry.h"
 #include "MessageEndpointBuilder.h"
+#include "Engine/Blueprint.h"
+#include "Framework/Docking/TabManager.h"
+#include "Editor.h"
+
+
+#include "BlueprintProvider.h"
 #include "ProtocolFactory.h"
 #include "RdEditorProtocol/UE4Library/UE4Library.h"
 
@@ -27,6 +29,23 @@ RdConnection::~RdConnection() {
     lifetimeDef.terminate();
 }
 
+static void AllowSetForeGroundForEditor(Jetbrains::EditorPlugin::RdEditorModel const& unrealToBackendModel) {
+    static const int32 CurrentProcessId = FPlatformProcess::GetCurrentProcessId();
+    try {
+        const rd::WiredRdTask<bool> Task = unrealToBackendModel.get_allowSetForegroundWindow().sync(CurrentProcessId);
+        if (Task.is_faulted()) {
+            std::cerr << "AllowSetForeGroundForEditor:" << rd::to_string(Task.value_or_throw());
+        }
+        else if (Task.is_succeeded()) {
+            if (!(Task.value_or_throw().unwrap())) {
+                std::cerr << "AllowSetForeGroundForEditor:" + false;
+            }
+        }
+    }
+    catch (std::exception const &e) {
+        std::cerr << "AllowSetForeGroundForEditor:" + rd::to_string(e);
+    }
+}
 
 void RdConnection::init() {
     const FAssetRegistryModule* AssetRegistryModule = &FModuleManager::LoadModuleChecked<FAssetRegistryModule>
@@ -46,17 +65,25 @@ void RdConnection::init() {
         Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
             unrealToBackendModel.get_serialization_context().get_serializers());
 
+        unrealToBackendModel.get_openBlueprint().advise(
+            lifetime, [this, MessageEndpoint](Jetbrains::EditorPlugin::BlueprintReference const& s) {
+                try {
+                    AllowSetForeGroundForEditor(unrealToBackendModel);
 
-        unrealToBackendModel.get_navigateToBlueprintClass().advise(
-            lifetime, [this, MessageEndpoint](Jetbrains::EditorPlugin::BlueprintClass const& s) {
-                BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
+                    auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+                    if (Window->IsWindowMinimized()) {
+                        Window->Restore();
+                    } else {
+                        Window->HACK_ForceToFront();
+                    }
+                    BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
+                } catch (std::exception const& e) {
+                    std::cerr << rd::to_string(e);
+                }
             });
 
         unrealToBackendModel.get_isBlueprintPathName().set([AssetRegistryModule](FString const& pathName) -> bool {
-            // const auto AssetByObjectPath = AssetRegistryModule->Get().GetAssetByObjectPath(FName(*pathName));
-            // auto bIsValid = AssetByObjectPath.IsValid();
-            // return bIsValid;
-            return FPackageName::IsValidObjectPath(pathName);
+            return BluePrintProvider::IsBlueprint(pathName);
         });
     });
 

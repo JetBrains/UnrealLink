@@ -24,6 +24,8 @@ public class RiderLink : ModuleRules
                 ,"MessagingCommon"
                 ,"AssetRegistry"
                 ,"ContentBrowser"
+                ,"Slate"
+                ,"SlateCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
         );

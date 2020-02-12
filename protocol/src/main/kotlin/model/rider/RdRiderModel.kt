@@ -7,6 +7,7 @@ import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
 import model.lib.ue4.UE4Library.BlueprintClass
 import model.lib.ue4.UE4Library.BlueprintFunction
+import model.lib.ue4.UE4Library.BlueprintReference
 import model.lib.ue4.UE4Library.FString
 import model.lib.ue4.UE4Library.StringRange
 
@@ -55,5 +56,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         signal("navigateToBlueprintClass", BlueprintClass)
         signal("navigateToBlueprintFunction", BlueprintFunction)
+
+        signal("openBlueprint", BlueprintReference)
+
+        callback("AllowSetForegroundWindow", int, bool)
     }
 }

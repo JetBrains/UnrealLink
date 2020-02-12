@@ -88,7 +88,7 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
                                                         "resolved from = ${match.value}, " +
                                                         "startOffset=${startOffset}, " +
                                                         "match.range.first=${match.range.first}")
-                                                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(value.fullPath))
+                                                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(value.fullPath))
                                                 Filter.ResultItem(matchStart + value.range.first, matchStart + value.range.last, hyperLinkInfo, false)
                                             }
                                             is LinkResponseFilePath -> {

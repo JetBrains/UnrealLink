@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using JetBrains.Collections.Viewable;
@@ -111,10 +112,7 @@ namespace ReSharperPlugin.UnrealEditor
                     var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
                         myDispatcher, wire, modelLifetime);
 
-                    myDispatcher.Queue(() =>
-                    {
-                        ResetModel(lf, protocol);
-                    });
+                    myDispatcher.Queue(() => { ResetModel(lf, protocol); });
                 });
             };
             watcher.Created += handler;
@@ -138,10 +136,16 @@ namespace ReSharperPlugin.UnrealEditor
                 {
                     UE4Library.RegisterDeclaredTypesSerializers(unrealModel.SerializationContext.Serializers);
 
-                    unrealModel.UnrealLog.Advise(viewLifetime, logEvent =>
+                    unrealModel.AllowSetForegroundWindow.Set((lt, pid) =>
                     {
-                        myUnrealHost.PerformModelAction(riderModel => { OnMessageReceived(riderModel, logEvent); });
+                        return myUnrealHost.PerformModelAction(riderModel => riderModel.AllowSetForegroundWindow.Start(pid)) as RdTask<bool>;
                     });
+
+                    unrealModel.UnrealLog.Advise(viewLifetime,
+                        logEvent =>
+                        {
+                            myUnrealHost.PerformModelAction(riderModel => { OnMessageReceived(riderModel, logEvent); });
+                        });
 
                     unrealModel.OnBlueprintAdded.Advise(viewLifetime, blueprintClass =>
                     {
@@ -155,10 +159,16 @@ namespace ReSharperPlugin.UnrealEditor
                                 .AsArray()));
                         riderModel.IsMethodReference.Set((lifetime, methodReference) =>
                             RdTask<bool>.Successful(true));
-                        riderModel.NavigateToBlueprintClass.Advise(viewLifetime,
-                            blueprintClass => { unrealModel.NavigateToBlueprintClass.Fire(blueprintClass); });
+                        riderModel.OpenBlueprint.Advise(viewLifetime,
+                            blueprintReference => OnOpenedBlueprint(unrealModel, blueprintReference));
                     });
                 });
+        }
+
+        private void OnOpenedBlueprint(RdEditorModel unrealModel, BlueprintReference blueprintReference)
+        {
+            
+            unrealModel.OpenBlueprint.Fire(blueprintReference);
         }
 
         public RdEditorModel GetCurrentEditorModel()

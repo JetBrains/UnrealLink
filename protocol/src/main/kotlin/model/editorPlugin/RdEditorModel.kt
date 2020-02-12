@@ -6,6 +6,7 @@ import com.jetbrains.rd.generator.nova.PredefinedType.int
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
+import model.lib.ue4.UE4Library
 import model.lib.ue4.UE4Library.BlueprintClass
 import model.lib.ue4.UE4Library.BlueprintFunction
 import model.lib.ue4.UE4Library.FString
@@ -34,8 +35,12 @@ object RdEditorModel : Ext(RdEditorRoot) {
         signal("navigateToBlueprintClass", BlueprintClass).async
         signal("navigateToBlueprintFunction", BlueprintFunction).async
 
+        signal("openBlueprint", UE4Library.BlueprintReference)
+
         signal("onBlueprintAdded", BlueprintClass).async
         call("isBlueprintPathName", FString, bool)
         call("getPathNameByPath", FString, FString.nullable)
+
+        callback("AllowSetForegroundWindow", int, bool)
     }
 }

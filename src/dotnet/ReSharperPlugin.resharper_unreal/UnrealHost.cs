@@ -31,6 +31,14 @@ namespace ReSharperPlugin.UnrealEditor
 
             action(myModel);
         }
+        
+        public T PerformModelAction<T>(Func<RdRiderModel, T> action)
+        {
+            if (myIsInTests)
+                return default;
+
+            return action(myModel);
+        }
 
         public T GetValue<T>(Func<RdRiderModel, T> getter)
         {
