@@ -138,7 +138,7 @@ namespace ReSharperPlugin.UnrealEditor
 
                     unrealModel.AllowSetForegroundWindow.Set((lt, pid) =>
                     {
-                        return myUnrealHost.PerformModelAction(riderModel => riderModel.AllowSetForegroundWindow.Start(pid)) as RdTask<bool>;
+                        return myUnrealHost.PerformModelAction(riderModel => riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
                     });
 
                     unrealModel.UnrealLog.Advise(viewLifetime,

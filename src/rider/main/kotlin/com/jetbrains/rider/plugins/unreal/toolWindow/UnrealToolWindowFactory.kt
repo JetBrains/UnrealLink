@@ -2,6 +2,7 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.execution.ui.ConsoleViewContentType.*
 import com.intellij.ide.impl.ContentManagerWatcher
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -14,23 +15,24 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
-class UnrealToolWindowFactory(val project: Project
-//                              ,private val host: UnrealHost
-) : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
+class UnrealToolWindowFactory(val project: Project)
+    : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
     companion object {
         val TOOLWINDOW_ID = "unreal"
         val TITLE_ID = "unreal"
         val ACTION_PLACE = "unreal"
+
+        fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, true, ToolWindowAnchor.BOTTOM, project, true, false)
 
-        ContentManagerWatcher(toolWindow, toolWindow.contentManager)
+        ContentManagerWatcher.watchContentManager(toolWindow, toolWindow.contentManager)
 
         toolWindow.title = "unreal"
-        toolWindow.icon = RiderIcons.ToolWindows.Stacktrace //todo change
+        toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
         return toolWindow
     }

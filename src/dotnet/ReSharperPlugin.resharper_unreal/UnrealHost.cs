@@ -34,6 +34,7 @@ namespace ReSharperPlugin.UnrealEditor
         
         public T PerformModelAction<T>(Func<RdRiderModel, T> action)
         {
+            
             if (myIsInTests)
                 return default;
 

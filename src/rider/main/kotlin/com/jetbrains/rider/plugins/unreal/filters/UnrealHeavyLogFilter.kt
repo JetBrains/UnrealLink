@@ -8,13 +8,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
 import com.jetbrains.rd.framework.RdTaskResult
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
+import com.jetbrains.rd.platform.util.application
+import com.jetbrains.rd.platform.util.lifetime
+import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
-import com.jetbrains.rider.util.idea.application
 import com.jetbrains.rider.util.idea.getLogger
-import com.jetbrains.rider.util.idea.lifetime
 
 class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel) : Filter, FilterMixin {
     companion object {
@@ -73,7 +74,7 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
     private fun processLinks(text: CharSequence, startOffset: Int, consumer: Consumer<in AdditionalHighlight>) {
         LogParser.parseLinkCandidates(text).let { candidates ->
             val request = candidates.toList()
-            val task = model.filterLinkCandidates.start(request.map { LinkRequest(FString(it.value)) })
+            val task = model.filterLinkCandidates.start(Lifetime.Eternal, request.map { LinkRequest(FString(it.value)) })
             task.result.advise(project.lifetime) { rdTaskResult ->
                 when (rdTaskResult) {
                     is RdTaskResult.Success -> {
