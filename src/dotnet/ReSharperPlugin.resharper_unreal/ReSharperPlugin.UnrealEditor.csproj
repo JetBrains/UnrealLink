@@ -18,6 +18,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="JetBrains.ReSharper.Feature.Services.Cpp, Version=777.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\..\..\build\riderRD-2020.1-SNAPSHOT\plugins\rider-cpp\DotFiles\JetBrains.ReSharper.Feature.Services.Cpp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharper.Psi.Cpp, Version=777.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\..\..\build\riderRD-2020.1-SNAPSHOT\plugins\rider-cpp\DotFiles\JetBrains.ReSharper.Psi.Cpp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.ReSharperCpp.RiderPlugin, Version=777.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\..\..\build\riderRD-2020.1-SNAPSHOT\plugins\rider-cpp\DotFiles\JetBrains.ReSharperCpp.RiderPlugin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
