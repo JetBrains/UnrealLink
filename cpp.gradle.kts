@@ -23,11 +23,13 @@ tasks {
             }
         }
     }
+
     val cloneRdCpp by creating (Exec::class) {
         val destinationDir = buildDir.resolve("rd")
         val branchName = "ue4-adapt"
-        enabled = !destinationDir.exists()
-        commandLine = listOf("git", "clone", "--branch=${branchName}", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet")
+        val cloneCommand = listOf("git", "clone", "--branch=$branchName", "https://github.com/jetbrains/rd.git", destinationDir.absolutePath, "--quiet")
+        val pullCommand = listOf("git", "--git-dir", destinationDir.resolve(".git").absolutePath, "pull", "origin", branchName)
+        commandLine = if (destinationDir.exists()) pullCommand else cloneCommand
     }
 
     val rdCppFolder = "$buildDir/rd/rd-cpp"
