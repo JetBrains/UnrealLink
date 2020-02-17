@@ -112,7 +112,7 @@ namespace ReSharperPlugin.UnrealEditor
                     var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
                         myDispatcher, wire, modelLifetime);
 
-                    myDispatcher.Queue(() => { ResetModel(lf, protocol); });
+                    ResetModel(lf, protocol);
                 });
             };
             watcher.Created += handler;
