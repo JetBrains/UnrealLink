@@ -58,13 +58,13 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
                         val first = startOffset + range.first
                         val last = startOffset + range.first + `class`.length
                         val linkInfo = UnrealClassHyperLinkInfo(model.navigateToBlueprintClass, BlueprintClass(FString(`class`)))
-                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+//                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
                     }
                     run {
                         val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
                         val first = startOffset + range.last - method.length + 1
                         val last = startOffset + range.last + 1
-                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
+//                        consumer.consume(AdditionalHighlight(listOf(Filter.ResultItem(first, last, linkInfo))))
                     }
                 }
             }
