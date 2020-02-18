@@ -18,7 +18,7 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
-        classpath("com.jetbrains.rd", "rd-gen", "0.201.25")
+        classpath("com.jetbrains.rd", "rd-gen", "0.201.58")
     }
 }
 
@@ -167,7 +167,7 @@ tasks {
 
     val compileDotNet by creating {
         dependsOn(findMsBuild)
-//        dependsOn(":protocol:generateModel")
+        dependsOn(":protocol:generateModel")
         dependsOn(patchPropsFile)
 
         inputs.files(dotNetDir.listFiles())
@@ -215,7 +215,7 @@ tasks {
         }
     }
 
-//    jar.get().dependsOn(":protocol:generateModel")
+    jar.get().dependsOn(":protocol:generateModel")
 
     withType<PrepareSandboxTask> {
         dependsOn(compileDotNet)
