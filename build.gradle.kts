@@ -35,7 +35,7 @@ dependencies {
 val repoRoot by extra { project.rootDir }
 val sdkVersion = "2020.1"
 val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
-val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/ReSharperHostSdk") }
+val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
@@ -43,7 +43,7 @@ val dotNetSolutionId by extra { "resharper_unreal" }
 val dotNetRootId by extra { "ReSharperPlugin" }
 val dotNetBinDir by extra { dotNetDir.resolve("$dotNetRootId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$dotNetRootId.UnrealEditor" }
-val pluginPropsFile by extra { File(dotNetDir, "Plugin.props") }
+val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.props") }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
@@ -102,29 +102,12 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val nugetPackagesPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes
+val dotNetSdkPath by lazy {
+    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSDkForRdPlugins")
+    assert(sdkPath.isDirectory)
+    println(".NETSDK path: $sdkPath")
 
-    println("SDK path: $sdkPath")
-    val path = File(sdkPath, "lib/ReSharperHostSdk")
-
-    println("NuGet packages: $path")
-    if (!path.isDirectory) error("$path does not exist or not a directory")
-
-    return@lazy path
-}
-
-val riderSdkPackageVersion by lazy {
-    val sdkPackageName = "JetBrains.Rider.SDK"
-
-    val regex = Regex("${Regex.escape(sdkPackageName)}\\.([\\d\\.]+.*)\\.nupkg")
-    val version = nugetPackagesPath
-            .walk()
-            .mapNotNull { regex.matchEntire(it.name)?.groupValues?.drop(1)?.first() }
-            .singleOrNull() ?: error("$sdkPackageName package is not found in $nugetPackagesPath (or multiple matches)")
-    println("$sdkPackageName version is $version")
-
-    return@lazy version
+    return@lazy sdkPath
 }
 
 tasks {
@@ -155,11 +138,13 @@ tasks {
 
     val patchPropsFile by creating {
         doLast {
+            if (pluginPropsFile.parentFile.exists().not()) {
+                pluginPropsFile.parentFile.mkdirs()
+            }
             pluginPropsFile.writeText("""
             |<Project>
             |   <PropertyGroup>
-            |       <SdkVersion>${riderSdkPackageVersion}</SdkVersion>
-            |       <Title>resharper_unreal</Title>
+            |       <DotNetSdkPath>${dotNetSdkPath}</DotNetSdkPath>
             |   </PropertyGroup>
             |</Project>""".trimMargin())
         }
