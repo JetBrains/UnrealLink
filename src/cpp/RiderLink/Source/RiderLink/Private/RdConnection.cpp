@@ -52,40 +52,39 @@ void RdConnection::init() {
         (AssetRegistryConstants::ModuleName);
 
     auto MessageEndpoint = FMessageEndpoint::Builder(FName("FAssetEditorManager")).Build();
-    
+
     AssetRegistryModule->Get().OnAssetAdded().AddLambda([](FAssetData AssetData) {
         BluePrintProvider::AddAsset(AssetData);
     });
 
 
-    scheduler.queue([this, MessageEndpoint, AssetRegistryModule] {
-        protocol = ProtocolFactory::create(scheduler, socketLifetime);
+    protocol = ProtocolFactory::create(scheduler, socketLifetime);
 
-        unrealToBackendModel.connect(lifetime, protocol.Get());
-        Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
-            unrealToBackendModel.get_serialization_context().get_serializers());
+    unrealToBackendModel.connect(lifetime, protocol.Get());
+    Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
+        unrealToBackendModel.get_serialization_context().get_serializers());
 
-        unrealToBackendModel.get_openBlueprint().advise(
-            lifetime, [this, MessageEndpoint](Jetbrains::EditorPlugin::BlueprintReference const& s) {
-                try {
-                    AllowSetForeGroundForEditor(unrealToBackendModel);
+    unrealToBackendModel.get_openBlueprint().advise(
+        lifetime, [this, MessageEndpoint](Jetbrains::EditorPlugin::BlueprintReference const& s) {
+            try {
+                AllowSetForeGroundForEditor(unrealToBackendModel);
 
-                    auto Window = FGlobalTabmanager::Get()->GetRootWindow();
-                    if (Window->IsWindowMinimized()) {
-                        Window->Restore();
-                    } else {
-                        Window->HACK_ForceToFront();
-                    }
-                    BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
-                } catch (std::exception const& e) {
-                    std::cerr << rd::to_string(e);
+                auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+                if (Window->IsWindowMinimized()) {
+                    Window->Restore();
+                } else {
+                    Window->HACK_ForceToFront();
                 }
-            });
-
-        unrealToBackendModel.get_isBlueprintPathName().set([AssetRegistryModule](FString const& pathName) -> bool {
-            return BluePrintProvider::IsBlueprint(pathName);
+                BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
+            } catch (std::exception const& e) {
+                std::cerr << rd::to_string(e);
+            }
         });
+
+    unrealToBackendModel.get_isBlueprintPathName().set([AssetRegistryModule](FString const& pathName) -> bool {
+        return BluePrintProvider::IsBlueprint(pathName);
     });
+
 
     BluePrintProvider::OnBlueprintAdded.BindLambda([this](UBlueprint* Blueprint) {
         scheduler.queue([this, Blueprint] {

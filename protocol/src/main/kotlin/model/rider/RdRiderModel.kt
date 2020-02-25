@@ -5,8 +5,7 @@ import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.BlueprintClass
-import model.lib.ue4.UE4Library.BlueprintFunction
+import model.lib.ue4.UE4Library.UClass
 import model.lib.ue4.UE4Library.BlueprintReference
 import model.lib.ue4.UE4Library.FString
 import model.lib.ue4.UE4Library.StringRange
@@ -38,7 +37,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends  ILinkResponse {}
 
     private val MethodReference = structdef("MethodReference") {
-        field("class", FString)
+        field("class", UClass)
         field("method", FString)
 
         const("separator", string, "::")
@@ -52,10 +51,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         call("filterLinkCandidates", immutableList(LinkRequest), array(ILinkResponse)).async
         call("isMethodReference", MethodReference, bool).async
-        signal("navigateToMethod", MethodReference)
 
-        signal("navigateToBlueprintClass", BlueprintClass)
-        signal("navigateToBlueprintFunction", BlueprintFunction)
+        signal("navigateToMethod", MethodReference)
+        signal("navigateToClass", UClass)
 
         signal("openBlueprint", BlueprintReference)
 

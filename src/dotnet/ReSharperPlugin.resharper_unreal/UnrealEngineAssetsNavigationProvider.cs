@@ -1,4 +1,4 @@
-/*using JetBrains.ProjectModel;
+using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Cpp.UEAsset.Reader;
 using JetBrains.ReSharper.Feature.Services.Cpp.UEAsset.Search;
 using JetBrains.Unreal.Lib;
@@ -12,7 +12,7 @@ namespace ReSharperPlugin.UnrealEditor
 		private readonly RiderBackendToUnrealEditor myBackendToUnrealEditor;
 
 		public UnrealEngineAssetsNavigationProvider(RiderBackendToUnrealEditor backendToUnrealEditor)
-		{GetPresentableName
+		{
 			myBackendToUnrealEditor = backendToUnrealEditor;
 		}
 		
@@ -24,8 +24,8 @@ namespace ReSharperPlugin.UnrealEditor
 				return false;
 			}
 			
-			model.NavigateToBlueprintClass.Fire(new BlueprintClass(new FString(assetPath.NormalizeSeparators(FileSystemPathEx.SeparatorStyle.Unix))));
+			model.OpenBlueprint.Fire(new BlueprintReference(new FString(assetPath.NormalizeSeparators(FileSystemPathEx.SeparatorStyle.Unix))));
 			return true;
 		}
 	}
-}*/
+}

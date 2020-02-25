@@ -98,10 +98,7 @@ object UE4Library : Root(
 
     val UnrealLogEvent = structdef("UnrealLogEvent") {
         field("info", LogMessageInfo)
-        field("parts", immutableList(LogPart))
-    }
-
-    val LogPart = basestruct("LogPart") {
+        field("text", FString)
     }
 
     /*@Suppress("unused")
@@ -109,13 +106,13 @@ object UE4Library : Root(
         field("message", FString)
     }*/
 
-    val BlueprintClass = structdef("BlueprintClass") {
+    val UClass = structdef("UClass") {
         field("name", FString)
     }
 
     val BlueprintFunction = structdef("BlueprintFunction") {
-        field("class", BlueprintClass)
-        field("methodName", FString)
+        field("class", UClass)
+        field("name", FString)
 
         const("separator", string, ":")
     }
@@ -146,10 +143,6 @@ object UE4Library : Root(
         const("message", string, "Unable to display Script Callstack. Compile with DO_BLUEPRINT_GUARD=1")
     }
 
-    @Suppress("unused")
-    private val ScriptCallStackPart = structdef("ScriptCallStackPart") extends LogPart {
-        field("scriptCallStack", IScriptCallStack)
-    }
     //endregion
 
     //region ScriptMsg
@@ -176,11 +169,6 @@ object UE4Library : Root(
 */
 
     //endregion
-
-    private val TextPart = structdef("TextPart") extends LogPart {
-        field("text", FString)
-    }
-
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
         field("begin", int)
         field("end", int)

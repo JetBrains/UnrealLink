@@ -7,8 +7,7 @@ import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.BlueprintClass
-import model.lib.ue4.UE4Library.BlueprintFunction
+import model.lib.ue4.UE4Library.UClass
 import model.lib.ue4.UE4Library.FString
 import model.lib.ue4.UE4Library.UnrealLogEvent
 import java.io.File
@@ -32,12 +31,9 @@ object RdEditorModel : Ext(RdEditorRoot) {
         signal("unrealLog", UnrealLogEvent).async
         property("play", bool)
 
-        signal("navigateToBlueprintClass", BlueprintClass).async
-        signal("navigateToBlueprintFunction", BlueprintFunction).async
-
         signal("openBlueprint", UE4Library.BlueprintReference)
 
-        signal("onBlueprintAdded", BlueprintClass).async
+        signal("onBlueprintAdded", UClass).async
         call("isBlueprintPathName", FString, bool)
         call("getPathNameByPath", FString, FString.nullable)
 

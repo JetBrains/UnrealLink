@@ -71,28 +71,6 @@ class UnrealToolWindowFactory(val project: Project)
     internal val model = project.solution.rdRiderModel
     private val stackTraceContentType = LOG_ERROR_OUTPUT
 
-    private fun print(scriptCallStack: IScriptCallStack) {
-        with(UnrealPane.publicConsoleView) {
-            when (scriptCallStack) {
-                is EmptyScriptCallStack -> {
-                    print(EmptyScriptCallStack.message, stackTraceContentType)
-                }
-                is ScriptCallStack -> {
-                    print(IScriptCallStack.header, stackTraceContentType)
-                    println()
-                    for (frame in scriptCallStack.frames) {
-                        print(frame.entry.data, stackTraceContentType)
-
-                        println()
-                    }
-                }
-                is UnableToDisplayScriptCallStack -> {
-                    print(UnableToDisplayScriptCallStack.message, stackTraceContentType)
-                }
-            }
-        }
-    }
-
     private fun print(message: FString) {
         with(UnrealPane.publicConsoleView) {
             print(message.data, NORMAL_OUTPUT)
@@ -119,30 +97,11 @@ class UnrealToolWindowFactory(val project: Project)
     }
 */
 
-    private fun print(it: ScriptCallStackPart) {
-        this.print(it.scriptCallStack)
-    }
-
-    private fun print(it: TextPart) {
-        this.print(it.text)
-    }
-
     fun print(unrealLogEvent: UnrealLogEvent) {
         showTab(TITLE_ID, Lifetime.Eternal)
 
         print(unrealLogEvent.info)
-        unrealLogEvent.parts.forEach {
-            when (it) {
-                is ScriptCallStackPart -> {
-                    this.print(it)
-                }
-                is TextPart -> {
-                    this.print(it)
-                }
-                else -> {
-                }
-            }
-        }
+        print(unrealLogEvent.text)
     }
 
     private fun println() {

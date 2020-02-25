@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using JetBrains.Collections.Viewable;
@@ -11,7 +10,10 @@ using JetBrains.ProjectModel;
 using JetBrains.Rd;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
+using JetBrains.ReSharper.Feature.Services.Navigation;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
+using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.Cpp.Caches;
 using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util;
@@ -26,19 +28,24 @@ namespace ReSharperPlugin.UnrealEditor
         private readonly ILogger myLogger;
         private readonly UnrealHost myUnrealHost;
         private readonly UnrealLinkResolver myLinkResolver;
+        private readonly EditorNavigator myEditorNavigator;
+        private readonly CppGlobalSymbolCache myCppSymbolNameCache;
+        private readonly DeclaredElementNavigationService myDeclaredElementNavigationService;
+        private readonly IPsiServices myPsiServices;
         private readonly IProperty<RdEditorModel> myEditorModel;
 
         private const string PortFileName = "UnrealProtocolPort.txt";
         private const string ClosedFileExtension = ".closed";
 
         public RiderBackendToUnrealEditor(Lifetime lifetime, IScheduler dispatcher, ISolution solution, ILogger logger,
-            UnrealHost unrealHost, UnrealLinkResolver linkResolver)
+            UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator)
         {
             myDispatcher = dispatcher;
             mySolution = solution;
             myLogger = logger;
             myUnrealHost = unrealHost;
             myLinkResolver = linkResolver;
+            myEditorNavigator = editorNavigator;
 
             myLogger.Info("RiderBackendToUnrealEditor building started");
 
@@ -125,6 +132,7 @@ namespace ReSharperPlugin.UnrealEditor
             riderModel.UnrealLog.Fire(message);
         }
 
+
         private void ResetModel(Lifetime lf, IProtocol protocol)
         {
             myUnrealHost.PerformModelAction(riderModel =>
@@ -138,7 +146,8 @@ namespace ReSharperPlugin.UnrealEditor
 
                     unrealModel.AllowSetForegroundWindow.Set((lt, pid) =>
                     {
-                        return myUnrealHost.PerformModelAction(riderModel => riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
+                        return myUnrealHost.PerformModelAction(riderModel =>
+                            riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
                     });
 
                     unrealModel.UnrealLog.Advise(viewLifetime,
@@ -158,16 +167,24 @@ namespace ReSharperPlugin.UnrealEditor
                                 .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))
                                 .AsArray()));
                         riderModel.IsMethodReference.Set((lifetime, methodReference) =>
-                            RdTask<bool>.Successful(true));
-                        riderModel.OpenBlueprint.Advise(viewLifetime,
-                            blueprintReference => OnOpenedBlueprint(unrealModel, blueprintReference));
+                        {
+                            var b = myEditorNavigator.IsMethodReference(methodReference);
+                            return RdTask<bool>.Successful(b);
+                        });
+                        riderModel.OpenBlueprint.Advise(viewLifetime, blueprintReference =>
+                            OnOpenedBlueprint(unrealModel, blueprintReference));
+
+                        riderModel.NavigateToClass.Advise(viewLifetime,
+                            uClass => myEditorNavigator.NavigateToClass(uClass));
+
+                        riderModel.NavigateToMethod.Advise(viewLifetime,
+                            methodReference => myEditorNavigator.NavigateToMethod(methodReference));
                     });
                 });
         }
 
         private void OnOpenedBlueprint(RdEditorModel unrealModel, BlueprintReference blueprintReference)
         {
-            
             unrealModel.OpenBlueprint.Fire(blueprintReference);
         }
 

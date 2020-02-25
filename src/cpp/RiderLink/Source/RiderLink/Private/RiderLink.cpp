@@ -10,7 +10,6 @@
 #include "Editor/UnrealEdEngine.h"
 #include "MessageEndpointBuilder.h"
 
-#include "LogParser.h"
 #include "BlueprintProvider.h"
 
 #include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
@@ -37,10 +36,8 @@ void FRiderLinkModule::StartupModule() {
     rdConnection.init();
 
     UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
-    rdConnection.scheduler.queue([this] {
-        rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
-            GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
-        });
+    rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
+        GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
     });
     static auto MessageEndpoint = FMessageEndpoint::Builder("FAssetEditorManager").Build();
     outputDevice.onSerializeMessage.BindLambda(
@@ -59,9 +56,8 @@ void FRiderLinkModule::StartupModule() {
                             DateTime = GetTimeNow(Time.GetValue());
                         }
                         auto MessageInfo = LogMessageInfo(Type, Name, DateTime);
-                        auto Event = LogParser::GetParts(std::move(message));
                         rdConnection.unrealToBackendModel.get_unrealLog().fire(
-                            UnrealLogEvent(std::move(MessageInfo), std::move(Event)));
+                            UnrealLogEvent{std::move(MessageInfo), std::move(message)});
                     });
             }
         });
