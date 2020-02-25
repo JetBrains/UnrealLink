@@ -74,7 +74,7 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
     private fun processLinks(text: CharSequence, startOffset: Int, consumer: Consumer<in AdditionalHighlight>) {
         LogParser.parseLinkCandidates(text).let { candidates ->
             val request = candidates.toList()
-            val task = model.filterLinkCandidates.start(Lifetime.Eternal, request.map { LinkRequest(FString(it.value)) })
+            val task = model.filterLinkCandidates.start(project.lifetime, request.map { LinkRequest(FString(it.value)) })
             task.result.advise(project.lifetime) { rdTaskResult ->
                 when (rdTaskResult) {
                     is RdTaskResult.Success -> {

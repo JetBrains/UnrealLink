@@ -1,3 +1,0 @@
-<Project>
-  <Import Project="$(MSBuildThisFileDirectory)build\generated\DotNetSdkPath.props" Condition="Exists('$(MSBuildThisFileDirectory)build\generated\DotNetSdkPath.props')" />
-</Project>
