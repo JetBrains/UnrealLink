@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
+using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model;
@@ -17,10 +17,11 @@ namespace ReSharperPlugin.UnrealEditor
     public class UnrealLinkResolver
     {
         private readonly ISolution _solution;
-        private readonly UnrealHost _unrealHost;
         private readonly ILogger _logger;
         private readonly ICppUE4SolutionDetector _unrealEngineSolutionDetector;
         private static readonly CompactMap<char, char> PairSymbol = new CompactMap<char, char>();
+        private readonly Lazy<FileSystemPath> _ue4SourcesPath;
+        private readonly Lazy<List<FileSystemPath>> _possiblePaths;
 
         static UnrealLinkResolver()
         {
@@ -30,12 +31,35 @@ namespace ReSharperPlugin.UnrealEditor
             PairSymbol.Add('"', '"');
         }
 
-        public UnrealLinkResolver(ISolution solution, UnrealHost unrealHost, ILogger logger, ICppUE4SolutionDetector unrealEngineSolutionDetector)
+        public UnrealLinkResolver(ISolution solution, ILogger logger,
+            ICppUE4SolutionDetector unrealEngineSolutionDetector)
         {
             _solution = solution;
-            _unrealHost = unrealHost;
             _logger = logger;
             _unrealEngineSolutionDetector = unrealEngineSolutionDetector;
+            var solutionDirectory = _solution.SolutionDirectory;
+            _ue4SourcesPath = new Lazy<FileSystemPath>(() =>
+            {
+                using (ReadLockCookie.Create())
+                {
+                    return unrealEngineSolutionDetector.UE4SourcesPath;
+                }
+            });
+
+            _possiblePaths = new Lazy<List<FileSystemPath>>(() =>
+                new List<FileSystemPath>
+                {
+                    _ue4SourcesPath.Value,
+                    _ue4SourcesPath.Value.Parent,
+                    _ue4SourcesPath.Value / "Content",
+                    _ue4SourcesPath.Value / "Content" / "Editor",
+                    _ue4SourcesPath.Value / "Content" / "Editor" / "Slate", // FSlateStyleSet::ContentRootDir
+                    _ue4SourcesPath.Value / "Plugins",
+
+                    solutionDirectory,
+                    solutionDirectory / "Content",
+                    solutionDirectory / "Plugins"
+                });
         }
 
         [CanBeNull]
@@ -46,29 +70,8 @@ namespace ReSharperPlugin.UnrealEditor
                 return path;
             }
 
-
-            FileSystemPath ue4SourcesPath;
-            using (ReadLockCookie.Create())
-            {
-                ue4SourcesPath = _unrealEngineSolutionDetector.UE4SourcesPath;
-            }
-            var solutionDirectory = _solution.SolutionDirectory;
-            
-            var possiblePaths = new List<FileSystemPath>
-            {
-                ue4SourcesPath / "Content",
-                ue4SourcesPath / "Plugins",
-                
-                ue4SourcesPath,
-                
-                solutionDirectory / "Content",
-                solutionDirectory / "Plugins",
-                
-                solutionDirectory
-            };
-
-            return possiblePaths
-                .SelectNotNull(possibleDir =>
+            return _possiblePaths
+                .Value.SelectNotNull(possibleDir =>
                 {
                     var relativePath = path.AsRelative();
                     if (relativePath == null || relativePath.IsEmpty)
@@ -79,7 +82,7 @@ namespace ReSharperPlugin.UnrealEditor
                     var candidate = possibleDir / relativePath;
                     return candidate.Exists == FileSystemPath.Existence.Missing ? null : candidate;
                 })
-                .FirstOrDefault(null as FileSystemPath);
+                .FirstOrDefault(null);
         }
 
         [CanBeNull]

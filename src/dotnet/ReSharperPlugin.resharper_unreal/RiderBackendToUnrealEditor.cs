@@ -8,11 +8,10 @@ using JetBrains.Lifetimes;
 using JetBrains.Platform.Unreal.EditorPluginModel;
 using JetBrains.ProjectModel;
 using JetBrains.Rd;
+using JetBrains.Rd.Base;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
-using JetBrains.ReSharper.Feature.Services.Navigation;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
-using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Cpp.Caches;
 using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
@@ -30,8 +29,6 @@ namespace ReSharperPlugin.UnrealEditor
         private readonly UnrealLinkResolver myLinkResolver;
         private readonly EditorNavigator myEditorNavigator;
         private readonly CppGlobalSymbolCache myCppSymbolNameCache;
-        private readonly DeclaredElementNavigationService myDeclaredElementNavigationService;
-        private readonly IPsiServices myPsiServices;
         private readonly IProperty<RdEditorModel> myEditorModel;
 
         private const string PortFileName = "UnrealProtocolPort.txt";
@@ -117,7 +114,7 @@ namespace ReSharperPlugin.UnrealEditor
                     var serializers = new Serializers();
                     var identities = new Identities(IdKind.Client);
                     var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
-                        myDispatcher, wire, modelLifetime);
+                        myDispatcher, wire, lf);
 
                     ResetModel(lf, protocol);
                 });
@@ -136,7 +133,10 @@ namespace ReSharperPlugin.UnrealEditor
         private void ResetModel(Lifetime lf, IProtocol protocol)
         {
             myUnrealHost.PerformModelAction(riderModel =>
-                UE4Library.RegisterDeclaredTypesSerializers(riderModel.SerializationContext.Serializers));
+            {
+                UE4Library.RegisterDeclaredTypesSerializers(riderModel.SerializationContext.Serializers);
+                riderModel.EditorId.SetValue(riderModel.EditorId.Value + 1);
+            });
 
             myEditorModel.SetValue(lf, new RdEditorModel(lf, protocol));
             myEditorModel.View(lf,

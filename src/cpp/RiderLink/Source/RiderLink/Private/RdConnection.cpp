@@ -59,7 +59,7 @@ void RdConnection::init() {
 
 
     protocol = ProtocolFactory::create(scheduler, socketLifetime);
-
+    
     unrealToBackendModel.connect(lifetime, protocol.Get());
     Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
         unrealToBackendModel.get_serialization_context().get_serializers());
@@ -89,7 +89,7 @@ void RdConnection::init() {
     BluePrintProvider::OnBlueprintAdded.BindLambda([this](UBlueprint* Blueprint) {
         scheduler.queue([this, Blueprint] {
             unrealToBackendModel.get_onBlueprintAdded().fire(
-                Jetbrains::EditorPlugin::BlueprintClass(Blueprint->GetPathName()));
+                Jetbrains::EditorPlugin::UClass(Blueprint->GetPathName()));
         });
     });
 }

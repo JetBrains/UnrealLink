@@ -7,8 +7,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
-import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.projectView.solution
@@ -19,15 +19,15 @@ class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
     companion object {
-        val TOOLWINDOW_ID = "unreal"
-        val TITLE_ID = "unreal"
+        val TOOLWINDOW_ID = "Unreal"
+        val TITLE_ID = "Unreal editor log"
         val ACTION_PLACE = "unreal"
 
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
-        val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, true, ToolWindowAnchor.BOTTOM, project, true, false)
+        val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
 
         ContentManagerWatcher.watchContentManager(toolWindow, toolWindow.contentManager)
 
@@ -38,12 +38,12 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     private fun printSpaces(n: Int = 1) {
-        UnrealPane.publicConsoleView.print(" ".repeat(n), NORMAL_OUTPUT)
+        UnrealPane.currentConsoleView.print(" ".repeat(n), NORMAL_OUTPUT)
 
     }
 
     fun print(s: LogMessageInfo) {
-        val consoleView = UnrealPane.publicConsoleView
+        val consoleView = UnrealPane.currentConsoleView
         val timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
         consoleView.print(timeString, SYSTEM_OUTPUT)
         printSpaces()
@@ -72,7 +72,7 @@ class UnrealToolWindowFactory(val project: Project)
     private val stackTraceContentType = LOG_ERROR_OUTPUT
 
     private fun print(message: FString) {
-        with(UnrealPane.publicConsoleView) {
+        with(UnrealPane.currentConsoleView) {
             print(message.data, NORMAL_OUTPUT)
         }
     }
@@ -98,14 +98,14 @@ class UnrealToolWindowFactory(val project: Project)
 */
 
     fun print(unrealLogEvent: UnrealLogEvent) {
-        showTab(TITLE_ID, Lifetime.Eternal)
+        showTab("$TITLE_ID #${model.editorId.value}", project.lifetime)
 
         print(unrealLogEvent.info)
         print(unrealLogEvent.text)
     }
 
     private fun println() {
-        with(UnrealPane.publicConsoleView) {
+        with(UnrealPane.currentConsoleView) {
             print(eol, NORMAL_OUTPUT)
         }
     }

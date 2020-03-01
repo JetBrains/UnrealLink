@@ -27,7 +27,6 @@ object RdEditorRoot : Root(
 
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
-        property("testConnection", int.nullable)
         signal("unrealLog", UnrealLogEvent).async
         property("play", bool)
 

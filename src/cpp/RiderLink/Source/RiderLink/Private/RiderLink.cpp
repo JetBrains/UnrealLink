@@ -43,10 +43,7 @@ void FRiderLinkModule::StartupModule() {
     outputDevice.onSerializeMessage.BindLambda(
         [this](const TCHAR* msg, ELogVerbosity::Type Type, const class FName& Name,
                TOptional<double> Time) {
-            auto CS = FString(msg);
-            if (CS.StartsWith("!!!")) {
-                BluePrintProvider::OpenBlueprint(CS.Mid(4), MessageEndpoint);
-            }
+            auto CS = FString(msg);            
             if (Type != ELogVerbosity::SetColor) {
                 rdConnection.scheduler.queue(
                     [this, message = FString(msg), Type, Name = Name.GetPlainNameString(),

@@ -22,9 +22,6 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     internal val model = project.solution.rdRiderModel
 
     init {
-        model.testConnection.advise(componentLifetime) {
-            logger.info("Connection UE $it")
-        }
         model.allowSetForegroundWindow.set { _, id ->
             if (SystemInfo.isWindows) {
                 return@set if (!user32.AllowSetForegroundWindow(id)) {

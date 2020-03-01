@@ -44,7 +44,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     }
 
     init {
-        property("testConnection", int.nullable)
+        property("editorId", 0).readonly
         property("play", bool)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)

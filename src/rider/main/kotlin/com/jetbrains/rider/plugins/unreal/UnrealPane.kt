@@ -15,13 +15,13 @@ class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) :
 //    private val consoleView: UnrealConsoleView = UnrealConsoleView(project)
 
     companion object {
-        lateinit var publicConsoleView : ConsoleViewImpl
+        lateinit var currentConsoleView : ConsoleViewImpl
     }
 
     init {
-        publicConsoleView = consoleView
-        publicConsoleView.allowHeavyFilters()
-        publicConsoleView.setUpdateFoldingsEnabled(true)
+        currentConsoleView = consoleView
+        currentConsoleView.allowHeavyFilters()
+        currentConsoleView.setUpdateFoldingsEnabled(true)
 
         val actionGroup = DefaultActionGroup().apply {
 

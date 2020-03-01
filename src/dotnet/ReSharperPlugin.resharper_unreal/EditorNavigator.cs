@@ -1,4 +1,5 @@
 using System.Linq;
+using JetBrains.Metadata.Reader.API;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Navigation;
 using JetBrains.ReSharper.Psi;
@@ -21,9 +22,9 @@ namespace ReSharperPlugin.UnrealEditor
         private const int MaxSizeOfCache = 1 << 6;
         private readonly DirectMappedCache<string, CppClassSymbol> _classCache = new DirectMappedCache<string, CppClassSymbol>(MaxSizeOfCache);
         private readonly DirectMappedCache<string, CppDeclaratorSymbol> _methodCache = new DirectMappedCache<string, CppDeclaratorSymbol>(MaxSizeOfCache);
-        
-        
-        private EditorNavigator(CppGlobalSymbolCache cppSymbolNameCache, IPsiServices psiServices)
+
+
+        public EditorNavigator(CppGlobalSymbolCache cppSymbolNameCache, IPsiServices psiServices)
         {
             _cppSymbolNameCache = cppSymbolNameCache;
             _psiServices = psiServices;
@@ -50,15 +51,26 @@ namespace ReSharperPlugin.UnrealEditor
             if (classSymbol == null)
                 return;
             var declaredElement = new CppParserSymbolDeclaredElement(_psiServices, classSymbol);
+
             using (ReadLockCookie.Create())
-                declaredElement.Navigate(true);
+            {
+                using (CompilationContextCookie.GetOrCreate(UniversalModuleReferenceContext.Instance))
+                {
+                    declaredElement.Navigate(true);
+                }
+            }
         }
 
         public void NavigateToMethod(MethodReference methodReference)
         {
             var declaredElement = MethodDeclaredElement(methodReference);
             using (ReadLockCookie.Create())
-                declaredElement.Navigate(true);
+            {
+                using (CompilationContextCookie.GetOrCreate(UniversalModuleReferenceContext.Instance))
+                {
+                    declaredElement.Navigate(true);
+                }
+            }
         }
 
         private CppParserSymbolDeclaredElement MethodDeclaredElement(MethodReference methodReference)
