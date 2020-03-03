@@ -11,10 +11,14 @@
 #include "MessageEndpointBuilder.h"
 
 #include "EditorViewportClient.h"
+#if ENGINE_MINOR_VERSION < 24
+#include "ILevelViewport.h"
+#else
+#include "IAssetViewport.h"
+#endif
 
 #include "BlueprintProvider.h"
 #include "LevelEditor.h"
-#include "IAssetViewport.h"
 
 #include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
 
@@ -46,7 +50,7 @@ void FRiderLinkModule::StartupModule() {
           GUnrealEd->RequestEndPlayMap();
         } else if (shouldPlay && GUnrealEd) {
           FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT("LevelEditor") );
-          TSharedPtr<IAssetViewport> ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
+          auto ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
           if (ActiveLevelViewport.IsValid()) {
             GUnrealEd->RequestPlaySession(true, ActiveLevelViewport, false);
           } else {
