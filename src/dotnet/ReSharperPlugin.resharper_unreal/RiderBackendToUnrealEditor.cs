@@ -56,6 +56,7 @@ namespace ReSharperPlugin.UnrealEditor
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..",
                 "Local", "Jetbrains", "Rider", "Unreal", projectName, "Ports");
 
+            Directory.CreateDirectory(portDirectoryFullPath);
 
             var watcher = new FileSystemWatcher(portDirectoryFullPath) {Filter = $"*{ClosedFileExtension}"};
 
@@ -108,14 +109,13 @@ namespace ReSharperPlugin.UnrealEditor
 
                 //todo think about alive file from previous session
 
+                myLogger.Info("WireConnected");
+                var serializers = new Serializers();
+                var identities = new Identities(IdKind.Client);
+                var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
+                    myDispatcher, wire, modelLifetime);
                 wire.Connected.WhenTrue(modelLifetime, lf =>
                 {
-                    myLogger.Info("WireConnected");
-                    var serializers = new Serializers();
-                    var identities = new Identities(IdKind.Client);
-                    var protocol = new Protocol($"UnrealRiderClient-{projectName}", serializers, identities,
-                        myDispatcher, wire, lf);
-
                     ResetModel(lf, protocol);
                 });
             };
