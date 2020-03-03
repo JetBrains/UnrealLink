@@ -4,7 +4,7 @@
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 
-#include "AssetEditorManager.h"
+#include "Toolkits/AssetEditorManager.h"
 #include "AssetRegistryModule.h"
 #include "IAssetRegistry.h"
 #include "MessageEndpointBuilder.h"

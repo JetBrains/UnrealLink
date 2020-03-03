@@ -118,12 +118,15 @@ tasks {
             if (isWindows) {
                 exec {
                     executable = "${project.rootDir}/tools/vswhere.exe"
-                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "Microsoft.NET.Sdk", "-property", "installationPath")
+                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "-property", "installationPath")
                     standardOutput = stdout
                     workingDir = project.rootDir
                 }
                 val vsRootDir = stdout.toString().trim()
-                extra["executable"] = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
+                var msBuildPath = "$vsRootDir/MSBuild/Current/Bin/MSBuild.exe"
+                if (!file(msBuildPath).exists())
+                    msBuildPath = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
+                extra["executable"] = msBuildPath
             } else {
                 exec {
                     executable = "which"

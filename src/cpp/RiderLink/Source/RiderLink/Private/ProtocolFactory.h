@@ -3,7 +3,7 @@
 #include "protocol/Protocol.h"
 #include "scheduler/base/IScheduler.h"
 
-#include "UniquePtr.h"
+#include "Templates/UniquePtr.h"
 
 class ProtocolFactory {
 public:

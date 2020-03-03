@@ -8,7 +8,7 @@
 #include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
 #include "SimpleScheduler.h"
 #include "SingleThreadScheduler.h"
-#include "UniquePtr.h"
+#include "Templates/UniquePtr.h"
 
 
 class RdConnection

@@ -179,6 +179,8 @@ namespace ReSharperPlugin.UnrealEditor
 
                         riderModel.NavigateToMethod.Advise(viewLifetime,
                             methodReference => myEditorNavigator.NavigateToMethod(methodReference));
+
+                        riderModel.Play.Advise(viewLifetime, b => unrealModel.Play.Set(b));
                     });
                 });
         }

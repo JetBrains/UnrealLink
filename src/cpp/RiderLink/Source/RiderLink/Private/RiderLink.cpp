@@ -10,7 +10,11 @@
 #include "Editor/UnrealEdEngine.h"
 #include "MessageEndpointBuilder.h"
 
+#include "EditorViewportClient.h"
+
 #include "BlueprintProvider.h"
+#include "LevelEditor.h"
+#include "IAssetViewport.h"
 
 #include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
 
@@ -36,8 +40,20 @@ void FRiderLinkModule::StartupModule() {
     rdConnection.init();
 
     UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
-    rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
-        GUnrealEd->PlayWorld->bDebugPauseExecution = shouldPlay;
+    rdConnection.scheduler.queue([this] {
+      rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
+        if (!shouldPlay && GUnrealEd && GUnrealEd->PlayWorld) {
+          GUnrealEd->RequestEndPlayMap();
+        } else if (shouldPlay && GUnrealEd) {
+          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT("LevelEditor") );
+          TSharedPtr<IAssetViewport> ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
+          if (ActiveLevelViewport.IsValid()) {
+            GUnrealEd->RequestPlaySession(true, ActiveLevelViewport, false);
+          } else {
+            GUnrealEd->RequestPlaySession( true, nullptr, false );
+          }
+        }
+      });
     });
     static auto MessageEndpoint = FMessageEndpoint::Builder("FAssetEditorManager").Build();
     outputDevice.onSerializeMessage.BindLambda(

@@ -4,8 +4,8 @@
 #include "std/hash.h"
 
 #include "Containers/UnrealString.h"
-#include "StringConv.h"
-#include "UniquePtr.h"
+#include "Containers/StringConv.h"
+#include "Templates/UniquePtr.h"
 
 
 //region FString

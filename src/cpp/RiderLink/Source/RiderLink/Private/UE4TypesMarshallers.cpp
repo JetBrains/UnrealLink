@@ -4,7 +4,7 @@
 
 #include "Containers/StringConv.h"
 #include "ArraySerializer.h"
-#include "UniquePtr.h"
+#include "Templates/UniquePtr.h"
 
 //region FString
 

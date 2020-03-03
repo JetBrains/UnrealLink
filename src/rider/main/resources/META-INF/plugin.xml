@@ -21,4 +21,8 @@
   <extensions defaultExtensionNs="com.intellij">
       <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
   </extensions>
+
+  <actions>
+    <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
+  </actions>
 </idea-plugin>
