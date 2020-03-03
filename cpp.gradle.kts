@@ -7,15 +7,16 @@ tasks {
             if (ueProjectPathTxt.exists()) {
                 val ueProjectPath = ueProjectPathTxt.readText()
                 val ueProjectPathDir = File(ueProjectPath)
-                if (ueProjectPathDir.exists()) {
-                    val isUEProject = ueProjectPathDir.listFiles().any {
-                        it.extension == "uproject"
-                    }
-                    if (isUEProject) {
-                        extra["UnrealProjectPath"] = ueProjectPathDir
-                    } else {
-                        throw AssertionError("Add path to a valid UnrealEngine project folder to: $ueProjectPathTxt")
-                    }
+                if (!ueProjectPathDir.exists()) throw AssertionError("$ueProjectPathDir doesn't exist")
+                if (!ueProjectPathDir.isDirectory) throw AssertionError("$ueProjectPathDir is not directory")
+
+                val isUEProject = ueProjectPathDir.listFiles().any {
+                    it.extension == "uproject"
+                }
+                if (isUEProject) {
+                    extra["UnrealProjectPath"] = ueProjectPathDir
+                } else {
+                    throw AssertionError("Add path to a valid UnrealEngine project folder to: $ueProjectPathTxt")
                 }
             } else {
                 ueProjectPathTxt.createNewFile()
