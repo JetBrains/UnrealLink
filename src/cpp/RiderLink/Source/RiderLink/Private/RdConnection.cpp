@@ -22,7 +22,7 @@ RdConnection::RdConnection():
     , socketLifetimeDef{rd::Lifetime::Eternal()}
     , lifetime{lifetimeDef.lifetime}
     , socketLifetime{socketLifetimeDef.lifetime}
-    , scheduler{lifetime, "UnrealEditorScheduler"} {}
+    , scheduler{socketLifetime, "UnrealEditorScheduler"} {}
 
 RdConnection::~RdConnection() {
     socketLifetimeDef.terminate();
