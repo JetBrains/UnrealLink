@@ -34,6 +34,9 @@ namespace ReSharperPlugin.UnrealEditor
         private const string PortFileName = "UnrealProtocolPort.txt";
         private const string ClosedFileExtension = ".closed";
 
+        private bool PlayedFromUnreal = false;
+        private bool PlayedFromRider = false;
+
         public RiderBackendToUnrealEditor(Lifetime lifetime, IScheduler dispatcher, ISolution solution, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator)
         {
@@ -160,6 +163,25 @@ namespace ReSharperPlugin.UnrealEditor
                     {
                         //todo
                     });
+
+                    unrealModel.Play.Advise(viewLifetime, b =>
+                    {
+                        myUnrealHost.PerformModelAction(riderModel =>
+                        {
+                            if (PlayedFromRider)
+                                return;
+                            try
+                            {
+                                PlayedFromUnreal = true;
+                                riderModel.Play.Set(b);
+                            }
+                            finally
+                            {
+                                PlayedFromUnreal = false;
+                            }
+                        });
+                    });
+
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
                         riderModel.FilterLinkCandidates.Set((lifetime, candidates) =>
@@ -180,7 +202,20 @@ namespace ReSharperPlugin.UnrealEditor
                         riderModel.NavigateToMethod.Advise(viewLifetime,
                             methodReference => myEditorNavigator.NavigateToMethod(methodReference));
 
-                        riderModel.Play.Advise(viewLifetime, b => unrealModel.Play.Set(b));
+                        riderModel.Play.Advise(viewLifetime, b =>
+                        {
+                            if (PlayedFromUnreal)
+                                return;
+                            try
+                            {
+                                PlayedFromRider = true;
+                                unrealModel.Play.Set(b);
+                            }
+                            finally
+                            {
+                                PlayedFromRider = false;
+                            }
+                        });
                     });
                 });
         }

@@ -30,6 +30,18 @@ IMPLEMENT_MODULE(FRiderLinkModule, RiderLink);
 FRiderLinkModule::FRiderLinkModule() {}
 FRiderLinkModule::~FRiderLinkModule() {}
 
+class SetForTheScope {
+public:
+  SetForTheScope(bool &value) : value(value) {
+    value = true;
+  }
+  ~SetForTheScope() {
+    value = false;
+  }
+private:
+  bool &value;
+};
+
 void FRiderLinkModule::ShutdownModule() {}
 
 void FRiderLinkModule::StartupModule() {
@@ -45,7 +57,11 @@ void FRiderLinkModule::StartupModule() {
 
     UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
     rdConnection.scheduler.queue([this] {
-      rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [](bool shouldPlay) {
+      rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [this](bool shouldPlay) {
+        if (PlayFromUnreal)
+          return;
+        SetForTheScope s(PlayFromRider);
+
         if (!shouldPlay && GUnrealEd && GUnrealEd->PlayWorld) {
           GUnrealEd->RequestEndPlayMap();
         } else if (shouldPlay && GUnrealEd) {
@@ -63,7 +79,13 @@ void FRiderLinkModule::StartupModule() {
     outputDevice.onSerializeMessage.BindLambda(
         [this](const TCHAR* msg, ELogVerbosity::Type Type, const class FName& Name,
                TOptional<double> Time) {
-            auto CS = FString(msg);            
+            rdConnection.scheduler.queue([this]() {
+              if (GUnrealEd && !PlayFromRider) {
+                SetForTheScope s(PlayFromUnreal);
+                rdConnection.unrealToBackendModel.get_play().set(GUnrealEd->PlayWorld);
+              }
+            });
+            auto CS = FString(msg);
             if (Type != ELogVerbosity::SetColor) {
                 rdConnection.scheduler.queue(
                     [this, message = FString(msg), Type, Name = Name.GetPlainNameString(),
