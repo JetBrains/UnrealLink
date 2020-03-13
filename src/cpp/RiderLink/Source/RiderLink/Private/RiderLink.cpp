@@ -57,33 +57,72 @@ void FRiderLinkModule::StartupModule() {
 
     UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
     rdConnection.scheduler.queue([this] {
-      rdConnection.unrealToBackendModel.get_play().advise(rdConnection.lifetime, [this](bool shouldPlay) {
-        if (PlayFromUnreal)
-          return;
-        SetForTheScope s(PlayFromRider);
+      rdConnection.unrealToBackendModel.get_play().advise(
+          rdConnection.lifetime, [this](int playValue) {
+            if (PlayFromUnreal)
+              return;
+            SetForTheScope s(PlayFromRider);
 
-        if (!shouldPlay && GUnrealEd && GUnrealEd->PlayWorld) {
-          GUnrealEd->RequestEndPlayMap();
-        } else if (shouldPlay && GUnrealEd) {
-          FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT("LevelEditor") );
-          auto ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
-          if (ActiveLevelViewport.IsValid()) {
-            GUnrealEd->RequestPlaySession(true, ActiveLevelViewport, false);
-          } else {
-            GUnrealEd->RequestPlaySession( true, nullptr, false );
-          }
+            if (!playValue && GUnrealEd && GUnrealEd->PlayWorld) {
+              GUnrealEd->RequestEndPlayMap();
+            } else if (playValue == 1 && GUnrealEd) {
+              if (GUnrealEd->PlayWorld &&
+                  GUnrealEd->PlayWorld->bDebugPauseExecution) {
+                GUnrealEd->PlayWorld->bDebugPauseExecution = false;
+              } else {
+                FLevelEditorModule &LevelEditorModule =
+                    FModuleManager::GetModuleChecked<FLevelEditorModule>(
+                        TEXT("LevelEditor"));
+                auto ActiveLevelViewport =
+                    LevelEditorModule.GetFirstActiveViewport();
+                ULevelEditorPlaySettings *PlayInSettings =
+                    GetMutableDefault<ULevelEditorPlaySettings>();
+                if (PlayInSettings) {
+                  PlayInSettings->SetPlayNumberOfClients(1);
+                }
+                if (ActiveLevelViewport.IsValid()) {
+                  GUnrealEd->RequestPlaySession(true, ActiveLevelViewport,
+                                                false);
+                } else {
+                  GUnrealEd->RequestPlaySession(true, nullptr, false);
+                }
+              }
+            } else if (playValue == 2 && GUnrealEd && GUnrealEd->PlayWorld) {
+              GUnrealEd->PlayWorld->bDebugPauseExecution = true;
+            }
+          });
+    });
+
+	FEditorDelegates::PausePIE.AddLambda([this](const bool paused) {
+      rdConnection.scheduler.queue([this]() {
+        if (GUnrealEd && !PlayFromRider) {
+          SetForTheScope s(PlayFromUnreal);
+          rdConnection.unrealToBackendModel.get_play().set(2);
         }
       });
     });
+
+    FEditorDelegates::ResumePIE.AddLambda([this](const bool resumed) {
+      rdConnection.scheduler.queue([this]() {
+        if (GUnrealEd && !PlayFromRider) {
+          SetForTheScope s(PlayFromUnreal);
+          rdConnection.unrealToBackendModel.get_play().set(1);
+        }
+      });
+    });
+
     static auto MessageEndpoint = FMessageEndpoint::Builder("FAssetEditorManager").Build();
     outputDevice.onSerializeMessage.BindLambda(
         [this](const TCHAR* msg, ELogVerbosity::Type Type, const class FName& Name,
                TOptional<double> Time) {
             rdConnection.scheduler.queue([this]() {
-              if (GUnrealEd && !PlayFromRider) {
-                SetForTheScope s(PlayFromUnreal);
-                rdConnection.unrealToBackendModel.get_play().set(GUnrealEd->PlayWorld);
-              }
+                if (GUnrealEd && !PlayFromRider) {
+                    SetForTheScope s(PlayFromUnreal);
+                    rdConnection.unrealToBackendModel.get_play().set(
+                        GUnrealEd->PlayWorld
+                            ? (GUnrealEd->PlayWorld->bDebugPauseExecution ? 2 : 1)
+                            : 0);
+                }
             });
             auto CS = FString(msg);
             if (Type != ELogVerbosity::SetColor) {

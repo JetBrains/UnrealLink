@@ -30,8 +30,6 @@ class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) :
                         !(it is PreviousOccurenceToolbarAction ||
                                 it is NextOccurenceToolbarAction/* || it is ConsoleViewImpl.ClearAllAction*/)
                     }.toList())
-            add(ActionManager.getInstance().getAction("RiderLink.StartUnreal"))
-            add(ActionManager.getInstance().getAction("RiderLink.StopUnreal"))
         }
 
         val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component

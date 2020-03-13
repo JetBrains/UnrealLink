@@ -164,7 +164,7 @@ namespace ReSharperPlugin.UnrealEditor
                         //todo
                     });
 
-                    unrealModel.Play.Advise(viewLifetime, b =>
+                    unrealModel.Play.Advise(viewLifetime, val =>
                     {
                         myUnrealHost.PerformModelAction(riderModel =>
                         {
@@ -173,7 +173,7 @@ namespace ReSharperPlugin.UnrealEditor
                             try
                             {
                                 PlayedFromUnreal = true;
-                                riderModel.Play.Set(b);
+                                riderModel.Play.Set(val);
                             }
                             finally
                             {
@@ -202,14 +202,14 @@ namespace ReSharperPlugin.UnrealEditor
                         riderModel.NavigateToMethod.Advise(viewLifetime,
                             methodReference => myEditorNavigator.NavigateToMethod(methodReference));
 
-                        riderModel.Play.Advise(viewLifetime, b =>
+                        riderModel.Play.Advise(viewLifetime, val =>
                         {
                             if (PlayedFromUnreal)
                                 return;
                             try
                             {
                                 PlayedFromRider = true;
-                                unrealModel.Play.Set(b);
+                                unrealModel.Play.Set(val);
                             }
                             finally
                             {
