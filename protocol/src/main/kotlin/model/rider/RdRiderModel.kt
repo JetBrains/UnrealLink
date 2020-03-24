@@ -46,6 +46,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     init {
         property("editorId", 0).readonly
         property("play", int)
+        property("playMode", int)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)
 

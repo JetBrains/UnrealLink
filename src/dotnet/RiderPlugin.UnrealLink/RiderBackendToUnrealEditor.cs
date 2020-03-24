@@ -36,6 +36,8 @@ namespace RiderPlugin.UnrealLink
 
         private bool PlayedFromUnreal = false;
         private bool PlayedFromRider = false;
+        private bool PlayModeFromUnreal = false;
+        private bool PlayModeFromRider = false;
 
         public RiderBackendToUnrealEditor(Lifetime lifetime, IScheduler dispatcher, ISolution solution, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator)
@@ -181,6 +183,23 @@ namespace RiderPlugin.UnrealLink
                             }
                         });
                     });
+                    unrealModel.PlayMode.Advise(viewLifetime, val =>
+                    {
+                        myUnrealHost.PerformModelAction(riderModel =>
+                        {
+                            if (PlayModeFromRider)
+                                return;
+                            try
+                            {
+                                PlayModeFromUnreal = true;
+                                riderModel.PlayMode.Set(val);
+                            }
+                            finally
+                            {
+                                PlayModeFromUnreal = false;
+                            }
+                        });
+                    });
 
                     myUnrealHost.PerformModelAction(riderModel =>
                     {
@@ -214,6 +233,21 @@ namespace RiderPlugin.UnrealLink
                             finally
                             {
                                 PlayedFromRider = false;
+                            }
+                        });
+                        
+                        riderModel.PlayMode.Advise(viewLifetime, val =>
+                        {
+                            if (PlayModeFromUnreal)
+                                return;
+                            try
+                            {
+                                PlayModeFromRider = true;
+                                unrealModel.PlayMode.Set(val);
+                            }
+                            finally
+                            {
+                                PlayModeFromRider = false;
                             }
                         });
                     });

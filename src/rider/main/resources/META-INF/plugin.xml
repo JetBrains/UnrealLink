@@ -23,14 +23,32 @@
   </extensions>
 
   <actions>
-    <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
-    <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
-    <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
-
     <group id="UnrealInteractionToolbar">
-      <reference ref="RiderLink.StartUnreal"/>
-      <reference ref="RiderLink.PauseUnreal"/>
-      <reference ref="RiderLink.StopUnreal"/>
+      <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain">
+        <group id="RiderLink.NumberOfPlayers" popup="true" text="Number of Players">
+          <action id="RiderLink.OnePlayer" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="1"/>
+          <action id="RiderLink.TwoPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="2"/>
+          <action id="RiderLink.ThreePlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="3"/>
+          <action id="RiderLink.FourPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="4"/>
+        </group>
+        <group id="RiderLink.SpawnPlayerAt" popup="true" text="Spawn Player at...">
+          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Current Camera Location"/>
+          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Default Player Start"/>
+        </group>
+        <group id="RiderLink.Modes" popup="true" text="Mode">
+          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Selected Viewport"/>
+          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Mobile Preview"/>
+          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="New Editor Window"/>
+          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="VR Preview"/>
+          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Standalone Game"/>
+          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Simulate"/>
+          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Vulkan Preview"/>
+        </group>
+        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer" text="Run Dedicated Server"/>
+      </group>
+      <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
+      <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
+      <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
   </actions>
