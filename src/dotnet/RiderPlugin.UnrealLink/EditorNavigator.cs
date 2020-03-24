@@ -12,7 +12,7 @@ using JetBrains.Rider.Model;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util.Caches;
 
-namespace ReSharperPlugin.UnrealEditor
+namespace RiderPlugin.UnrealLink
 {
     [SolutionComponent]
     public class EditorNavigator

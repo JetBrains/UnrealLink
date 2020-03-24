@@ -4,7 +4,7 @@ using JetBrains.ReSharper.Feature.Services.Cpp.UEAsset.Search;
 using JetBrains.Unreal.Lib;
 using JetBrains.Util;
 
-namespace ReSharperPlugin.UnrealEditor
+namespace RiderPlugin.UnrealLink
 {
 	[SolutionComponent]
 	public class UnrealEngineAssetsNavigationProvider : IUnrealEngineNavigationProvider

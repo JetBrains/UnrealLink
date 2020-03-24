@@ -4,7 +4,7 @@ using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Host.Features;
 using JetBrains.Rider.Model;
 
-namespace ReSharperPlugin.UnrealEditor
+namespace RiderPlugin.UnrealLink
 {
     [SolutionComponent]
     public class UnrealHost

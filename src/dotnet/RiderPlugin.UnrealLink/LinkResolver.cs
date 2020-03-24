@@ -11,7 +11,7 @@ using JetBrains.Unreal.Lib;
 using JetBrains.Util.DataStructures;
 using JetBrains.Util;
 
-namespace ReSharperPlugin.UnrealEditor
+namespace RiderPlugin.UnrealLink
 {
     [SolutionComponent]
     public class UnrealLinkResolver

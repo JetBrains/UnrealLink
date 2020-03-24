@@ -1,4 +1,4 @@
-# resharper_unreal for Rider
+# UnrealLink for Rider
 
 ## Pre-requisites
 * Unreal Engine 4.2+

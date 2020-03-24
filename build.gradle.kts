@@ -39,10 +39,11 @@ val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRd
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
-val dotNetSolutionId by extra { "resharper_unreal" }
-val dotNetRootId by extra { "ReSharperPlugin" }
-val dotNetBinDir by extra { dotNetDir.resolve("$dotNetRootId.$dotNetSolutionId").resolve("bin") }
-val dotNetPluginId by extra { "$dotNetRootId.UnrealEditor" }
+val dotNetSolutionId by extra { "UnrealLink" }
+val idePluginId by extra { "RiderPlugin" }
+val dotNetRiderProjectId by extra {"$idePluginId.$dotNetSolutionId"}
+val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
+val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.props") }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
@@ -171,14 +172,14 @@ tasks {
             }
 
             if (result.exitValue != 0) {
-                println("${stdout.toString().trim()}")
+                println(stdout.toString().trim())
                 throw GradleException("Problems with compileDotNet task")
             }
         }
 
     }
 
-    val buildPlugin by getting(Zip::class) {
+    @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(compileDotNet)
         outputs.upToDateWhen { false }
         buildSearchableOptions {

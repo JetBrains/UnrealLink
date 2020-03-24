@@ -1,3 +1,3 @@
-rootProject.name = "resharper_unreal"
+rootProject.name = "UnrealLink"
 
 include(":protocol")

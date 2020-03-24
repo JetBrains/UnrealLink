@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReSharperPlugin.UnrealEditor", "src\dotnet\ReSharperPlugin.resharper_unreal\ReSharperPlugin.UnrealEditor.csproj", "{084172D1-A9C6-46D0-96AD-05C5B09A5E5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiderPlugin.UnrealLink", "src\dotnet\RiderPlugin.UnrealLink\RiderPlugin.UnrealLink.csproj", "{084172D1-A9C6-46D0-96AD-05C5B09A5E5D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{4A9ABB95-3762-448B-B5BF-099E46DB22DE}"
 	ProjectSection(SolutionItems) = preProject
