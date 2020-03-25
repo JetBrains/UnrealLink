@@ -47,8 +47,8 @@
         <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer" text="Run Dedicated Server"/>
       </group>
       <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
-      <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
       <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
+      <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
   </actions>

@@ -250,6 +250,8 @@ namespace RiderPlugin.UnrealLink
                                 PlayModeFromRider = false;
                             }
                         });
+                        riderModel.FrameSkip.Advise(viewLifetime, skip =>
+                            unrealModel.FrameSkip.Fire(skip));
                     });
                 });
         }

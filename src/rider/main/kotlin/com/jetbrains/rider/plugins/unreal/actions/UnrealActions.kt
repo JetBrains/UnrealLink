@@ -9,23 +9,34 @@ import com.intellij.util.SmartList
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.valueOrDefault
 import com.jetbrains.rider.plugins.unreal.UnrealHost
+import org.jetbrains.annotations.Nls
+import org.jetbrains.annotations.Nullable
+import javax.swing.Icon
 
-class PlayInUnrealAction : AnAction("Play Unreal", "Play Unreal", AllIcons.Actions.Execute) {
+abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : AnAction(text, description, icon) {
     private var subscribed = false
+
+    abstract fun updatePlay(e: AnActionEvent)
 
     override fun update(e: AnActionEvent) {
         val host = e.getHost()
-
         if (!subscribed) {
             subscribed = true
-            host?.model?.play?.advise(e.project!!.lifetime) { value ->
-                e.presentation.isEnabled = value != 1
+            host?.model?.play?.advise(e.project!!.lifetime) { _ ->
+                updatePlay(e)
             }
         }
-
-        e.presentation.isVisible = true
-        e.presentation.isEnabled = if (host == null) false else host.model.play.valueOrDefault(0) != 1
+        updatePlay(e)
         super.update(e)
+    }
+}
+
+class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", AllIcons.Actions.Execute) {
+    override fun updatePlay(e: AnActionEvent) {
+        e.presentation.isVisible = true
+        val value = e.getHost()?.model?.play?.valueOrDefault(0)
+        e.presentation.isEnabled = value != 1
+        e.presentation.text = if (value == 2) "Resume Unreal" else "Start Unreal"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -34,21 +45,11 @@ class PlayInUnrealAction : AnAction("Play Unreal", "Play Unreal", AllIcons.Actio
     }
 }
 
-class StopInUnrealAction : AnAction("Stop Unreal", "Stop Unreal", AllIcons.Actions.Suspend) {
-    private var subscribed = false
-    override fun update(e: AnActionEvent) {
+class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", AllIcons.Actions.Suspend) {
+    override fun updatePlay(e: AnActionEvent) {
         val host = e.getHost()
-
-        if (!subscribed) {
-            subscribed = true
-            host?.model?.play?.advise(e.project!!.lifetime) { value ->
-                e.presentation.isEnabled = value > 0
-            }
-        }
-
         e.presentation.isVisible = true
         e.presentation.isEnabled = if (host == null) false else host.model.play.valueOrDefault(0) > 0
-        super.update(e)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -57,27 +58,21 @@ class StopInUnrealAction : AnAction("Stop Unreal", "Stop Unreal", AllIcons.Actio
     }
 }
 
-class PauseInUnrealAction : AnAction("Pause Unreal", "Pause Unreal", AllIcons.Actions.Pause) {
-    private var subscribed = false
-
-    override fun update(e: AnActionEvent) {
-        val host = e.getHost()
-
-        if (!subscribed) {
-            subscribed = true
-            host?.model?.play?.advise(e.project!!.lifetime) { value ->
-                e.presentation.isEnabled = value == 1
-            }
-        }
-
+class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", AllIcons.Actions.Pause) {
+    override fun updatePlay(e: AnActionEvent) {
         e.presentation.isVisible = true
-        e.presentation.isEnabled = if (host == null) false else host.model.play.valueOrDefault(0) == 1
-        super.update(e)
+        val value = e.getHost()?.model?.play?.valueOrDefault(0)
+        e.presentation.isEnabled = value != null && value > 0
+        e.presentation.icon = if (value == 2) AllIcons.Actions.Resume else AllIcons.Actions.Pause
+        e.presentation.text = if (value == 2) "Frame Skip" else "Pause Unreal"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val host = e.getHost()
-        host?.model?.play?.set(2)
+        if (host?.model?.play?.valueOrDefault(0) == 1)
+            host.model.play.set(2)
+        else
+            host?.model?.frameSkip?.fire(true)
     }
 }
 
