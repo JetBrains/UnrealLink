@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
@@ -15,6 +16,7 @@ import com.jetbrains.rider.plugins.unreal.actions.DedicatedServer
 import com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers
 import com.jetbrains.rider.plugins.unreal.actions.PlayMode
 import com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer
+import com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.util.idea.getComponent
 import com.sun.jna.LastErrorException
@@ -30,7 +32,7 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
 
     internal val model = project.solution.rdRiderModel
     val isUnrealEngineSolution:Boolean
-            get() = project.solution.rdRiderModel.isConnectedToUnrealEditor.value
+            get() = model.isUnrealEngineSolution.value
 
     init {
         model.allowSetForegroundWindow.set { _, id ->
@@ -43,6 +45,9 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
                 }
             }
             RdTask.fromResult(true)
+        }
+        model.isUnrealEngineSolution.advise(project.lifetime) {
+            project.getService(StatusBarWidgetsManager::class.java).updateWidget(UnrealStatusBarWidget::class.java)
         }
 
         model.playMode.advise(project.lifetime) { mode ->

@@ -19,7 +19,7 @@
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
-      <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
+    <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
   </extensions>
 
