@@ -111,6 +111,8 @@ namespace RiderPlugin.UnrealLink
                 }
 
                 var wire = new SocketWire.Client(modelLifetime, myDispatcher, port, "UnrealEditorClient");
+                wire.Connected.Advise(modelLifetime, isConnected => myUnrealHost.PerformModelAction(riderModel => 
+                    riderModel.IsConnectedToUnrealEditor.SetValue(isConnected)));
 
                 //todo think about alive file from previous session
 

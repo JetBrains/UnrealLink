@@ -29,6 +29,8 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     }
 
     internal val model = project.solution.rdRiderModel
+    val isUnrealEngineSolution:Boolean
+            get() = project.solution.rdRiderModel.isConnectedToUnrealEditor.value
 
     init {
         model.allowSetForegroundWindow.set { _, id ->

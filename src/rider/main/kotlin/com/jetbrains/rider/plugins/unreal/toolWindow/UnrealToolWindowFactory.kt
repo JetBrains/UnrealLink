@@ -19,9 +19,9 @@ class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
     companion object {
-        val TOOLWINDOW_ID = "Unreal"
-        val TITLE_ID = "Unreal editor log"
-        val ACTION_PLACE = "unreal"
+        const val TOOLWINDOW_ID = "Unreal"
+        const val TITLE_ID = "Unreal Editor Log"
+        const val ACTION_PLACE = "unreal"
 
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }

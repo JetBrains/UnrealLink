@@ -59,5 +59,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         signal("openBlueprint", BlueprintReference)
 
         callback("AllowSetForegroundWindow", int, bool)
+
+        property("isConnectedToUnrealEditor", false)
+        property("isUnrealEngineSolution", false)
     }
 }
