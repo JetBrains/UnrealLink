@@ -47,6 +47,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("editorId", 0).readonly
         property("play", int)
         property("playMode", int)
+        signal("frameSkip", bool)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)
 

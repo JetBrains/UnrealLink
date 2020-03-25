@@ -184,6 +184,11 @@ void FRiderLinkModule::StartupModule() {
             GUnrealEd->PlayWorld->bDebugPauseExecution = true;
           }
         });
+    rdConnection.unrealToBackendModel.get_frameSkip().advise(
+        rdConnection.lifetime, [this](bool skip) {
+          GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
+          GUnrealEd->PlayWorld->bDebugPauseExecution = false;
+    });
   });
 
   FEditorDelegates::BeginPIE.AddLambda([this](const bool started) {
