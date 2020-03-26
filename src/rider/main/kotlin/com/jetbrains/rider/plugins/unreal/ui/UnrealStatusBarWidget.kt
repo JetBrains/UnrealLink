@@ -11,7 +11,7 @@ class UnrealStatusBarWidget: StatusBarWidgetFactory {
     override fun getId() = UnrealStatusBarIcon.StatusBarIconId
     override fun isAvailable(project: Project) = UnrealHost.getInstance(project).isUnrealEngineSolution
     override fun canBeEnabledOn(statusBar: StatusBar) = true
-    override fun getDisplayName() = "Unity Editor connection"
+    override fun getDisplayName() = "Unreal Editor connection"
     override fun disposeWidget(widget: StatusBarWidget) {}
     override fun createWidget(project: Project) = UnrealStatusBarIcon(project)
 }

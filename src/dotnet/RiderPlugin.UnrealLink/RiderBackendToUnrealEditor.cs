@@ -53,7 +53,7 @@ namespace RiderPlugin.UnrealLink
 
             var modelLifetimeDefinition = lifetime.CreateNested();
             var modelLifetime = modelLifetimeDefinition.Lifetime;
-            myEditorModel = new Property<RdEditorModel>(modelLifetime, "RiderTounrealModel");
+            myEditorModel = new Property<RdEditorModel>(modelLifetime, "RiderToUnrealModel");
 
 
             var projectName = mySolution.Name;
@@ -86,8 +86,8 @@ namespace RiderPlugin.UnrealLink
             {
                 myLogger.Info("File with port's deleted");
 
-                //modelLifetimeDefinition.Terminate();
-                //modelLifetimeDefinition = lifetime.CreateNested();
+                modelLifetimeDefinition.Terminate();
+                modelLifetimeDefinition = lifetime.CreateNested();
             };
         }
 
