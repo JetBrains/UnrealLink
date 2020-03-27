@@ -14,7 +14,9 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
 
     internal val model = project.solution.rdRiderModel
     val isUnrealEngineSolution:Boolean
-            get() = model.isUnrealEngineSolution.value
+        get() = model.isUnrealEngineSolution.value
+    val isConnectedToUnrealEditor:Boolean
+        get() = model.isConnectedToUnrealEditor.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
         action(model)

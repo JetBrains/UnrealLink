@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal
 
+import com.intellij.ide.ActivityTracker
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -45,6 +46,13 @@ class UnrealHostSetup(project: Project, unrealHost: UnrealHost) : LifetimedProje
         unrealHost.performModelAction {
             it.isUnrealEngineSolution.change.advise(project.lifetime) {
                 project.getService(StatusBarWidgetsManager::class.java).updateWidget(UnrealStatusBarWidget::class.java)
+            }
+        }
+
+//  Update state of Unreal actions on toolbar
+        unrealHost.performModelAction {
+            it.play.change.advise(project.lifetime) {
+                ActivityTracker.getInstance().inc()
             }
         }
 
