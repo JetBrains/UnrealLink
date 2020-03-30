@@ -1,10 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.ToggleAction
+import com.intellij.openapi.actionSystem.*
 import com.intellij.util.SmartList
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.valueOrDefault
@@ -65,6 +62,19 @@ class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", AllI
     }
 }
 
+class PlaySettings : DefaultActionGroup() {
+    override fun update(e: AnActionEvent) {
+        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution?:false
+        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor?:false
+    }
+}
+
+class PlaySubsettings : DefaultActionGroup() {
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
+    }
+}
+
 abstract class OnlyOneSelectedAction : ToggleAction() {
     protected abstract fun getActions(): SmartList<OnlyOneSelectedAction>
     protected abstract fun initialUpdate(e: AnActionEvent)
@@ -87,6 +97,7 @@ abstract class OnlyOneSelectedAction : ToggleAction() {
             firstUpdate = false
             initialUpdate(e)
         }
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
     }
 }
 
@@ -184,6 +195,11 @@ class DedicatedServer : ToggleAction() {
         var mode: Int = host!!.model.playMode.valueOrDefault(0)
         mode = setDedicatedServer(mode, value)
         host.model.playMode.set(mode)
+    }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
     }
 }
 
