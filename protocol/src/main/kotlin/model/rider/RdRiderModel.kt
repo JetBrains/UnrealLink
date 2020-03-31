@@ -61,7 +61,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         callback("AllowSetForegroundWindow", int, bool)
 
-        property("isConnectedToUnrealEditor", false)
+        property("isConnectedToUnrealEditor", false).readonly.async
         property("isUnrealEngineSolution", false)
     }
 }
