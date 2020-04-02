@@ -26,18 +26,18 @@
 
   <actions>
     <group id="UnrealInteractionToolbar">
-      <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain">
-        <group id="RiderLink.NumberOfPlayers" popup="true" text="Number of Players">
+      <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain" class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
+        <group id="RiderLink.NumberOfPlayers" popup="true" text="Number of Players" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
           <action id="RiderLink.OnePlayer" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="1"/>
           <action id="RiderLink.TwoPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="2"/>
           <action id="RiderLink.ThreePlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="3"/>
           <action id="RiderLink.FourPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="4"/>
         </group>
-        <group id="RiderLink.SpawnPlayerAt" popup="true" text="Spawn Player at...">
+        <group id="RiderLink.SpawnPlayerAt" popup="true" text="Spawn Player at..." class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
           <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Current Camera Location"/>
           <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Default Player Start"/>
         </group>
-        <group id="RiderLink.Modes" popup="true" text="Mode">
+        <group id="RiderLink.Modes" popup="true" text="Mode" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
           <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Selected Viewport"/>
           <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Mobile Preview"/>
           <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="New Editor Window"/>

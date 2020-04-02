@@ -1,10 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.ToggleAction
+import com.intellij.openapi.actionSystem.*
 import com.intellij.util.SmartList
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.valueOrDefault
@@ -14,28 +11,17 @@ import org.jetbrains.annotations.Nullable
 import javax.swing.Icon
 
 abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : AnAction(text, description, icon) {
-    private var subscribed = false
-
-    abstract fun updatePlay(e: AnActionEvent)
-
     override fun update(e: AnActionEvent) {
-        val host = e.getHost()
-        if (!subscribed) {
-            subscribed = true
-            host?.model?.play?.advise(e.project!!.lifetime) { _ ->
-                updatePlay(e)
-            }
-        }
-        updatePlay(e)
-        super.update(e)
+        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution?:false
+        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor?:false
     }
 }
 
 class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", AllIcons.Actions.Execute) {
-    override fun updatePlay(e: AnActionEvent) {
-        e.presentation.isVisible = true
+    override fun update(e: AnActionEvent) {
+        super.update(e)
         val value = e.getHost()?.model?.play?.valueOrDefault(0)
-        e.presentation.isEnabled = value != 1
+        e.presentation.isEnabled = e.presentation.isEnabled && value != 1
         e.presentation.text = if (value == 2) "Resume Unreal" else "Start Unreal"
     }
 
@@ -46,10 +32,10 @@ class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", AllIcon
 }
 
 class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", AllIcons.Actions.Suspend) {
-    override fun updatePlay(e: AnActionEvent) {
+    override fun update(e: AnActionEvent) {
+        super.update(e)
         val host = e.getHost()
-        e.presentation.isVisible = true
-        e.presentation.isEnabled = if (host == null) false else host.model.play.valueOrDefault(0) > 0
+        e.presentation.isEnabled = e.presentation.isEnabled && host != null && host.model.play.valueOrDefault(0) > 0
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -59,10 +45,10 @@ class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", AllIcon
 }
 
 class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", AllIcons.Actions.Pause) {
-    override fun updatePlay(e: AnActionEvent) {
-        e.presentation.isVisible = true
+    override fun update(e: AnActionEvent) {
+        super.update(e)
         val value = e.getHost()?.model?.play?.valueOrDefault(0)
-        e.presentation.isEnabled = value != null && value > 0
+        e.presentation.isEnabled = e.presentation.isEnabled && value != null && value > 0
         e.presentation.icon = if (value == 2) AllIcons.Actions.Resume else AllIcons.Actions.Pause
         e.presentation.text = if (value == 2) "Frame Skip" else "Pause Unreal"
     }
@@ -73,6 +59,19 @@ class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", AllI
             host.model.play.set(2)
         else
             host?.model?.frameSkip?.fire(true)
+    }
+}
+
+class PlaySettings : DefaultActionGroup() {
+    override fun update(e: AnActionEvent) {
+        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution?:false
+        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor?:false
+    }
+}
+
+class PlaySubsettings : DefaultActionGroup() {
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
     }
 }
 
@@ -98,6 +97,7 @@ abstract class OnlyOneSelectedAction : ToggleAction() {
             firstUpdate = false
             initialUpdate(e)
         }
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
     }
 }
 
@@ -196,6 +196,11 @@ class DedicatedServer : ToggleAction() {
         mode = setDedicatedServer(mode, value)
         host.model.playMode.set(mode)
     }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
+    }
 }
 
 class PlayMode : OnlyOneSelectedAction() {
@@ -248,7 +253,7 @@ class PlayMode : OnlyOneSelectedAction() {
     }
 }
 
-fun AnActionEvent.getHost(): UnrealHost? {
+fun AnActionEvent.    getHost(): UnrealHost? {
     val project = project?: return null
     return UnrealHost.getInstance(project)
 }
