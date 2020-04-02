@@ -98,10 +98,12 @@ class UnrealToolWindowFactory(val project: Project)
 */
 
     fun print(unrealLogEvent: UnrealLogEvent) {
-        showTab("$TITLE_ID #${model.editorId.value}", project.lifetime)
-
         print(unrealLogEvent.info)
         print(unrealLogEvent.text)
+    }
+
+    fun showTabForNewSession() {
+        showTab("$TITLE_ID #${model.editorId.value}", project.lifetime)
     }
 
     private fun println() {

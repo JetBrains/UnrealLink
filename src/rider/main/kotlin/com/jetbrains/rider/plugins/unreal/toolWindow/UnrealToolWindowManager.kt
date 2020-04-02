@@ -21,6 +21,10 @@ class UnrealToolWindowManager(project: Project,
     init {
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
 
+        host.model.isConnectedToUnrealEditor.advise(componentLifetime) {
+            if(it) unrealToolWindowContextFactory.showTabForNewSession()
+        }
+
         host.model.unrealLog.advise(componentLifetime) { event ->
             unrealToolWindowContextFactory.print(event)
             unrealToolWindowContextFactory.flush()
