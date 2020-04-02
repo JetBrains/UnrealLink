@@ -34,6 +34,7 @@ TUniquePtr<rd::Protocol> ProtocolFactory::create(rd::IScheduler & scheduler, rd:
         const FString PortFileFullPath = FPaths::Combine(PortFullDirectoryPath, PORT_FILE_NAME);
         const FString PortFileClosedPath = FPaths::Combine(PortFullDirectoryPath,
                                                            FString(PORT_FILE_NAME).Append(CLOSED_FILE_EXTENSION));
+        rd::minimum_level_to_log = rd::LogLevel::Fatal;
         auto wire = std::make_shared<rd::SocketWire::Server>(socketLifetime, &scheduler, 0,
                                                              TCHAR_TO_UTF8(
                                                                  *FString::Printf(TEXT("UnrealEditorServer-%s"), *
