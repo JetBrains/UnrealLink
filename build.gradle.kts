@@ -111,6 +111,8 @@ val dotNetSdkPath by lazy {
     return@lazy sdkPath
 }
 
+apply(from = "cpp.gradle.kts")
+
 tasks {
     val findMsBuild by creating {
         doLast {
@@ -208,6 +210,8 @@ tasks {
 
     withType<PrepareSandboxTask> {
         dependsOn(compileDotNet)
+        val packCppSide = getByName<Zip>("packCppSide")
+        dependsOn(packCppSide)
 
         outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
 
@@ -229,6 +233,10 @@ tasks {
             dllFiles.forEach { file ->
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
             }
+            copy {
+                from(packCppSide.archiveFile)
+                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/cpp")
+            }
         }
     }
 }
@@ -248,4 +256,3 @@ intellij {
 }
 
 
-apply(from = "cpp.gradle.kts")
