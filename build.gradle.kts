@@ -63,7 +63,7 @@ java {
 
 val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
 
-project.version = (ext.properties.getOrPut("pluginVersion") { "0.0.0.1" } as String)
+project.version = (ext.properties.getOrPut("pluginVersion") { "${properties["productVersion"]}.${properties["BuildCounter"]}" } as String)
 
 tasks {
     withType<PublishTask> {
@@ -235,7 +235,7 @@ tasks {
             }
             copy {
                 from(packCppSide.archiveFile)
-                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/cpp")
+                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/EditorPlugin")
             }
         }
     }

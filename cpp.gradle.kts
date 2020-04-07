@@ -28,7 +28,7 @@ tasks {
 
     val cloneRdCpp by creating (Exec::class) {
         val destinationDir = buildDir.resolve("rd")
-        val branchName = "ue4-adapt"
+        val branchName = "dev/ap-fix-single-thread-scheduler"
         val cloneCommand = listOf("git", "clone", "--branch=$branchName", "git@github.com:JetBrains/rd.git", destinationDir.absolutePath, "--quiet")
         val pullCommand = listOf("git", "--git-dir", destinationDir.resolve(".git").absolutePath, "pull", "origin", branchName)
         commandLine = if (destinationDir.exists()) pullCommand else cloneCommand
@@ -49,7 +49,7 @@ tasks {
 
         val text = File(pathToUplugin).readLines().map {
             val pattern = "\"VersionName\": "
-            it.replaceAfter(pattern, "\"${project.version}\"")
+            it.replaceAfter(pattern, "\"${project.version}\",")
         }
         File(pathToUplugin).writeText(text.joinToString(System.lineSeparator()))
     }
