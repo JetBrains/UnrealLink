@@ -84,7 +84,7 @@ tasks {
         dependsOn(installRdCpp)
         dependsOn(patchUpluginVersion)
         from("${project.rootDir}/src/cpp/RiderLink") {
-            include("RiderLink.uplugin", "Resources", "Source")
+            include("RiderLink.uplugin", "Resources/**", "Source/**")
         }
         archiveFileName.set("RiderLink.zip")
     }
