@@ -66,11 +66,13 @@ namespace RiderPlugin.UnrealLink
                     }
                     catch (Exception _)
                     {
-                        backupDir.Move(pluginDir);
+                        if(backupDir.ExistsDirectory)
+                            backupDir.Move(pluginDir);
                         continue;
                     }
-
-                    backupDir.Delete();
+                    
+                    if(backupDir.ExistsDirectory)
+                        backupDir.Delete();
 
                     needToRegenerateProjectFiles = true;                    
                 }

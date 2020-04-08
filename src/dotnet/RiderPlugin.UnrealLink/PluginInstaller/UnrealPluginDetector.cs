@@ -67,7 +67,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     // We didn't find Engine plugins, let's gather data about Project plugins
                     foreach (var uprojectLocation in uprojectLocations)
                     {
-                        TryGetProjectPluginForUproject(uprojectLocation, installInfo);
+                        var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
+                        installInfo.ProjectPlugins.Add(projectPlugin);
                     }
                 }
 
@@ -75,12 +76,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             });
         }
 
-        private void TryGetProjectPluginForUproject(FileSystemPath uprojectLocation,
+        private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(FileSystemPath uprojectLocation,
             UnrealPluginInstallInfo installInfo)
         {
             var projectRoot = uprojectLocation.Directory;
             var upluginLocation = projectRoot / ourPathToProjectPlugin;
-            installInfo.ProjectPlugins.Add(GetPluginInfo(upluginLocation));
+            return GetPluginInfo(upluginLocation, uprojectLocation);
         }
 
         private bool TryGetEnginePluginFromUproject(FileSystemPath uprojectPath, UnrealPluginInstallInfo installInfo)
