@@ -11,7 +11,7 @@ using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
-using JetBrains.Util.Logging;
+using Newtonsoft.Json.Linq;
 using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Settings;
 
@@ -100,11 +100,37 @@ namespace RiderPlugin.UnrealLink
                 if (backupDir.ExistsDirectory)
                     backupDir.Delete();
 
+                PatchTypeOfUpluginFile(upluginFile);
+
                 needToRegenerateProjectFiles = true;
             }
 
             if (needToRegenerateProjectFiles)
                 RegenerateProjectFiles(unrealPluginInstallInfo.ProjectPlugins.FirstNotNull()?.UprojectFilePath);
+        }
+
+        private void PatchTypeOfUpluginFile(FileSystemPath upluginFile)
+        {
+            var jsonText = File.ReadAllText(upluginFile.FullPath);
+            try
+            {
+                var jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonText) as JObject;
+                var modules = jsonObject["Modules"];
+                var pluginType = myPluginDetector.UnrealVersion.Minor >= 24 ? "UncookedOnly" : "Developer";
+                if (modules is JArray array)
+                {
+                    foreach (var item in array)
+                    {
+                        item["Type"].Replace(pluginType);
+                    }
+                }
+
+                File.WriteAllText(upluginFile.FullPath, jsonObject.ToString());
+            }
+            catch (Exception e)
+            {
+                myLogger.Log(LoggingLevel.WARN, $@"Couldn't patch 'Type' field of {upluginFile}", e);
+            }
         }
 
         private void BindToInstallationSettingChange()

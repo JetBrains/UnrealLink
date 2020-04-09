@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
@@ -29,18 +30,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly CppUE4SolutionDetector mySolutionDetector;
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
+        private Version myUnrealVersion = null;
+        public Version UnrealVersion => myUnrealVersion == null? new Version(0, 0,0 ) : myUnrealVersion;
+        
+
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
             CppUE4SolutionDetector solutionDetector, ISolution solution)
         {
-            InstallInfoProperty = new Property<UnrealPluginInstallInfo>(lifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLifetime = lifetime;
+            InstallInfoProperty = new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLogger = logger;
             myUnrealHost = unrealHost;
             mySolution = solution;
             mySolutionDetector = solutionDetector;
-            mySolutionDetector.IsUE4Solution_Observable.Change.Advise(lifetime, isUESolution =>
+            mySolutionDetector.IsUE4Solution_Observable.Change.Advise_NoAcknowledgement(myLifetime, isUESolution =>
             {
                 if (!isUESolution.HasNew || isUESolution.New != TriBool.True) return;
+                
+                myUnrealVersion = new Version(4, mySolutionDetector.UE4Version, mySolutionDetector.UE4PatchVersion);
                 
                 var installInfo = new UnrealPluginInstallInfo();
                 var foundEnginePlugin = TryGetEnginePluginFromSolution(mySolution, installInfo);
