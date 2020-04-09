@@ -12,6 +12,7 @@ using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
 using Newtonsoft.Json.Linq;
+using JetBrains.Collections.Viewable;
 using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Settings;
 
@@ -24,20 +25,23 @@ namespace RiderPlugin.UnrealLink
         private readonly ILogger myLogger;
         private readonly PluginPathsProvider myPathsProvider;
         private readonly IShellLocks myShellLocks;
+        private readonly UnrealHost myUnrealHost;
         private IContextBoundSettingsStoreLive myBoundSettingsStore;
         private UnrealPluginDetector myPluginDetector;
         private const string BACKUP_SUFFIX = ".backup";
 
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
             PluginPathsProvider pathsProvider, ISolution solution, ISettingsStore settingsStore,
-        IShellLocks shellLocks)
+        IShellLocks shellLocks, UnrealHost unrealHost)
         {
             myLifetime = lifetime;
             myLogger = logger;
             myPathsProvider = pathsProvider;
             myShellLocks = shellLocks;
+            myUnrealHost = unrealHost;
             myBoundSettingsStore = settingsStore.BindToContextLive(myLifetime, ContextRange.Smart(solution.ToDataContext()));
             myPluginDetector = pluginDetector;
+            
             myPluginDetector.InstallInfoProperty.Change.Advise_NoAcknowledgement(myLifetime, installInfo =>
             {
                 if (!installInfo.HasNew || installInfo.New == null) return;
@@ -45,30 +49,43 @@ namespace RiderPlugin.UnrealLink
                     () =>
                     {
                         var unrealPluginInstallInfo = installInfo.New;
-                        if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable) return;
-                
+                        if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
+                        {
+                            // TODO: add install plugin to Engine
+                        };
+
                         if (!myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin))
+                        {
+                            foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+                            {
+                                if (installDescription.IsPluginAvailable == false ||
+                                    installDescription.PluginVersion != myPathsProvider.CurrentPluginVersion)
+                                {
+                                    myUnrealHost.PerformModelAction(model => model.OnEditorModelOutOfSync());
+                                }
+                            }
+
                             return;
+                        }
                 
-                        TryInstallPlugin(unrealPluginInstallInfo);
+                        InstallPluginIfRequired(unrealPluginInstallInfo);
                     });
             });
             BindToInstallationSettingChange();
+            BindToNotificationFixAction();
         }
 
-        private void TryInstallPlugin(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void InstallPluginIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo)
         {
             bool needToRegenerateProjectFiles = false;
 
             foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
             {
+                if (installDescription.PluginVersion == myPathsProvider.CurrentPluginVersion) continue;
+                
                 var pluginDir = installDescription.UnrealPluginRootFolder;
                 var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginDir);
-                if (upluginFile.ExistsFile)
-                {
-                    var version = PluginPathsProvider.GetPluginVersion(upluginFile);
-                    if (version != null && version >= myPathsProvider.CurrentPluginVersion) continue;
-                }
+                
 
                 var backupDir = pluginDir.AddSuffix(BACKUP_SUFFIX);
                 try
@@ -140,14 +157,29 @@ namespace RiderPlugin.UnrealLink
             {
                 if (!args.GetNewOrNull()) return;
                 myShellLocks.ExecuteOrQueueReadLockEx(myLifetime, "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
-                    () =>
-                    {
-                        var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
-                        if (unrealPluginInstallInfo != null)
-                        {
-                            TryInstallPlugin(unrealPluginInstallInfo);
-                        }
-                    });
+                    InstallPluginIfInfoAvailable);
+            });
+        }
+
+        private void InstallPluginIfInfoAvailable()
+        {
+            var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
+            if (unrealPluginInstallInfo != null)
+            {
+                InstallPluginIfRequired(unrealPluginInstallInfo);
+            }
+        }
+
+        private void BindToNotificationFixAction()
+        {
+            myUnrealHost.PerformModelAction(model =>
+            {
+                model.InstallEditorPlugin.AdviseNotNull(myLifetime, unit =>
+                {
+                    myShellLocks.ExecuteOrQueueReadLockEx(myLifetime,
+                        "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
+                        InstallPluginIfInfoAvailable);
+                });
             });
         }
 

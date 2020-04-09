@@ -14,9 +14,8 @@
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
-      <component>
-          <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class>
-      </component>
+    <component><implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class></component>
+    <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class></component>
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -54,5 +53,9 @@
       <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
+
+    <action id="InstallEditorPluginAction"
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginAction"
+            text="Install Unreal Editor Plugin" />
   </actions>
 </idea-plugin>
