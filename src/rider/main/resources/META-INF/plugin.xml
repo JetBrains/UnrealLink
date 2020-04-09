@@ -54,7 +54,7 @@
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
 
-    <action id="InstallEditorPluginAction"
+    <action id="UnrealLink.InstallEditorPluginAction"
             class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginAction"
             text="Install Unreal Editor Plugin" />
   </actions>
