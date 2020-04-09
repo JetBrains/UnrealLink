@@ -32,7 +32,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
             CppUE4SolutionDetector solutionDetector, ISolution solution)
         {
-            InstallInfoProperty = new Property<UnrealPluginInstallInfo>("UnrealPluginInstalInfoNotification");
+            InstallInfoProperty = new Property<UnrealPluginInstallInfo>(lifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLifetime = lifetime;
             myLogger = logger;
             myUnrealHost = unrealHost;
