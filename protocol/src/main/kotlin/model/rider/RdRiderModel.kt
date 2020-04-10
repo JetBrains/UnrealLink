@@ -44,7 +44,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     }
 
     init {
-        property("editorId", 0).readonly
+        property("editorId", 0).readonly.async
         property("play", int)
         property("playMode", int)
         signal("frameSkip", bool)

@@ -1,7 +1,5 @@
 #include "BlueprintProvider.h"
 
-#include "UObject/UObjectIterator.h"
-#include "EdGraph/EdGraph.h"
 #include "Toolkits/AssetEditorManager.h"
 #include "BlueprintEditor.h"
 #include "AssetEditorMessages.h"
@@ -10,7 +8,7 @@
 FOnBlueprintAdded BluePrintProvider::OnBlueprintAdded{};
 
 void BluePrintProvider::AddBlueprint(UBlueprint* Blueprint) {
-    OnBlueprintAdded.ExecuteIfBound(Blueprint);   
+    OnBlueprintAdded.ExecuteIfBound(Blueprint);
 }
 
 void BluePrintProvider::AddAsset(FAssetData AssetData) {
@@ -18,7 +16,7 @@ void BluePrintProvider::AddAsset(FAssetData AssetData) {
     if (cls) {
         UBlueprint* Blueprint = Cast<UBlueprint>(cls);
         if (Blueprint && Blueprint->IsValidLowLevel()) {
-            AddBlueprint(Blueprint);           
+            AddBlueprint(Blueprint);
         }
     }
 }
@@ -28,5 +26,7 @@ bool BluePrintProvider::IsBlueprint(FString const& pathName) {
 }
 
 void BluePrintProvider::OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
+    // Just to create asset manager if it wasn't created already
+    FAssetEditorManager::Get();
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
 }
