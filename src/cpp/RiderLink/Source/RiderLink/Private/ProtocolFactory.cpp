@@ -30,22 +30,19 @@ TUniquePtr<rd::Protocol> ProtocolFactory::create(rd::IScheduler & scheduler, rd:
 
         const FString ProjectName = FApp::GetProjectName();
         const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath, TEXT("Jetbrains"), TEXT("Rider"),
-                                                              TEXT("Unreal"), *ProjectName, TEXT("Ports"));
-        const FString PortFileFullPath = FPaths::Combine(PortFullDirectoryPath, PORT_FILE_NAME);
-        const FString PortFileClosedPath = FPaths::Combine(PortFullDirectoryPath,
-                                                           FString(PORT_FILE_NAME).Append(CLOSED_FILE_EXTENSION));
+                                                              TEXT("Unreal"), TEXT("Ports"));
+        const FString PortFileFullPath = FPaths::Combine(PortFullDirectoryPath, *ProjectName);
+        
         rd::minimum_level_to_log = rd::LogLevel::Fatal;
         auto wire = std::make_shared<rd::SocketWire::Server>(socketLifetime, &scheduler, 0,
                                                              TCHAR_TO_UTF8(
                                                                  *FString::Printf(TEXT("UnrealEditorServer-%s"), *
                                                                      ProjectName)));
         auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, &scheduler, wire, socketLifetime);
-       
 
         auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
         if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath)) {
             FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *PortFileFullPath);
-            FFileHelper::SaveStringToFile("", *PortFileClosedPath);
         }
         wire->connected.advise(socketLifetime, [](bool value) {
             if (value) {
@@ -56,11 +53,8 @@ TUniquePtr<rd::Protocol> ProtocolFactory::create(rd::IScheduler & scheduler, rd:
             }
         });
 
-        socketLifetime->add_action([&, PortFileFullPath, PortFileClosedPath] {
+        socketLifetime->add_action([&, PortFileFullPath] {
             if (!PlatformFile.DeleteFile(*PortFileFullPath)) {
-                //log error
-            }
-            if (!PlatformFile.DeleteFile(*PortFileClosedPath)) {
                 //log error
             }
         });

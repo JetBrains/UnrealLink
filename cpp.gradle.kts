@@ -95,7 +95,7 @@ tasks {
         dependsOn(patchUpluginVersion)
         doLast {
             val unrealProjectPath = getUnrealEngineProject.extra["UnrealProjectPath"] as File
-            val targetDir = File("$unrealProjectPath/Plugins/RiderLink")
+            val targetDir = File("$unrealProjectPath/Plugins/Developer/RiderLink")
 
             if(targetDir.exists()) {
                 val stdOut = ByteArrayOutputStream()
