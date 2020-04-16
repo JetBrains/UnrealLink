@@ -42,9 +42,8 @@ namespace RiderPlugin.UnrealLink
             myBoundSettingsStore = settingsStore.BindToContextLive(myLifetime, ContextRange.Smart(solution.ToDataContext()));
             myPluginDetector = pluginDetector;
             
-            myPluginDetector.InstallInfoProperty.Change.Advise_NoAcknowledgement(myLifetime, installInfo =>
+            myPluginDetector.InstallInfoProperty.Change.Advise_NewNotNull(myLifetime, installInfo =>
             {
-                if (!installInfo.HasNew || installInfo.New == null) return;
                 myShellLocks.ExecuteOrQueueReadLockEx(myLifetime, "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
                     () =>
                     {
@@ -153,9 +152,8 @@ namespace RiderPlugin.UnrealLink
         private void BindToInstallationSettingChange()
         {
             var entry = myBoundSettingsStore.Schema.GetScalarEntry((UnrealLinkSettings s) => s.InstallRiderLinkPlugin);
-            myBoundSettingsStore.GetValueProperty<bool>(myLifetime, entry, null).Change.Advise_NoAcknowledgement(myLifetime, args =>
+            myBoundSettingsStore.GetValueProperty<bool>(myLifetime, entry, null).Change.Advise_When(myLifetime, newValue => newValue, args =>
             {
-                if (!args.GetNewOrNull()) return;
                 myShellLocks.ExecuteOrQueueReadLockEx(myLifetime, "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
                     InstallPluginIfInfoAvailable);
             });

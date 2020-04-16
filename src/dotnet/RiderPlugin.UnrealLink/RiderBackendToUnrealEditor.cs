@@ -36,8 +36,6 @@ namespace RiderPlugin.UnrealLink
         private readonly IShellLocks myLocks;
         private SequentialLifetimes myConnectionLifetimeProducer;
 
-        private Tuple<String, int> myConnection = null;
-
         public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, IScheduler dispatcher, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator,
             UnrealPluginDetector pluginDetector)

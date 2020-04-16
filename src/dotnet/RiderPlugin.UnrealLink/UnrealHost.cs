@@ -1,5 +1,6 @@
 using System;
 using JetBrains.Application.Threading;
+using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Base;
@@ -29,12 +30,9 @@ namespace RiderPlugin.UnrealLink
 
             myLifetime = lifetime;   
             myModel = solution.GetProtocolSolution().GetRdRiderModel();
-            solutionDetector.IsUE4Solution_Observable.Change.Advise(myLifetime, args =>
+            solutionDetector.IsUE4Solution_Observable.Change.Advise_HasNew(myLifetime, args =>
             {
-                if (args.HasNew)
-                {
                     myModel.IsUnrealEngineSolution.Set(args.New == TriBool.True);
-                }
             });
         }
 

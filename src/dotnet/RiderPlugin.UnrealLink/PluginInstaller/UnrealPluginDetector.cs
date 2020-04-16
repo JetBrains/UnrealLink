@@ -31,56 +31,57 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
         private Version myUnrealVersion = null;
-        public Version UnrealVersion => myUnrealVersion == null? new Version(0, 0,0 ) : myUnrealVersion;
-        
+        public Version UnrealVersion => myUnrealVersion == null ? new Version(0, 0, 0) : myUnrealVersion;
+
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
             CppUE4SolutionDetector solutionDetector, ISolution solution)
         {
             myLifetime = lifetime;
-            InstallInfoProperty = new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
+            InstallInfoProperty =
+                new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLogger = logger;
             myUnrealHost = unrealHost;
             mySolution = solution;
             mySolutionDetector = solutionDetector;
-            mySolutionDetector.IsUE4Solution_Observable.Change.Advise_NoAcknowledgement(myLifetime, isUESolution =>
-            {
-                if (!isUESolution.HasNew || isUESolution.New != TriBool.True) return;
-                
-                myUnrealVersion = new Version(4, mySolutionDetector.UE4Version, mySolutionDetector.UE4PatchVersion);
-                
-                var installInfo = new UnrealPluginInstallInfo();
-                var foundEnginePlugin = TryGetEnginePluginFromSolution(mySolution, installInfo);
-
-                var uprojectLocations = mySolution.GetAllProjects().SelectMany(project =>
-                    project.GetAllProjectFiles(projectFile =>
-                    {
-                        var location = projectFile.Location;
-                        if (location == null || !location.ExistsFile) return false;
-                        
-                        return location.ExtensionNoDot == UPROJECT_FILE_FORMAT && location.NameWithoutExtension == project.Name;
-                    })).Select(file => file.Location).ToSet();
-
-                if (!foundEnginePlugin)
+            mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
+                newValue => newValue == TriBool.True, isUESolution =>
                 {
-                    // All projects in the solution are bound to the same engine
-                    // So take first project and use it to find Unreal Engine
-                    foundEnginePlugin =
-                        TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
-                }
+                    myUnrealVersion = new Version(4, mySolutionDetector.UE4Version, mySolutionDetector.UE4PatchVersion);
 
-                if (!foundEnginePlugin)
-                {
-                    // We didn't find Engine plugins, let's gather data about Project plugins
-                    foreach (var uprojectLocation in uprojectLocations)
+                    var installInfo = new UnrealPluginInstallInfo();
+                    var foundEnginePlugin = TryGetEnginePluginFromSolution(mySolution, installInfo);
+
+                    var uprojectLocations = mySolution.GetAllProjects().SelectMany(project =>
+                        project.GetAllProjectFiles(projectFile =>
+                        {
+                            var location = projectFile.Location;
+                            if (location == null || !location.ExistsFile) return false;
+
+                            return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
+                                   location.NameWithoutExtension == project.Name;
+                        })).Select(file => file.Location).ToSet();
+
+                    if (!foundEnginePlugin)
                     {
-                        var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
-                        installInfo.ProjectPlugins.Add(projectPlugin);
+                        // All projects in the solution are bound to the same engine
+                        // So take first project and use it to find Unreal Engine
+                        foundEnginePlugin =
+                            TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
                     }
-                }
 
-                InstallInfoProperty.SetValue(installInfo);
-            });
+                    if (!foundEnginePlugin)
+                    {
+                        // We didn't find Engine plugins, let's gather data about Project plugins
+                        foreach (var uprojectLocation in uprojectLocations)
+                        {
+                            var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
+                            installInfo.ProjectPlugins.Add(projectPlugin);
+                        }
+                    }
+
+                    InstallInfoProperty.SetValue(installInfo);
+                });
         }
 
         private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(FileSystemPath uprojectLocation,
