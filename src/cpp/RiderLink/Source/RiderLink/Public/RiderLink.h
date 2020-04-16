@@ -33,4 +33,6 @@ private:
 	/** Handle to the test dll we will load */
 	RdConnection rdConnection;
 	FRiderOutputDevice outputDevice;
+	bool PlayFromUnreal = false;
+	bool PlayFromRider = false;
 };

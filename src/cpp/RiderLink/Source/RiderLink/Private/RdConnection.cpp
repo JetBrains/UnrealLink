@@ -1,94 +1,98 @@
 #include "RdConnection.hpp"
 
-#include "UE4TypesMarshallers.h"
-
-#include "SocketWire.h"
-#include "Protocol.h"
+// ReSharper disable once CppUnusedIncludeDirective
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 
-#include "Misc/FileHelper.h"
-#include "Misc/Paths.h"
-#include "Runtime/CoreUObject/Public/UObject/Class.h"
-#include "GeneralProjectSettings.h"
-#include "HAL/PlatformFilemanager.h"
-#include "Misc/App.h"
-#include "Windows/WindowsPlatformMisc.h"
+#include "Toolkits/AssetEditorManager.h"
+#include "AssetRegistryModule.h"
+#include "IAssetRegistry.h"
+#include "MessageEndpointBuilder.h"
+#include "Engine/Blueprint.h"
+#include "Framework/Docking/TabManager.h"
+#include "Editor.h"
+
 
 #include "BlueprintProvider.h"
-
-
-constexpr TCHAR PORT_FILE_NAME[] = TEXT("UnrealProtocolPort.txt");
-constexpr TCHAR CLOSED_FILE_EXTENSION[] = TEXT(".closed");
+#include "ProtocolFactory.h"
+#include "RdEditorProtocol/UE4Library/UE4Library.h"
 
 RdConnection::RdConnection():
-	lifetimeDef{rd::Lifetime::Eternal()}
-	, socketLifetimeDef{rd::Lifetime::Eternal()}
-	, lifetime{lifetimeDef.lifetime}
-	, socketLifetime{socketLifetimeDef.lifetime}
-	, scheduler{/*lifetime, "UnrealEditorScheduler"*/} {}
+    lifetimeDef{rd::Lifetime::Eternal()}
+    , socketLifetimeDef{rd::Lifetime::Eternal()}
+    , lifetime{lifetimeDef.lifetime}
+    , socketLifetime{socketLifetimeDef.lifetime}
+    , scheduler{socketLifetime, "UnrealEditorScheduler"} {}
 
 RdConnection::~RdConnection() {
-	socketLifetimeDef.terminate();
-	lifetimeDef.terminate();
+    socketLifetimeDef.terminate();
+    lifetimeDef.terminate();
+}
+
+static void AllowSetForeGroundForEditor(Jetbrains::EditorPlugin::RdEditorModel const& unrealToBackendModel) {
+    static const int32 CurrentProcessId = FPlatformProcess::GetCurrentProcessId();
+    try {
+        const rd::WiredRdTask<bool> Task = unrealToBackendModel.get_allowSetForegroundWindow().sync(CurrentProcessId);
+        if (Task.is_faulted()) {
+            std::cerr << "AllowSetForeGroundForEditor:" << rd::to_string(Task.value_or_throw());
+        }
+        else if (Task.is_succeeded()) {
+            if (!(Task.value_or_throw().unwrap())) {
+                std::cerr << "AllowSetForeGroundForEditor:" + false;
+            }
+        }
+    }
+    catch (std::exception const &e) {
+        std::cerr << "AllowSetForeGroundForEditor:" + rd::to_string(e);
+    }
 }
 
 void RdConnection::init() {
-	_CrtDbgBreak();
+    const FAssetRegistryModule* AssetRegistryModule = &FModuleManager::LoadModuleChecked<FAssetRegistryModule>
+        (AssetRegistryConstants::ModuleName);
 
-	scheduler.queue([this] {
+    auto MessageEndpoint = FMessageEndpoint::Builder(FName("FAssetEditorManager")).Build();
 
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
-		TCHAR CAppDataLocalPath[4096];
-		FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"), CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
-		FString FAppDataLocalPath = CAppDataLocalPath;
-#else
-		const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"));
-#endif
+    AssetRegistryModule->Get().OnAssetAdded().AddLambda([](FAssetData AssetData) {
+        BluePrintProvider::AddAsset(AssetData);
+    });
 
-		const FString ProjectName = FApp::GetProjectName();
-		const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath, TEXT("Jetbrains"), TEXT("Rider"),
-		                                                      TEXT("Unreal"), *ProjectName, TEXT("Ports"));
-		const FString PortFileFullPath = FPaths::Combine(PortFullDirectoryPath, PORT_FILE_NAME);
-		const FString PortFileClosedPath = FPaths::Combine(PortFullDirectoryPath,
-		                                                   FString(PORT_FILE_NAME).Append(CLOSED_FILE_EXTENSION));
-		auto wire = std::make_shared<rd::SocketWire::Server>(socketLifetime, &scheduler, 0,
-		                                                     TCHAR_TO_UTF8(
-			                                                     *FString::Printf(TEXT("UnrealEditorServer-%s"), *
-				                                                     ProjectName)));
-		protocol = std::make_unique<rd::Protocol>(rd::Identities::SERVER, &scheduler, wire, lifetime);
-		unrealToBackendModel.connect(lifetime, protocol.get());
 
-		auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-		if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath)) {
-			FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *PortFileFullPath);
-			FFileHelper::SaveStringToFile("", *PortFileClosedPath);
-		}
-		wire->connected.advise(socketLifetime, [this](bool value) {
-			if (value) {
-				//connected to R#
-			}
-			else {
-				//R# disconnected 
-			}
-		});
+    protocol = ProtocolFactory::create(scheduler, socketLifetime);
+    
+    unrealToBackendModel.connect(lifetime, protocol.Get());
+    Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
+        unrealToBackendModel.get_serialization_context().get_serializers());
 
-		lifetime->add_action([&, PortFileFullPath, PortFileClosedPath] {
-			if (!PlatformFile.DeleteFile(*PortFileFullPath)) {
-				//log error
-			}
-			if (!PlatformFile.DeleteFile(*PortFileClosedPath)) {
-				//log error
-			}
-		});
+    unrealToBackendModel.get_openBlueprint().advise(
+        lifetime, [this, MessageEndpoint](Jetbrains::EditorPlugin::BlueprintReference const& s) {
+            try {
+                AllowSetForeGroundForEditor(unrealToBackendModel);
 
-		unrealToBackendModel.get_isBlueprint().set([](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
-			return BluePrintProvider::IsBlueprint(s.get_pathName(), s.get_graphName());
-		});
-		unrealToBackendModel.get_navigate().advise(lifetime, [this](Jetbrains::EditorPlugin::BlueprintStruct const& s) {
-			BluePrintProvider::OpenBlueprint(s.get_pathName(), s.get_graphName());
-		});
-	});
+                auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+                if (Window->IsWindowMinimized()) {
+                    Window->Restore();
+                } else {
+                    Window->HACK_ForceToFront();
+                }
+                BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
+            } catch (std::exception const& e) {
+                std::cerr << rd::to_string(e);
+            }
+        });
+
+    unrealToBackendModel.get_isBlueprintPathName().set([AssetRegistryModule](FString const& pathName) -> bool {
+        return BluePrintProvider::IsBlueprint(pathName);
+    });
+
+
+    BluePrintProvider::OnBlueprintAdded.BindLambda([this](UBlueprint* Blueprint) {
+        scheduler.queue([this, Blueprint] {
+            unrealToBackendModel.get_onBlueprintAdded().fire(
+                Jetbrains::EditorPlugin::UClass(Blueprint->GetPathName()));
+        });
+    });
 }
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/HideWindowsPlatformTypes.h"

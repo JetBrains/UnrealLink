@@ -1,12 +1,14 @@
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.intellij.tasks.*
+import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.file.Paths
 
 buildscript {
     repositories {
+        mavenCentral()
         maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
         maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
         maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
@@ -15,8 +17,8 @@ buildscript {
     }
 
     dependencies {
-        classpath("gradle.plugin.org.jetbrains.intellij.plugins","gradle-intellij-plugin", "0.4.13")
-        classpath("com.jetbrains.rd", "rd-gen", "0.201.3")
+        classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
+        classpath("com.jetbrains.rd", "rd-gen", "0.201.58")
     }
 }
 
@@ -26,23 +28,23 @@ plugins {
 }
 
 dependencies {
-    compile("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
 
 val repoRoot by extra { project.rootDir }
-val sdkVersion = "2019.3"
+val sdkVersion = "2020.1"
 val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
-val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/ReSharperHostSdk") }
+val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
-val dotNetSolutionId by extra { "resharper_unreal" }
-val dotNetRootId by extra { "ReSharperPlugin" }
-val dotNetBinDir by extra { dotNetDir.resolve( "$dotNetRootId.$dotNetSolutionId").resolve("bin") }
-val dotNetPluginId by extra { "$dotNetRootId.UnrealEditor" }
-val pluginPropsFile by extra { File(dotNetDir, "Plugin.props") }
+val dotNetSolutionId by extra { "UnrealLink" }
+val idePluginId by extra { "RiderPlugin" }
+val dotNetRiderProjectId by extra {"$idePluginId.$dotNetSolutionId"}
+val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
+val dotNetPluginId by extra { "$idePluginId.${project.name}" }
+val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.props") }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
@@ -61,7 +63,7 @@ java {
 
 val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
 
-project.version = (ext.properties.getOrPut("pluginVersion") { "0.0.0.1" } as String)
+project.version = (ext.properties.getOrPut("pluginVersion") { "${properties["productVersion"]}.${properties["BuildCounter"]}" } as String)
 
 tasks {
     withType<PublishTask> {
@@ -70,12 +72,8 @@ tasks {
         if (project.extra.has("password"))
             setPassword(ext["password"] as String)
     }
-    val version = "11_0_2b159"
     withType<RunIdeTask> {
-        jvmArgs("-Xmx4096m")
-    }
-    withType<BuildSearchableOptionsTask> {
-        setJbrVersion(version)
+        maxHeapSize = "4096m"
     }
 }
 kotlin {
@@ -105,30 +103,15 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val nugetPackagesPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes
+val dotNetSdkPath by lazy {
+    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSDkForRdPlugins")
+    assert(sdkPath.isDirectory)
+    println(".NETSDK path: $sdkPath")
 
-    println("SDK path: $sdkPath")
-    val path = File(sdkPath, "lib/ReSharperHostSdk")
-
-    println("NuGet packages: $path")
-    if (!path.isDirectory) error("$path does not exist or not a directory")
-
-    return@lazy path
+    return@lazy sdkPath
 }
 
-val riderSdkPackageVersion by lazy {
-    val sdkPackageName = "JetBrains.Rider.SDK"
-
-    val regex = Regex("${Regex.escape(sdkPackageName)}\\.([\\d\\.]+.*)\\.nupkg")
-    val version = nugetPackagesPath
-            .walk()
-            .mapNotNull { regex.matchEntire(it.name)?.groupValues?.drop(1)?.first() }
-            .singleOrNull() ?: error("$sdkPackageName package is not found in $nugetPackagesPath (or multiple matches)")
-    println("$sdkPackageName version is $version")
-
-    return@lazy version
-}
+apply(from = "cpp.gradle.kts")
 
 tasks {
     val findMsBuild by creating {
@@ -138,12 +121,15 @@ tasks {
             if (isWindows) {
                 exec {
                     executable = "${project.rootDir}/tools/vswhere.exe"
-                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "Microsoft.NET.Sdk", "-property", "installationPath")
+                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "-property", "installationPath")
                     standardOutput = stdout
                     workingDir = project.rootDir
                 }
                 val vsRootDir = stdout.toString().trim()
-                extra["executable"] = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
+                var msBuildPath = "$vsRootDir/MSBuild/Current/Bin/MSBuild.exe"
+                if (!file(msBuildPath).exists())
+                    msBuildPath = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
+                extra["executable"] = msBuildPath
             } else {
                 exec {
                     executable = "which"
@@ -158,11 +144,13 @@ tasks {
 
     val patchPropsFile by creating {
         doLast {
+            if (pluginPropsFile.parentFile.exists().not()) {
+                pluginPropsFile.parentFile.mkdirs()
+            }
             pluginPropsFile.writeText("""
             |<Project>
             |   <PropertyGroup>
-            |       <SdkVersion>${riderSdkPackageVersion}</SdkVersion>
-            |       <Title>resharper_unreal</Title>
+            |       <DotNetSdkPath>${dotNetSdkPath}</DotNetSdkPath>
             |   </PropertyGroup>
             |</Project>""".trimMargin())
         }
@@ -186,17 +174,17 @@ tasks {
             }
 
             if (result.exitValue != 0) {
-                println("${stdout.toString().trim()}")
+                println(stdout.toString().trim())
                 throw GradleException("Problems with compileDotNet task")
             }
         }
 
     }
 
-    val buildPlugin by getting(Zip::class) {
+    @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(compileDotNet)
         outputs.upToDateWhen { false }
-        getByName("buildSearchableOptions") {
+        buildSearchableOptions {
             enabled = buildConfiguration == "Release"
         }
         doLast {
@@ -213,30 +201,20 @@ tasks {
 
             exec {
                 executable = getByName("findMsBuild").extra["executable"] as String
-                args = listOf("/t:Pack", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$version")
+                args = listOf("/t:Pack", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$archiveVersion")
             }
         }
     }
 
     jar.get().dependsOn(":protocol:generateModel")
-}
 
-intellij {
-    type = "RD"
-    version = "$sdkVersion-SNAPSHOT"
-
-    instrumentCode = false
-    downloadSources = false
-    updateSinceUntilBuild = true
-    tasks.withType<PatchPluginXmlTask> {
-//        sinceBuild( prop("sinceBuild"))
-//        untilBuild(prop("untilBuild"))
-    }
-}
-
-tasks {
     withType<PrepareSandboxTask> {
-        dependsOn("compileDotNet")
+        dependsOn(compileDotNet)
+        val packCppSide = getByName<Zip>("packCppSide")
+        dependsOn(packCppSide)
+
+        outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
+
         val outputFolder = dotNetBinDir
                 .resolve(dotNetPluginId)
                 .resolve(buildConfiguration)
@@ -255,8 +233,26 @@ tasks {
             dllFiles.forEach { file ->
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
             }
+            copy {
+                from(packCppSide.archiveFile)
+                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/EditorPlugin")
+            }
         }
     }
 }
 
-apply(from = "cpp.gradle.kts")
+
+intellij {
+    type = "RD"
+    version = "$sdkVersion-SNAPSHOT"
+
+    instrumentCode = false
+    downloadSources = false
+    updateSinceUntilBuild = true
+    tasks.withType<PatchPluginXmlTask> {
+        //        sinceBuild( prop("sinceBuild"))
+//        untilBuild(prop("untilBuild"))
+    }
+}
+
+

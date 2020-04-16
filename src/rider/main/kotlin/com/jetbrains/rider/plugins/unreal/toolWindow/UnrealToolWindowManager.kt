@@ -2,7 +2,10 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
+import com.jetbrains.rider.model.UE4Library
 import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager
+import com.jetbrains.rider.util.idea.getComponent
 import com.jetbrains.rider.util.idea.getLogger
 
 class UnrealToolWindowManager(project: Project,
@@ -13,11 +16,18 @@ class UnrealToolWindowManager(project: Project,
         private val logger = getLogger<UnrealToolWindowManager>()
     }
 
-//    private val context = unrealToolWindowContextFactory
+    val unrealLogViewerManager = project.getComponent<UnrealLogViewerManager>()
 
     init {
-        host.model.unrealLog.advise(componentLifetime) { unrealLogMessage ->
-            unrealToolWindowContextFactory.print(unrealLogMessage)
+        UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
+
+        host.model.isConnectedToUnrealEditor.advise(componentLifetime) {
+            if(it) unrealToolWindowContextFactory.showTabForNewSession()
+        }
+
+        host.model.unrealLog.advise(componentLifetime) { event ->
+            unrealToolWindowContextFactory.print(event)
+            unrealToolWindowContextFactory.flush()
         }
     }
 }

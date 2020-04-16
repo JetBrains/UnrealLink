@@ -28,5 +28,5 @@ src/cpp/RiderLink/Intermediate
 UnrealEngineProjectPath.txt
 
 # RD generated files
-src/cpp/RiderLink/Source/RD
+src/cpp/RiderLink/Source/RD/
 src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol

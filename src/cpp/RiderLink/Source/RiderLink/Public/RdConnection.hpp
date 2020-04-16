@@ -4,10 +4,11 @@
 
 
 //The external headers and defines goes here
-#include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
 #include "IProtocol.h"
-#include "SingleThreadScheduler.h"
+#include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
 #include "SimpleScheduler.h"
+#include "SingleThreadScheduler.h"
+#include "Templates/UniquePtr.h"
 
 
 class RdConnection
@@ -29,8 +30,8 @@ public:
 	rd::Lifetime lifetime;
 	rd::Lifetime socketLifetime;
 
-	rd::SimpleScheduler scheduler;
+	rd::SingleThreadScheduler scheduler;
 
 private:
-	std::unique_ptr<rd::IProtocol> protocol;
+	TUniquePtr<rd::IProtocol> protocol;
 };

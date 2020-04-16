@@ -20,6 +20,12 @@ public class RiderLink : ModuleRules
 				,"Engine"
 				,"Json"
                 ,"UnrealEd"
+                ,"UnrealEdMessages"
+                ,"MessagingCommon"
+                ,"AssetRegistry"
+                ,"ContentBrowser"
+                ,"Slate"
+                ,"SlateCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
         );

@@ -17,8 +17,8 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 
-    compile(files("$rdLibDirectory/rider-model.jar"))
-    compile(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.3")
+    implementation(files("$rdLibDirectory/rider-model.jar"))
+    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.201.58")
 }
 
 val rdLibDirectory: File by rootProject.extra
@@ -32,11 +32,11 @@ configure<RdgenParams> {
     classpath("$rdLibDirectory/rider-model.jar", sourceSets.main.get().output)
 }
 tasks {
-    val unrealEditorCppOutput = File(repoRoot,"src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol")
-    val csEditorOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdEditorProtocol")
-    val csRiderOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/RdRiderProtocol")
-    val csLibraryOutput = File(repoRoot, "src/dotnet/ReSharperPlugin.resharper_unreal/obj/model/Library")
-    val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/obj/model/RdRiderProtocol")
+    val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol")
+    val csEditorOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdEditorProtocol")
+    val csRiderOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdRiderProtocol")
+    val csLibraryOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/Library")
+    val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
 
 
     val generateRiderModel by creating(RdgenTask::class) {
@@ -93,7 +93,7 @@ tasks {
         }
     }
 
-    val generateModel by creating {
+    @Suppress("UNUSED_VARIABLE") val generateModel by creating {
         group = "protocol"
         description = "Generates protocol models."
         dependsOn(generateRiderModel, generateEditorPluginModel, generateUE4Lib)

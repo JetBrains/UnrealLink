@@ -5,8 +5,10 @@ import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.BlueprintStruct
+import model.lib.ue4.UE4Library.UClass
+import model.lib.ue4.UE4Library.BlueprintReference
 import model.lib.ue4.UE4Library.FString
+import model.lib.ue4.UE4Library.StringRange
 
 @Suppress("unused")
 object RdRiderModel : Ext(SolutionModel.Solution) {
@@ -16,15 +18,53 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         }
     }
 
+    val LinkRequest = structdef("LinkRequest") {
+        field("data", FString)
+    }
+
+    val ILinkResponse = basestruct("ILinkResponse") {}
+
+    val LinkResponseBlueprint = structdef("LinkResponseBlueprint") extends ILinkResponse {
+        field("fullPath", FString)
+        field("range", StringRange)
+    }
+
+    val LinkResponseFilePath = structdef("LinkResponseFilePath") extends ILinkResponse {
+        field("fullPath", FString)
+        field("range", StringRange)
+    }
+
+    val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends  ILinkResponse {}
+
+    private val MethodReference = structdef("MethodReference") {
+        field("class", UClass)
+        field("method", FString)
+
+        const("separator", string, "::")
+    }
+
     init {
+        property("editorId", 0).readonly.async
+        property("play", int)
+        property("playMode", int)
+        signal("frameSkip", bool)
 
+        signal("unrealLog", UE4Library.UnrealLogEvent)
 
-        property("testConnection", int.nullable)
-        property("play", bool)
+        call("filterLinkCandidates", immutableList(LinkRequest), array(ILinkResponse)).async
+        call("isMethodReference", MethodReference, bool).async
 
-        signal("unrealLog", UE4Library.UnrealLogMessage)
+        signal("navigateToMethod", MethodReference)
+        signal("navigateToClass", UClass)
 
-        call("isBlueprint", BlueprintStruct, bool).async
-        signal("navigate", BlueprintStruct)
+        signal("openBlueprint", BlueprintReference)
+
+        callback("AllowSetForegroundWindow", int, bool)
+
+        property("isConnectedToUnrealEditor", false).readonly.async
+        property("isUnrealEngineSolution", false)
+
+        sink("onEditorModelOutOfSync", void)
+        source("installEditorPlugin", void)
     }
 }
