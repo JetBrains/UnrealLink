@@ -3,21 +3,20 @@ using System.IO;
 using System.IO.Compression;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading;
+using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
+using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
 using Newtonsoft.Json.Linq;
-using JetBrains.Collections.Viewable;
-using JetBrains.Rider.Model.Notifications;
-using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Settings;
 
-namespace RiderPlugin.UnrealLink
+namespace RiderPlugin.UnrealLink.PluginInstaller
 {
     [SolutionComponent]
     public class UnrealPluginInstaller
