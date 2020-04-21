@@ -151,7 +151,7 @@ namespace RiderPlugin.UnrealLink
             }
             catch (Exception e)
             {
-                myLogger.Log(LoggingLevel.WARN, $@"Couldn't patch 'Type' field of {upluginFile}", e);
+                myLogger.Warn($"Couldn't patch 'Type' field of {upluginFile}", e);
             }
         }
 
