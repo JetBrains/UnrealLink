@@ -16,6 +16,7 @@ using JetBrains.Util;
 using JetBrains.Util.Interop;
 using Newtonsoft.Json.Linq;
 using RiderPlugin.UnrealLink.Settings;
+using RiderPlugin.UnrealLink.Utils;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
@@ -31,6 +32,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly NotificationsModel myNotificationsModel;
         private IContextBoundSettingsStoreLive myBoundSettingsStore;
         private UnrealPluginDetector myPluginDetector;
+        private ProcessingQueue myQueue;
         private const string TMP_PREFIX = "UnrealLink";
 
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
@@ -47,6 +49,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myBoundSettingsStore =
                 settingsStore.BindToContextLive(myLifetime, ContextRange.Smart(solution.ToDataContext()));
             myPluginDetector = pluginDetector;
+            myQueue = new ProcessingQueue(myShellLocks, myLifetime);
 
             myPluginDetector.InstallInfoProperty.Change.Advise_NewNotNull(myLifetime, installInfo =>
             {
@@ -76,11 +79,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             return;
                         }
 
-                        InstallPluginIfRequired(unrealPluginInstallInfo);
+                        QueueInstall(unrealPluginInstallInfo);
                     });
             });
             BindToInstallationSettingChange();
             BindToNotificationFixAction();
+        }
+
+        private void QueueInstall(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        {
+            myQueue.Enqueue(() => InstallPluginIfRequired(unrealPluginInstallInfo) );
         }
 
         private void InstallPluginIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo)
@@ -90,7 +98,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
             {
                 if (installDescription.PluginVersion == myPathsProvider.CurrentPluginVersion) continue;
-
+                
+                myLogger.Info($"[UnrealLink]: Installing plugin for {installDescription.UprojectFilePath}");
                 var pluginDir = installDescription.UnrealPluginRootFolder;
                 var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
                 
@@ -161,9 +170,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         $"[UnrealLink]: Couldn't copy from {pluginTmpDir} to {pluginDir}");
                 }
                 
+                
+                var notification = new NotificationModel("Unreal Editor plugin installed",
+                    "<html>Unreal Editor plugin was installed to:<br>" +
+                    $"<b>{pluginDir}<b>" +
+                    "</html>", true, RdNotificationEntryType.INFO);
+
+                myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.InstallPlugin",
+                    () => { myNotificationsModel.Notification(notification); });
 
                 backupDir.Delete();
                 pluginTmpDir.Delete();
+                
+                installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
+                installDescription.IsPluginAvailable = true;
 
                 needToRegenerateProjectFiles = true;
             }
@@ -216,7 +236,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
             if (unrealPluginInstallInfo != null)
             {
-                InstallPluginIfRequired(unrealPluginInstallInfo);
+                QueueInstall(unrealPluginInstallInfo);
             }
         }
 
@@ -229,6 +249,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     myShellLocks.ExecuteOrQueueReadLockEx(myLifetime,
                         "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
                         InstallPluginIfInfoAvailable);
+                });
+                model.EnableAutoupdatePlugin.AdviseNotNull(myLifetime, unit =>
+                {
+                    myBoundSettingsStore.SetValue<UnrealLinkSettings, bool>(s => s.InstallRiderLinkPlugin, true);
                 });
             });
         }

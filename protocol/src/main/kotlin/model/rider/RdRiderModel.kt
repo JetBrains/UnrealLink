@@ -66,5 +66,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         sink("onEditorModelOutOfSync", void)
         source("installEditorPlugin", void)
+        source("enableAutoupdatePlugin", void)
     }
 }

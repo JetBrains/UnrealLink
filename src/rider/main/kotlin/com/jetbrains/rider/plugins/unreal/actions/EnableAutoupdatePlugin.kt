@@ -5,10 +5,10 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.jetbrains.rider.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
-open class InstallEditorPluginAction : DumbAwareAction() {
+open class EnableAutoupdatePlugin : DumbAwareAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         e.presentation.isEnabled = false
-        project.solution.rdRiderModel.installEditorPlugin.fire(Unit)
+        project.solution.rdRiderModel.enableAutoupdatePlugin.fire(Unit)
     }
 }

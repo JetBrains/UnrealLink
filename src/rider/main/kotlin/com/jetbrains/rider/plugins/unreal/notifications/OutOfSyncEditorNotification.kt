@@ -21,8 +21,8 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
             val message = "The RiderLink Unreal Editor plugin is out of date and automatic plugin updates are disabled. Advanced Unreal integration features are unavailable until the plugin is updated."
 
             val notification = Notification(notificationGroupId.displayId, "Unreal Editor plugin update required", message, NotificationType.WARNING)
-            val action = ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginAction")
-            notification.addAction(action)
+            notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginAction"))
+            notification.addAction(ActionManager.getInstance().getAction("UnrealLink.EnableAutoupdatePlugin"))
             Notifications.Bus.notify(notification, project)
         }
     }

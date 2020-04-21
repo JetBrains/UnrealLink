@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.Application.Threading;
@@ -71,16 +72,19 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                     var installInfo = new UnrealPluginInstallInfo();
                     var foundEnginePlugin = TryGetEnginePluginFromSolution(mySolution, installInfo);
+                    ISet<FileSystemPath> uprojectLocations;
+                    using (solution.Locks.UsingReadLock())
+                    {
+                        uprojectLocations = mySolution.GetAllProjects().SelectMany(project =>
+                            project.GetAllProjectFiles(projectFile =>
+                            {
+                                var location = projectFile.Location;
+                                if (location == null || !location.ExistsFile) return false;
 
-                    var uprojectLocations = mySolution.GetAllProjects().SelectMany(project =>
-                        project.GetAllProjectFiles(projectFile =>
-                        {
-                            var location = projectFile.Location;
-                            if (location == null || !location.ExistsFile) return false;
-
-                            return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
-                                   location.NameWithoutExtension == project.Name;
-                        })).Select(file => file.Location).ToSet();
+                                return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
+                                       location.NameWithoutExtension == project.Name;
+                            })).Select(file => file.Location).ToSet();
+                    }
                     
                     myLogger.Info($"[UnrealLink]: Found {uprojectLocations.Count} uprojects");
 
