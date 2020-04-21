@@ -48,11 +48,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost = unrealHost;
             mySolution = solution;
             mySolutionDetector = solutionDetector;
+            
             mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
                 newValue => newValue == TriBool.True, isUESolution =>
                 {
+                    myLogger.Info("[UnrealLink]: Looking for RiderLink plugins");
                     myUnrealVersion = new Version(4, mySolutionDetector.UE4Version, mySolutionDetector.UE4PatchVersion);
-
+                    
                     if (myUnrealVersion < myMinimalSupportedVersion)
                     {
                         var notification = new NotificationModel("Unreal Engine 4.20.0+ is required", 
@@ -79,8 +81,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
                                    location.NameWithoutExtension == project.Name;
                         })).Select(file => file.Location).ToSet();
+                    
+                    myLogger.Info($"[UnrealLink]: Found {uprojectLocations.Count} uprojects");
 
-                    if (!foundEnginePlugin)
+                    if (!foundEnginePlugin && !uprojectLocations.IsEmpty())
                     {
                         // All projects in the solution are bound to the same engine
                         // So take first project and use it to find Unreal Engine
@@ -93,7 +97,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         // We didn't find Engine plugins, let's gather data about Project plugins
                         foreach (var uprojectLocation in uprojectLocations)
                         {
+                            myLogger.Info($"[UnrealLink]: Looking for plugin in {uprojectLocation}");
                             var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
+                            if (projectPlugin.IsPluginAvailable)
+                            {
+                                myLogger.Info($"[UnrealLink]: found plugin {projectPlugin.UnrealPluginRootFolder}");
+                            }
                             installInfo.ProjectPlugins.Add(projectPlugin);
                         }
                     }
@@ -120,7 +129,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return TryGetEnginePluginFromEngineRoot(installInfo, unrealEngineRoot);
         }
 
-        private static bool TryGetEnginePluginFromSolution(ISolution solution, UnrealPluginInstallInfo installInfo)
+        private bool TryGetEnginePluginFromSolution(ISolution solution, UnrealPluginInstallInfo installInfo)
         {
             var engineProject = solution.GetProjectsByName("UE4").FirstNotNull();
             if (engineProject?.ProjectFile == null) return false;
@@ -130,11 +139,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return TryGetEnginePluginFromEngineRoot(installInfo, engineRootFolder);
         }
 
-        private static bool TryGetEnginePluginFromEngineRoot(UnrealPluginInstallInfo installInfo,
+        private bool TryGetEnginePluginFromEngineRoot(UnrealPluginInstallInfo installInfo,
             FileSystemPath engineRootFolder)
         {
             var upluginFilePath = engineRootFolder / ourPathToEnginePlugin;
             installInfo.EnginePlugin = GetPluginInfo(upluginFilePath);
+            if(installInfo.EnginePlugin.IsPluginAvailable)
+            {
+                myLogger.Info($"[UnrealLink]: found plugin {installInfo.EnginePlugin.UnrealPluginRootFolder}");
+            }
             return installInfo.EnginePlugin.IsPluginAvailable;
         }
 

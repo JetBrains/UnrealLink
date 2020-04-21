@@ -31,7 +31,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly NotificationsModel myNotificationsModel;
         private IContextBoundSettingsStoreLive myBoundSettingsStore;
         private UnrealPluginDetector myPluginDetector;
-        private const string TMP_PREFIX = "UnrealLink_";
+        private const string TMP_PREFIX = "UnrealLink";
 
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
             PluginPathsProvider pathsProvider, ISolution solution, ISettingsStore settingsStore,
@@ -58,7 +58,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
                         {
                             // TODO: add install plugin to Engine
-                            myLogger.Info("Plugin is already installed in Engine");
+                            myLogger.Info("[UnrealLink]: Plugin is already installed in Engine");
                             return;
                         }
 
@@ -93,15 +93,23 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                 var pluginDir = installDescription.UnrealPluginRootFolder;
                 var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+                
                 try
                 {
                     if (pluginDir.ExistsDirectory)
-                        pluginDir.Move(backupDir);
+                    {
+                        pluginDir.Copy(backupDir);
+                        pluginDir.DeleteChildren();
+                    }
+                    else
+                    {
+                        pluginDir.CreateDirectory();
+                    }
                 }
                 catch (Exception exception)
                 {
                     myLogger.Error(exception, ExceptionOrigin.Algorithmic,
-                        "Couldn't backup original RiderLink plugin folder");
+                        "[UnrealLink]: Couldn't backup original RiderLink plugin folder");
                     backupDir.Delete();
                     continue;
                 }
@@ -116,9 +124,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 catch (Exception exception)
                 {
                     myLogger.Error(exception, ExceptionOrigin.Algorithmic,
-                        $"Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
+                        $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
                     if (backupDir.ExistsDirectory)
-                        backupDir.Move(pluginDir);
+                        backupDir.Copy(pluginDir);
                     pluginTmpDir.Delete();
                     backupDir.Delete();
                     continue;
@@ -128,7 +136,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 if (!PatchTypeOfUpluginFile(upluginFile, myLogger, myPluginDetector.UnrealVersion))
                 {
                     if (backupDir.ExistsDirectory)
-                        backupDir.Move(pluginDir);
+                        backupDir.Copy(pluginDir);
                     backupDir.Delete();
                     pluginTmpDir.Delete();
                     continue;
@@ -142,8 +150,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 //     myLogger.Warn($"Failed to build RiderLink for {installDescription.UprojectFilePath.NameWithoutExtension}. Copying source files instead");
                 //     pluginTmpDir.Move(pluginDir);
                 // }
+                try
+                {
+                    pluginTmpDir.Copy(pluginDir);
+                }
+                catch (Exception exception)
+                {
+                    
+                    myLogger.Error(exception, ExceptionOrigin.Algorithmic,
+                        $"[UnrealLink]: Couldn't copy from {pluginTmpDir} to {pluginDir}");
+                }
                 
-                pluginTmpDir.Move(pluginDir);
 
                 backupDir.Delete();
                 pluginTmpDir.Delete();
@@ -175,7 +192,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             catch (Exception e)
             {
-                logger.Error($"Couldn't patch 'Type' field of {upluginFile}", e);
+                logger.Error($"[UnrealLink]: Couldn't patch 'Type' field of {upluginFile}", e);
                 return false;
             }
 
@@ -220,7 +237,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             if (uprojectFilePath.IsNullOrEmpty())
             {
-                myLogger.Error($"Failed refresh project files, couldn't find uproject path: {uprojectFilePath}");
+                myLogger.Error($"[UnrealLink]: Failed refresh project files, couldn't find uproject path: {uprojectFilePath}");
                 return;
             }
 
@@ -235,7 +252,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             // 3. If UVS is missing or have failed, fallback to UnrealBuildTool
             if (RegenerateProjectUsingUBT(uprojectFilePath, pathToUnrealBuildToolBin, engineRoot)) return;
 
-            myLogger.Error("Couldn't refresh project files");
+            myLogger.Error("[UnrealLink]: Couldn't refresh project files");
             var notification = new NotificationModel($"Failed to refresh project files",
                 "<html>RiderLink has been successfully installed to the project:<br>" +
                 $"<b>{uprojectFilePath.NameWithoutExtension}<b>" +
@@ -249,13 +266,22 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private bool GenerateProjectFilesUsingBat(FileSystemPath engineRoot)
         {
             var isProjectUnderEngine = mySolution.SolutionFilePath.Directory == engineRoot;
-            if (!isProjectUnderEngine) return false;
+            if (!isProjectUnderEngine)
+            {
+                myLogger.Info($"[UnrealLink]: {mySolution.SolutionFilePath} is not in {engineRoot} ");
+                return false;
+            }
 
             var generateProjectFilesBat = engineRoot / "GenerateProjectFiles.bat";
-            if (!generateProjectFilesBat.ExistsFile) return false;
+            if (!generateProjectFilesBat.ExistsFile)
+            {
+                myLogger.Info($"[UnrealLink]: {generateProjectFilesBat} is not available");
+                return false;
+            }
 
             try
             {
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {generateProjectFilesBat}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     generateProjectFilesBat,
                     null,
@@ -268,7 +294,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             catch (ErrorLevelException errorLevelException)
             {
                 myLogger.Error(errorLevelException,
-                    $"Failed refresh project files, calling {generateProjectFilesBat} went wrong");
+                    $"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesBat} went wrong");
                 return false;
             }
 
@@ -279,7 +305,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var pathToUnrealVersionSelector =
                 engineRoot / "Engine" / "Binaries" / "Win64" / "UnrealVersionSelector.exe";
-            if (!pathToUnrealVersionSelector.ExistsFile) return false;
+            if (!pathToUnrealVersionSelector.ExistsFile)
+            {
+                myLogger.Info($"[UnrealLink]: {pathToUnrealVersionSelector} is not available");
+                return false;
+            }
 
             var commandLine = new CommandLineBuilderJet()
                 .AppendSwitch("/projectFiles")
@@ -287,6 +317,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {pathToUnrealVersionSelector} {commandLine}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     pathToUnrealVersionSelector,
                     commandLine,
@@ -298,7 +329,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             catch (ErrorLevelException errorLevelException)
             {
-                myLogger.Error(errorLevelException, "Failed refresh project files, calling UVS went wrong");
+                myLogger.Error(errorLevelException, $"[UnrealLink]: Failed refresh project files: calling {pathToUnrealVersionSelector} {commandLine}");
                 return false;
             }
 
@@ -312,14 +343,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var commandLine = new CommandLineBuilderJet()
                 .AppendSwitch("-ProjectFiles")
-                .AppendFileName(uprojectFilePath)
-                .AppendSwitch("-game")
-                .AppendSwitch("-engine");
+                .AppendSwitch($"-project=\"{uprojectFilePath.FullPath}\"")
+                .AppendSwitch("-game");
+                
             if (isInstalledBuild)
                 commandLine.AppendSwitch("-rocket");
-
+            else
+                commandLine.AppendSwitch("-engine");
+            
             try
             {
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {pathToUnrealBuildToolBin} {commandLine}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     pathToUnrealBuildToolBin,
                     commandLine,
@@ -331,7 +365,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             catch (ErrorLevelException errorLevelException)
             {
-                myLogger.Error(errorLevelException, "Failed refresh project files, calling UBT went wrong");
+                myLogger.Error(errorLevelException, $"[UnrealLink]: Failed refresh project files: calling {pathToUnrealBuildToolBin} {commandLine}");
                 return false;
             }
 
@@ -360,7 +394,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pathToUat = engineRoot / "Engine" / "Build" / "BatchFiles" / "RunUAT.bat";
             if (!pathToUat.ExistsFile)
             {
-                myLogger.Error("Failed build plugin: RunUAT.bat is not available");
+                myLogger.Error("[UnrealLink]: Failed build plugin: RunUAT.bat is not available");
                 return false;
             }
 
@@ -383,13 +417,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 process.WaitForExit(1000*60);
                 if (process.ExitCode != 0)
                 {
-                    myLogger.Error("Failed build plugin: calling RunUAT.bat went wrong");
+                    myLogger.Error("[UnrealLink]: Failed build plugin: calling RunUAT.bat went wrong");
                     return false;
                 }
             }
             catch (Exception exception)
             {
-                myLogger.Error(exception, "Failed build plugin: calling RunUAT.bat went wrong");
+                myLogger.Error(exception, "[UnrealLink]: Failed build plugin: calling RunUAT.bat went wrong");
                 return false;
             }
 

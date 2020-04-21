@@ -250,8 +250,7 @@ intellij {
     downloadSources = false
     updateSinceUntilBuild = true
     tasks.withType<PatchPluginXmlTask> {
-        //        sinceBuild( prop("sinceBuild"))
-//        untilBuild(prop("untilBuild"))
+        sinceBuild( "201.7189.51")
     }
 }
 
