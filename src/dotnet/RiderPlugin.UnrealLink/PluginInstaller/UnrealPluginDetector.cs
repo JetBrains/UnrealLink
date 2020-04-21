@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
+using JetBrains.Application.Threading;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
+using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
+using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
@@ -32,10 +35,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private Version myUnrealVersion = null;
         public Version UnrealVersion => myUnrealVersion == null ? new Version(0, 0, 0) : myUnrealVersion;
+        private readonly Version myMinimalSupportedVersion = new Version(4, 20, 0); 
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
-            CppUE4SolutionDetector solutionDetector, ISolution solution)
+            CppUE4SolutionDetector solutionDetector, ISolution solution, NotificationsModel notificationsModel, IShellLocks locks)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
@@ -48,6 +52,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 newValue => newValue == TriBool.True, isUESolution =>
                 {
                     myUnrealVersion = new Version(4, mySolutionDetector.UE4Version, mySolutionDetector.UE4PatchVersion);
+
+                    if (myUnrealVersion < myMinimalSupportedVersion)
+                    {
+                        var notification = new NotificationModel("Unreal Engine 4.20.0+ is required", 
+                            "<html>UnrealLink supports Unreal Engine versions starting with 4.20.0<br>"+
+                            "<b>WARNING: Advanced users only</b><br>"+
+                            "You can manually download the latest version of plugin and build It for your version of Unreal Editor<br>" +
+                            RiderContextNotificationHelper.MakeLink("https://github.com/JetBrains/UnrealLink/releases", "Download latest Unreal Editor plugin") +
+                            "</html>",
+                            true,
+                            RdNotificationEntryType.WARN);
+                        locks.ExecuteOrQueue(myLifetime, "UnrealLink.CheckSupportedVersion",() => notificationsModel.Notification(notification));
+                        return;
+                    }
 
                     var installInfo = new UnrealPluginInstallInfo();
                     var foundEnginePlugin = TryGetEnginePluginFromSolution(mySolution, installInfo);
