@@ -12,7 +12,11 @@ void BluePrintProvider::AddBlueprint(UBlueprint* Blueprint) {
 }
 
 void BluePrintProvider::AddAsset(FAssetData AssetData) {
+#if ENGINE_MINOR_VERSION < 23
+    UObject* cls = AssetData.GetAsset();
+#else
     UObject* cls = AssetData.FastGetAsset();
+#endif
     if (cls) {
         UBlueprint* Blueprint = Cast<UBlueprint>(cls);
         if (Blueprint && Blueprint->IsValidLowLevel()) {

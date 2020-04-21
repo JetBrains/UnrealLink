@@ -13,6 +13,7 @@
 #include "EditorViewportClient.h"
 #if ENGINE_MINOR_VERSION < 24
 #include "ILevelViewport.h"
+#include "LevelEditorViewport.h"
 #else
 #include "IAssetViewport.h"
 #endif
@@ -105,8 +106,13 @@ static void RequestPlay(int mode) {
   const FRotator *StartRotation = nullptr;
   if (!atPlayerStart && slateApplication && ActiveLevelViewport.IsValid() &&
       slateApplication->FindWidgetWindow(ActiveLevelViewport->AsWidget()).IsValid()) {
+#if ENGINE_MINOR_VERSION < 24
+    StartLocation = &ActiveLevelViewport->GetLevelViewportClient().GetViewLocation();
+    StartRotation = &ActiveLevelViewport->GetLevelViewportClient().GetViewRotation();
+#else
     StartLocation = &ActiveLevelViewport->GetAssetViewportClient().GetViewLocation();
     StartRotation = &ActiveLevelViewport->GetAssetViewportClient().GetViewRotation();
+#endif
   }
   
   if (playMode == PlayMode_InEditorFloating) {
