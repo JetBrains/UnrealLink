@@ -13,6 +13,7 @@ using JetBrains.Util;
 using JetBrains.Util.Interop;
 using Newtonsoft.Json.Linq;
 using JetBrains.Collections.Viewable;
+using JetBrains.Rider.Model.Notifications;
 using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Settings;
 
@@ -24,21 +25,25 @@ namespace RiderPlugin.UnrealLink
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
         private readonly PluginPathsProvider myPathsProvider;
+        private readonly ISolution mySolution;
         private readonly IShellLocks myShellLocks;
         private readonly UnrealHost myUnrealHost;
+        private readonly NotificationsModel myNotificationsModel;
         private IContextBoundSettingsStoreLive myBoundSettingsStore;
         private UnrealPluginDetector myPluginDetector;
         private const string BACKUP_SUFFIX = ".backup";
 
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
             PluginPathsProvider pathsProvider, ISolution solution, ISettingsStore settingsStore,
-        IShellLocks shellLocks, UnrealHost unrealHost)
+        IShellLocks shellLocks, UnrealHost unrealHost, NotificationsModel notificationsModel)
         {
             myLifetime = lifetime;
             myLogger = logger;
             myPathsProvider = pathsProvider;
+            mySolution = solution;
             myShellLocks = shellLocks;
             myUnrealHost = unrealHost;
+            myNotificationsModel = notificationsModel;
             myBoundSettingsStore = settingsStore.BindToContextLive(myLifetime, ContextRange.Smart(solution.ToDataContext()));
             myPluginDetector = pluginDetector;
             
@@ -51,6 +56,7 @@ namespace RiderPlugin.UnrealLink
                         if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
                         {
                             // TODO: add install plugin to Engine
+                            return;
                         };
 
                         if (!myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin))
@@ -183,15 +189,105 @@ namespace RiderPlugin.UnrealLink
 
         private void RegenerateProjectFiles(FileSystemPath uprojectFilePath)
         {
-            if (uprojectFilePath == null || uprojectFilePath.IsEmpty) return;
-            // {UnrealEngineRoot}/Engine/Binaries/DotNET/UnrealBuildTool.exe  -projectfiles {uprojectFilePath} -game -engine
+            if (uprojectFilePath.IsNullOrEmpty())
+            {
+                myLogger.Error($"Failed refresh project files, couldn't find uproject path: {uprojectFilePath}");
+                return;
+            }
+            
             var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectFilePath);
             var pathToUnrealBuildToolBin = UnrealEngineFolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
+
+            // 1. If project is under engine root, use GenerateProjectFiles.bat first
+            if (GenerateProjectFilesUsingBat(engineRoot)) return;
+            // 2. If it's a standalone project, use UnrealVersionSelector
+            //    The same way "Generate project files" from context menu of .uproject works
+            if (RegenerateProjectUsingUVS(uprojectFilePath, engineRoot)) return;
+            // 3. If UVS is missing or have failed, fallback to UnrealBuildTool
+            if (RegenerateProjectUsingUBT(uprojectFilePath, pathToUnrealBuildToolBin, engineRoot)) return;
+            
+            myLogger.Error("Couldn't refresh project files");
+            var notification = new NotificationModel($"Failed to refresh project files", "<html>RiderLink has been successfully installed to the project:<br>" +
+                                                                                         "<b>{uprojectFilePath.ExtensionNoDot}<b>" +
+                                                                                         "but refresh project action has failed.<br>" +
+                                                                                         "</html>", true, RdNotificationEntryType.WARN);
+            
+            myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.RefreshProject", () =>
+            {
+                myNotificationsModel.Notification(notification);
+            });
+        }
+
+        private bool GenerateProjectFilesUsingBat(FileSystemPath engineRoot)
+        { 
+            var isProjectUnderEngine = mySolution.SolutionFilePath.Directory == engineRoot;
+            if (!isProjectUnderEngine) return false;
+            
+            var generateProjectFilesBat = engineRoot / "GenerateProjectFiles.bat";
+            if (!generateProjectFilesBat.ExistsFile) return false;
+            
+            try
+            {
+                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
+                    generateProjectFilesBat,
+                    null,
+                    LoggingLevel.INFO,
+                    TimeSpan.FromMinutes(1),
+                    InvokeChildProcess.TreatStderr.AsOutput,
+                    generateProjectFilesBat.Directory
+                ));
+            }
+            catch (ErrorLevelException errorLevelException)
+            {
+                myLogger.Error(errorLevelException, $"Failed refresh project files, calling {generateProjectFilesBat} went wrong");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool RegenerateProjectUsingUVS(FileSystemPath uprojectFilePath, FileSystemPath engineRoot)
+        {
+            var pathToUnrealVersionSelector = engineRoot / "Engine"/ "Binaries" / "Win64" / "UnrealVersionSelector.exe";
+            if (!pathToUnrealVersionSelector.ExistsFile) return false;
+            
+            var commandLine = new CommandLineBuilderJet()
+                .AppendSwitch("/projectFiles")
+                .AppendFileName(uprojectFilePath);
+
+            try
+            {
+                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
+                    pathToUnrealVersionSelector,
+                    commandLine,
+                    LoggingLevel.INFO,
+                    TimeSpan.FromMinutes(1),
+                    InvokeChildProcess.TreatStderr.AsOutput,
+                    pathToUnrealVersionSelector.Directory
+                ));
+            }
+            catch (ErrorLevelException errorLevelException)
+            {
+                myLogger.Error(errorLevelException, "Failed refresh project files, calling UVS went wrong");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool RegenerateProjectUsingUBT(FileSystemPath uprojectFilePath, FileSystemPath pathToUnrealBuildToolBin,
+            FileSystemPath engineRoot)
+        {
+            var installedbuildTxt = engineRoot / "Engine" / "Build" / "InstalledBuild.txt";
+            var isInstalledBuild = installedbuildTxt.ExistsFile;
+            
             var commandLine = new CommandLineBuilderJet()
                 .AppendSwitch("-ProjectFiles")
                 .AppendFileName(uprojectFilePath)
                 .AppendSwitch("-game")
                 .AppendSwitch("-engine");
+            if (isInstalledBuild)
+                commandLine.AppendSwitch("-rocket");
 
             try
             {
@@ -199,15 +295,18 @@ namespace RiderPlugin.UnrealLink
                     pathToUnrealBuildToolBin,
                     commandLine,
                     LoggingLevel.INFO,
-                    TimeSpan.FromMinutes(10),
+                    TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
                     pathToUnrealBuildToolBin.Directory
                 ));
             }
-            catch (ErrorLevelException)
+            catch (ErrorLevelException errorLevelException)
             {
-                // TODO: handle properly
+                myLogger.Error(errorLevelException, "Failed refresh project files, calling UBT went wrong");
+                return false;
             }
+
+            return true;
         }
     }
 }
