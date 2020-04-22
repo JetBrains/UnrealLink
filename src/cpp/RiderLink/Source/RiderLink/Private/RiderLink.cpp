@@ -166,7 +166,11 @@ void FRiderLinkModule::StartupModule() {
   };
 
   rdConnection.init();
-  slateApplication = &FSlateApplication::Get();
+  if(FSlateApplication::IsInitialized())
+  {
+    slateApplication = &FSlateApplication::Get();
+  }
+  
 
   UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
   rdConnection.scheduler.queue([this] {
