@@ -103,7 +103,7 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     fun showTabForNewSession() {
-        showTab("$TITLE_ID #${model.editorId.value}", project.lifetime)
+        showTab("$TITLE_ID", project.lifetime)
     }
 
     private fun println() {
