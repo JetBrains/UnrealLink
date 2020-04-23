@@ -104,7 +104,16 @@ namespace RiderPlugin.UnrealLink
         {
             if (!portFileFullPath.ExistsFile) return;
 
-            var text = File.ReadAllText(portFileFullPath.FullPath);
+            string text;
+            try
+            {
+                text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
+            }
+            catch (Exception exception)
+            {
+                myLogger.Error(exception, $"[UnrealLink]: Couldn't read connection port from {portFileFullPath}");
+                return;
+            }
             if (!int.TryParse(text, out var port))
             {
                 myLogger.Error("Couldn't parse port for from file:{0}, text:{1}", portFileFullPath, text);
