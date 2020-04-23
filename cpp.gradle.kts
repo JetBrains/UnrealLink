@@ -120,10 +120,10 @@ tasks {
                 }
 
                 // If it's not Junction or if it's a Junction but doesn't point to local RiderLink - delete it
-                exec {
-                    commandLine = listOf("cmd.exe", "/c", "rmdir", "/S", "/Q", targetDir.absolutePath)
-                }
+                targetDir.delete()
             }
+
+            targetDir.parentFile.mkdirs();
             val stdOut = ByteArrayOutputStream()
             val result = exec {
                     commandLine = listOf("cmd.exe", "/c", "mklink" , "/J" ,targetDir.absolutePath ,File(riderLinkDir).absolutePath)
