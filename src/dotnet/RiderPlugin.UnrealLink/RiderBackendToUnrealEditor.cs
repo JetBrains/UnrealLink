@@ -73,7 +73,7 @@ namespace RiderPlugin.UnrealLink
                     var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
                     if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
                     {
-                        myLocks.ExecuteOrQueue(myComponentLifetime, "CreateProtocol", () => CreateProtocols(path));
+                        myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", () => CreateProtocols(path));
                     }
                 };
 
@@ -87,8 +87,8 @@ namespace RiderPlugin.UnrealLink
 
                 foreach (var projectName in projects)
                 {
-                    var portFileFullPath = Path.Combine(portDirectoryFullPath, projectName);
-                    CreateProtocols(FileSystemPath.Parse(portFileFullPath));
+                    var portFileFullPath = FileSystemPath.Parse(portDirectoryFullPath) / projectName;
+                    myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", () => CreateProtocols(portFileFullPath));
                 }
             });
 
@@ -104,19 +104,14 @@ namespace RiderPlugin.UnrealLink
         {
             if (!portFileFullPath.ExistsFile) return;
 
-            string text;
-            try
+            if (!ReadPortFile(portFileFullPath, out var text))
             {
-                text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
-            }
-            catch (Exception exception)
-            {
-                myLogger.Error(exception, $"[UnrealLink]: Couldn't read connection port from {portFileFullPath}");
+                myLogger.Error($"[UnrealLink]: Failed to read {portFileFullPath}");
                 return;
             }
             if (!int.TryParse(text, out var port))
             {
-                myLogger.Error("Couldn't parse port for from file:{0}, text:{1}", portFileFullPath, text);
+                myLogger.Error($"[UnrealLink]: Couldn't parse port from file:{portFileFullPath}, text:{text}");
                 return;
             }
 
@@ -135,6 +130,28 @@ namespace RiderPlugin.UnrealLink
                 myLogger.Info("Wire connected");
                 ResetModel(lifetime, protocol);
             });
+        }
+
+        // [TODO]: Fix reading port file in a sustainable way, instead of randomly trying to read it 3 times in a row 
+        private bool ReadPortFile(FileSystemPath portFileFullPath, out string text)
+        {
+            text = "";
+            int tries = 3;
+            while (tries != 0)
+            {
+                try
+                {
+                    text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
+                    return true;
+                }
+                catch (Exception exception)
+                {
+                    tries -= 1;
+                    myLogger.Warn($"[UnrealLink]: Couldn't read connection port from {portFileFullPath}");
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+            return false;
         }
 
         void OnMessageReceived(RdRiderModel riderModel, UnrealLogEvent message)
