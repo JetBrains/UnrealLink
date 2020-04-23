@@ -62,6 +62,22 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         {
                             // TODO: add install plugin to Engine
                             myLogger.Info("[UnrealLink]: Plugin is already installed in Engine");
+                            var enginePluginVersion = unrealPluginInstallInfo.EnginePlugin.PluginVersion;
+                            if (enginePluginVersion !=
+                                myPathsProvider.CurrentPluginVersion)
+                            {
+                                myLogger.Warn($"[UnrealLink]: Plugin is installed in Engine and it's out of sync. " +
+                                              $"Correct version:{myPathsProvider.CurrentPluginVersion}, " +
+                                              $"Current version {enginePluginVersion}");
+                                var notification = new NotificationModel($"RiderLink is out of sync",
+                                    "<html>Currently installed RiderLink plugin is out of sync with UnrealLink plugin in Rider<br>" +
+                                    $"UnrealLink (Rider plugin) version: {myPathsProvider.CurrentPluginVersion}<br>" +
+                                    $"RiderLink (Unreal Editor plugin) version: {enginePluginVersion}" +
+                                    "</html>", true, RdNotificationEntryType.WARN);
+
+                                myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.OutOfSync",
+                                    () => { myNotificationsModel.Notification(notification); });
+                            }
                             return;
                         }
 
