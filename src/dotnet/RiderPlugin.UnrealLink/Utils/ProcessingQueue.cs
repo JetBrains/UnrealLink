@@ -43,7 +43,7 @@ namespace RiderPlugin.UnrealLink.Utils
         {
             while (true)
             {
-                if (myLifetime.IsTerminated)
+                if (myLifetime.IsNotAlive)
                     break;
 
                 Task task;
