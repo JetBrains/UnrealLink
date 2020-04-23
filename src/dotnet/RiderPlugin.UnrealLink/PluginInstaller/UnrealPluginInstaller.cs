@@ -99,6 +99,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 if (installDescription.PluginVersion == myPathsProvider.CurrentPluginVersion) continue;
                 
+                var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(installDescription.UprojectFilePath);
+                if ((engineRoot / "Engine" / "Source" / "Programs").IsPrefixOf(installDescription.UprojectFilePath))
+                {
+                    myLogger.Info("[UnrealLink]: Found uproject in Programs folder. Skipping it.");
+                    return;
+                }
+                
                 myLogger.Info($"[UnrealLink]: Installing plugin for {installDescription.UprojectFilePath}");
                 var pluginDir = installDescription.UnrealPluginRootFolder;
                 var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
@@ -165,9 +172,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 }
                 catch (Exception exception)
                 {
-                    
-                    myLogger.Error(exception, ExceptionOrigin.Algorithmic,
+                    myLogger.Error(exception,
                         $"[UnrealLink]: Couldn't copy from {pluginTmpDir} to {pluginDir}");
+                    if (backupDir.ExistsDirectory)
+                        backupDir.Copy(pluginDir);
                 }
                 
                 
