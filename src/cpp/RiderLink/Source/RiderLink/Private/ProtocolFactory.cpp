@@ -14,9 +14,6 @@
 
 #include "SocketWire.h"
 
-constexpr TCHAR PORT_FILE_NAME[] = TEXT("UnrealProtocolPort.txt");
-constexpr TCHAR CLOSED_FILE_EXTENSION[] = TEXT(".closed");
-
 TUniquePtr<rd::Protocol> ProtocolFactory::create(rd::IScheduler & scheduler, rd::Lifetime socketLifetime) {
     
 
