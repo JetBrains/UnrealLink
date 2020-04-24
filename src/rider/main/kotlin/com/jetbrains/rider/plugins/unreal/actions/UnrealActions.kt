@@ -6,6 +6,7 @@ import com.intellij.util.SmartList
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.valueOrDefault
 import com.jetbrains.rider.plugins.unreal.UnrealHost
+import icons.UnrealIcons
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.Nullable
 import javax.swing.Icon
@@ -17,7 +18,7 @@ abstract class PlayStateAction(text: String?, description: String?, icon: Icon?)
     }
 }
 
-class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", AllIcons.Actions.Execute) {
+class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", UnrealIcons.Status.Play) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val value = e.getHost()?.model?.play?.valueOrDefault(0)
@@ -31,7 +32,7 @@ class PlayInUnrealAction : PlayStateAction("Play Unreal", "Play Unreal", AllIcon
     }
 }
 
-class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", AllIcons.Actions.Suspend) {
+class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", UnrealIcons.Status.Stop) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getHost()
@@ -44,12 +45,12 @@ class StopInUnrealAction : PlayStateAction("Stop Unreal", "Stop Unreal", AllIcon
     }
 }
 
-class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", AllIcons.Actions.Pause) {
+class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", UnrealIcons.Status.Pause) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val value = e.getHost()?.model?.play?.valueOrDefault(0)
         e.presentation.isEnabled = e.presentation.isEnabled && value != null && value > 0
-        e.presentation.icon = if (value == 2) AllIcons.Actions.Resume else AllIcons.Actions.Pause
+        e.presentation.icon = if (value == 2) AllIcons.Actions.Resume else UnrealIcons.Status.Pause
         e.presentation.text = if (value == 2) "Frame Skip" else "Pause Unreal"
     }
 
