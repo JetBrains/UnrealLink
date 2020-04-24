@@ -102,27 +102,22 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             {
                                 // All projects in the solution are bound to the same engine
                                 // So take first project and use it to find Unreal Engine
-                                foundEnginePlugin =
-                                    TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
+                                TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
                             }
 
-                            if (!foundEnginePlugin)
+                            // We didn't find Engine plugins, let's gather data about Project plugins
+                            foreach (var uprojectLocation in uprojectLocations)
                             {
-                                // We didn't find Engine plugins, let's gather data about Project plugins
-                                foreach (var uprojectLocation in uprojectLocations)
+                                myLogger.Info($"[UnrealLink]: Looking for plugin in {uprojectLocation}");
+                                var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
+                                if (projectPlugin.IsPluginAvailable)
                                 {
-                                    myLogger.Info($"[UnrealLink]: Looking for plugin in {uprojectLocation}");
-                                    var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
-                                    if (projectPlugin.IsPluginAvailable)
-                                    {
-                                        myLogger.Info(
-                                            $"[UnrealLink]: found plugin {projectPlugin.UnrealPluginRootFolder}");
-                                    }
-
-                                    installInfo.ProjectPlugins.Add(projectPlugin);
+                                    myLogger.Info(
+                                        $"[UnrealLink]: found plugin {projectPlugin.UnrealPluginRootFolder}");
                                 }
-                            }
 
+                                installInfo.ProjectPlugins.Add(projectPlugin);
+                            }
                             InstallInfoProperty.SetValue(installInfo);
                         }));
                 });
