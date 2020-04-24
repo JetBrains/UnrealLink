@@ -172,7 +172,7 @@ void FRiderLinkModule::StartupModule() {
   }
   
 
-  UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT START"));
+  UE_LOG(FLogRiderLinkModule, Log, TEXT("INIT START"));
   rdConnection.scheduler.queue([this] {
     rdConnection.unrealToBackendModel.get_play().advise(
         rdConnection.lifetime, [this](int playValue) {
@@ -264,7 +264,7 @@ void FRiderLinkModule::StartupModule() {
         }
       });
 
-  UE_LOG(FLogRiderLinkModule, Warning, TEXT("INIT FINISH"));
+  UE_LOG(FLogRiderLinkModule, Log, TEXT("INIT FINISH"));
   // FDebug::DumpStackTraceToLog();
 }
 
