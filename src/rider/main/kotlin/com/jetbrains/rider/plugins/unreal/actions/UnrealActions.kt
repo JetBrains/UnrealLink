@@ -50,7 +50,7 @@ class PauseInUnrealAction : PlayStateAction("Pause Unreal", "Pause Unreal", Unre
         super.update(e)
         val value = e.getHost()?.model?.play?.valueOrDefault(0)
         e.presentation.isEnabled = e.presentation.isEnabled && value != null && value > 0
-        e.presentation.icon = if (value == 2) AllIcons.Actions.Resume else UnrealIcons.Status.Pause
+        e.presentation.icon = if (value == 2) UnrealIcons.Status.FrameSkip else UnrealIcons.Status.Pause
         e.presentation.text = if (value == 2) "Frame Skip" else "Pause Unreal"
     }
 

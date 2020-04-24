@@ -10,6 +10,7 @@ class UnrealIcons {
             val Pause = IconLoader.getIcon("/Icons/Status/unrealStatusPause.svg")
             val Play = IconLoader.getIcon("/Icons/Status/unrealStatusPlay.svg")
             val Stop = IconLoader.getIcon("/Icons/Status/unrealStatusBreakpoint.svg")
+            val FrameSkip = IconLoader.getIcon("/Icons/Status/unrealFrameSkip.svg")
         }
     }
 }
