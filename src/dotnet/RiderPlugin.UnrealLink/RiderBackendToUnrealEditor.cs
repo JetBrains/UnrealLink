@@ -38,7 +38,7 @@ namespace RiderPlugin.UnrealLink
 
         public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, IScheduler dispatcher, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator,
-            UnrealPluginDetector pluginDetector)
+            UnrealPluginDetector pluginDetector, ISolution solution)
         {
             myComponentLifetime = lifetime;
             myLocks = locks;
@@ -61,29 +61,33 @@ namespace RiderPlugin.UnrealLink
 
                 Directory.CreateDirectory(portDirectoryFullPath);
 
-                var watcher = new FileSystemWatcher(portDirectoryFullPath)
-                {
-                    NotifyFilter = NotifyFilters.LastWrite
-                };
                 var projects = pluginInfo.ProjectPlugins.Select(it => it.UprojectFilePath.NameWithoutExtension)
                     .ToList();
-
-                FileSystemEventHandler handler = (obj, fileSystemEvent) =>
+                
+                solution.Locks.Tasks.Queue(myComponentLifetime, () =>
                 {
-                    var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
-                    if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
+                    var watcher = new FileSystemWatcher(portDirectoryFullPath)
                     {
-                        myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", () => CreateProtocols(path));
-                    }
-                };
+                        NotifyFilter = NotifyFilters.LastWrite
+                    };
 
-                watcher.Changed += handler;
-                watcher.Created += handler;
+                    FileSystemEventHandler handler = (obj, fileSystemEvent) =>
+                    {
+                        var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
+                        if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
+                        {
+                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
+                                () => CreateProtocols(path));
+                        }
+                    };
 
-                // Check if it's even possible to happen
-                lt.Bracket(() => { }, () => { watcher.Dispose(); });
+                    watcher.Changed += handler;
+                    watcher.Created += handler;
 
-                StartWatcher(watcher);
+                    lt.Bracket(() => { }, () => { watcher.Dispose(); });
+
+                    StartWatcher(watcher);
+                });
 
                 foreach (var projectName in projects)
                 {
