@@ -11,28 +11,7 @@ public class RiderLink : ModuleRules
 		
 		bUseRTTI = true;
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-                 "Core"
-				,"CoreUObject"
-				,"DesktopPlatform"
-				,"Engine"
-				,"Json"
-                ,"UnrealEd"
-                ,"UnrealEdMessages"
-                ,"MessagingCommon"
-                ,"AssetRegistry"
-                ,"ContentBrowser"
-                ,"Slate"
-                ,"SlateCore"
-				// ... add private dependencies that you statically link with here ...	
-			}
-        );
-		
-        if (Target.Platform == UnrealTargetPlatform.Win64)
-		{
-			PrivateDependencyModuleNames.Add("RD");
-		}
+		PublicDependencyModuleNames.Add("Core");
+		PublicDependencyModuleNames.Add("RD");
 	}
 }

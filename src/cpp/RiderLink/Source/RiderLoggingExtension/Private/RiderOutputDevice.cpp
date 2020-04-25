@@ -1,8 +1,7 @@
-#include "RiderOutputDevice.h"
-
-#include "UE4TypesMarshallers.h"
+#include "RiderOutputDevice.hpp"
 
 #include "CoreGlobals.h"
+#include "Misc/OutputDeviceRedirector.h"
 
 FRiderOutputDevice::FRiderOutputDevice() {
 	GLog->AddOutputDevice(this);
@@ -13,7 +12,7 @@ FRiderOutputDevice::~FRiderOutputDevice() {
 	if (onSerializeMessage.IsBound())
 		onSerializeMessage.Unbind();
 	// At shutdown, GLog may already be null
-	if (GLog != NULL) {
+	if (GLog != nullptr) {
 		GLog->RemoveOutputDevice(this);
 	}
 }

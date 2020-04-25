@@ -29,4 +29,4 @@ UnrealEngineProjectPath.txt
 
 # RD generated files
 src/cpp/RiderLink/Source/RD/
-src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol
+src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol

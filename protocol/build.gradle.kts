@@ -32,7 +32,7 @@ configure<RdgenParams> {
     classpath("$rdLibDirectory/rider-model.jar", sourceSets.main.get().output)
 }
 tasks {
-    val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Private/RdEditorProtocol")
+    val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol")
     val csEditorOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdEditorProtocol")
     val csRiderOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdRiderProtocol")
     val csLibraryOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/Library")

@@ -2,37 +2,30 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
-#include "Windows/AllowWindowsPlatformTypes.h"
-
-//The external headers and defines goes here
 #include "RdConnection.hpp"
-#include "RiderOutputDevice.h"
 
-#include "Windows/HideWindowsPlatformTypes.h"
-
+#include "Logging/LogMacros.h"
+#include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
 
-
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderLinkModule, Log, All);
-
 
 class FRiderLinkModule : public IModuleInterface
 {
 public:
-	FRiderLinkModule();
-	~FRiderLinkModule();
+	FRiderLinkModule() = default;
+	~FRiderLinkModule() = default;
+
+	static FName GetModuleName()
+	{
+		static const FName ModuleName = TEXT("RiderLink");
+		return ModuleName;
+	}
 
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	virtual bool SupportsDynamicReloading() override;
 
-private:
-	/** Handle to the test dll we will load */
 	RdConnection rdConnection;
-	FRiderOutputDevice outputDevice;
-	bool PlayFromUnreal = false;
-	bool PlayFromRider = false;
 };

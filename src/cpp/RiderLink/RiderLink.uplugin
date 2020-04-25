@@ -18,7 +18,13 @@
 		{
 			"Name": "RiderLink",
 			"Type": "Developer",
-			"LoadingPhase": "PreDefault",
+			"LoadingPhase": "EarliestPossible",
+			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
+			"Name": "RiderLoggingExtension",
+			"Type": "Developer",
+			"LoadingPhase": "EarliestPossible",
 			"WhitelistPlatforms": [ "Win64" ]
 		}
 	]

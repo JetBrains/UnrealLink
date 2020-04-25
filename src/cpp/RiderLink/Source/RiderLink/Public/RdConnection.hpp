@@ -1,37 +1,39 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2020 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/AllowWindowsPlatformTypes.h"
 
-//The external headers and defines goes here
-#include "IProtocol.h"
+#include "rd_framework_cpp/base/IProtocol.h"
+#include "rd_framework_cpp/scheduler/SingleThreadScheduler.h"
 #include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
-#include "SimpleScheduler.h"
-#include "SingleThreadScheduler.h"
-#include "Templates/UniquePtr.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/HideWindowsPlatformTypes.h"
+
+#include "Templates/UniquePtr.h"
 
 class RdConnection
 {
 public:
 	RdConnection();
 	~RdConnection();
-	/** Handle to the test dll we will load */
-	//RdProperty<tl::optional<int>> test_connection{ 0 };
-	//RdProperty<tl::optional<std::wstring> > unreal_log{ L"" };
-	//RdProperty<tl::optional<bool> > unreal_play{ false };
 
-	void init();
-	Jetbrains::EditorPlugin::RdEditorModel unrealToBackendModel;
+	void Init();
+	void Shutdown();
 
-	rd::LifetimeDefinition lifetimeDef;
-	rd::LifetimeDefinition socketLifetimeDef;
-
-	rd::Lifetime lifetime;
-	rd::Lifetime socketLifetime;
-
-	rd::SingleThreadScheduler scheduler;
+	Jetbrains::EditorPlugin::RdEditorModel UnrealToBackendModel;
 
 private:
-	TUniquePtr<rd::IProtocol> protocol;
+	TUniquePtr<rd::IProtocol> Protocol;
+
+	rd::LifetimeDefinition LifetimeDef;
+	rd::LifetimeDefinition SocketLifetimeDef;
+
+	rd::Lifetime Lifetime;
+	rd::Lifetime SocketLifetime;
+
+public:
+	rd::SingleThreadScheduler Scheduler;
 };
