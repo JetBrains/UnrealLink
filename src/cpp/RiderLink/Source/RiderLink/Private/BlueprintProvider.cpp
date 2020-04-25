@@ -4,6 +4,7 @@
 #include "BlueprintEditor.h"
 #include "AssetEditorMessages.h"
 #include "MessageEndpointBuilder.h"
+#include "Async/Async.h"
 
 FOnBlueprintAdded BluePrintProvider::OnBlueprintAdded{};
 
@@ -31,6 +32,13 @@ bool BluePrintProvider::IsBlueprint(FString const& pathName) {
 
 void BluePrintProvider::OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
     // Just to create asset manager if it wasn't created already
+#if ENGINE_MINOR_VERSION < 24
     FAssetEditorManager::Get();
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
+#else
+    AsyncTask(ENamedThreads::GameThread, [path]()
+    {
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(path);
+    });
+#endif
 }

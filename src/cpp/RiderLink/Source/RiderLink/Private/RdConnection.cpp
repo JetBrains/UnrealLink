@@ -81,7 +81,7 @@ void RdConnection::init() {
             }
         });
 
-    unrealToBackendModel.get_isBlueprintPathName().set([AssetRegistryModule](FString const& pathName) -> bool {
+    unrealToBackendModel.get_isBlueprintPathName().set([](FString const& pathName) -> bool {
         return BluePrintProvider::IsBlueprint(pathName);
     });
 
