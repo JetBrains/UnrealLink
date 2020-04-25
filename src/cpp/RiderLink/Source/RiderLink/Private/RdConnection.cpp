@@ -54,7 +54,8 @@ void RdConnection::init() {
     auto MessageEndpoint = FMessageEndpoint::Builder(FName("FAssetEditorManager")).Build();
 
     AssetRegistryModule->Get().OnAssetAdded().AddLambda([](FAssetData AssetData) {
-        BluePrintProvider::AddAsset(AssetData);
+        // TODO: Fix loading uasset's on 4.23-
+        // BluePrintProvider::AddAsset(AssetData);
     });
 
 
