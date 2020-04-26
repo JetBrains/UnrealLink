@@ -158,7 +158,7 @@ static int ModeFromSettings() {
 void FRiderLinkModule::StartupModule() {
   using namespace Jetbrains::EditorPlugin;
 
-  static const auto START_TIME = FDateTime::Now();
+  static const auto START_TIME = FDateTime::UtcNow();
 
   static const auto GetTimeNow = [](double Time) -> rd::DateTime {
     return rd::DateTime(static_cast<std::time_t>(START_TIME.ToUnixTimestamp() +
@@ -248,20 +248,28 @@ void FRiderLinkModule::StartupModule() {
   outputDevice.onSerializeMessage.BindLambda(
       [this](const TCHAR *msg, ELogVerbosity::Type Type,
              const class FName &Name, TOptional<double> Time) {
-        auto CS = FString(msg);
-        if (Type != ELogVerbosity::SetColor) {
-          rdConnection.scheduler.queue([this, message = FString(msg), Type,
-                                        Name = Name.GetPlainNameString(),
-                                        Time]() mutable {
-            rd::optional<rd::DateTime> DateTime;
-            if (Time) {
-              DateTime = GetTimeNow(Time.GetValue());
-            }
-            auto MessageInfo = LogMessageInfo(Type, Name, DateTime);
+        if (Type > ELogVerbosity::All) return;
+        
+        rdConnection.scheduler.queue([this, tail = FString(msg), Type,
+                                      Name = Name.GetPlainNameString(),
+                                      Time]() mutable {
+          rd::optional<rd::DateTime> DateTime;
+          if (Time) {
+            DateTime = GetTimeNow(Time.GetValue());
+          }
+          LogMessageInfo MessageInfo = LogMessageInfo(Type, Name, DateTime);
+
+          FString toSend;
+          while(tail.Split("\n", &toSend, &tail))
+          {
+            toSend.TrimEndInline();
             rdConnection.unrealToBackendModel.get_unrealLog().fire(
-                UnrealLogEvent{std::move(MessageInfo), std::move(message)});
+            UnrealLogEvent{std::move(MessageInfo), std::move(toSend)});
+          }
+          tail.TrimEndInline();
+          rdConnection.unrealToBackendModel.get_unrealLog().fire(
+              UnrealLogEvent{std::move(MessageInfo), std::move(tail)});
           });
-        }
       });
 
   UE_LOG(FLogRiderLinkModule, Log, TEXT("INIT FINISH"));
