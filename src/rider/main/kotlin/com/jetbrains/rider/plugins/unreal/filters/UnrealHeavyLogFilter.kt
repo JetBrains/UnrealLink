@@ -40,6 +40,8 @@ class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel
         }
 
         val text = copiedFragment.charsSequence
+        // TODO: instead of using heavy filters, use simple filter
+        if(text.length > 2048) return
 
         processMethodReferences(text, startOffset, consumer)
 
