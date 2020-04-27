@@ -5,3 +5,6 @@
   * C++ based project
 * VS 2017
   * With Microsoft.NET.Sdk and C++ environment
+
+## WARNING
+RiderLink plugin for Unreal Editor is not intended to be installed manually. Rather it should be installed by Rider to ensure compatibility.
