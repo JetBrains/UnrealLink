@@ -16,13 +16,15 @@ import com.jetbrains.rider.model.*
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
+import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.util.idea.getLogger
 
-class UnrealHeavyLogFilter(val project: Project, private val model: RdRiderModel) : Filter, FilterMixin {
+class UnrealHeavyLogFilter(val project: Project) : Filter, FilterMixin {
     companion object {
         private val logger = getLogger<UnrealHeavyLogFilter>()
     }
 
+    private val model = project.solution.rdRiderModel
     private val urlFilter = UrlFilter()
 
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
