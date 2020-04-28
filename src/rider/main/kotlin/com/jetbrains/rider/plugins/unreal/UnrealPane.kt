@@ -8,11 +8,11 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rider.plugins.unreal.filters.UnrealHeavyLogFilter
 import com.jetbrains.rider.ui.components.ComponentFactories
 
-class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
+class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     private val consoleView: ConsoleViewImpl = ComponentFactories.getConsoleView(project, lifetime)
-//    private val consoleView: UnrealConsoleView = UnrealConsoleView(project)
 
     companion object {
         lateinit var currentConsoleView : ConsoleViewImpl
@@ -20,6 +20,7 @@ class UnrealPane(val model: Any, val lifetime: Lifetime, val project: Project) :
 
     init {
         currentConsoleView = consoleView
+        currentConsoleView.addMessageFilter(UnrealHeavyLogFilter(project))
         currentConsoleView.allowHeavyFilters()
         currentConsoleView.setUpdateFoldingsEnabled(true)
 

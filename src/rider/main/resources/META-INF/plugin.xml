@@ -15,11 +15,9 @@
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealLogViewerManager</implementation-class></component>
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
-    <consoleFilterProvider implementation="com.jetbrains.rider.plugins.unreal.UnrealLogViewerFilterProvider" />
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
     <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
   </extensions>

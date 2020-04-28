@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using JetBrains.Diagnostics;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
@@ -126,9 +127,17 @@ namespace RiderPlugin.UnrealLink
             IRdCall<FString, bool> isBlueprintPathName)
         {
             var path = new FString(s);
-            return isBlueprintPathName.Sync(path)
-                ? new LinkResponseBlueprint(path, range)
-                : null;
+            try
+            {
+                return isBlueprintPathName.Sync(path)
+                    ? new LinkResponseBlueprint(path, range)
+                    : null;
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e, "[UnrealLink]: Failed to parse Blueprint string");
+                return null;
+            }
         }
 
         [NotNull]
