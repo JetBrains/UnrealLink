@@ -13,6 +13,5 @@ public class RiderLoggingExtension : ModuleRules
 		PrivateDependencyModuleNames.Add("Core");
 		PrivateDependencyModuleNames.Add("RD");
 		PrivateDependencyModuleNames.Add("RiderLink");
-		
 	}
 }
