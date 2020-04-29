@@ -9,7 +9,6 @@ public class RiderBlueprintExtension : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		bUseRTTI = true;
-		bFasterWithoutUnity = true;
 
 		PrivateDependencyModuleNames.AddRange(new []
 		{
