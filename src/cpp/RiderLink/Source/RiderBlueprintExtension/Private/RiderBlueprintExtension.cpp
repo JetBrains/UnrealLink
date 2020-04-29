@@ -1,7 +1,20 @@
 #include "RiderBlueprintExtension.hpp"
 
-#include "BlueprintProvider.hpp"
+#if PLATFORM_WINDOWS
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/AllowWindowsPlatformTypes.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/PreWindowsApi.h"
+
 #include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
+
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/PostWindowsApi.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
+
+#include "BlueprintProvider.hpp"
 #include "RiderLink.hpp"
 
 #include "AssetRegistryModule.h"
