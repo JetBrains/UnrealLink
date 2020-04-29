@@ -32,6 +32,12 @@
 			"Type": "Developer",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
+			"Name": "RiderGameControlExtension",
+			"Type": "Developer",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [ "Win64" ]
 		}
 	]
 }
