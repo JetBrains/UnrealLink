@@ -7,7 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
-#include "ModuleManager.h"
+#include "Modules/ModuleManager.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderLinkModule, Log, All);
 

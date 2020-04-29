@@ -3,16 +3,20 @@
 #include "RiderLink.hpp"
 
 #include "IHeadMountedDisplay.h"
-#include "ILevelViewport.h"
 #include "IXRTrackingSystem.h"
 #include "LevelEditor.h"
-#include "LevelEditorViewport.h"
 #include "Modules/ModuleManager.h"
 #include "Settings/LevelEditorPlaySettings.h"
-#include "SlateApplication.h"
+#include "Framework/Application/SlateApplication.h"
 #include "UnrealEd.h"
 
 #include "Runtime/Launch/Resources/Version.h"
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
+#include "ILevelViewport.h"
+#include "LevelEditorViewport.h"
+#else
+#include "IAssetViewport.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
@@ -75,7 +79,7 @@ static void RequestPlay(int mode)
     FLevelEditorModule& LevelEditorModule =
         FModuleManager::GetModuleChecked<FLevelEditorModule>(
             TEXT("LevelEditor"));
-    TSharedPtr<ILevelViewport> ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
+    auto ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
     ULevelEditorPlaySettings* PlayInSettings =
         GetMutableDefault<ULevelEditorPlaySettings>();
     const EPlayModeType PlayMode = PlayModeFromInt((mode & (16 + 32 + 64)) >> 4);

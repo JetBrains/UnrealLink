@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MessageEndpoint.h"
-#include "SharedPointerInternals.h"
+#include "Templates/SharedPointer.h"
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
