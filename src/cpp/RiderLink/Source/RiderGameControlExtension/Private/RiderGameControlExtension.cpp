@@ -72,6 +72,85 @@ static int PlayModeToInt(EPlayModeType modeType)
     return 0;
 }
 
+static void RequestPlaySession( bool bAtPlayerStart, TSharedPtr<class IAssetViewport> DestinationViewport, bool bInSimulateInEditor, const FVector* StartLocation = nullptr, const FRotator* StartRotation = nullptr, int32 DestinationConsole = -1, bool bUseMobilePreview = false, bool bUseVRPreview = false, bool bUseVulkanPreview = false)
+{
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
+    GUnrealEd->RequestPlaySession(bAtPlayerStart, DestinationViewport, bInSimulateInEditor, StartLocation, StartRotation, DestinationConsole, bUseMobilePreview, bUseVRPreview, bUseVulkanPreview);
+#else
+    FRequestPlaySessionParams PlaySessionParams;
+
+    if (StartLocation)
+    {
+        PlaySessionParams.StartLocation = *StartLocation;
+        PlaySessionParams.StartRotation = StartRotation ? *StartRotation : FRotator::ZeroRotator;
+    }
+    if (DestinationViewport != nullptr)
+    {
+        PlaySessionParams.DestinationSlateViewport = DestinationViewport;
+    }
+
+    if (bInSimulateInEditor)
+    {
+        PlaySessionParams.WorldType = EPlaySessionWorldType::SimulateInEditor;
+    }
+
+    if (bUseVRPreview)
+    {
+        check(!bUseMobilePreview && !bUseVulkanPreview);
+        PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VRPreview;
+    }
+
+    if (bUseVulkanPreview)
+    {
+        check(!bUseMobilePreview && !bUseVRPreview);
+        PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VulkanPreview;
+        PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
+    }
+
+    if (bUseMobilePreview)
+    {
+        check(!bUseVRPreview && !bUseVulkanPreview);
+        PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::MobilePreview;
+        PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
+    }
+	
+    GUnrealEd->RequestPlaySession(PlaySessionParams);
+#endif
+}
+
+void RequestPlaySession(const FVector* StartLocation, const FRotator* StartRotation, bool MobilePreview, bool VulkanPreview, const FString& MobilePreviewTargetDevice, FString AdditionalStandaloneLaunchParameters = TEXT(""))
+{
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
+    GUnrealEd->RequestPlaySession(StartLocation, StartRotation, MobilePreview, VulkanPreview, MobilePreviewTargetDevice, AdditionalStandaloneLaunchParameters);
+#else
+    FRequestPlaySessionParams PlaySessionParams;
+
+    if (MobilePreview)
+    {
+        check(!VulkanPreview);
+        PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
+        PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::MobilePreview;
+        PlaySessionParams.MobilePreviewTargetDevice = MobilePreviewTargetDevice;
+        PlaySessionParams.AdditionalStandaloneCommandLineParameters = AdditionalStandaloneLaunchParameters;
+    }
+
+    if (VulkanPreview)
+    {
+        check(!MobilePreview);
+        PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
+        PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VulkanPreview;
+        PlaySessionParams.AdditionalStandaloneCommandLineParameters = AdditionalStandaloneLaunchParameters;
+    }
+	
+    if (StartLocation)
+    {
+        PlaySessionParams.StartLocation = *StartLocation;
+        PlaySessionParams.StartRotation = StartRotation ? *StartRotation : FRotator::ZeroRotator;
+    }
+    GUnrealEd->RequestPlaySession(PlaySessionParams);
+#endif
+}
+
 FSlateApplication* SlateApplication = nullptr;
 
 static void RequestPlay(int mode)
@@ -87,7 +166,11 @@ static void RequestPlay(int mode)
     if (PlayInSettings)
     {
         PlayInSettings->SetPlayNumberOfClients(NumberOfPlayers(mode));
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
         PlayInSettings->SetPlayNetDedicated(DedicatedServer(mode));
+#else
+        PlayInSettings->bLaunchSeparateServer = DedicatedServer(mode);
+#endif
         PlayInSettings->LastExecutedPlayModeLocation =
             bSpawnAtPlayerStart
                 ? PlayLocation_DefaultPlayerStart
@@ -111,7 +194,7 @@ static void RequestPlay(int mode)
 
     if (PlayMode == PlayMode_InEditorFloating)
     {
-        GUnrealEd->RequestPlaySession(bSpawnAtPlayerStart, nullptr, false, StartLocation);
+        RequestPlaySession(bSpawnAtPlayerStart, nullptr, false, StartLocation);
     }
     else if (PlayMode == PlayMode_InVR)
     {
@@ -119,32 +202,32 @@ static void RequestPlay(int mode)
                                  GEngine->XRSystem.IsValid() &&
                                  GEngine->XRSystem->GetHMDDevice() &&
                                  GEngine->XRSystem->GetHMDDevice()->IsHMDConnected();
-        
-        GUnrealEd->RequestPlaySession(bSpawnAtPlayerStart,
-                                      ActiveLevelViewport,
-                                      false, StartLocation,
-                                      StartRotation, -1,
-                                      false,
-                                      bHMDIsReady);
+
+        RequestPlaySession(bSpawnAtPlayerStart,
+                           ActiveLevelViewport,
+                           false, StartLocation,
+                           StartRotation, -1,
+                           false,
+                           bHMDIsReady);
     }
     else if (PlayMode == PlayMode_InMobilePreview ||
             PlayMode == PlayMode_InVulkanPreview ||
             PlayMode == PlayMode_InNewProcess)
     {
-        GUnrealEd->RequestPlaySession(StartLocation, StartRotation,
+        RequestPlaySession(StartLocation, StartRotation,
                                       PlayMode == PlayMode_InMobilePreview,
                                       PlayMode == PlayMode_InVulkanPreview,
                                       TEXT(""));
     }
     else if (PlayMode == PlayMode_InViewPort)
     {
-        GUnrealEd->RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false,
+        RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false,
                                       StartLocation, StartRotation);
     }
     else
     {
         // PlayMode_Simulate
-        GUnrealEd->RequestPlaySession(false, ActiveLevelViewport, true);
+        RequestPlaySession(false, ActiveLevelViewport, true);
     }
 }
 
@@ -157,7 +240,11 @@ static int ModeFromSettings()
     int32 NumberOfClients;
     bool bNetDedicated;
     PlayInSettings->GetPlayNumberOfClients(NumberOfClients);
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
     PlayInSettings->GetPlayNetDedicated(bNetDedicated);
+#else
+    bNetDedicated = PlayInSettings->bLaunchSeparateServer;
+#endif
     const bool bSpawnAtPlayerStart = PlayInSettings->LastExecutedPlayModeLocation == PlayLocation_DefaultPlayerStart;
     return (NumberOfClients - 1) + (bSpawnAtPlayerStart ? (1 << 2) : 0) + (bNetDedicated ? (1 << 3) : 0) +
         (PlayModeToInt(PlayInSettings->LastExecutedPlayModeType) << 4);
