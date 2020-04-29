@@ -3,16 +3,24 @@
 #include "rd_framework_cpp/scheduler/base/IScheduler.h"
 #include "rd_framework_cpp/wire/SocketWire.h"
 
-#include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
+#if PLATFORM_WINDOWS
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/PreWindowsApi.h"
+
+#include "HAL/PlatformFilemanager.h"
 #include "Windows/WindowsPlatformMisc.h"
+
+#include "Windows/PostWindowsApi.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/HideWindowsPlatformTypes.h"
+#endif
+
+#include "Runtime/Launch/Resources/Version.h"
 
 
 TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler * Scheduler, rd::Lifetime SocketLifetime)
@@ -20,7 +28,7 @@ TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler * Scheduler, rd:
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
 		TCHAR CAppDataLocalPath[4096];
 		FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"), CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
-		FString FAppDataLocalPath = CAppDataLocalPath;
+        const FString FAppDataLocalPath = CAppDataLocalPath;
 #else
         const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"));
 #endif

@@ -2,8 +2,19 @@
 
 #include "RiderLink.hpp"
 
-#include "HAL/Platform.h"
 #include "Modules/ModuleManager.h"
+
+#if PLATFORM_WINDOWS
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/PreWindowsApi.h"
+
+#include "HAL/Platform.h"
+
+#include "Windows/PostWindowsApi.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
@@ -13,18 +24,16 @@ IMPLEMENT_MODULE(FRiderLinkModule, RiderLink);
 
 void FRiderLinkModule::ShutdownModule()
 {
-  UE_LOG(FLogRiderLinkModule, Log, TEXT("SHUTDOWN START"));
-  
-  UE_LOG(FLogRiderLinkModule, Log, TEXT("SHUTDOWN FINISH"));
+  UE_LOG(FLogRiderLinkModule, Verbose, TEXT("SHUTDOWN START"));
+  RdConnection.Shutdown();
+  UE_LOG(FLogRiderLinkModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
 
 void FRiderLinkModule::StartupModule()
 {
-  UE_LOG(FLogRiderLinkModule, Log, TEXT("STARTUP START"));
-
-  rdConnection.Init();
-
-  UE_LOG(FLogRiderLinkModule, Log, TEXT("STARTUP FINISH"));
+  UE_LOG(FLogRiderLinkModule, Verbose, TEXT("STARTUP START"));
+  RdConnection.Init();
+  UE_LOG(FLogRiderLinkModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
 bool FRiderLinkModule::SupportsDynamicReloading() { return true; }

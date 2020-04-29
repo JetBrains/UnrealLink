@@ -1,35 +1,30 @@
 #include "RdConnection.hpp"
 
-// ReSharper disable once CppUnusedIncludeDirective
-// #include "Windows/AllowWindowsPlatformTypes.h"
-
 #include "ProtocolFactory.h"
 #include "RdEditorProtocol/UE4Library/UE4Library.h"
 
 RdConnection::RdConnection():
-    LifetimeDef{rd::Lifetime::Eternal()}
-    , SocketLifetimeDef{rd::Lifetime::Eternal()}
-    , Lifetime{LifetimeDef.lifetime}
+    SocketLifetimeDef{rd::Lifetime::Eternal()}
     , SocketLifetime{SocketLifetimeDef.lifetime}
-    , Scheduler{SocketLifetime, "UnrealEditorScheduler"} {}
-
-RdConnection::~RdConnection() {
-    SocketLifetimeDef.terminate();
-    LifetimeDef.terminate();
+    , Scheduler{SocketLifetime, "UnrealEditorScheduler"}
+{
 }
 
-void RdConnection::Init() {
+RdConnection::~RdConnection()
+{
+    SocketLifetimeDef.terminate();
+}
+
+void RdConnection::Init()
+{
     Protocol = ProtocolFactory::Create(&Scheduler, SocketLifetime);
-    UnrealToBackendModel.connect(Lifetime, Protocol.Get());
+    UnrealToBackendModel.connect(SocketLifetime, Protocol.Get());
     Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
-        UnrealToBackendModel.get_serialization_context().get_serializers());
+        UnrealToBackendModel.get_serialization_context().get_serializers()
+    );
 }
 
 void RdConnection::Shutdown()
 {
-    LifetimeDef.terminate();
     SocketLifetimeDef.terminate();
 }
-
-// ReSharper disable once CppUnusedIncludeDirective
-// #include "Windows/HideWindowsPlatformTypes.h"

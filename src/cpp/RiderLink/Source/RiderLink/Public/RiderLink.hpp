@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
+#include "ModuleManager.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderLinkModule, Log, All);
 
@@ -15,6 +16,11 @@ class FRiderLinkModule : public IModuleInterface
 public:
 	FRiderLinkModule() = default;
 	~FRiderLinkModule() = default;
+
+	static FRiderLinkModule& Get()
+	{		
+		return FModuleManager::GetModuleChecked<FRiderLinkModule>(GetModuleName());
+	}
 
 	static FName GetModuleName()
 	{
@@ -27,5 +33,7 @@ public:
 	virtual void ShutdownModule() override;
 	virtual bool SupportsDynamicReloading() override;
 
-	RdConnection rdConnection;
+	rd::Lifetime CreateNestedLifetime() const { return RdConnection.Scheduler.lifetime.create_nested(); }
+
+	RdConnection RdConnection;
 };
