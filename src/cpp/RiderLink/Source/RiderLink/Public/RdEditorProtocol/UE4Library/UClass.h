@@ -62,7 +62,7 @@ namespace Jetbrains {
     namespace EditorPlugin {
         
         //data
-        class UClass : public rd::IPolymorphicSerializable
+        class RIDERLINK_API UClass : public rd::IPolymorphicSerializable
         {
             
             //companion

@@ -61,7 +61,7 @@
 /// </summary>
 namespace Jetbrains {
     namespace EditorPlugin {
-        class ScriptCallStack : public IScriptCallStack
+        class RIDERLINK_API ScriptCallStack : public IScriptCallStack
         {
             
             //companion

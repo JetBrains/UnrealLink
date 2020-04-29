@@ -62,7 +62,7 @@ namespace Jetbrains {
     namespace EditorPlugin {
         
         //data
-        class ScriptCallStackFrame : public rd::IPolymorphicSerializable
+        class RIDERLINK_API ScriptCallStackFrame : public rd::IPolymorphicSerializable
         {
             
             //companion
