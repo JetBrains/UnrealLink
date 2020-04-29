@@ -9,15 +9,6 @@
 //region FString
 
 namespace rd {
-    template <typename T, typename A>
-    int32_t size(TArray<T, A> const& value) {
-        return static_cast<int32_t>(value.Num());
-    }
-
-    template <typename T, typename A>
-    void resize(TArray<T, A>& value, int32_t size) {
-        value.Reserve(size);
-    }
 
     FString Polymorphic<FString, void>::read(SerializationCtx& ctx, Buffer& buffer) {
         return FString(std::move(buffer.read_wstring()).data());

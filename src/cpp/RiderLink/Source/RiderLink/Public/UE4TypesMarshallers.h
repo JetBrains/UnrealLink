@@ -50,6 +50,16 @@ namespace rd {
         Result.reset(std::move(Ptr).Release());
         return Result;
     }
+    
+    template <typename T, typename A>
+    int32_t size(TArray<T, A> const& value) {
+        return static_cast<int32_t>(value.Num());
+    }
+
+    template <typename T, typename A>
+    void resize(TArray<T, A>& value, int32_t size) {
+        value.Reserve(size);
+    }
 }
 
 extern template class rd::Polymorphic<FString>;
