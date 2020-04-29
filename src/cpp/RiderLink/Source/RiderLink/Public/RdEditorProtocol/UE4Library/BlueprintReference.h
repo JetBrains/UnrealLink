@@ -62,7 +62,7 @@ namespace Jetbrains {
     namespace EditorPlugin {
         
         //data
-        class BlueprintReference : public rd::IPolymorphicSerializable
+        class RIDERLINK_API BlueprintReference : public rd::IPolymorphicSerializable
         {
             
             //companion
