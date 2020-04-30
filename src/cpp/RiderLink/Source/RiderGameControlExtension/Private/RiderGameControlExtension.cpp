@@ -72,7 +72,12 @@ static int PlayModeToInt(EPlayModeType modeType)
     return 0;
 }
 
-static void RequestPlaySession( bool bAtPlayerStart, TSharedPtr<class IAssetViewport> DestinationViewport, bool bInSimulateInEditor, const FVector* StartLocation = nullptr, const FRotator* StartRotation = nullptr, int32 DestinationConsole = -1, bool bUseMobilePreview = false, bool bUseVRPreview = false, bool bUseVulkanPreview = false)
+// This template has purpose.
+// Before UE 4.24, RequestPlaySession was taking TSharedPtr<ILevelViewport>
+// On UE 4.24, RequestPlaySession takes TSharedPtr<IAssetViewport>
+// Starting from UE 4.25, RequestPlaySession takes FRequestPlaySessionParams and other overrides become obsolete
+template<typename T>
+static void RequestPlaySession( bool bAtPlayerStart, TSharedPtr<T> DestinationViewport, bool bInSimulateInEditor, const FVector* StartLocation = nullptr, const FRotator* StartRotation = nullptr, int32 DestinationConsole = -1, bool bUseMobilePreview = false, bool bUseVRPreview = false, bool bUseVulkanPreview = false)
 {
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
     GUnrealEd->RequestPlaySession(bAtPlayerStart, DestinationViewport, bInSimulateInEditor, StartLocation, StartRotation, DestinationConsole, bUseMobilePreview, bUseVRPreview, bUseVulkanPreview);
@@ -194,7 +199,7 @@ static void RequestPlay(int mode)
 
     if (PlayMode == PlayMode_InEditorFloating)
     {
-        RequestPlaySession(bSpawnAtPlayerStart, nullptr, false, StartLocation);
+        RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false, StartLocation);
     }
     else if (PlayMode == PlayMode_InVR)
     {
