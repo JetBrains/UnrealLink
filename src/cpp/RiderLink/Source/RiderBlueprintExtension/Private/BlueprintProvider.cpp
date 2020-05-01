@@ -6,6 +6,8 @@
 #include "MessageEndpointBuilder.h"
 #include "Async/Async.h"
 
+#include "Runtime/Launch/Resources/Version.h"
+
 FOnBlueprintAdded BluePrintProvider::OnBlueprintAdded{};
 
 void BluePrintProvider::AddBlueprint(UBlueprint* Blueprint) {

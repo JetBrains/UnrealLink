@@ -8,7 +8,8 @@
 #include "Modules/ModuleManager.h"
 #include "Settings/LevelEditorPlaySettings.h"
 #include "Framework/Application/SlateApplication.h"
-#include "UnrealEd.h"
+#include "Editor/UnrealEdEngine.h"
+#include "UnrealEd/Public/Editor.h"
 
 #include "Runtime/Launch/Resources/Version.h"
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
@@ -23,6 +24,8 @@
 DEFINE_LOG_CATEGORY(FLogRiderGameControlExtensionModule);
 
 IMPLEMENT_MODULE(FRiderGameControlExtensionModule, RiderGameControlExtension);
+
+extern UNREALED_API class UUnrealEdEngine* GUnrealEd;
 
 class FSetForTheScope
 {
@@ -327,8 +330,7 @@ void FRiderGameControlExtensionModule::StartupModule()
                 GUnrealEd->PlayWorld->bDebugPauseExecution = true;
             }
         });
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_frameSkip().advise(
-        NestedLifetime, [this](bool)
+    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, [this](bool)
         {
             GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
             GUnrealEd->PlayWorld->bDebugPauseExecution = false;
