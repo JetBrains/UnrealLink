@@ -290,6 +290,21 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectFilePath);
+            if (engineRoot.IsEmpty)
+            {
+                myLogger.Error($"[UnrealLink]: Couldn't find Unreal Engine root for {uprojectFilePath}");
+                var notificationNoEngine = new NotificationModel($"Failed to refresh project files",
+                    "<html>RiderLink has been successfully installed to the project:<br>" +
+                    $"<b>{uprojectFilePath.NameWithoutExtension}<b>" +
+                    "but refresh project action has failed.<br>" +
+                    "Couldn't find Unreal Engine root for:<br>" +
+                    $"{uprojectFilePath}<br>" +
+                    "</html>", true, RdNotificationEntryType.WARN);
+
+                myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.RefreshProject",
+                    () => { myNotificationsModel.Notification(notificationNoEngine); });
+                return;
+            }
             var pathToUnrealBuildToolBin = UnrealEngineFolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
 
             // 1. If project is under engine root, use GenerateProjectFiles.bat first
