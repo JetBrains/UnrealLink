@@ -89,6 +89,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                     installDescription.PluginVersion != myPathsProvider.CurrentPluginVersion)
                                 {
                                     myUnrealHost.PerformModelAction(model => model.OnEditorModelOutOfSync());
+                                    break;
                                 }
                             }
 
