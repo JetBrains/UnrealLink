@@ -32,6 +32,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly ILogger myLogger;
         private readonly UnrealHost myUnrealHost;
         private readonly ISolution mySolution;
+        private readonly PluginPathsProvider myPluginPathsProvider;
         private readonly CppUE4SolutionDetector mySolutionDetector;
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
@@ -42,7 +43,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
             CppUE4SolutionDetector solutionDetector, ISolution solution, NotificationsModel notificationsModel,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler)
+            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, PluginPathsProvider pluginPathsProvider)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
@@ -50,6 +51,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myLogger = logger;
             myUnrealHost = unrealHost;
             mySolution = solution;
+            myPluginPathsProvider = pluginPathsProvider;
             mySolutionDetector = solutionDetector;
 
             mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
@@ -165,7 +167,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         [NotNull]
-        private static UnrealPluginInstallInfo.InstallDescription GetPluginInfo(
+        private UnrealPluginInstallInfo.InstallDescription GetPluginInfo(
             [NotNull] FileSystemPath upluginFilePath, [CanBeNull] FileSystemPath uprojectFilePath = null)
         {
             var installDescription = new UnrealPluginInstallInfo.InstallDescription()
@@ -175,7 +177,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             };
             if (!upluginFilePath.ExistsFile) return installDescription;
 
-            var version = PluginPathsProvider.GetPluginVersion(upluginFilePath);
+            var version = myPluginPathsProvider.GetPluginVersion(upluginFilePath);
             if (version == null) return installDescription;
 
             installDescription.IsPluginAvailable = true;
