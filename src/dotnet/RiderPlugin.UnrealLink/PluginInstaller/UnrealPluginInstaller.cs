@@ -58,39 +58,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     () =>
                     {
                         var unrealPluginInstallInfo = installInfo.New;
-                        if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
-                        {
-                            // TODO: add install plugin to Engine
-                            myLogger.Info("[UnrealLink]: Plugin is already installed in Engine");
-                            var enginePluginVersion = unrealPluginInstallInfo.EnginePlugin.PluginVersion;
-                            if (enginePluginVersion !=
-                                myPathsProvider.CurrentPluginVersion)
-                            {
-                                myLogger.Warn($"[UnrealLink]: Plugin is installed in Engine and it's out of sync. " +
-                                              $"Correct version:{myPathsProvider.CurrentPluginVersion}, " +
-                                              $"Current version {enginePluginVersion}");
-                                var notification = new NotificationModel($"RiderLink is out of sync",
-                                    "<html>Currently installed RiderLink plugin is out of sync with UnrealLink plugin in Rider<br>" +
-                                    $"UnrealLink (Rider plugin) version: {myPathsProvider.CurrentPluginVersion}<br>" +
-                                    $"RiderLink (Unreal Editor plugin) version: {enginePluginVersion}" +
-                                    "</html>", true, RdNotificationEntryType.WARN);
-
-                                myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.OutOfSync",
-                                    () => { myNotificationsModel.Notification(notification); });
-                            }
-                            return;
-                        }
 
                         if (!myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin))
                         {
-                            foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+                            if (unrealPluginInstallInfo.EnginePlugin.PluginVersion !=
+                                myPathsProvider.CurrentPluginVersion)
                             {
-                                if (installDescription.IsPluginAvailable == false ||
-                                    installDescription.PluginVersion != myPathsProvider.CurrentPluginVersion)
-                                {
-                                    myUnrealHost.PerformModelAction(model => model.OnEditorModelOutOfSync());
-                                    break;
-                                }
+                                myLogger.Warn("[UnrealLink]: Plugin is out of sync");
+                                myUnrealHost.PerformModelAction(model => model.OnEditorModelOutOfSync());
                             }
 
                             return;
@@ -108,113 +83,139 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myQueue.Enqueue(() => InstallPluginIfRequired(unrealPluginInstallInfo) );
         }
 
+        private class DeleteTempFolders : IDisposable
+        {
+            private readonly FileSystemPath myTempFolder;
+
+            public DeleteTempFolders(FileSystemPath tempFolder)
+            {
+                myTempFolder = tempFolder;
+            }
+
+            public void Dispose()
+            {
+                myTempFolder.Delete();
+            }
+        }
+
         private void InstallPluginIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo)
         {
-            bool needToRegenerateProjectFiles = false;
+            if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
+                unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion) return;
+            
+            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
+            
+            var enginePluginRootFolder = unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder;
+            if (enginePluginRootFolder.ExistsDirectory)
+            {
+                try
+                {
+                    enginePluginRootFolder.Copy(backupDir);
+                }
+                catch (Exception exception)
+                {
+                    myLogger.Error(exception, $"[UnrealLink]: Failed to backup {enginePluginRootFolder}");
+                    const string backupFailTitle = "Failed to backup old RiderLink plugin";
+                    var backupFailText = $"<html>Please, manually remove<br>" +
+                                                  $"<b>{enginePluginRootFolder.FullPath}\"</b><br>" +
+                                                  "And try installing <b>RiderLink</b> again</html>";
+                    Notify(backupFailTitle, backupFailText, RdNotificationEntryType.WARN);
+                    return;
+                }
+
+                try
+                {
+                    unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder.Delete();
+                }
+                catch (Exception exception)
+                {
+                    myLogger.Error(exception, $"[UnrealLink]: Failed to delete {enginePluginRootFolder}");
+                    const string deleteOldFailTitle = "Failed to delete old RiderLink plugin";
+                    var deleteOldFailText = $"<html>Please, manually remove<br>" +
+                                                  "<a href=\"{unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder}\">Old plugin</a><br>" +
+                                                  "And try installing <b>RiderLink</b> again</html>";
+                    Notify(deleteOldFailTitle, deleteOldFailText, RdNotificationEntryType.WARN);
+                    return;
+                }
+            }
+            
+            var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
+            var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            try
+            {
+                ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath,pluginTmpDir.FullPath);
+            }
+            catch (Exception exception)
+            {
+                myLogger.Error(exception, $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
+                
+                const string unzipFailTitle = "Failed to unzip new RiderLink plugin";
+                var unzipFailText = $"<html>Failed to unzip <a href=\"{editorPluginPathFile.FullPath}\">new version of RiderLink</a> to user folder<br>" +
+                                             "Try restarting Rider in administrative mode</html>";
+                Notify(unzipFailTitle, unzipFailText, RdNotificationEntryType.WARN);
+                return;
+            }
+            
+            var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
+            if (!PatchTypeOfUpluginFile(upluginFile, myLogger, myPluginDetector.UnrealVersion))
+            {
+                pluginTmpDir.Delete();
+            }
+            
+            var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+
+            bool failedToBuild = true;
+            foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+            {
+                if (!BuildPlugin(upluginFile,
+                    pluginBuildOutput,
+                    installDescription.UprojectFilePath))
+                {
+                    myLogger.Warn($"Failed to build RiderLink for {installDescription.UprojectFilePath.NameWithoutExtension}");
+                }
+                else
+                {
+                    failedToBuild = false;
+                    break;
+                }
+            }
+
+            if (failedToBuild)
+            {
+                myLogger.Error($"Failed to build RiderLink for any available project");
+                const string failedBuildTitle = "Failed to build RiderLink plugin";
+                var failedBuildText = "<html>" +
+                                      "Check console for more info" +
+                                      "</html>";
+                Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
+                return;
+            }
+
+            enginePluginRootFolder.CreateDirectory().DeleteChildren();
+            pluginBuildOutput.Copy(enginePluginRootFolder);
 
             foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
             {
-                if (installDescription.PluginVersion == myPathsProvider.CurrentPluginVersion) continue;
-                
-                var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(installDescription.UprojectFilePath);
-                if ((engineRoot / "Engine" / "Source" / "Programs").IsPrefixOf(installDescription.UprojectFilePath))
-                {
-                    myLogger.Info("[UnrealLink]: Found uproject in Programs folder. Skipping it.");
-                    return;
-                }
-                
-                myLogger.Info($"[UnrealLink]: Installing plugin for {installDescription.UprojectFilePath}");
-                var pluginDir = installDescription.UnrealPluginRootFolder;
-                var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-                
-                try
-                {
-                    if (pluginDir.ExistsDirectory)
-                    {
-                        pluginDir.Copy(backupDir);
-                        pluginDir.DeleteChildren();
-                    }
-                    else
-                    {
-                        pluginDir.CreateDirectory();
-                    }
-                }
-                catch (Exception exception)
-                {
-                    myLogger.Error(exception, ExceptionOrigin.Algorithmic,
-                        "[UnrealLink]: Couldn't backup original RiderLink plugin folder");
-                    backupDir.Delete();
-                    continue;
-                }
-
-                var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
-                var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-                try
-                {
-                    ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath,
-                        pluginTmpDir.FullPath);
-                }
-                catch (Exception exception)
-                {
-                    myLogger.Error(exception, ExceptionOrigin.Algorithmic,
-                        $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
-                    if (backupDir.ExistsDirectory)
-                        backupDir.Copy(pluginDir);
-                    pluginTmpDir.Delete();
-                    backupDir.Delete();
-                    continue;
-                }
-
-                var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
-                if (!PatchTypeOfUpluginFile(upluginFile, myLogger, myPluginDetector.UnrealVersion))
-                {
-                    if (backupDir.ExistsDirectory)
-                        backupDir.Copy(pluginDir);
-                    backupDir.Delete();
-                    pluginTmpDir.Delete();
-                    continue;
-                }
-
-                // TODO: On UE 4.20 (at least) building plugin from cmd is broken.
-                // if (!BuildPlugin(upluginFile,
-                //     pluginDir.Directory,
-                //     installDescription.UprojectFilePath))
-                // {
-                //     myLogger.Warn($"Failed to build RiderLink for {installDescription.UprojectFilePath.NameWithoutExtension}. Copying source files instead");
-                //     pluginTmpDir.Move(pluginDir);
-                // }
-                try
-                {
-                    pluginTmpDir.Copy(pluginDir);
-                }
-                catch (Exception exception)
-                {
-                    myLogger.Error(exception,
-                        $"[UnrealLink]: Couldn't copy from {pluginTmpDir} to {pluginDir}");
-                    if (backupDir.ExistsDirectory)
-                        backupDir.Copy(pluginDir);
-                }
-                
-                
-                var notification = new NotificationModel("Unreal Editor plugin installed",
-                    "<html>Unreal Editor plugin was installed to:<br>" +
-                    $"<b>{pluginDir}<b>" +
-                    "</html>", true, RdNotificationEntryType.INFO);
-
-                myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.InstallPlugin",
-                    () => { myNotificationsModel.Notification(notification); });
-
-                backupDir.Delete();
-                pluginTmpDir.Delete();
-                
-                installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
-                installDescription.IsPluginAvailable = true;
-
-                needToRegenerateProjectFiles = true;
+                installDescription.UnrealPluginRootFolder.Delete();
             }
 
-            if (needToRegenerateProjectFiles)
-                RegenerateProjectFiles(unrealPluginInstallInfo.ProjectPlugins.FirstNotNull()?.UprojectFilePath);
+            const string title = "Unreal Editor plugin installed";
+            var text = "<html>Unreal Editor plugin was installed to:<br>" +
+                       $"<b>{enginePluginRootFolder}<b>" +
+                       "</html>";
+                            
+            Notify(title, text, RdNotificationEntryType.INFO);
+
+            RegenerateProjectFiles(unrealPluginInstallInfo.ProjectPlugins.FirstNotNull()?.UprojectFilePath);
+        }
+
+        private void Notify(string title, string text, RdNotificationEntryType verbosity)
+        {
+            var notification = new NotificationModel(title, text, true, verbosity);
+
+            myShellLocks.ExecuteOrQueue(myLifetime, "UnrealLink.InstallPlugin",
+                () => { myNotificationsModel.Notification(notification); });
         }
 
         private static bool PatchTypeOfUpluginFile(FileSystemPath upluginFile, ILogger logger, Version pluginVersion)
@@ -447,13 +448,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             //engineRoot\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
             var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectFile);
-            var isInstalledBuild = IsInstalledBuild(engineRoot);
             var commandLine = new CommandLineBuilderJet()
                 .AppendSwitch("BuildPlugin")
                 .AppendSwitch($"-Plugin=\"{upluginPath.FullPath}\"")
-                .AppendSwitch($"-Package=\"{outputDir.FullPath}\"");
-            if (isInstalledBuild)
-                commandLine.AppendSwitch("-Rocket");
+                .AppendSwitch($"-Package=\"{outputDir.FullPath}\"")
+                .AppendSwitch("-Rocket");
 
             var pathToUat = engineRoot / "Engine" / "Build" / "BatchFiles" / "RunUAT.bat";
             if (!pathToUat.ExistsFile)
@@ -461,36 +460,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Error("[UnrealLink]: Failed build plugin: RunUAT.bat is not available");
                 return false;
             }
-
+            
             try
             {
-                var processStartInfo = new ProcessStartInfo()
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    FileName = pathToUat.FullPath,
-                    Arguments = commandLine.ToString()
-                };
-                var process = new Process
-                {
-                    EnableRaisingEvents = true,
-                    StartInfo = processStartInfo,
-                    
-                };
-                process.Start();
-                process.WaitForExit(1000*60);
-                if (process.ExitCode != 0)
-                {
-                    myLogger.Error("[UnrealLink]: Failed build plugin: calling RunUAT.bat went wrong");
-                    return false;
-                }
+                myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {pathToUat}");
+                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoStdout(
+                    pathToUat,
+                    commandLine,
+                    TimeSpan.FromMinutes(1),
+                    InvokeChildProcess.TreatStderr.AsOutput
+                ));
             }
-            catch (Exception exception)
+            catch (ErrorLevelException errorLevelException)
             {
-                myLogger.Error(exception, "[UnrealLink]: Failed build plugin: calling RunUAT.bat went wrong");
+                myLogger.Error(errorLevelException,
+                    $"[UnrealLink]: Failed refresh project files, calling {pathToUat} went wrong");
                 return false;
             }
-
+            
             return true;
         }
     }
