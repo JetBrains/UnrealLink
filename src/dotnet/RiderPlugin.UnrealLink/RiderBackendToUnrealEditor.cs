@@ -150,11 +150,12 @@ namespace RiderPlugin.UnrealLink
                 }
                 catch (Exception exception)
                 {
-                    tries -= 1;
-                    myLogger.Warn($"[UnrealLink]: Couldn't read connection port from {portFileFullPath}");
+                    --tries;
+                    myLogger.Error(exception, $"[UnrealLink]: Couldn't read connection port from {portFileFullPath} on {3 - tries} try");
                     System.Threading.Thread.Sleep(1000);
                 }
             }
+            myLogger.Error($"[UnrealLink]: Failed to read connection port from {portFileFullPath}");
             return false;
         }
 

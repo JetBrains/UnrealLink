@@ -15,16 +15,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     {
         private readonly ApplicationPackages myApplicationPackages;
         private readonly IDeployedPackagesExpandLocationResolver myResolver;
+        private readonly ILogger myLogger;
 
         private static readonly string EditorPluginFile = "RiderLink.zip";
         public readonly FileSystemPath PathToPackedPlugin;
         public readonly Version CurrentPluginVersion;
 
         public PluginPathsProvider(ApplicationPackages applicationPackages,
-            IDeployedPackagesExpandLocationResolver resolver)
+            IDeployedPackagesExpandLocationResolver resolver, ILogger logger)
         {
             myApplicationPackages = applicationPackages;
             myResolver = resolver;
+            myLogger = logger;
             PathToPackedPlugin = GetEditorPluginPathFile();
             CurrentPluginVersion = GetCurrentPluginVersion();
         }
@@ -65,21 +67,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return result;
         }
 
-        public static Version GetPluginVersion(FileSystemPath upluginFilePath)
+        public Version GetPluginVersion(FileSystemPath upluginFilePath)
         {
-            var text = File.ReadAllText(upluginFilePath.FullPath);
             try
-
             {
+                var text = File.ReadAllText(upluginFilePath.FullPath);
                 var upluginDescription = JObject.Parse(text);
                 var versionToken = upluginDescription.GetValue("VersionName");
                 if (versionToken == null) return null;
 
                 return new Version(versionToken.ToString());
             }
-            catch (Exception _)
+            catch (Exception exception)
             {
-                // TODO: add logging for multiple cases
+                myLogger.Error(exception, "[UnrealLink]: Couldn't read RiderLink plugin version");
                 return null;
             }
         }
