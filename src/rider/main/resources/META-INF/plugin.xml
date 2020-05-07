@@ -55,8 +55,8 @@
     <action id="UnrealLink.InstallEditorPluginAction"
             class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginAction"
             text="Install Unreal Editor Plugin" />
-    <action id="UnrealLink.EnableAutoupdatePlugin"
-            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoupdatePlugin"
+    <action id="UnrealLink.EnableAutoUpdatePlugin"
+            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"
             text="Enable Auto-Update" />
   </actions>
 </idea-plugin>

@@ -24,7 +24,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
                 notification, _ -> notification.expire()
             }
             notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginAction"))
-            notification.addAction(ActionManager.getInstance().getAction("UnrealLink.EnableAutoupdatePlugin"))
+            notification.addAction(ActionManager.getInstance().getAction("UnrealLink.EnableAutoUpdatePlugin"))
             Notifications.Bus.notify(notification, project)
         }
     }
