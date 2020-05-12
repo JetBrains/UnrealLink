@@ -198,7 +198,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Error($"Failed to build RiderLink for any available project");
                 const string failedBuildTitle = "Failed to build RiderLink plugin";
                 var failedBuildText = "<html>" +
-                                      "Check console for more info" +
+                                      "Check build logs for more info<b>" +
+                                      "Help > Diagnostic Tools > Show Log in Explorer" +
                                       "</html>";
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return;
@@ -354,14 +355,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {generateProjectFilesBat}");
-                var cmdLine = new CommandLineBuilderJet()
-                    .AppendSwitch("/C")
+                var commandLine = new CommandLineBuilderJet()
                     .AppendFileName(generateProjectFilesBat);
+            
+                var hackCmd = new CommandLineBuilderJet()
+                    .AppendSwitch("/C")
+                    .AppendSwitch($"\"{commandLine}\"");
+                
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
 
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     GetPathToCmd(),
-                    cmdLine,
+                    hackCmd,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
@@ -389,17 +394,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             var commandLine = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
                 .AppendFileName(pathToUnrealVersionSelector)
                 .AppendSwitch("/projectFiles")
                 .AppendFileName(uprojectFilePath);
+            
+            var hackCmd = new CommandLineBuilderJet()
+                .AppendSwitch("/C")
+                .AppendSwitch($"\"{commandLine}\"");
 
             try
             {
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {pathToUnrealVersionSelector} {commandLine}");
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     GetPathToCmd(),
-                    commandLine,
+                    hackCmd,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
@@ -422,7 +430,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             bool isInstalledBuild = IsInstalledBuild(engineRoot);
 
             var commandLine = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
                 .AppendFileName(pathToUnrealBuildToolBin)
                 .AppendSwitch("-ProjectFiles")
                 .AppendSwitch($"-project=\"{uprojectFilePath.FullPath}\"")
@@ -433,12 +440,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             else
                 commandLine.AppendSwitch("-engine");
 
+            var hackCmd = new CommandLineBuilderJet()
+                .AppendSwitch("/C")
+                .AppendSwitch($"\"{commandLine}\"");
+
             try
             {
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {pathToUnrealBuildToolBin} {commandLine}");
+                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
                     GetPathToCmd(),
-                    commandLine,
+                    hackCmd,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
@@ -448,7 +459,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             catch (ErrorLevelException errorLevelException)
             {
                 myLogger.Error(errorLevelException,
-                    $"[UnrealLink]: Failed refresh project files: calling {pathToUnrealBuildToolBin} {commandLine}");
+                    $"[UnrealLink]: Failed refresh project files: calling {commandLine}");
                 return false;
             }
 
@@ -482,12 +493,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             
             var commandLine = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
                 .AppendFileName(pathToUat)
                 .AppendSwitch("BuildPlugin")
                 .AppendSwitch($"-Plugin=\"{upluginPath.FullPath}\"")
                 .AppendSwitch($"-Package=\"{outputDir.FullPath}\"")
                 .AppendSwitch("-Rocket");
+            
+            var hackCmd = new CommandLineBuilderJet()
+                .AppendSwitch("/C")
+                .AppendSwitch($"\"{commandLine}\"");
 
             try
             {
@@ -504,11 +518,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         stdOut.Add(chunk);
                     }
                 });
-                myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {pathToUat}");
-                var pathToCmd = GetPathToCmd();
+                myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {commandLine}");
+                var pathToCmdExe = GetPathToCmd();
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
-                var result = InvokeChildProcess.InvokeSync(pathToCmd, commandLine,
+                var result = InvokeChildProcess.InvokeSync(pathToCmdExe, hackCmd,
                     pipeStreams,TimeSpan.FromMinutes(1), null, null, null, myLogger);
                 myLogger.Verbose(stdOut.Join("\n"));
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
