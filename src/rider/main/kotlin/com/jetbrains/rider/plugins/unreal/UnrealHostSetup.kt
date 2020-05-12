@@ -46,6 +46,14 @@ class UnrealHostSetup(project: Project, unrealHost: UnrealHost) : LifetimedProje
             }
         }
 
+        unrealHost.performModelAction {
+            it.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
+                if (!connected) {
+                    it.play.set(0);
+                }
+            }
+        }
+
 //  Update state of Unreal actions on toolbar
         unrealHost.performModelAction {
             it.play.change.advise(project.lifetime) {
