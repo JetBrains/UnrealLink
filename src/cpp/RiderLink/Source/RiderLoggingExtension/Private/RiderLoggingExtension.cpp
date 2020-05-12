@@ -49,6 +49,10 @@ void FRiderLoggingExtensionModule::StartupModule()
                         FRiderLinkModule>(
                         FRiderLinkModule::GetModuleName());
 
+                    // [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
+                    // while we won't change BP hyperlink parsing
+                    tail = tail.Left(4096);
+
                     FString toSend;
                     while (tail.Split("\n", &toSend, &tail))
                     {
