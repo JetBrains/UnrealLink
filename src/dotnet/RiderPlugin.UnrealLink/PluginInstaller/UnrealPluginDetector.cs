@@ -7,7 +7,7 @@ using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
-using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
+using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
@@ -137,7 +137,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             if (!uprojectPath.ExistsFile) return false;
 
-            var unrealEngineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectPath);
+            var unrealEngineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectPath);
             if (unrealEngineRoot.IsEmpty) return false;
 
             return TryGetEnginePluginFromEngineRoot(installInfo, unrealEngineRoot);

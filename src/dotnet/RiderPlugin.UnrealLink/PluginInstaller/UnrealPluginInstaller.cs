@@ -10,7 +10,7 @@ using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
-using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
+using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
@@ -299,7 +299,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return;
             }
 
-            var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectFilePath);
+            var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFilePath);
             if (engineRoot.IsEmpty)
             {
                 myLogger.Error($"[UnrealLink]: Couldn't find Unreal Engine root for {uprojectFilePath}");
@@ -316,7 +316,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return;
             }
 
-            var pathToUnrealBuildToolBin = UnrealEngineFolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
+            var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
 
             // 1. If project is under engine root, use GenerateProjectFiles.bat first
             if (GenerateProjectFilesUsingBat(engineRoot)) return;
@@ -476,7 +476,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile)
         {
             //engineRoot\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
-            var engineRoot = UnrealEngineFolderFinder.FindUnrealEngineRoot(uprojectFile);
+            var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFile);
             if (engineRoot.IsEmpty)
             {
                 myLogger.Error(
