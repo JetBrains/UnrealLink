@@ -198,8 +198,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Error($"Failed to build RiderLink for any available project");
                 const string failedBuildTitle = "Failed to build RiderLink plugin";
                 var failedBuildText = "<html>" +
-                                      "Check build logs for more info<b>" +
-                                      "Help > Diagnostic Tools > Show Log in Explorer" +
+                                      "Check build logs for more info<br>" +
+                                      "<b>Help > Diagnostic Tools > Show Log in Explorer</b>" +
                                       "</html>";
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return;
