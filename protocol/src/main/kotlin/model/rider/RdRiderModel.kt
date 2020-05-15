@@ -4,6 +4,7 @@ import com.jetbrains.rd.generator.nova.*
 import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
+import com.jetbrains.rider.model.nova.ide.UiContextModel
 import model.lib.ue4.UE4Library
 import model.lib.ue4.UE4Library.UClass
 import model.lib.ue4.UE4Library.BlueprintReference
@@ -43,6 +44,19 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         const("separator", string, "::")
     }
 
+    private val PluginInstallStatus = enum("PluginInstallStatus") {
+        +"NoPlugin"
+        +"UpToDate"
+        +"InEditor"
+        +"InGame"
+    }
+
+    private val PluginInstallLocation = enum("PluginInstallLocation") {
+        +"Editor"
+        +"Game"
+        +"NotInstalled"
+    }
+
     init {
         property("editorId", 0).readonly.async
         property("play", int)
@@ -64,8 +78,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("isConnectedToUnrealEditor", false).readonly.async
         property("isUnrealEngineSolution", false)
 
-        sink("onEditorModelOutOfSync", void)
-        source("installEditorPlugin", void)
+        sink("onEditorModelOutOfSync", PluginInstallStatus)
+        source("installEditorPlugin", PluginInstallLocation)
         source("enableAutoupdatePlugin", void)
     }
 }

@@ -11,6 +11,7 @@ using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
+using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 
@@ -105,13 +106,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                 // All projects in the solution are bound to the same engine
                                 // So take first project and use it to find Unreal Engine
                                 TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
+                                foundEnginePlugin = installInfo.EnginePlugin.IsPluginAvailable;
                             }
 
-                            // We didn't find Engine plugins, let's gather data about Project plugins
+                            // Gather data about Project plugins
                             foreach (var uprojectLocation in uprojectLocations)
                             {
                                 myLogger.Info($"[UnrealLink]: Looking for plugin in {uprojectLocation}");
-                                var projectPlugin = GetProjectPluginForUproject(uprojectLocation, installInfo);
+                                var projectPlugin = GetProjectPluginForUproject(uprojectLocation);
                                 if (projectPlugin.IsPluginAvailable)
                                 {
                                     myLogger.Info(
@@ -120,13 +122,19 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                                 installInfo.ProjectPlugins.Add(projectPlugin);
                             }
+
+                            if (foundEnginePlugin)
+                                installInfo.Location = PluginInstallLocation.Editor;
+                            else if (installInfo.ProjectPlugins.Any(description => description.IsPluginAvailable))
+                                installInfo.Location = PluginInstallLocation.Game;
+                            else
+                                installInfo.Location = PluginInstallLocation.NotInstalled;
                             InstallInfoProperty.SetValue(installInfo);
                         }));
                 });
         }
 
-        private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(FileSystemPath uprojectLocation,
-            UnrealPluginInstallInfo installInfo)
+        private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(FileSystemPath uprojectLocation)
         {
             var projectRoot = uprojectLocation.Directory;
             var upluginLocation = projectRoot / ourPathToProjectPlugin;

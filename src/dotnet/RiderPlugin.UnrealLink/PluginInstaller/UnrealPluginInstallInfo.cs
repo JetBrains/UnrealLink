@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Rider.Model;
 using JetBrains.Util;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
@@ -16,5 +17,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         public InstallDescription EnginePlugin = new InstallDescription();
         public List<InstallDescription> ProjectPlugins = new List<InstallDescription>();
+
+        public PluginInstallLocation Location;
     }
 }

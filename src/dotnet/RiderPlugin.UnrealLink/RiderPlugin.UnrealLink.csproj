@@ -13,9 +13,5 @@
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Utils" />
-  </ItemGroup>
-
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" />
 </Project>

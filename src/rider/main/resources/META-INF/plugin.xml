@@ -53,9 +53,12 @@
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
 
-    <action id="UnrealLink.InstallEditorPluginAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginAction"
-            text="Install Unreal Editor Plugin" />
+    <action id="UnrealLink.InstallEditorPluginToEngineAction"
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"
+            text="Install Unreal Editor Plugin in Engine" />
+    <action id="UnrealLink.InstallEditorPluginToGameAction"
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"
+            text="Install Unreal Editor Plugin in Game" />
     <action id="UnrealLink.EnableAutoUpdatePlugin"
             class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"
             text="Enable Auto-Update" />

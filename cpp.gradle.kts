@@ -37,7 +37,7 @@ tasks {
     val rdCppFolder = "$buildDir/rd/rd-cpp"
 
     val buildRdCpp by creating(Exec::class) {
-        dependsOn(cloneRdCpp)
+        // dependsOn(cloneRdCpp)
         inputs.dir("$rdCppFolder/src")
         outputs.dir("$rdCppFolder/export")
         commandLine = listOf("cmd", "/c", "$rdCppFolder/build.cmd")
