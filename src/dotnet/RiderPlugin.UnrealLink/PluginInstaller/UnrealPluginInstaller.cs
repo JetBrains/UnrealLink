@@ -69,9 +69,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var status = PluginInstallStatus.NoPlugin;
             var outOfSync = true;
-            if (unrealPluginInstallInfo.Location == PluginInstallLocation.Editor)
+            if (unrealPluginInstallInfo.Location == PluginInstallLocation.Engine)
             {
-                status = PluginInstallStatus.InEditor;
+                status = PluginInstallStatus.InEngine;
                 outOfSync = unrealPluginInstallInfo.EnginePlugin.PluginVersion !=
                             myPathsProvider.CurrentPluginVersion;
             }
@@ -102,7 +102,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             mySolution.Locks.ExecuteOrQueueReadLockEx(myLifetime,
                 "UnrealPluginInstaller.InstallPluginIfRequired",
-                () => InstallPluginInEngineIfRequired(unrealPluginInstallInfo));
+                () => HandleManualInstallPlugin(unrealPluginInstallInfo.Location));
         }
 
         private sealed class DeleteTempFolders : IDisposable
@@ -175,7 +175,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 break;
             }
 
-            if (!success)
+            if (success)
+            {
+                unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable = false;
+            } else
             {
                 foreach (var backupAllPlugin in backupAllPlugins)
                 {
@@ -229,6 +232,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 foreach (var backupAllPlugin in backupAllPlugins)
                 {
                     backupAllPlugin.Restore();
+                }
+            }
+            else
+            {
+                foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+                {
+                    installDescription.IsPluginAvailable = false;
                 }
             }
         }
@@ -345,20 +355,23 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private void HandleManualInstallPlugin(PluginInstallLocation location)
+        public void HandleManualInstallPlugin(PluginInstallLocation location)
         {
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
             if (unrealPluginInstallInfo == null) return;
-            
-            if (location == PluginInstallLocation.Editor)
-            {
-                InstallPluginInEngineIfRequired(unrealPluginInstallInfo);
-            }
-            else
-            {
-                InstallPluginInGameIfRequired(unrealPluginInstallInfo);
-            }
 
+            mySolution.Locks.ExecuteOrQueueReadLockEx(myLifetime,
+                "UnrealPluginInstaller.HandleManualInstallPlugin", () =>
+                {
+                    if (location == PluginInstallLocation.Engine)
+                    {
+                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo);
+                    }
+                    else
+                    {
+                        InstallPluginInGameIfRequired(unrealPluginInstallInfo);
+                    }
+                });
         }
 
         private void BindToNotificationFixAction()

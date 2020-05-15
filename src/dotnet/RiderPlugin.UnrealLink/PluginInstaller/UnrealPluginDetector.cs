@@ -124,7 +124,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             }
 
                             if (foundEnginePlugin)
-                                installInfo.Location = PluginInstallLocation.Editor;
+                                installInfo.Location = PluginInstallLocation.Engine;
                             else if (installInfo.ProjectPlugins.Any(description => description.IsPluginAvailable))
                                 installInfo.Location = PluginInstallLocation.Game;
                             else

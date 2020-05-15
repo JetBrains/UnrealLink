@@ -47,12 +47,12 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     private val PluginInstallStatus = enum("PluginInstallStatus") {
         +"NoPlugin"
         +"UpToDate"
-        +"InEditor"
+        +"InEngine"
         +"InGame"
     }
 
     private val PluginInstallLocation = enum("PluginInstallLocation") {
-        +"Editor"
+        +"Engine"
         +"Game"
         +"NotInstalled"
     }

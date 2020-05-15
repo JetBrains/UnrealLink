@@ -42,7 +42,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
                     notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginToEngineAction"))
                     notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginToGameAction"))
                 }
-                PluginInstallStatus.InEditor -> {
+                PluginInstallStatus.InEngine -> {
                     notification.addAction(object : InstallEditorPluginToEngineAction("Update Plugin in Engine"){})
                     notification.addAction(object : InstallEditorPluginToGameAction("Move Plugin to Game"){})
                 }

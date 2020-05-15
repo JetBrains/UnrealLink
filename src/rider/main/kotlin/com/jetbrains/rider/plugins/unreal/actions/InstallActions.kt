@@ -12,7 +12,7 @@ open class InstallEditorPluginToEngineAction(private val text: String = "Install
         notification.expire()
         val project = e.project ?: return
         e.presentation.isEnabled = false
-        project.solution.rdRiderModel.installEditorPlugin.fire(PluginInstallLocation.Editor)
+        project.solution.rdRiderModel.installEditorPlugin.fire(PluginInstallLocation.Engine)
     }
 }
 
