@@ -151,11 +151,11 @@ namespace RiderPlugin.UnrealLink
                 catch (Exception exception)
                 {
                     --tries;
-                    myLogger.Error(exception, $"[UnrealLink]: Couldn't read connection port from {portFileFullPath} on {3 - tries} try");
+                    myLogger.Warn(exception, ExceptionOrigin.OuterWorld,$"[UnrealLink]: Couldn't read connection port from {portFileFullPath} on {3 - tries} try");
                     System.Threading.Thread.Sleep(1000);
                 }
             }
-            myLogger.Error($"[UnrealLink]: Failed to read connection port from {portFileFullPath}");
+            myLogger.Error($"[UnrealLink]: Failed to read connection port from {portFileFullPath} 3 times in a row");
             return false;
         }
 
