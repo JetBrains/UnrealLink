@@ -34,10 +34,16 @@ tasks {
         commandLine = if (destinationDir.exists()) pullCommand else cloneCommand
     }
 
+    val updateSubmodulesRdCpp by creating (Exec::class) {
+        workingDir = buildDir.resolve("rd")
+        commandLine = listOf("git", "submodule", "update", "--init", "--recursive")
+    }
+
     val rdCppFolder = "$buildDir/rd/rd-cpp"
 
     val buildRdCpp by creating(Exec::class) {
-        // dependsOn(cloneRdCpp)
+        dependsOn(cloneRdCpp)
+        dependsOn(updateSubmodulesRdCpp)
         inputs.dir("$rdCppFolder/src")
         outputs.dir("$rdCppFolder/export")
         commandLine = listOf("cmd", "/c", "$rdCppFolder/build.cmd")
