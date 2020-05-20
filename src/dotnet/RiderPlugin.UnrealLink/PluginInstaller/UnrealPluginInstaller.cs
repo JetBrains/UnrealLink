@@ -113,18 +113,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
                 unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion) return;
 
-            Lifetime.Using(lifetime =>
+            Lifetime.UsingNested(lifetime =>
             {
                 lifetime.Bracket(() => InstallationIsInProgress.Value = true,
                     () => InstallationIsInProgress.Value = false);
                 var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
                 var header = $"{prefix} RiderLink plugin";
+                var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);
                 var task = RiderBackgroundTaskBuilder.Create()
                     .AsNonCancelable()
-                    .AsIndeterminate()
-                    .WithHeader(header);
+                    .WithHeader(header)
+                    .WithProgress(progress)
+                    .WithDescriptionFromProgress();
                 myBackgroundTaskHost.AddNewTask(lifetime, task);
-                InstallPluginInEngine(unrealPluginInstallInfo);
+                InstallPluginInEngine(unrealPluginInstallInfo, progress);
             });
         }
         
@@ -134,7 +136,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
                 return;
 
-            Lifetime.Using(lifetime =>
+            Lifetime.UsingNested(lifetime =>
             {
                 lifetime.Bracket(() => InstallationIsInProgress.Value = true,
                     () => InstallationIsInProgress.Value = false);
@@ -195,13 +197,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return result;
         }
 
-        private void InstallPluginInEngine(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void InstallPluginInEngine(UnrealPluginInstallInfo unrealPluginInstallInfo, IProperty<double> progress)
         {
             var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
-            if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin, unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath))
+            if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin, unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress))
             {
                 foreach (var backupAllPlugin in backupAllPlugins)
                 {
@@ -217,8 +219,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private bool InstallPlugin(UnrealPluginInstallInfo.InstallDescription installDescription, FileSystemPath uprojectFile)
+        private bool InstallPlugin(UnrealPluginInstallInfo.InstallDescription installDescription,
+            FileSystemPath uprojectFile, IProperty<double> progressProperty = null)
         {
+            const double ZIP_STEP = 0.1;
+            const double PATCH_STEP = 0.1;
+            const double BUILD_STEP = 0.6;
+            const double REFRESH_STEP = 0.1;
+
+            var currentProgress = 0.0;
             var pluginRootFolder = installDescription.UnrealPluginRootFolder;
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
@@ -226,6 +235,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             try
             {
                 ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
+                progressProperty?.SetValue(currentProgress+=ZIP_STEP);
             }
             catch (Exception exception)
             {
@@ -244,12 +254,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 pluginTmpDir.Delete();
             }
+            progressProperty?.SetValue(currentProgress+=PATCH_STEP);
 
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
 
+            var buildProgress = currentProgress;
             if (!BuildPlugin(upluginFile,
                 pluginBuildOutput,
-                uprojectFile))
+                uprojectFile,value => progressProperty?.SetValue(buildProgress + value*BUILD_STEP)))
             {
                 myLogger.Error($"Failed to build RiderLink for any available project");
                 const string failedBuildTitle = "Failed to build RiderLink plugin";
@@ -260,9 +272,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return false;
             }
+            progressProperty?.SetValue(currentProgress+=BUILD_STEP);
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
             pluginBuildOutput.Copy(pluginRootFolder);
+            progressProperty?.SetValue(currentProgress+=REFRESH_STEP);
 
             installDescription.IsPluginAvailable = true;
             installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
@@ -275,6 +289,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             Notify(title, text, RdNotificationEntryType.INFO);
 
             RegenerateProjectFiles(uprojectFile);
+            progressProperty?.SetValue(1.0);
             return true;
         }
 
@@ -331,7 +346,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         public void HandleManualInstallPlugin(PluginInstallLocation location)
         {
-            InstallationIsInProgress.Value = true;
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
             if (unrealPluginInstallInfo == null) return;
 
@@ -542,7 +556,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return isInstalledBuild;
         }
 
-        private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile)
+        private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile, Action<double> progressPump)
         {
             //engineRoot\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
             var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFile);
@@ -586,13 +600,30 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     {
                         stdOut.Add(chunk);
                     }
+
+                    if (isErr) return;
+                    
+                    var progressText = chunk.Trim();
+                    if (!progressText.StartsWith("[")) return;
+                    
+                    var closingBracketIndex = progressText.IndexOf(']');
+                    if (closingBracketIndex == -1) return;
+                    
+                    var progressNumberWithDivision = progressText.Substring(1, closingBracketIndex-1);
+                    var numbers = progressNumberWithDivision.Split('/');
+                    if (numbers.Length != 2) return;
+
+                    if (!int.TryParse(numbers[0], out var leftInt)) return;
+                    if (!int.TryParse(numbers[1], out var rightInt)) return;
+
+                    progressPump((double)leftInt / rightInt);
                 });
                 myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {commandLine}");
                 var pathToCmdExe = BatchUtils.GetPathToCmd();
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
                 var result = InvokeChildProcess.InvokeSync(pathToCmdExe, hackCmd,
-                    pipeStreams,TimeSpan.FromMinutes(5), null, null, null, myLogger);
+                    pipeStreams,TimeSpan.FromMinutes(30), null, null, null, myLogger);
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
                 myLogger.Verbose("[UnrealLink]: Build logs:");
                 myLogger.Verbose(stdOut.Join("\n"));
