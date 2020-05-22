@@ -45,6 +45,12 @@ object UE4Library : Root(
         }
     }
 
+    val PlayState = enum("PlayState") {
+        +"Idle"
+        +"Play"
+        +"Pause"
+    }
+
     val VerbosityType = declare(CppIntrinsicType("ELogVerbosity", "Type", "Logging/LogVerbosity.h"))
     {
         setting(Cpp17Generator.IsNonScoped, "uint8")

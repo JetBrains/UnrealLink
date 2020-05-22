@@ -3,6 +3,7 @@ package model.editorPlugin
 import com.jetbrains.rd.generator.nova.*
 import com.jetbrains.rd.generator.nova.PredefinedType.bool
 import com.jetbrains.rd.generator.nova.PredefinedType.int
+import com.jetbrains.rd.generator.nova.PredefinedType.void
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
@@ -28,9 +29,8 @@ object RdEditorRoot : Root(
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
         signal("unrealLog", UnrealLogEvent).async
-        property("play", int)
         property("playMode", int)
-        signal("frameSkip", bool)
+        source("frameSkip", void)
 
         signal("openBlueprint", UE4Library.BlueprintReference)
 
@@ -39,5 +39,8 @@ object RdEditorModel : Ext(RdEditorRoot) {
         call("getPathNameByPath", FString, FString.nullable)
 
         callback("AllowSetForegroundWindow", int, bool)
+
+        sink("PlayStateFromEditor", UE4Library.PlayState)
+        source("PlayStateFromRider", UE4Library.PlayState)
     }
 }

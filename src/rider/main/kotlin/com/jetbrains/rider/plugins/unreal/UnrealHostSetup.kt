@@ -11,6 +11,7 @@ import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
+import com.jetbrains.rider.model.PlayState
 import com.jetbrains.rider.plugins.unreal.actions.*
 import com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget
 import com.sun.jna.LastErrorException
@@ -49,15 +50,15 @@ class UnrealHostSetup(project: Project, unrealHost: UnrealHost) : LifetimedProje
         unrealHost.performModelAction {
             it.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
                 if (!connected) {
-                    it.play.set(0);
+                    setPlayState(unrealHost, PlayState.Idle)
                 }
             }
         }
 
 //  Update state of Unreal actions on toolbar
         unrealHost.performModelAction {
-            it.play.change.advise(project.lifetime) {
-                ActivityTracker.getInstance().inc()
+            it.playStateFromEditor.advise(project.lifetime) { newState ->
+                setPlayState(unrealHost, newState)
             }
         }
 
@@ -74,6 +75,12 @@ class UnrealHostSetup(project: Project, unrealHost: UnrealHost) : LifetimedProje
                 dedicatedServerAction.setSelected(AnActionEvent(null, DataManager.getInstance().dataContext, "", dedicatedServerAction.templatePresentation, ActionManager.getInstance(), 0), DedicatedServer.getDedicatedServer(mode))
             }
         }
+    }
+
+    private fun setPlayState(unrealHost: UnrealHost, it: PlayState) {
+        unrealHost.playState = it
+        // This will trigger refresh in actions for `PlayActions.kt`
+        ActivityTracker.getInstance().inc()
     }
 
     private val user32 = Native.load("user32", User32::class.java)

@@ -2,6 +2,8 @@
 
 #include "RiderLink.hpp"
 
+#include <RdEditorProtocol/UE4Library/PlayState.h>
+
 #include "IHeadMountedDisplay.h"
 #include "IXRTrackingSystem.h"
 #include "LevelEditor.h"
@@ -310,19 +312,19 @@ void FRiderGameControlExtensionModule::StartupModule()
     }
 
     const rd::Lifetime NestedLifetime = FRiderLinkModule::Get().CreateNestedLifetime();
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().advise(
-        NestedLifetime, [this](int playValue)
+    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromRider().advise(
+        NestedLifetime, [this](Jetbrains::EditorPlugin::PlayState State)
         {
-            if (PlayFromUnreal)
-                return;
-            FSetForTheScope s(PlayFromRider);
-
-            if (!playValue && GUnrealEd && GUnrealEd->PlayWorld)
+            if(!GUnrealEd) return;
+            switch(State)
             {
-                GUnrealEd->RequestEndPlayMap();
-            }
-            else if (playValue == 1 && GUnrealEd)
-            {
+            case Jetbrains::EditorPlugin::PlayState::Idle:
+                if (State == Jetbrains::EditorPlugin::PlayState::Idle && GUnrealEd->PlayWorld)
+                {
+                    GUnrealEd->RequestEndPlayMap();
+                }
+                break;
+            case Jetbrains::EditorPlugin::PlayState::Play:
                 if (GUnrealEd->PlayWorld &&
                     GUnrealEd->PlayWorld->bDebugPauseExecution)
                 {
@@ -334,44 +336,17 @@ void FRiderGameControlExtensionModule::StartupModule()
                                      .RdConnection.UnrealToBackendModel.get_playMode().get();
                     RequestPlay(Mode);
                 }
-            }
-            else if (playValue == 2 && GUnrealEd && GUnrealEd->PlayWorld)
-            {
-                GUnrealEd->PlayWorld->bDebugPauseExecution = true;
+                break;
+            case Jetbrains::EditorPlugin::PlayState::Pause:
+                if (GUnrealEd->PlayWorld)
+                {
+                    GUnrealEd->PlayWorld->bDebugPauseExecution = true;
+                }
+                break;
             }
         });
 
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().advise(
-        NestedLifetime, [this](int playValue)
-        {
-            if (PlayFromUnreal)
-                return;
-            FSetForTheScope s(PlayFromRider);
-
-            if (!playValue && GUnrealEd && GUnrealEd->PlayWorld)
-            {
-                GUnrealEd->RequestEndPlayMap();
-            }
-            else if (playValue == 1 && GUnrealEd)
-            {
-                if (GUnrealEd->PlayWorld &&
-                    GUnrealEd->PlayWorld->bDebugPauseExecution)
-                {
-                    GUnrealEd->PlayWorld->bDebugPauseExecution = false;
-                }
-                else
-                {
-                    const int mode = FRiderLinkModule::Get()
-                                     .RdConnection.UnrealToBackendModel.get_playMode().get();
-                    RequestPlay(mode);
-                }
-            }
-            else if (playValue == 2 && GUnrealEd && GUnrealEd->PlayWorld)
-            {
-                GUnrealEd->PlayWorld->bDebugPauseExecution = true;
-            }
-        });
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, [this](bool)
+    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, [this]()
         {
             GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
             GUnrealEd->PlayWorld->bDebugPauseExecution = false;
@@ -379,38 +354,34 @@ void FRiderGameControlExtensionModule::StartupModule()
 
     FEditorDelegates::BeginPIE.AddLambda([this](const bool)
     {
-        if (GUnrealEd && !PlayFromRider)
+        if (GUnrealEd)
         {
-            FSetForTheScope s(PlayFromUnreal);
             FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().set(true);
+            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
         }
     });
 
     FEditorDelegates::EndPIE.AddLambda([this](const bool)
     {
-        if (GUnrealEd && !PlayFromRider)
+        if (GUnrealEd)
         {
-            FSetForTheScope s(PlayFromUnreal);
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().set(false);
+            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Idle);
         }
     });
 
     FEditorDelegates::PausePIE.AddLambda([this](const bool)
     {
-        if (GUnrealEd && !PlayFromRider)
+        if (GUnrealEd)
         {
-            FSetForTheScope s(PlayFromUnreal);
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().set(2);
+            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Pause);
         }
     });
 
     FEditorDelegates::ResumePIE.AddLambda([this](const bool)
     {
-        if (GUnrealEd && !PlayFromRider)
+        if (GUnrealEd)
         {
-            FSetForTheScope s(PlayFromUnreal);
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_play().set(1);
+            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
         }
     });
 

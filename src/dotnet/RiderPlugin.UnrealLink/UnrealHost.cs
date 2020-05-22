@@ -19,7 +19,7 @@ namespace RiderPlugin.UnrealLink
         // TODO: frontend isn't up in backend tests
         private readonly bool myIsInTests;
 
-        private readonly RdRiderModel myModel;
+        public readonly RdRiderModel myModel;
 
         // ReSharper disable once SuggestBaseTypeForParameter
         public UnrealHost(Lifetime lifetime, ISolution solution, IShellLocks locks, CppUE4SolutionDetector solutionDetector)
