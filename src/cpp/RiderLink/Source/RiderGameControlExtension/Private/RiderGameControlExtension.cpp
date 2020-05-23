@@ -20,6 +20,7 @@
 #include "LevelEditorViewport.h"
 #else
 #include "IAssetViewport.h"
+#include "EditorViewportClient.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "RiderLink"
@@ -235,7 +236,7 @@ static void RequestPlay(int mode)
     if (!bSpawnAtPlayerStart && SlateApplication && ActiveLevelViewport.IsValid() &&
         SlateApplication->FindWidgetWindow(ActiveLevelViewport->AsWidget()).IsValid())
     {
-#if ENGINE_MINOR_VERSION < 24
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
         StartLocation = &ActiveLevelViewport->GetLevelViewportClient().GetViewLocation();
         StartRotation = &ActiveLevelViewport->GetLevelViewportClient().GetViewRotation();
 #else
