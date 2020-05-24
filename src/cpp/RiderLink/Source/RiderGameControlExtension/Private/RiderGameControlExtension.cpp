@@ -319,16 +319,18 @@ void FRiderGameControlExtensionModule::StartupModule()
             switch(State)
             {
             case Jetbrains::EditorPlugin::PlayState::Idle:
-                if (State == Jetbrains::EditorPlugin::PlayState::Idle && GUnrealEd->PlayWorld)
+                if (GUnrealEd->PlayWorld)
                 {
                     GUnrealEd->RequestEndPlayMap();
                 }
                 break;
             case Jetbrains::EditorPlugin::PlayState::Play:
                 if (GUnrealEd->PlayWorld &&
-                    GUnrealEd->PlayWorld->bDebugPauseExecution)
+                    GUnrealEd->PlayWorld->IsPaused())
                 {
                     GUnrealEd->PlayWorld->bDebugPauseExecution = false;
+                    // Simply switching flag doesn't work, `ResumePIE` delegate won't be triggered
+                    GUnrealEd->PlaySessionResumed();
                 }
                 else
                 {
@@ -341,6 +343,8 @@ void FRiderGameControlExtensionModule::StartupModule()
                 if (GUnrealEd->PlayWorld)
                 {
                     GUnrealEd->PlayWorld->bDebugPauseExecution = true;
+                    // Simply switching flag doesn't work, `PausePIE` delegate won't be triggered
+                    GUnrealEd->PlaySessionPaused();
                 }
                 break;
             }
