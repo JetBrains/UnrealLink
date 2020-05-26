@@ -1,65 +1,65 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
 import com.intellij.util.SmartList
-import com.jetbrains.rd.platform.util.lifetime
+import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rd.util.reactive.valueOrDefault
+import com.jetbrains.rider.model.PlayState
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import icons.UnrealIcons
-import org.jetbrains.annotations.Nls
-import org.jetbrains.annotations.Nullable
 import javax.swing.Icon
 
 abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : AnAction(text, description, icon) {
     override fun update(e: AnActionEvent) {
-        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution?:false
-        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor?:false
+        val host = e.getHost()
+        e.presentation.isVisible = host?.isUnrealEngineSolution?:false
+        e.presentation.isEnabled = host?.isConnectedToUnrealEditor?:false
     }
 }
 
 class PlayInUnrealAction : PlayStateAction("Play", "Play", UnrealIcons.Status.Play) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val value = e.getHost()?.model?.play?.valueOrDefault(0)
-        e.presentation.isEnabled = e.presentation.isEnabled && value != 1
-        e.presentation.text = if (value == 2) "Resume Unreal" else "Play"
+        val value = e.getHost()?.playState
+        e.presentation.isEnabled = e.presentation.isEnabled && value != PlayState.Play
+        e.presentation.text = if (value == PlayState.Pause) "Resume Unreal" else "Play"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost()
-        host?.model?.play?.set(1)
+        val host = e.getHost()?:return
+        host.model.playStateFromRider.fire(PlayState.Play)
     }
 }
 
 class StopInUnrealAction : PlayStateAction("Stop", "Stop", UnrealIcons.Status.Stop) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost()
-        e.presentation.isEnabled = e.presentation.isEnabled && host != null && host.model.play.valueOrDefault(0) > 0
+        val host = e.getHost()?: return
+        e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost()
-        host?.model?.play?.set(0)
+        val host = e.getHost()?: return
+        host.model.playStateFromRider.fire(PlayState.Idle)
     }
 }
 
 class PauseInUnrealAction : PlayStateAction("Pause", "Pause", UnrealIcons.Status.Pause) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val value = e.getHost()?.model?.play?.valueOrDefault(0)
-        e.presentation.isEnabled = e.presentation.isEnabled && value != null && value > 0
-        e.presentation.icon = if (value == 2) UnrealIcons.Status.FrameSkip else UnrealIcons.Status.Pause
-        e.presentation.text = if (value == 2) "Frame Skip" else "Pause"
+        val host = e.getHost()?: return
+        e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
+        e.presentation.icon = if (host.playState == PlayState.Pause) UnrealIcons.Status.FrameSkip else UnrealIcons.Status.Pause
+        e.presentation.text = if (host.playState == PlayState.Pause) "Frame Skip" else "Pause"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost()
-        if (host?.model?.play?.valueOrDefault(0) == 1)
-            host.model.play.set(2)
-        else
-            host?.model?.frameSkip?.fire(true)
+        val host = e.getHost() ?: return
+        when(host.playState) {
+            PlayState.Play -> host.model.playStateFromRider.fire(PlayState.Pause)
+            PlayState.Pause -> host.model.frameSkip.fire()
+            else -> host.logger.error("[UnrealLink] Invalid play state for PauseInUnrealAction: ${host.playState}")
+        }
     }
 }
 

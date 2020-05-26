@@ -9,6 +9,7 @@
 #include "UE4Library.h"
 
 #include "../UE4Library/StringRange.h"
+#include "../UE4Library/PlayState.h"
 #include "../UE4Library/LogMessageInfo.h"
 #include "../UE4Library/UnrealLogEvent.h"
 #include "../UE4Library/UClass.h"
@@ -66,7 +67,7 @@ namespace Jetbrains {
         //initializer
         void UE4Library::initialize()
         {
-            serializationHash = 2145331300305657334L;
+            serializationHash = -1833244089192435908L;
         }
         
         //primary ctor

@@ -57,7 +57,7 @@
 #pragma warning( disable:4267 )
 #pragma warning( disable:4244 )
 /// <summary>
-/// <p>Generated from: UE4Library.kt:154</p>
+/// <p>Generated from: UE4Library.kt:160</p>
 /// </summary>
 namespace Jetbrains {
     namespace EditorPlugin {

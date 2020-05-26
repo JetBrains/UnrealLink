@@ -48,6 +48,7 @@
 #include "../UE4Library/BlueprintReference.h"
 #include "../UE4Library/UClass.h"
 #include "Runtime/Core/Public/Containers/UnrealString.h"
+#include "../UE4Library/PlayState.h"
 
 #include "UE4TypesMarshallers.h"
 
@@ -57,7 +58,7 @@
 #pragma warning( disable:4267 )
 #pragma warning( disable:4244 )
 /// <summary>
-/// <p>Generated from: RdEditorModel.kt:28</p>
+/// <p>Generated from: RdEditorModel.kt:29</p>
 /// </summary>
 namespace Jetbrains {
     namespace EditorPlugin {
@@ -88,14 +89,15 @@ namespace Jetbrains {
             //fields
             protected:
             rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_;
-            rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> play_;
             rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_;
-            rd::RdSignal<bool, rd::Polymorphic<bool>> frameSkip_;
+            rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_;
             rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_;
             rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_;
             rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_;
             rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_;
             rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_;
+            rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_;
+            rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_;
             
             
             //initializer
@@ -104,7 +106,7 @@ namespace Jetbrains {
             
             //primary ctor
             public:
-            RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> play_, rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_, rd::RdSignal<bool, rd::Polymorphic<bool>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_);
+            RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_, rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_);
             
             //secondary constructor
             #ifdef __cpp_structured_bindings
@@ -134,14 +136,15 @@ namespace Jetbrains {
             
             //getters
             rd::ISignal<UnrealLogEvent> const & get_unrealLog() const;
-            rd::IProperty<int32_t> const & get_play() const;
             rd::IProperty<int32_t> const & get_playMode() const;
-            rd::ISignal<bool> const & get_frameSkip() const;
+            rd::ISource<rd::Void> const & get_frameSkip() const;
             rd::ISignal<BlueprintReference> const & get_openBlueprint() const;
             rd::ISignal<UClass> const & get_onBlueprintAdded() const;
             rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> const & get_isBlueprintPathName() const;
             rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> const & get_getPathNameByPath() const;
             rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> const & get_allowSetForegroundWindow() const;
+            rd::ISignal<PlayState> const & get_playStateFromEditor() const;
+            rd::ISource<PlayState> const & get_playStateFromRider() const;
             
             //intern
             

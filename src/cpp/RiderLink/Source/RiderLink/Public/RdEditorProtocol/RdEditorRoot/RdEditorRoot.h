@@ -52,7 +52,7 @@
 #pragma warning( disable:4267 )
 #pragma warning( disable:4244 )
 /// <summary>
-/// <p>Generated from: RdEditorModel.kt:16</p>
+/// <p>Generated from: RdEditorModel.kt:17</p>
 /// </summary>
 namespace Jetbrains {
     namespace EditorPlugin {

@@ -59,9 +59,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
     init {
         property("editorId", 0).readonly.async
-        property("play", int)
         property("playMode", int)
-        signal("frameSkip", bool)
+        source("frameSkip", void)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)
 
@@ -81,5 +80,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         sink("onEditorModelOutOfSync", PluginInstallStatus)
         source("installEditorPlugin", PluginInstallLocation)
         source("enableAutoupdatePlugin", void)
+
+        sink("PlayStateFromEditor", UE4Library.PlayState)
+        source("PlayStateFromRider", UE4Library.PlayState)
     }
 }
