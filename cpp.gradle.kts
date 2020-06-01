@@ -29,21 +29,15 @@ tasks {
     val cloneRdCpp by creating (Exec::class) {
         val destinationDir = buildDir.resolve("rd")
         val branchName = "ue4-adapt"
-        val cloneCommand = listOf("git", "clone", "--branch=$branchName", "https://github.com/JetBrains/rd.git", destinationDir.absolutePath, "--quiet")
+        val cloneCommand = listOf("git", "clone", "--recurse-submodules", "-j8", "--branch=$branchName", "https://github.com/JetBrains/rd.git", destinationDir.absolutePath, "--quiet")
         val pullCommand = listOf("git", "--git-dir", destinationDir.resolve(".git").absolutePath, "pull", "origin", branchName)
         commandLine = if (destinationDir.exists()) pullCommand else cloneCommand
-    }
-
-    val updateSubmodulesRdCpp by creating (Exec::class) {
-        workingDir = buildDir.resolve("rd")
-        commandLine = listOf("git", "submodule", "update", "--init", "--recursive")
     }
 
     val rdCppFolder = "$buildDir/rd/rd-cpp"
 
     val buildRdCpp by creating(Exec::class) {
         dependsOn(cloneRdCpp)
-        dependsOn(updateSubmodulesRdCpp)
         inputs.dir("$rdCppFolder/src")
         outputs.dir("$rdCppFolder/export")
         commandLine = listOf("cmd", "/c", "$rdCppFolder/build.cmd")
