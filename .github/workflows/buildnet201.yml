@@ -31,7 +31,7 @@ jobs:
       run: git reset --hard
       shell: cmd
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PBuildCounter=$GITHUB_RUN_NUMBER -PConfiguration=Release
+      run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
       if: success()
