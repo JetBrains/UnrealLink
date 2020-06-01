@@ -34,6 +34,7 @@ jobs:
       run: gradlew.bat buildPlugin -PBuildCounter=$GITHUB_RUN_NUMBER -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
+      if: success()
       uses: actions/upload-artifact@v2
       with:
         name: Built plugin
