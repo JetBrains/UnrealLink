@@ -7,9 +7,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.model.*
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
+import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
@@ -98,8 +102,38 @@ class UnrealToolWindowFactory(val project: Project)
 */
 
     fun print(unrealLogEvent: UnrealLogEvent) {
+        val consoleView = UnrealPane.currentConsoleView
         print(unrealLogEvent.info)
+        val startOffset = consoleView.contentSize
         print(unrealLogEvent.text)
+        if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty())
+            consoleView.flushDeferredText()
+        for (range in unrealLogEvent.bpPathRanges) {
+            val match = unrealLogEvent.text.data.substring(range.first, range.last)
+            val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
+            consoleView.hyperlinks.createHyperlink(startOffset + range.first, startOffset + range.last, null, hyperLinkInfo)
+        }
+        for (range in unrealLogEvent.methodRanges) {
+            val match = unrealLogEvent.text.data.substring(range.first, range.last)
+            val (`class`, method) = match.split(MethodReference.separator)
+            val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
+            model.isMethodReference.startAndAdviseSuccess(methodReference) {
+                if (it) {
+                    run {
+                        val first = startOffset + range.first
+                        val last = startOffset + range.first + `class`.length
+                        val linkInfo = UnrealClassHyperLinkInfo(model.navigateToClass, UClass(FString(`class`)))
+                        consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
+                    }
+                    run {
+                        val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
+                        val first = startOffset + range.last - method.length
+                        val last = startOffset + range.last
+                        consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
+                    }
+                }
+            }
+        }
     }
 
     fun showTabForNewSession() {

@@ -46,6 +46,7 @@
 
 #include "../UE4Library/LogMessageInfo.h"
 #include "Runtime/Core/Public/Containers/UnrealString.h"
+#include "../UE4Library/StringRange.h"
 
 #include "UE4TypesMarshallers.h"
 #include "Runtime/Core/Public/Containers/Array.h"
@@ -78,6 +79,8 @@ namespace Jetbrains {
             protected:
             rd::Wrapper<LogMessageInfo> info_;
             FString text_;
+            TArray<rd::Wrapper<StringRange>> bpPathRanges_;
+            TArray<rd::Wrapper<StringRange>> methodRanges_;
             
             
             //initializer
@@ -86,7 +89,7 @@ namespace Jetbrains {
             
             //primary ctor
             public:
-            UnrealLogEvent(rd::Wrapper<LogMessageInfo> info_, FString text_);
+            UnrealLogEvent(rd::Wrapper<LogMessageInfo> info_, FString text_, TArray<rd::Wrapper<StringRange>> bpPathRanges_, TArray<rd::Wrapper<StringRange>> methodRanges_);
             
             //secondary constructor
             #ifdef __cpp_structured_bindings
@@ -95,9 +98,11 @@ namespace Jetbrains {
                 template <size_t I>
                 decltype(auto) get() const
                 {
-                    if constexpr (I < 0 || I >= 2) static_assert (I < 0 || I >= 2, "I < 0 || I >= 2");
+                    if constexpr (I < 0 || I >= 4) static_assert (I < 0 || I >= 4, "I < 0 || I >= 4");
                     else if constexpr (I==0)  return static_cast<const LogMessageInfo&>(get_info());
                     else if constexpr (I==1)  return static_cast<const FString&>(get_text());
+                    else if constexpr (I==2)  return static_cast<const TArray<rd::Wrapper<StringRange>>&>(get_bpPathRanges());
+                    else if constexpr (I==3)  return static_cast<const TArray<rd::Wrapper<StringRange>>&>(get_methodRanges());
                 }
             #endif
             
@@ -128,6 +133,8 @@ namespace Jetbrains {
             //getters
             LogMessageInfo const & get_info() const;
             FString const & get_text() const;
+            TArray<rd::Wrapper<StringRange>> const & get_bpPathRanges() const;
+            TArray<rd::Wrapper<StringRange>> const & get_methodRanges() const;
             
             //intern
             
@@ -176,7 +183,7 @@ namespace rd {
     //tuple trait
     namespace std {
         template<>
-        class tuple_size<Jetbrains::EditorPlugin::UnrealLogEvent> : public integral_constant<size_t, 2> {};
+        class tuple_size<Jetbrains::EditorPlugin::UnrealLogEvent> : public integral_constant<size_t, 4> {};
         
         template<size_t I>
         class std::tuple_element<I, Jetbrains::EditorPlugin::UnrealLogEvent> {

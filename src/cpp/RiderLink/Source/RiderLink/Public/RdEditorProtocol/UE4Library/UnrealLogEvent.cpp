@@ -22,9 +22,9 @@ namespace Jetbrains {
         }
         
         //primary ctor
-        UnrealLogEvent::UnrealLogEvent(rd::Wrapper<LogMessageInfo> info_, FString text_) :
+        UnrealLogEvent::UnrealLogEvent(rd::Wrapper<LogMessageInfo> info_, FString text_, TArray<rd::Wrapper<StringRange>> bpPathRanges_, TArray<rd::Wrapper<StringRange>> methodRanges_) :
         rd::IPolymorphicSerializable()
-        ,info_(std::move(info_)), text_(std::move(text_))
+        ,info_(std::move(info_)), text_(std::move(text_)), bpPathRanges_(std::move(bpPathRanges_)), methodRanges_(std::move(methodRanges_))
         {
             initialize();
         }
@@ -38,7 +38,15 @@ namespace Jetbrains {
         {
             auto info_ = LogMessageInfo::read(ctx, buffer);
             auto text_ = rd::Polymorphic<FString>::read(ctx, buffer);
-            UnrealLogEvent res{std::move(info_), std::move(text_)};
+            auto bpPathRanges_ = buffer.read_array<TArray, StringRange, FDefaultAllocator>(
+            [&ctx, &buffer]() mutable  
+            { return StringRange::read(ctx, buffer); }
+            );
+            auto methodRanges_ = buffer.read_array<TArray, StringRange, FDefaultAllocator>(
+            [&ctx, &buffer]() mutable  
+            { return StringRange::read(ctx, buffer); }
+            );
+            UnrealLogEvent res{std::move(info_), std::move(text_), std::move(bpPathRanges_), std::move(methodRanges_)};
             return res;
         }
         
@@ -47,6 +55,14 @@ namespace Jetbrains {
         {
             rd::Polymorphic<std::decay_t<decltype(info_)>>::write(ctx, buffer, info_);
             rd::Polymorphic<std::decay_t<decltype(text_)>>::write(ctx, buffer, text_);
+            buffer.write_array<TArray, StringRange, FDefaultAllocator>(bpPathRanges_, 
+            [&ctx, &buffer](StringRange const & it) mutable  -> void 
+            { rd::Polymorphic<std::decay_t<decltype(it)>>::write(ctx, buffer, it); }
+            );
+            buffer.write_array<TArray, StringRange, FDefaultAllocator>(methodRanges_, 
+            [&ctx, &buffer](StringRange const & it) mutable  -> void 
+            { rd::Polymorphic<std::decay_t<decltype(it)>>::write(ctx, buffer, it); }
+            );
         }
         
         //virtual init
@@ -62,6 +78,14 @@ namespace Jetbrains {
         {
             return text_;
         }
+        TArray<rd::Wrapper<StringRange>> const & UnrealLogEvent::get_bpPathRanges() const
+        {
+            return bpPathRanges_;
+        }
+        TArray<rd::Wrapper<StringRange>> const & UnrealLogEvent::get_methodRanges() const
+        {
+            return methodRanges_;
+        }
         
         //intern
         
@@ -72,6 +96,8 @@ namespace Jetbrains {
             if (this == &other) return true;
             if (this->info_ != other.info_) return false;
             if (this->text_ != other.text_) return false;
+            if (this->bpPathRanges_ != other.bpPathRanges_) return false;
+            if (this->methodRanges_ != other.methodRanges_) return false;
             
             return true;
         }
@@ -91,6 +117,8 @@ namespace Jetbrains {
             size_t __r = 0;
             __r = __r * 31 + (rd::hash<LogMessageInfo>()(get_info()));
             __r = __r * 31 + (rd::hash<FString>()(get_text()));
+            __r = __r * 31 + (rd::contentDeepHashCode(get_bpPathRanges()));
+            __r = __r * 31 + (rd::contentDeepHashCode(get_methodRanges()));
             return __r;
         }
         
@@ -115,6 +143,12 @@ namespace Jetbrains {
             res += '\n';
             res += "\ttext = ";
             res += rd::to_string(text_);
+            res += '\n';
+            res += "\tbpPathRanges = ";
+            res += rd::to_string(bpPathRanges_);
+            res += '\n';
+            res += "\tmethodRanges = ";
+            res += rd::to_string(methodRanges_);
             res += '\n';
             return res;
         }

@@ -105,6 +105,8 @@ object UE4Library : Root(
     val UnrealLogEvent = structdef("UnrealLogEvent") {
         field("info", LogMessageInfo)
         field("text", FString)
+        field("bpPathRanges", immutableList(StringRange))
+        field("methodRanges", immutableList(StringRange))
     }
 
     /*@Suppress("unused")
