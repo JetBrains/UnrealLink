@@ -5,7 +5,7 @@
 
 DECLARE_DELEGATE_OneParam(FOnBlueprintAdded, UBlueprint *);
 
-class BluePrintProvider {
+class RIDERBLUEPRINTEXTENSION_API BluePrintProvider {
     static void AddBlueprint(UBlueprint* Blueprint);
 public:
     static FOnBlueprintAdded OnBlueprintAdded;

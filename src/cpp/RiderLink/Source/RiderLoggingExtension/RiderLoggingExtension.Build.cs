@@ -10,8 +10,15 @@ public class RiderLoggingExtension : ModuleRules
 		
 		bUseRTTI = true;
 
-		PrivateDependencyModuleNames.Add("Core");
-		PrivateDependencyModuleNames.Add("RD");
-		PrivateDependencyModuleNames.Add("RiderLink");
+		PrivateDependencyModuleNames.AddRange(new []
+		{
+			"Core",
+			"RD",
+			"RiderLink",
+			"RiderBlueprintExtension",
+			"AssetRegistry",
+			"MessagingCommon",
+			"CoreUObject"
+		});
 	}
 }

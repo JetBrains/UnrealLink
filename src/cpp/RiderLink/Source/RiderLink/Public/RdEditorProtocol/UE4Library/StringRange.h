@@ -60,7 +60,7 @@ namespace Jetbrains {
     namespace EditorPlugin {
         
         //data
-        class StringRange : public rd::IPolymorphicSerializable
+        class RIDERLINK_API StringRange : public rd::IPolymorphicSerializable
         {
             
             //companion
