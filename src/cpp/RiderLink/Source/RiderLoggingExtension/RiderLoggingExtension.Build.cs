@@ -15,10 +15,7 @@ public class RiderLoggingExtension : ModuleRules
 			"Core",
 			"RD",
 			"RiderLink",
-			"RiderBlueprintExtension",
-			"AssetRegistry",
-			"MessagingCommon",
-			"CoreUObject"
+			"RiderBlueprintExtension"
 		});
 	}
 }

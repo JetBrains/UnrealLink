@@ -1,10 +1,12 @@
 #include "BlueprintProvider.hpp"
 
-#include "Toolkits/AssetEditorManager.h"
-#include "BlueprintEditor.h"
-#include "AssetEditorMessages.h"
-#include "MessageEndpointBuilder.h"
 #include "Async/Async.h"
+#include "AssetData.h"
+#include "AssetEditorMessages.h"
+#include "BlueprintEditor.h"
+#include "MessageEndpointBuilder.h"
+#include "MessageEndpoint.h"
+#include "Toolkits/AssetEditorManager.h"
 
 #include "Runtime/Launch/Resources/Version.h"
 

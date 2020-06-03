@@ -1,12 +1,12 @@
 #include "RiderLoggingExtension.hpp"
 
-#include "BlueprintProvider.hpp"
-#include "Regex.h"
 #include "RiderLink.hpp"
-#include "StringRange.h"
+#include "BlueprintProvider.hpp"
 #include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
+#include "RdEditorProtocol/UE4Library/StringRange.h"
 #include "RdEditorProtocol/UE4Library/UnrealLogEvent.h"
 
+#include "Internationalization/Regex.h"
 #include "Misc/DateTime.h"
 #include "Modules/ModuleManager.h"
 

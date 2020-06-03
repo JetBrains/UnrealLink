@@ -1,8 +1,10 @@
 #pragma once
 
-#include "AssetData.h"
-#include "MessageEndpoint.h"
+#include "Delegates/Delegate.h"
 
+struct FAssetData;
+class FMessageEndpoint;
+class UBlueprint;
 DECLARE_DELEGATE_OneParam(FOnBlueprintAdded, UBlueprint *);
 
 class RIDERBLUEPRINTEXTENSION_API BluePrintProvider {
