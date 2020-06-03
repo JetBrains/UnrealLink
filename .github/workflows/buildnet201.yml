@@ -47,5 +47,4 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.config.artifact }}
         path: output/*
