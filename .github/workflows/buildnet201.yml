@@ -1,35 +1,45 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ net201 ]
   pull_request:
     branches: [ net201 ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
-    runs-on: windows-latest
+    env:
+      working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows Latest", artifact: "UnrealLink-Windows",
+            os: windows-latest,
+            SEP: \
+          }
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     - name: Hack Generate common model
       run: gradlew.bat generateUE4Lib
       shell: cmd
-    - name: Hack Generate Unreal Editr<>Rider model
+    - name: Hack Generate Unreal Editor<>Rider model
       run: gradlew.bat generateEditorPluginModel
       shell: cmd
     - name: Hack Clean files in model
       run: git reset --hard
-      shell: cmd
     - name: Build Plugin
       run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
@@ -37,5 +47,5 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v2
       with:
-        name: Built plugin
+        name: ${{ matrix.config.artifact }}
         path: output/*
