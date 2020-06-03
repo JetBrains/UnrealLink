@@ -6,10 +6,14 @@ on:
   pull_request:
     branches: [ net201 ]
 
+env:
+  SDK: 2020.1
+
 jobs:
   build:
     env:
       working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
+      artifact: UnrealLink-${{ env.SDK }}.${{ github.run_number }}
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -47,4 +51,4 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v2
       with:
-        path: output/*
+        path: output/${{artifact}}
