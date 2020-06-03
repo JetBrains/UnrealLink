@@ -8,6 +8,11 @@ public class RiderLink : ModuleRules
 	public RiderLink(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+#if UE_4_24_OR_LATER
+		bUseUnity = true;
+#else
+		bFasterWithoutUnity = false;
+#endif
 		
 		bUseRTTI = true;
 
