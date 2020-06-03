@@ -6,14 +6,11 @@ on:
   pull_request:
     branches: [ net201 ]
 
-env:
-  SDK: 2020.1
-
 jobs:
   build:
     env:
       working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
-      artifact: UnrealLink-${{ env.SDK }}.${{ github.run_number }}
+      artifact: UnrealLink-2020.1.${{ github.run_number }}
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
