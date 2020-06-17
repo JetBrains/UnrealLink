@@ -1,11 +1,11 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.openapi.project.Project
+import com.jetbrains.rd.platform.util.getLogger
 import com.jetbrains.rd.util.reactive.whenTrue
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.model.UE4Library
 import com.jetbrains.rider.plugins.unreal.UnrealHost
-import com.jetbrains.rider.util.idea.getLogger
 
 class UnrealToolWindowManager(project: Project,
                               host: UnrealHost,

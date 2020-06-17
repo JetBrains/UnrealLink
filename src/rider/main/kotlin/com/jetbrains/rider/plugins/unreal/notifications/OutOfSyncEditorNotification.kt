@@ -6,10 +6,10 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.reactive.adviseNotNull
-import com.jetbrains.rdclient.util.idea.ProtocolSubscribedProjectComponent
 import com.jetbrains.rider.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.intellij.openapi.actionSystem.ActionManager
+import com.jetbrains.rd.platform.util.idea.ProtocolSubscribedProjectComponent
 import com.jetbrains.rider.model.PluginInstallStatus
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction
@@ -20,7 +20,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
     }
 
     init {
-        project.solution.rdRiderModel.onEditorModelOutOfSync.adviseNotNull(componentLifetime) {
+        project.solution.rdRiderModel.onEditorModelOutOfSync.adviseNotNull(projectComponentLifetime) {
             if(it == PluginInstallStatus.UpToDate) return@adviseNotNull
 
             var message = if(it == PluginInstallStatus.NoPlugin)

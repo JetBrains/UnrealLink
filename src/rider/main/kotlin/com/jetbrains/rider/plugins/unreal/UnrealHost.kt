@@ -1,20 +1,20 @@
 package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.openapi.project.Project
+import com.jetbrains.rd.platform.util.getComponent
+import com.jetbrains.rd.platform.util.getLogger
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.model.PlayState
 import com.jetbrains.rider.model.RdRiderModel
 import com.jetbrains.rider.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.util.idea.getComponent
-import com.jetbrains.rider.util.idea.getLogger
-
 class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     companion object {
         fun getInstance(project: Project) = project.getComponent<UnrealHost>()
     }
 
     val logger = getLogger<UnrealHost>()
+
     var playState: PlayState = PlayState.Idle;
 
     internal val model = project.solution.rdRiderModel

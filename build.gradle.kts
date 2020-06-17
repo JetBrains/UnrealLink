@@ -18,7 +18,7 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
-        classpath("com.jetbrains.rd", "rd-gen", "0.201.58")
+        classpath("com.jetbrains.rd", "rd-gen", "0.202.99")
     }
 }
 
@@ -33,7 +33,7 @@ dependencies {
 }
 
 val repoRoot by extra { project.rootDir }
-val sdkVersion = "2020.1"
+val sdkVersion = "2020.2"
 val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
 val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
