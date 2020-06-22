@@ -1,4 +1,4 @@
-name: Build RiderLink net202
+name: Build RiderLink
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest", artifact: "UnrealLink-2020.1.${{ github.run_number }}",
+            name: "Windows Latest", artifact: "UnrealLink-2020.2.${{ github.run_number }}",
             os: windows-latest,
             SEP: \
           }
