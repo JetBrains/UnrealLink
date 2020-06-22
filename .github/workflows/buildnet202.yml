@@ -1,4 +1,4 @@
-name: CI
+name: Build RiderLink net202
 
 on:
   push:
