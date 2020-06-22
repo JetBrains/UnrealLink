@@ -27,7 +27,9 @@ src/cpp/RiderLink/Intermediate
 # Local setup specific files
 UnrealEngineProjectPath.txt
 
-# RD generated files
-src/cpp/RiderLink/Source/RD/
 # [TODO]: ignore RdEditorProtocol when RD will be able to add DllExport macro
 # src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol
+
+*.nupkg
+src/cpp/RiderLink/Source/RD
+!src/cpp/RiderLink/Source/RD/RD.Build.cs
