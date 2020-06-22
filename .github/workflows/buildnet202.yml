@@ -1,4 +1,4 @@
-name: Build RiderLink
+name: BuildRiderLink
 
 on:
   push:
