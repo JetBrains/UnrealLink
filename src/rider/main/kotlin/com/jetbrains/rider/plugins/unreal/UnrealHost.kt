@@ -1,8 +1,7 @@
 package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.openapi.project.Project
-import com.jetbrains.rd.platform.util.getComponent
-import com.jetbrains.rd.platform.util.getLogger
+import com.intellij.openapi.diagnostic.Logger
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.model.PlayState
 import com.jetbrains.rider.model.RdRiderModel
@@ -10,10 +9,10 @@ import com.jetbrains.rider.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     companion object {
-        fun getInstance(project: Project) = project.getComponent<UnrealHost>()
+        fun getInstance(project: Project) = project.getComponent(UnrealHost::class.java)
     }
 
-    val logger = getLogger<UnrealHost>()
+    val logger = Logger.getInstance(UnrealHost::class.java)
 
     var playState: PlayState = PlayState.Idle;
 

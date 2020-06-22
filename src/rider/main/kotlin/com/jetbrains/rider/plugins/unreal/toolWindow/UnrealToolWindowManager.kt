@@ -11,9 +11,6 @@ class UnrealToolWindowManager(project: Project,
                               host: UnrealHost,
                               private val unrealToolWindowContextFactory: UnrealToolWindowFactory
 ) : LifetimedProjectComponent(project) {
-    companion object {
-        private val logger = getLogger<UnrealToolWindowManager>()
-    }
 
     init {
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
