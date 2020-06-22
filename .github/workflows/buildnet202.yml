@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ net201 ]
+    branches: [ net202 ]
   pull_request:
-    branches: [ net201 ]
+    branches: [ net202 ]
 
 jobs:
   build:
