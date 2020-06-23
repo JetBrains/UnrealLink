@@ -19,7 +19,7 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows Latest", artifact: "UnrealLink-2020.2.${{ github.run_number }}.zip",
+            name: "Windows Latest",
             os: windows-latest,
             SEP: \
           }
@@ -51,5 +51,5 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.config.artifact }}
+          name: "UnrealLink-2020.2.${{ github.run_number }}.zip"
           path: output/*
