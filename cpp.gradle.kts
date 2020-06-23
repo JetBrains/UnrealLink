@@ -53,7 +53,6 @@ tasks {
         inputs.dir("$rdCppFolder/src")
         outputs.dir("$rdCppFolder/export")
         commandLine = listOf("cmd", "/c", "$rdCppFolder/build.cmd")
-        //windows only
     }
 
     val patchUpluginVersion by creating {
