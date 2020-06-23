@@ -28,7 +28,6 @@ tasks {
 
     val patchUpluginVersion by creating {
         val pathToUplugin = "${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin"
-
         val text = File(pathToUplugin).readLines().map {
             val pattern = "\"VersionName\": "
             it.replaceAfter(pattern, "\"${project.version}\",")
