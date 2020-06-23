@@ -1,10 +1,14 @@
-name: CI
+name: build-riderlink
 
 on:
   push:
-    branches: [ net201 ]
+    paths-ignore:
+    - README.md
+    branches: [ net202 ]
   pull_request:
-    branches: [ net201 ]
+    paths-ignore:
+    - README.md
+    branches: [ net202 ]
 
 jobs:
   build:
@@ -17,7 +21,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest", artifact: "UnrealLink-Windows",
+            name: "Windows Latest", artifact: "UnrealLink-2020.2.${{ github.run_number }}.zip",
             os: windows-latest,
             SEP: \
           }
@@ -28,9 +32,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/cache@v2
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
+        path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
@@ -46,8 +48,8 @@ jobs:
       run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
-      if: success()
+      if: success() && github.event_name == 'commit'
       uses: actions/upload-artifact@v2
       with:
+        path: output/**
         name: ${{ matrix.config.artifact }}
-        path: output/*
