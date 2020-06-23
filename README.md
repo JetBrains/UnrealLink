@@ -1,5 +1,3 @@
-# ![CI](https://github.com/JetBrains/UnrealLink/workflows/CI/badge.svg?branch=net201)
-
 # UnrealLink for Rider, RiderLink for Unreal Editor
 
 ## Pre-requisites
