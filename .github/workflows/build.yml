@@ -1,4 +1,4 @@
-name: Build RiderLink
+name: build-riderlink
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
       run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
-      if: success()
+      if: success() && github.event_name == 'commit'
       uses: actions/upload-artifact@v2
       with:
         path: output/**
