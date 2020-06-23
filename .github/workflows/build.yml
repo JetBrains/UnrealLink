@@ -19,7 +19,7 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows Latest", artifact: "UnrealLink-Windows",
+            name: "Windows Latest", artifact: "UnrealLink-2020.2.${{ github.run_number }}.zip",
             os: windows-latest,
             SEP: \
           }
