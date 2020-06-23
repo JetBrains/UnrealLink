@@ -2,9 +2,11 @@ name: build-riderlink
 
 on:
   push:
-    branches: [ net202 ]
+    paths-ignore:
+      - README.md
+    branches: [ net201, net202 ]
   pull_request:
-    branches: [ net202 ]
+    branches: [ net201, net202 ]
 
 jobs:
   build:
