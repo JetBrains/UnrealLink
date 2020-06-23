@@ -48,7 +48,7 @@ jobs:
       run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
-      if: success() && github.event_name == 'commit'
+      if: success()
       uses: actions/upload-artifact@v2
       with:
         path: output/**
