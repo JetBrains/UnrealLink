@@ -4,9 +4,9 @@ on:
   push:
     paths-ignore:
     - README.md
-    branches: [ net201 ]
+    branches: [ net201, net202 ]
   pull_request:
-    branches: [ net201 ]
+    branches: [ net201, net202 ]
 
 jobs:
   build:
