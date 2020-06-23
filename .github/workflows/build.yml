@@ -6,6 +6,8 @@ on:
     - README.md
     branches: [ net202 ]
   pull_request:
+    paths-ignore:
+    - README.md
     branches: [ net202 ]
 
 jobs:
