@@ -4,9 +4,9 @@ on:
   push:
     paths-ignore:
     - README.md
-    branches: [ net201, net202 ]
+    branches: [ net202 ]
   pull_request:
-    branches: [ net201, net202 ]
+    branches: [ net202 ]
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest", artifact: "UnrealLink-2020.2.${{ github.run_number }}.zip",
+            name: "Windows Latest", artifact-prefix: "UnrealLink-2020.2.",
             os: windows-latest,
             SEP: \
           }
@@ -50,4 +50,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: output/**
-        name: ${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact-prefix }}${{ github.run_number}}.zip
