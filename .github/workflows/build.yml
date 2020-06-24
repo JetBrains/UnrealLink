@@ -52,4 +52,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: output/**
-        name: ${{ matrix.config.artifact-prefix }}${{ github.run_number}}.zip
+        name: ${{ matrix.config.artifact-prefix }}${{ github.run_number}}
