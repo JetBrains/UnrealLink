@@ -3,10 +3,13 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 import com.intellij.execution.ui.ConsoleViewContentType.*
 import com.intellij.ide.impl.ContentManagerWatcher
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.impl.FoldingModelImpl
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.util.DocumentUtil
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
@@ -19,6 +22,9 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
+import java.awt.event.ItemEvent
+import java.awt.event.ItemListener
+
 class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
 
@@ -30,6 +36,9 @@ class UnrealToolWindowFactory(val project: Project)
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
 
+    private var currentCategory: String = "All"
+    private var currentVerbosity: String = "All"
+
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
 
@@ -38,7 +47,76 @@ class UnrealToolWindowFactory(val project: Project)
         toolWindow.title = "unreal"
         toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
+        UnrealPane.categoryCombobox.getComboBox().addItemListener(ItemListener {
+            if (it.stateChange == ItemEvent.SELECTED) {
+                currentCategory = it.item as String
+                filter()
+            }
+        })
+
+        UnrealPane.verbosityCombobox.getComboBox().addItemListener(ItemListener {
+            if (it.stateChange == ItemEvent.SELECTED) {
+                currentVerbosity = it.item as String
+                filter()
+            }
+        })
+
         return toolWindow
+    }
+
+    private fun verbosityToInt(verbosity: String): Int {
+        return when (verbosity) {
+            "Verbose" -> 5
+            "Log" -> 4
+            "Display" -> 3
+            "Warning" -> 2
+            "Error" -> 1
+            "Fatal" -> 0
+            else -> 6
+        }
+    }
+
+    private fun isMatchingVerbosity(valueToCheck: String, currentSetting: String): Boolean {
+        return verbosityToInt(valueToCheck) <= verbosityToInt(currentSetting)
+    }
+
+    private fun filter() {
+        val foldingModel = UnrealPane.currentConsoleView.editor.foldingModel as FoldingModelImpl
+        foldingModel.runBatchFoldingOperation {
+            for (region in foldingModel.getAllFoldRegions()) {
+                foldingModel.removeFoldRegion(region)
+            }
+            if (currentCategory == "All" && currentVerbosity == "All") {
+                return@runBatchFoldingOperation
+            }
+            val doc = UnrealPane.currentConsoleView.editor.document
+            val text = UnrealPane.currentConsoleView.editor.document.text
+            var index = 0
+            var lastOffset = 0
+
+            while (index < text.length) {
+                val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
+                val verbosity = text.substring(index + 30, index + 42)
+                val category = text.substring(index + 43, index + 63)
+                if (currentCategory != "All" && !category.trim().equals(currentCategory)) {
+                    index = lineEndOffset + 1
+                    continue
+                }
+                if (currentVerbosity != "All" && !isMatchingVerbosity(verbosity.trim(), currentVerbosity)) {
+                    index = lineEndOffset + 1
+                    continue
+                }
+                if (index != lastOffset) {
+                    foldingModel.createFoldRegion(lastOffset, index, "", null, true)
+                }
+                lastOffset = lineEndOffset + 1
+                index = lastOffset
+            }
+            if (lastOffset < text.length) {
+                val region = foldingModel.createFoldRegion(lastOffset, text.length, "", null, true)
+                region!!.setExpanded(false)
+            }
+        }
     }
 
     private fun printSpaces(n: Int = 1) {
@@ -68,6 +146,18 @@ class UnrealToolWindowFactory(val project: Project)
         printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1)
 
         val category = s.category.data.take(CATEGORY_WIDTH)
+        val comboBox = UnrealPane.categoryCombobox.getComboBox()
+        var exists: Boolean = false
+        for (i in 0..comboBox.getItemCount()) {
+            if (comboBox.getItemAt(i) == category) {
+                exists = true
+                break
+            }
+        }
+        if (!exists) {
+            comboBox.addItem(category)
+        }
+
         consoleView.print(category, SYSTEM_OUTPUT)
         printSpaces(CATEGORY_WIDTH - category.length + 1)
     }
@@ -103,11 +193,11 @@ class UnrealToolWindowFactory(val project: Project)
 
     fun print(unrealLogEvent: UnrealLogEvent) {
         val consoleView = UnrealPane.currentConsoleView
+        var startOfLineOffset = consoleView.contentSize
         print(unrealLogEvent.info)
         val startOffset = consoleView.contentSize
         print(unrealLogEvent.text)
-        if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty())
-            consoleView.flushDeferredText()
+        consoleView.flushDeferredText()
         for (range in unrealLogEvent.bpPathRanges) {
             val match = unrealLogEvent.text.data.substring(range.first, range.last)
             val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
@@ -132,6 +222,13 @@ class UnrealToolWindowFactory(val project: Project)
                         consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
                     }
                 }
+            }
+        }
+        if ((currentVerbosity != "All" && isMatchingVerbosity(unrealLogEvent.info.type.toString(), currentVerbosity))
+                || (currentCategory != "All" && unrealLogEvent.info.category.data != currentCategory)) {
+            val foldingModel = UnrealPane.currentConsoleView.editor.foldingModel as FoldingModelImpl
+            foldingModel.runBatchFoldingOperation {
+                foldingModel.createFoldRegion(startOfLineOffset, consoleView.contentSize, "", null, true)
             }
         }
     }
