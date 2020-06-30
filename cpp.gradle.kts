@@ -45,6 +45,7 @@ tasks {
             versionsOfRdCpp.forEach {
                 val stdOut = ByteArrayOutputStream()
                 val outputFile = generateOutputFile(it)
+                if(File(outputFile).exists()) return@forEach
                 val downloadUrl = "https://jetbrains.bintray.com/rd-nuget/$outputFile"
                 val result = exec {
                     commandLine = listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", outputFile)
@@ -66,10 +67,6 @@ tasks {
             val toolchain = it
             val outputFile = generateOutputFile(toolchain)
             val destinationDir = File("$riderLinkDir/Source/RD/$toolchain")
-            doFirst{
-                println(outputFile)
-                println(destinationDir)
-            }
             from(zipTree(outputFile)) {
                 include("native/**")
                 eachFile {

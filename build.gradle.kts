@@ -17,14 +17,14 @@ buildscript {
     }
 
     dependencies {
-        classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.13")
+        classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.21")
         classpath("com.jetbrains.rd", "rd-gen", "0.202.99")
     }
 }
 
 plugins {
-    id("org.jetbrains.intellij") version "0.4.13"
-    kotlin("jvm") version "1.3.50"
+    id("org.jetbrains.intellij") version "0.4.21"
+    kotlin("jvm") version "1.3.72"
 }
 
 dependencies {
@@ -248,10 +248,7 @@ intellij {
 
     instrumentCode = false
     downloadSources = false
-    updateSinceUntilBuild = true
-    tasks.withType<PatchPluginXmlTask> {
-        sinceBuild( "201.7571.34")
-    }
+    tasks.withType<PatchPluginXmlTask> {}
 }
 
 
