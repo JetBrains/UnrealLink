@@ -22,12 +22,16 @@ public class RD : ModuleRules
 				case WindowsCompiler.VisualStudio2017:
 					Toolchain = "win-vs17";
 					break;
+#if UE_4_22_OR_LATER
 				case WindowsCompiler.VisualStudio2019:
 					Toolchain = "win-vs19";
 					break;
+#endif					
+#if UE_4_21_OR_LATER
 				case WindowsCompiler.Clang:
 					Toolchain = "win-clang";
 					throw new NotImplementedException();
+#endif
 				default:
 					throw new NotImplementedException();
 			}
