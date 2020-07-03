@@ -53,7 +53,7 @@ tasks {
                 if(File(outputFile).exists()) return@forEach
                 val downloadUrl = "https://jetbrains.bintray.com/rd-nuget/$outputFile"
                 val result = exec {
-                    commandLine = listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", outputFile)
+                    commandLine = listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", "build/$outputFile")
                     isIgnoreExitValue = true
                     errorOutput = stdOut
                 }
@@ -72,7 +72,7 @@ tasks {
             val toolchain = it
             val outputFile = generateOutputFile(toolchain)
             val destinationDir = File("$riderLinkDir/Source/RD/$toolchain")
-            from(zipTree(outputFile)) {
+            from(zipTree("build/$outputFile")) {
                 include("native/**")
                 eachFile {
                     relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
