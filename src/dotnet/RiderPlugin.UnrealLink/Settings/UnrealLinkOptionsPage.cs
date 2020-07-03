@@ -22,7 +22,7 @@ namespace RiderPlugin.UnrealLink.Settings
     public class UnrealLinkSettings
     {
         [SettingsEntry(false,
-            "If this option is enabled, the RiderLink editor plugin will be automatically installed and updated.")]
+            "If this option is enabled, the RiderLink editor plugin will be automatically updated.")]
         public bool InstallRiderLinkPlugin;
     }
 
