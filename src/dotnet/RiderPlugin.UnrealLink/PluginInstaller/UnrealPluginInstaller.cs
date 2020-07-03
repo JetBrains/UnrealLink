@@ -108,9 +108,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 () => HandleManualInstallPlugin(unrealPluginInstallInfo.Location));
         }
 
-        private void InstallPluginInEngineIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void InstallPluginInEngineIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo, bool forceInstall = false)
         {
-            if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
+            if (!forceInstall && unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
                 unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion) return;
 
             Lifetime.UsingNested(lifetime =>
@@ -130,9 +130,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             });
         }
         
-        private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo, bool forceInstall = false)
         {
-            if (unrealPluginInstallInfo.ProjectPlugins.All(description =>
+            if (!forceInstall && unrealPluginInstallInfo.ProjectPlugins.All(description =>
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
                 return;
 
@@ -380,7 +380,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        public void HandleManualInstallPlugin(PluginInstallLocation location)
+        public void HandleManualInstallPlugin(PluginInstallLocation location, bool forceInstall = false)
         {
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
             if (unrealPluginInstallInfo == null) return;
@@ -390,11 +390,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 {
                     if (location == PluginInstallLocation.Engine)
                     {
-                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo);
+                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo, forceInstall);
                     }
                     else
                     {
-                        InstallPluginInGameIfRequired(unrealPluginInstallInfo);
+                        InstallPluginInGameIfRequired(unrealPluginInstallInfo, forceInstall);
                     }
                 });
         }
@@ -403,7 +403,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             myUnrealHost.PerformModelAction(model =>
             {
-                model.InstallEditorPlugin.Advise(Lifetime, HandleManualInstallPlugin);
+                model.InstallEditorPlugin.Advise(Lifetime, location => HandleManualInstallPlugin(location));
                 model.EnableAutoupdatePlugin.AdviseNotNull(Lifetime,
                     unit =>
                     {

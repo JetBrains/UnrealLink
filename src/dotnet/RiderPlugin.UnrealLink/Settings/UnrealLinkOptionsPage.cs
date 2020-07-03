@@ -47,14 +47,14 @@ namespace RiderPlugin.UnrealLink.Settings
 
         private void SetupInstallButtons()
         {
+            var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
+                .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
+            var solution = owner?.CurrentSolution;
+            var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
+
             var installInEngineButton = AddButton("Install RiderLink plugin in Engine", () =>
             {
-                var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
-                    .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
-                var solution = owner?.CurrentSolution;
-
-                var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
-                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Engine);
+                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Engine, forceInstall:true);
             });
             foreach (var beControl in installInEngineButton.Descendants<BeControl>())
             {
@@ -63,12 +63,7 @@ namespace RiderPlugin.UnrealLink.Settings
 
             var installInGameButton = AddButton("Install RiderLink plugin in Game", () =>
             {
-                var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
-                    .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
-                var solution = owner?.CurrentSolution;
-
-                var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
-                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Game);
+                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Game, forceInstall:true);
             });
             foreach (var beControl in installInGameButton.Descendants<BeControl>())
             {
@@ -78,11 +73,6 @@ namespace RiderPlugin.UnrealLink.Settings
             var installationInProgressText = AddText("Installation is in progress...");
             installationInProgressText.Visible.Value = ControlVisibility.Hidden;
             
-            var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
-                .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
-            var solution = owner?.CurrentSolution;
-
-            var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
             unrealPluginInstaller?.InstallationIsInProgress.Change.Advise_HasNew(unrealPluginInstaller.Lifetime,
                 installationInProgress =>
                 {
