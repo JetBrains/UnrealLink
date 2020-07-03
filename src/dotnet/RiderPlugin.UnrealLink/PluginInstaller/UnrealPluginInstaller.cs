@@ -272,6 +272,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return false;
             }
+
+            if (!PatchEnabledByDefaultOfUpluginFile(pluginBuildOutput))
+            {
+                const string failedToPatch = "Failed to build RiderLink plugin";
+                var failedPatchText = "<html>" +
+                                      "Failed to set `EnableByDefault` to true in RiderLink.uplugin<br>" +
+                                      "You need to manually enable RiderLink in UnrealEditor<br>" +
+                                      "</html>";
+                Notify(failedToPatch, failedPatchText, RdNotificationEntryType.INFO);
+            }
             progressProperty?.SetValue(currentProgress+=BUILD_STEP);
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
@@ -290,6 +300,32 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             RegenerateProjectFiles(uprojectFile);
             progressProperty?.SetValue(1.0);
+            return true;
+        }
+
+        private bool PatchEnabledByDefaultOfUpluginFile(FileSystemPath pluginBuildOutput)
+        {
+            var upluginFile = pluginBuildOutput / "RiderLink.uplugin";
+            if (!upluginFile.ExistsFile) return false;
+
+            var jsonText = File.ReadAllText(upluginFile.FullPath);
+            try
+            {
+                var jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonText) as JObject;
+                if (jsonObject == null)
+                {
+                    myLogger.Warn($"[UnrealLink]: {upluginFile} is not a JSON file, couldn't patch it");
+                    return false;
+                }
+                jsonObject["EnabledByDefault"] = true;
+                File.WriteAllText(upluginFile.FullPath, jsonObject.ToString());
+            }
+            catch (Exception e)
+            {
+                myLogger.Warn($"[UnrealLink]: Couldn't patch 'EnableByDefault' field of {upluginFile}", e);
+                return false;
+            }
+
             return true;
         }
 
