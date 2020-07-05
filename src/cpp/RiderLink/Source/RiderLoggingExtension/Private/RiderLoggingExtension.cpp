@@ -55,16 +55,18 @@ void FRiderLoggingExtensionModule::StartupModule()
             static_cast<int64>(Time)));
     };
 
+    FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
+
+    RdConnection& RdConnection = RiderLinkModule.RdConnection;
+
     outputDevice.onSerializeMessage.BindLambda(
-        [this](const TCHAR* msg, ELogVerbosity::Type Type,
+        [this, &RdConnection](const TCHAR* msg, ELogVerbosity::Type Type,
                const class FName& Name, TOptional<double> Time)
         {
             if (Type > ELogVerbosity::All) return;
 
-            FRiderLinkModule& RiderLinkModule = FModuleManager::GetModuleChecked<FRiderLinkModule>(
-                FRiderLinkModule::GetModuleName());
-
-            RiderLinkModule.RdConnection.Scheduler.queue([this, tail = FString(msg), Type,
+            rd::ISignal<Jetbrains::EditorPlugin::UnrealLogEvent> const & UnrealLog = RdConnection.UnrealToBackendModel.get_unrealLog();
+            RdConnection.Scheduler.queue([this, &UnrealLog, tail = FString(msg), Type,
                     Name = Name.GetPlainNameString(),
                     Time]() mutable
                 {
@@ -76,10 +78,6 @@ void FRiderLoggingExtensionModule::StartupModule()
                     Jetbrains::EditorPlugin::LogMessageInfo MessageInfo =
                         Jetbrains::EditorPlugin::LogMessageInfo(Type, Name, DateTime);
 
-                    FRiderLinkModule& RiderLinkModule = FModuleManager::GetModuleChecked<
-                        FRiderLinkModule>(
-                        FRiderLinkModule::GetModuleName());
-
                     // [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
                     // while we won't change BP hyperlink parsing
                     tail = tail.Left(4096);
@@ -90,16 +88,15 @@ void FRiderLoggingExtensionModule::StartupModule()
                     while (tail.Split("\n", &toSend, &tail))
                     {
                         toSend.TrimEndInline();
-                        RiderLinkModule
-                            .RdConnection.UnrealToBackendModel.get_unrealLog().fire(
+                        UnrealLog.fire(
                                 Jetbrains::EditorPlugin::UnrealLogEvent(
-                                    MessageInfo, std::move(toSend), GetPathRanges(PathPattern, toSend), GetMethodRanges(MethodPattern, tail)
+                                    MessageInfo, toSend, GetPathRanges(PathPattern, toSend), GetMethodRanges(MethodPattern, toSend)
                                 ));
                     }
                     tail.TrimEndInline();
-                    RiderLinkModule.RdConnection.UnrealToBackendModel.get_unrealLog().fire(
+                    UnrealLog.fire(
                         Jetbrains::EditorPlugin::UnrealLogEvent{
-                            MessageInfo, std::move(tail), GetPathRanges(PathPattern, tail), GetMethodRanges(MethodPattern, tail)
+                            MessageInfo, tail, GetPathRanges(PathPattern, tail), GetMethodRanges(MethodPattern, tail)
                         });
                 });
         });
