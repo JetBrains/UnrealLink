@@ -14,6 +14,7 @@ jobs:
   build:
     env:
       working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
+      major-version: 2020.2
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -21,7 +22,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest", artifact-prefix: "UnrealLink-2020.2.",
+            name: "Windows Latest", artifact-prefix: "UnrealLink-",
             os: windows-latest,
             SEP: \
           }
@@ -45,11 +46,11 @@ jobs:
     - name: Hack Clean files in model
       run: git reset --hard
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
+      run: gradlew.bat buildPlugin -PproductVersion=${{ env.major-version }}-PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
     - name: Upload built plugin
       if: success()
       uses: actions/upload-artifact@v2
       with:
         path: output/**
-        name: ${{ matrix.config.artifact-prefix }}${{ github.run_number}}
+        name: ${{ matrix.config.artifact-prefix }}${{ env.major-version }}.${{ github.run_number}}
