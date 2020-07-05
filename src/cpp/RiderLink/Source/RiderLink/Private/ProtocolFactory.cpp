@@ -45,7 +45,7 @@ TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler * Scheduler, rd:
     auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, Scheduler, wire, SocketLifetime);
 
     auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-    if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath))
+    if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath) && !IsRunningCommandlet())
     {
         FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *PortFileFullPath);
     }

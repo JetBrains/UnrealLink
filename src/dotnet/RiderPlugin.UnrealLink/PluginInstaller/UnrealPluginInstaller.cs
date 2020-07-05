@@ -250,14 +250,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
-            if (!PatchTypeOfUpluginFile(upluginFile, myLogger, myPluginDetector.UnrealVersion))
-            {
-                pluginTmpDir.Delete();
-            }
-            progressProperty?.SetValue(currentProgress+=PATCH_STEP);
-
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-
             var buildProgress = currentProgress;
             if (!BuildPlugin(upluginFile,
                 pluginBuildOutput,
@@ -272,6 +265,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return false;
             }
+            progressProperty?.SetValue(currentProgress+=BUILD_STEP);
 
             if (!PatchEnabledByDefaultOfUpluginFile(pluginBuildOutput))
             {
@@ -282,7 +276,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                       "</html>";
                 Notify(failedToPatch, failedPatchText, RdNotificationEntryType.INFO);
             }
-            progressProperty?.SetValue(currentProgress+=BUILD_STEP);
+            progressProperty?.SetValue(currentProgress+=PATCH_STEP);
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
             pluginBuildOutput.Copy(pluginRootFolder);
@@ -335,33 +329,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
-        }
-
-        private static bool PatchTypeOfUpluginFile(FileSystemPath upluginFile, ILogger logger, Version pluginVersion)
-        {
-            var jsonText = File.ReadAllText(upluginFile.FullPath);
-            try
-            {
-                var jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonText) as JObject;
-                var modules = jsonObject["Modules"];
-                var pluginType = pluginVersion.Minor >= 24 ? "UncookedOnly" : "Developer";
-                if (modules is JArray array)
-                {
-                    foreach (var item in array)
-                    {
-                        item["Type"].Replace(pluginType);
-                    }
-                }
-
-                File.WriteAllText(upluginFile.FullPath, jsonObject.ToString());
-            }
-            catch (Exception e)
-            {
-                logger.Error($"[UnrealLink]: Couldn't patch 'Type' field of {upluginFile}", e);
-                return false;
-            }
-
-            return true;
         }
 
         private void BindToInstallationSettingChange()

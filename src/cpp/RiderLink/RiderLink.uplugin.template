@@ -17,25 +17,25 @@
 	"Modules": [
 		{
 			"Name": "RiderLink",
-			"Type": "Developer",
+			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [ "Win64" ]
 		},
 		{
 			"Name": "RiderLoggingExtension",
-			"Type": "Developer",
+			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [ "Win64" ]
 		},
 		{
 			"Name": "RiderBlueprintExtension",
-			"Type": "Developer",
+			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [ "Win64" ]
 		},
 		{
 			"Name": "RiderGameControlExtension",
-			"Type": "Developer",
+			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [ "Win64" ]
 		}
