@@ -66,37 +66,39 @@ void FRiderLoggingExtensionModule::StartupModule()
             if (Type > ELogVerbosity::All) return;
 
             rd::ISignal<Jetbrains::EditorPlugin::UnrealLogEvent> const & UnrealLog = RdConnection.UnrealToBackendModel.get_unrealLog();
-            RdConnection.Scheduler.queue([this, &UnrealLog, tail = FString(msg), Type,
+            rd::optional<rd::DateTime> DateTime;
+            if (Time)
+            {
+                DateTime = GetTimeNow(Time.GetValue());
+            }
+
+            RdConnection.Scheduler.queue([&UnrealLog, Msg = FString(msg), Type,
                     Name = Name.GetPlainNameString(),
-                    Time]() mutable
+                    DateTime]()
                 {
-                    rd::optional<rd::DateTime> DateTime;
-                    if (Time)
-                    {
-                        DateTime = GetTimeNow(Time.GetValue());
-                    }
-                    Jetbrains::EditorPlugin::LogMessageInfo MessageInfo =
-                        Jetbrains::EditorPlugin::LogMessageInfo(Type, Name, DateTime);
+                    Jetbrains::EditorPlugin::LogMessageInfo MessageInfo{Type, Name, DateTime};
 
                     // [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
                     // while we won't change BP hyperlink parsing
-                    tail = tail.Left(4096);
+                    FString Tail = Msg.Left(4096);
 
                     const FRegexPattern PathPattern = FRegexPattern(TEXT("[^\\s]*/[^\\s]+"));
                     const FRegexPattern MethodPattern = FRegexPattern(TEXT("[0-9a-z_A-Z]+::[0-9a-z_A-Z]+"));
-                    FString toSend;
-                    while (tail.Split("\n", &toSend, &tail))
+                    FString ToSend;
+                    while (Tail.Split("\n", &ToSend, &Tail))
                     {
-                        toSend.TrimEndInline();
+                        ToSend.TrimEndInline();
                         UnrealLog.fire(
-                                Jetbrains::EditorPlugin::UnrealLogEvent(
-                                    MessageInfo, toSend, GetPathRanges(PathPattern, toSend), GetMethodRanges(MethodPattern, toSend)
-                                ));
+                            Jetbrains::EditorPlugin::UnrealLogEvent{
+                                MessageInfo, ToSend, GetPathRanges(PathPattern, ToSend),
+                                GetMethodRanges(MethodPattern, ToSend)
+                            });
                     }
-                    tail.TrimEndInline();
+                    Tail.TrimEndInline();
                     UnrealLog.fire(
                         Jetbrains::EditorPlugin::UnrealLogEvent{
-                            MessageInfo, tail, GetPathRanges(PathPattern, tail), GetMethodRanges(MethodPattern, tail)
+                            MessageInfo, Tail, GetPathRanges(PathPattern, Tail),
+                            GetMethodRanges(MethodPattern, Tail)
                         });
                 });
         });
