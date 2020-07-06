@@ -83,7 +83,7 @@ void FRiderLoggingExtensionModule::StartupModule()
                     FString Tail = Msg.Left(4096);
 
                     const FRegexPattern PathPattern = FRegexPattern(TEXT("[^\\s]*/[^\\s]+"));
-                    const FRegexPattern MethodPattern = FRegexPattern(TEXT("[0-9a-z_A-Z]+::[0-9a-z_A-Z]+"));
+                    const FRegexPattern MethodPattern = FRegexPattern(TEXT("[0-9a-z_A-Z]+::~?[0-9a-z_A-Z]+"));
                     FString ToSend;
                     while (Tail.Split("\n", &ToSend, &Tail))
                     {
