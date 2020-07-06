@@ -11,10 +11,10 @@ import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.model.*
+import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
-import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
@@ -104,10 +104,11 @@ class UnrealToolWindowFactory(val project: Project)
     fun print(unrealLogEvent: UnrealLogEvent) {
         val consoleView = UnrealPane.currentConsoleView
         print(unrealLogEvent.info)
-        val startOffset = consoleView.contentSize
         print(unrealLogEvent.text)
-        if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty())
-            consoleView.flushDeferredText()
+        if (unrealLogEvent.bpPathRanges.isEmpty() && unrealLogEvent.methodRanges.isEmpty())
+            return
+        consoleView.flushDeferredText()
+        val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
         for (range in unrealLogEvent.bpPathRanges) {
             val match = unrealLogEvent.text.data.substring(range.first, range.last)
             val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
