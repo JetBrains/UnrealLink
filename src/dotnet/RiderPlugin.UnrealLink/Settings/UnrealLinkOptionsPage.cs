@@ -40,7 +40,7 @@ namespace RiderPlugin.UnrealLink.Settings
             : base(lifetime, optionsPageContext, optionsSettingsSmartContext)
         {
             AddBoolOption((UnrealLinkSettings k) => k.InstallRiderLinkPlugin,
-                "Automatically install and update Rider's UnrealLink editor plugin (recommended)");
+                "Automatically update RiderLink plugin for Unreal Editor (recommended)");
             
             SetupInstallButtons();
         }
