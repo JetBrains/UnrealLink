@@ -13,6 +13,7 @@ using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
+using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
@@ -108,26 +109,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 () => HandleManualInstallPlugin(unrealPluginInstallInfo.Location));
         }
 
-        private void InstallPluginInEngineIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo, bool forceInstall = false)
+        private void InstallPluginInEngineIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo,
+            IProperty<double> progress, bool forceInstall = false)
         {
             if (!forceInstall && unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
                 unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion) return;
-
-            Lifetime.UsingNested(lifetime =>
-            {
-                lifetime.Bracket(() => InstallationIsInProgress.Value = true,
-                    () => InstallationIsInProgress.Value = false);
-                var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
-                var header = $"{prefix} RiderLink plugin";
-                var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);
-                var task = RiderBackgroundTaskBuilder.Create()
-                    .AsNonCancelable()
-                    .WithHeader(header)
-                    .WithProgress(progress)
-                    .WithDescriptionFromProgress();
-                myBackgroundTaskHost.AddNewTask(lifetime, task);
-                InstallPluginInEngine(unrealPluginInstallInfo, progress);
-            });
+            
+            InstallPluginInEngine(unrealPluginInstallInfo, progress);
         }
         
         private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo, bool forceInstall = false)
@@ -136,23 +124,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
                 return;
 
-            Lifetime.UsingNested(lifetime =>
-            {
-                lifetime.Bracket(() => InstallationIsInProgress.Value = true,
-                    () => InstallationIsInProgress.Value = false);
-                var allProjectsHavePlugins = unrealPluginInstallInfo.ProjectPlugins.All(description => description.IsPluginAvailable);
-                var prefix = allProjectsHavePlugins ? "Updating" : "Installing";
-                var header = $"{prefix} RiderLink plugin";
-                var task = RiderBackgroundTaskBuilder.Create()
-                    .AsNonCancelable()
-                    .AsIndeterminate()
-                    .WithHeader(header);
-                myBackgroundTaskHost.AddNewTask(lifetime, task);
-                InstallPluginInGame(unrealPluginInstallInfo);
-            });
+            InstallPluginInGame(unrealPluginInstallInfo);
         }
-
-
 
         private void InstallPluginInGame(UnrealPluginInstallInfo unrealPluginInstallInfo)
         {
@@ -352,18 +325,31 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
             if (unrealPluginInstallInfo == null) return;
 
-            mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
-                "UnrealPluginInstaller.HandleManualInstallPlugin", () =>
+            Lifetime.UsingNestedAsync(async lifetime =>
+            {
+                lifetime.Bracket(() => InstallationIsInProgress.Value = true,
+                    () => InstallationIsInProgress.Value = false);
+                var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
+                var header = $"{prefix} RiderLink plugin";
+                var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);
+                var task = RiderBackgroundTaskBuilder.Create()
+                    .AsNonCancelable()
+                    .WithHeader(header)
+                    .WithProgress(progress)
+                    .WithDescriptionFromProgress();
+                myBackgroundTaskHost.AddNewTask(lifetime, task);
+                await lifetime.StartBackground(() =>
                 {
                     if (location == PluginInstallLocation.Engine)
                     {
-                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo, forceInstall);
+                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo, progress, forceInstall);
                     }
                     else
                     {
                         InstallPluginInGameIfRequired(unrealPluginInstallInfo, forceInstall);
                     }
                 });
+            });
         }
 
         private void BindToNotificationFixAction()

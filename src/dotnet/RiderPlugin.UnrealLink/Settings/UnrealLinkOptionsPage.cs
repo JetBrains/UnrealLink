@@ -56,19 +56,11 @@ namespace RiderPlugin.UnrealLink.Settings
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Engine, forceInstall:true);
             });
-            foreach (var beControl in installInEngineButton.Descendants<BeControl>())
-            {
-                installInEngineButton.Enabled.FlowIntoRd(Lifetime, beControl.Enabled);
-            }
 
             var installInGameButton = AddButton("Install RiderLink plugin in Game", () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Game, forceInstall:true);
             });
-            foreach (var beControl in installInGameButton.Descendants<BeControl>())
-            {
-                installInGameButton.Enabled.FlowIntoRd(Lifetime, beControl.Enabled);
-            }
 
             var installationInProgressText = AddText("Installation is in progress...");
             installationInProgressText.Visible.Value = ControlVisibility.Hidden;
@@ -77,7 +69,15 @@ namespace RiderPlugin.UnrealLink.Settings
                 installationInProgress =>
                 {
                     installInEngineButton.Enabled.Value = !installationInProgress.New;
+                    foreach (var beControl in installInEngineButton.Descendants<BeControl>())
+                    {
+                        beControl.Enabled.Value = !installationInProgress.New;
+                    }
                     installInGameButton.Enabled.Value = !installationInProgress.New;
+                    foreach (var beControl in installInGameButton.Descendants<BeControl>())
+                    {
+                        beControl.Enabled.Value = !installationInProgress.New;
+                    }
                     installationInProgressText.Visible.Value = installationInProgress.New ?
                         ControlVisibility.Visible :
                         ControlVisibility.Hidden;
