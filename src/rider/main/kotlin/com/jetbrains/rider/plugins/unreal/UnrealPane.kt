@@ -11,6 +11,7 @@ import com.intellij.ui.ComboBoxFieldPanel
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.ui.components.ComponentFactories
+import com.jetbrains.rider.model.*
 
 import javax.swing.*
 import java.awt.*
@@ -45,14 +46,14 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
         verbosityCombobox.createComponent()
         val comboBox = verbosityCombobox.getComboBox()
-        comboBox.addItem("All")
-        comboBox.addItem("Verbose")
-        comboBox.addItem("Log")
-        comboBox.addItem("Display")
-        comboBox.addItem("Warning")
-        comboBox.addItem("Error")
-        comboBox.addItem("Fatal")
+        for (verbosity in VerbosityType.values()) {
+            comboBox.addItem(verbosity.name)
+            if (verbosity.equals(VerbosityType.All)) {
+                break
+            }
+        }
         verbosityCombobox.setText("All")
+
         topPanel.add(JLabel("Verbosity"))
         topPanel.add(verbosityCombobox)
 
