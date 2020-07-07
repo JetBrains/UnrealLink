@@ -64,20 +64,12 @@ class UnrealToolWindowFactory(val project: Project)
         return toolWindow
     }
 
-    private fun verbosityToInt(verbosity: String): Int {
-        return when (verbosity) {
-            "Verbose" -> 5
-            "Log" -> 4
-            "Display" -> 3
-            "Warning" -> 2
-            "Error" -> 1
-            "Fatal" -> 0
-            else -> 6
-        }
+    private fun isMatchingVerbosity(valueToCheck: VerbosityType, currentSetting: String): Boolean {
+        return valueToCheck.compareTo(VerbosityType.valueOf(currentSetting)) <= 0
     }
 
     private fun isMatchingVerbosity(valueToCheck: String, currentSetting: String): Boolean {
-        return verbosityToInt(valueToCheck) <= verbosityToInt(currentSetting)
+        return VerbosityType.valueOf(valueToCheck).compareTo(VerbosityType.valueOf(currentSetting)) <= 0
     }
 
     private fun filter() {
@@ -96,8 +88,8 @@ class UnrealToolWindowFactory(val project: Project)
 
             while (index < text.length) {
                 val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
-                val verbosity = text.substring(index + 30, index + 42)
-                val category = text.substring(index + 43, index + 63)
+                val verbosity = text.substring(index + TIME_WIDTH + 1, index + TIME_WIDTH + VERBOSITY_WIDTH + 1)
+                val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2)
                 if (currentCategory != "All" && !category.trim().equals(currentCategory)) {
                     index = lineEndOffset + 1
                     continue
@@ -196,41 +188,58 @@ class UnrealToolWindowFactory(val project: Project)
         var startOfLineOffset = consoleView.contentSize
         print(unrealLogEvent.info)
         print(unrealLogEvent.text)
-        if (unrealLogEvent.bpPathRanges.isEmpty() && unrealLogEvent.methodRanges.isEmpty())
-            return
+
         consoleView.flushDeferredText()
-        val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
-        for (range in unrealLogEvent.bpPathRanges) {
-            val match = unrealLogEvent.text.data.substring(range.first, range.last)
-            val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
-            consoleView.hyperlinks.createHyperlink(startOffset + range.first, startOffset + range.last, null, hyperLinkInfo)
-        }
-        for (range in unrealLogEvent.methodRanges) {
-            val match = unrealLogEvent.text.data.substring(range.first, range.last)
-            val (`class`, method) = match.split(MethodReference.separator)
-            val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
-            model.isMethodReference.startAndAdviseSuccess(methodReference) {
-                if (it) {
-                    run {
-                        val first = startOffset + range.first
-                        val last = startOffset + range.first + `class`.length
-                        val linkInfo = UnrealClassHyperLinkInfo(model.navigateToClass, UClass(FString(`class`)))
-                        consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
-                    }
-                    run {
-                        val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
-                        val first = startOffset + range.last - method.length
-                        val last = startOffset + range.last
-                        consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
+        if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty()) {
+            val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
+            for (range in unrealLogEvent.bpPathRanges) {
+                val match = unrealLogEvent.text.data.substring(range.first, range.last)
+                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
+                consoleView.hyperlinks.createHyperlink(startOffset + range.first, startOffset + range.last, null, hyperLinkInfo)
+            }
+            for (range in unrealLogEvent.methodRanges) {
+                val match = unrealLogEvent.text.data.substring(range.first, range.last)
+                val (`class`, method) = match.split(MethodReference.separator)
+                val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
+                model.isMethodReference.startAndAdviseSuccess(methodReference) {
+                    if (it) {
+                        run {
+                            val first = startOffset + range.first
+                            val last = startOffset + range.first + `class`.length
+                            val linkInfo = UnrealClassHyperLinkInfo(model.navigateToClass, UClass(FString(`class`)))
+                            consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
+                        }
+                        run {
+                            val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
+                            val first = startOffset + range.last - method.length
+                            val last = startOffset + range.last
+                            consoleView.hyperlinks.createHyperlink(first, last, null, linkInfo)
+                        }
                     }
                 }
             }
         }
-        if ((currentVerbosity != "All" && isMatchingVerbosity(unrealLogEvent.info.type.toString(), currentVerbosity))
+
+        val foldingModel = UnrealPane.currentConsoleView.editor.foldingModel as FoldingModelImpl
+        var existingRegion = foldingModel.getCollapsedRegionAtOffset(startOfLineOffset - 1)
+        if (existingRegion == null)
+            existingRegion = foldingModel.getCollapsedRegionAtOffset(startOfLineOffset - 2)
+        if ((currentVerbosity != "All" && !isMatchingVerbosity(unrealLogEvent.info.type, currentVerbosity))
                 || (currentCategory != "All" && unrealLogEvent.info.category.data != currentCategory)) {
-            val foldingModel = UnrealPane.currentConsoleView.editor.foldingModel as FoldingModelImpl
             foldingModel.runBatchFoldingOperation {
+                if (existingRegion != null) {
+                    startOfLineOffset = existingRegion.getStartOffset()
+                    foldingModel.removeFoldRegion(existingRegion)
+                }
                 foldingModel.createFoldRegion(startOfLineOffset, consoleView.contentSize, "", null, true)
+            }
+        }
+        else if (existingRegion != null) {
+            // expand region to cover the whole line with EOL
+            foldingModel.runBatchFoldingOperation {
+                val start = existingRegion.getStartOffset()
+                foldingModel.removeFoldRegion(existingRegion)
+                foldingModel.createFoldRegion(start, startOfLineOffset, "", null, true)
             }
         }
     }
