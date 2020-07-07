@@ -75,7 +75,6 @@ public class RD : ModuleRules
             "include/rd_framework_cpp",
             "include/thirdparty",
             "include/rd_core_cpp/lifetime",
-            "include/rd_core_cpp/logger",
             "include/rd_core_cpp/reactive",
             "include/rd_core_cpp/std",
             "include/rd_core_cpp/types",

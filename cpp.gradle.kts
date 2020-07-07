@@ -42,7 +42,7 @@ tasks {
 
     val riderLinkDir = "$rootDir/src/cpp/RiderLink"
     val versionsOfRdCpp = arrayOf("win-vs17", "win-vs19")
-    val rdCppVersion = "201.1.56"
+    val rdCppVersion = "201.1.78"
     val generateOutputFile = {toolchain:String -> "JetBrains.RdFramework.Cpp.$rdCppVersion-$toolchain.nupkg"}
 
     val getRdCpp by creating{
