@@ -118,25 +118,30 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             InstallPluginInEngine(unrealPluginInstallInfo, progress);
         }
         
-        private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo, bool forceInstall = false)
+        private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo,
+            Property<double> progress, bool forceInstall = false)
         {
             if (!forceInstall && unrealPluginInstallInfo.ProjectPlugins.All(description =>
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
                 return;
 
-            InstallPluginInGame(unrealPluginInstallInfo);
+            InstallPluginInGame(unrealPluginInstallInfo, progress);
         }
 
-        private void InstallPluginInGame(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void InstallPluginInGame(UnrealPluginInstallInfo unrealPluginInstallInfo, Property<double> progress)
         {
             var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             var success = true;
-            foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+            var size = unrealPluginInstallInfo.ProjectPlugins.Count;
+            var range = 1.0 / size;
+            for (int i = 0; i < unrealPluginInstallInfo.ProjectPlugins.Count; i++)
             {
-                if (InstallPlugin(installDescription, installDescription.UprojectFilePath)) continue;
+                progress.Value = range*i;
+                var installDescription = unrealPluginInstallInfo.ProjectPlugins[i];
+                if (InstallPlugin(installDescription, installDescription.UprojectFilePath, progress, range)) continue;
                 
                 success = false;
                 break;
@@ -176,7 +181,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
-            if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin, unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress))
+            progress.Value = 0.0;
+            if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin, unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0))
             {
                 foreach (var backupAllPlugin in backupAllPlugins)
                 {
@@ -193,14 +199,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         private bool InstallPlugin(UnrealPluginInstallInfo.InstallDescription installDescription,
-            FileSystemPath uprojectFile, IProperty<double> progressProperty = null)
+            FileSystemPath uprojectFile, IProperty<double> progressProperty, double range)
         {
-            const double ZIP_STEP = 0.1;
-            const double PATCH_STEP = 0.1;
-            const double BUILD_STEP = 0.6;
-            const double REFRESH_STEP = 0.1;
+            var ZIP_STEP = 0.1*range;
+            var PATCH_STEP = 0.1*range;
+            var BUILD_STEP = 0.6*range;
+            var REFRESH_STEP = 0.1*range;
 
-            var currentProgress = 0.0;
             var pluginRootFolder = installDescription.UnrealPluginRootFolder;
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
@@ -208,7 +213,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             try
             {
                 ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
-                progressProperty?.SetValue(currentProgress+=ZIP_STEP);
+                progressProperty.Value += ZIP_STEP;
             }
             catch (Exception exception)
             {
@@ -224,10 +229,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            var buildProgress = currentProgress;
+            var buildProgress = progressProperty.Value;
             if (!BuildPlugin(upluginFile,
                 pluginBuildOutput,
-                uprojectFile,value => progressProperty?.SetValue(buildProgress + value*BUILD_STEP)))
+                uprojectFile,value => progressProperty.SetValue(buildProgress + value*BUILD_STEP)))
             {
                 myLogger.Error($"Failed to build RiderLink for any available project");
                 const string failedBuildTitle = "Failed to build RiderLink plugin";
@@ -238,7 +243,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return false;
             }
-            progressProperty?.SetValue(currentProgress+=BUILD_STEP);
+            progressProperty.Value = buildProgress + BUILD_STEP;
 
             if (!PatchEnabledByDefaultOfUpluginFile(pluginBuildOutput))
             {
@@ -249,11 +254,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                       "</html>";
                 Notify(failedToPatch, failedPatchText, RdNotificationEntryType.INFO);
             }
-            progressProperty?.SetValue(currentProgress+=PATCH_STEP);
+            progressProperty.Value += PATCH_STEP;
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
             pluginBuildOutput.Copy(pluginRootFolder);
-            progressProperty?.SetValue(currentProgress+=REFRESH_STEP);
+            progressProperty.Value += REFRESH_STEP;
 
             installDescription.IsPluginAvailable = true;
             installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
@@ -266,7 +271,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             Notify(title, text, RdNotificationEntryType.INFO);
 
             RegenerateProjectFiles(uprojectFile);
-            progressProperty?.SetValue(1.0);
             return true;
         }
 
@@ -346,7 +350,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     }
                     else
                     {
-                        InstallPluginInGameIfRequired(unrealPluginInstallInfo, forceInstall);
+                        InstallPluginInGameIfRequired(unrealPluginInstallInfo, progress, forceInstall);
                     }
                 });
             });
