@@ -61,6 +61,7 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         categoryCombobox.getComboBox().addItem("All")
         topPanel.add(JLabel("Category"))
         topPanel.add(categoryCombobox)
+        topPanel.border = BorderFactory.createEmptyBorder(0, 5, 0, 0)
 
         consoleView.add(topPanel, BorderLayout.NORTH)
         setContent(consoleView)
