@@ -47,18 +47,14 @@ class UnrealToolWindowFactory(val project: Project)
         toolWindow.title = "unreal"
         toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
-        UnrealPane.categoryCombobox.getComboBox().addItemListener(ItemListener {
-            if (it.stateChange == ItemEvent.SELECTED) {
-                currentCategory = it.item as String
-                filter()
-            }
+        UnrealPane.categoryFilterActionGroup.addItemListener({ category ->
+            currentCategory = category
+            filter()
         })
 
-        UnrealPane.verbosityCombobox.getComboBox().addItemListener(ItemListener {
-            if (it.stateChange == ItemEvent.SELECTED) {
-                currentVerbosity = it.item as String
-                filter()
-            }
+        UnrealPane.verbosityFilterActionGroup.addItemListener({ verbosity ->
+            currentVerbosity = verbosity
+            filter()
         })
 
         return toolWindow
@@ -138,16 +134,15 @@ class UnrealToolWindowFactory(val project: Project)
         printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1)
 
         val category = s.category.data.take(CATEGORY_WIDTH)
-        val comboBox = UnrealPane.categoryCombobox.getComboBox()
         var exists: Boolean = false
-        for (i in 0..comboBox.getItemCount()) {
-            if (comboBox.getItemAt(i) == category) {
+        for (item in UnrealPane.categoryFilterActionGroup.items()) {
+            if (item == category) {
                 exists = true
-                break
+                break;
             }
         }
         if (!exists) {
-            comboBox.addItem(category)
+            UnrealPane.categoryFilterActionGroup.addItem(category)
         }
 
         consoleView.print(category, SYSTEM_OUTPUT)
