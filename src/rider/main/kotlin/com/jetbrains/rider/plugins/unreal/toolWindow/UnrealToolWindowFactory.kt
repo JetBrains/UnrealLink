@@ -185,13 +185,13 @@ class UnrealToolWindowFactory(val project: Project)
 
     fun print(unrealLogEvent: UnrealLogEvent) {
         val consoleView = UnrealPane.currentConsoleView
-        var startOfLineOffset = consoleView.contentSize
         print(unrealLogEvent.info)
         print(unrealLogEvent.text)
 
         consoleView.flushDeferredText()
+        val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
+        var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3) - 1
         if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty()) {
-            val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
             for (range in unrealLogEvent.bpPathRanges) {
                 val match = unrealLogEvent.text.data.substring(range.first, range.last)
                 val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
