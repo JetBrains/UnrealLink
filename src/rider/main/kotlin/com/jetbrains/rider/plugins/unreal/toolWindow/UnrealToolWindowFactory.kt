@@ -14,6 +14,7 @@ import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.model.*
+import com.jetbrains.rider.plugins.unreal.actions.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
@@ -36,8 +37,7 @@ class UnrealToolWindowFactory(val project: Project)
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
 
-    private var currentCategory: String = "All"
-    private var currentVerbosity: String = "All"
+    var allCetegoriesSelected: Boolean = true
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
@@ -47,25 +47,70 @@ class UnrealToolWindowFactory(val project: Project)
         toolWindow.title = "unreal"
         toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
-        UnrealPane.categoryFilterActionGroup.addItemListener({ category ->
-            currentCategory = category
+        UnrealPane.categoryFilterActionGroup.addItemListener({
+            val selected = UnrealPane.categoryFilterActionGroup.selected()
+            if (allCetegoriesSelected) {
+                if (!("All" in selected)) {
+                    UnrealPane.categoryFilterActionGroup.selectAll(false)
+                    allCetegoriesSelected = false
+                } else if (selected.size != UnrealPane.categoryFilterActionGroup.items().size) {
+                    allCetegoriesSelected = false
+                    for (item in UnrealPane.categoryFilterActionGroup.items()) {
+                        if (item.getName() == "All") {
+                            item.setSelected(false)
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if ("All" in selected) {
+                    UnrealPane.categoryFilterActionGroup.selectAll(true)
+                    allCetegoriesSelected = true
+                } else if (selected.size == UnrealPane.categoryFilterActionGroup.items().size - 1) {
+                    allCetegoriesSelected = true
+                    for (item in UnrealPane.categoryFilterActionGroup.items()) {
+                        if (item.getName() == "All") {
+                            item.setSelected(true)
+                            break;
+                        }
+                    }
+                }
+            }
             filter()
         })
 
-        UnrealPane.verbosityFilterActionGroup.addItemListener({ verbosity ->
-            currentVerbosity = verbosity
+        UnrealPane.verbosityFilterActionGroup.addItemListener({
             filter()
         })
 
         return toolWindow
     }
 
-    private fun isMatchingVerbosity(valueToCheck: VerbosityType, currentSetting: String): Boolean {
-        return valueToCheck.compareTo(VerbosityType.valueOf(currentSetting)) <= 0
+    private fun isMatchingVerbosity(valueToCheck: VerbosityType, currentList: List<String>): Boolean {
+        if (currentList.isEmpty()) {
+            return false
+        }
+
+        if (valueToCheck.compareTo(VerbosityType.Error) <= 0)
+            return "Errors" in currentList
+        if (valueToCheck == VerbosityType.Warning)
+            return "Warnings" in currentList
+
+        return "Messages" in currentList
     }
 
-    private fun isMatchingVerbosity(valueToCheck: String, currentSetting: String): Boolean {
-        return VerbosityType.valueOf(valueToCheck).compareTo(VerbosityType.valueOf(currentSetting)) <= 0
+    private fun isMatchingVerbosity(valueToCheck: String, currentList: List<String>): Boolean {
+        if (currentList.isEmpty()) {
+            return false
+        }
+
+        val value = VerbosityType.valueOf(valueToCheck)
+        if (value.compareTo(VerbosityType.Error) <= 0)
+            return "Errors" in currentList
+        if (value == VerbosityType.Warning)
+            return "Warnings" in currentList
+
+        return "Messages" in currentList
     }
 
     private fun filter() {
@@ -74,7 +119,9 @@ class UnrealToolWindowFactory(val project: Project)
             for (region in foldingModel.getAllFoldRegions()) {
                 foldingModel.removeFoldRegion(region)
             }
-            if (currentCategory == "All" && currentVerbosity == "All") {
+            val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
+            val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
+            if ("All" in selectedCategories && selectedVerbosities.size == 3) {
                 return@runBatchFoldingOperation
             }
             val doc = UnrealPane.currentConsoleView.editor.document
@@ -84,13 +131,13 @@ class UnrealToolWindowFactory(val project: Project)
 
             while (index < text.length) {
                 val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
-                val verbosity = text.substring(index + TIME_WIDTH + 1, index + TIME_WIDTH + VERBOSITY_WIDTH + 1)
-                val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2)
-                if (currentCategory != "All" && !category.trim().equals(currentCategory)) {
+                val verbosity = text.substring(index + TIME_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + 2)
+                val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 3, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3)
+                if (!(category.trim() in selectedCategories)) {
                     index = lineEndOffset + 1
                     continue
                 }
-                if (currentVerbosity != "All" && !isMatchingVerbosity(verbosity.trim(), currentVerbosity)) {
+                if (!isMatchingVerbosity(verbosity.trim(), selectedVerbosities)) {
                     index = lineEndOffset + 1
                     continue
                 }
@@ -135,14 +182,18 @@ class UnrealToolWindowFactory(val project: Project)
 
         val category = s.category.data.take(CATEGORY_WIDTH)
         var exists: Boolean = false
+        var allSelected: Boolean = true
         for (item in UnrealPane.categoryFilterActionGroup.items()) {
-            if (item == category) {
+            if (item.getName() == "All") {
+                allSelected = item.isSelected()
+            }
+            if (item.getName() == category) {
                 exists = true
                 break;
             }
         }
         if (!exists) {
-            UnrealPane.categoryFilterActionGroup.addItem(category)
+            UnrealPane.categoryFilterActionGroup.addItem(FilterCheckboxAction(category, allSelected))
         }
 
         consoleView.print(category, SYSTEM_OUTPUT)
@@ -185,7 +236,7 @@ class UnrealToolWindowFactory(val project: Project)
 
         consoleView.flushDeferredText()
         val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
-        var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3) - 1
+        var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 4)
         if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty()) {
             for (range in unrealLogEvent.bpPathRanges) {
                 val match = unrealLogEvent.text.data.substring(range.first, range.last)
@@ -219,8 +270,10 @@ class UnrealToolWindowFactory(val project: Project)
         var existingRegion = foldingModel.getCollapsedRegionAtOffset(startOfLineOffset - 1)
         if (existingRegion == null)
             existingRegion = foldingModel.getCollapsedRegionAtOffset(startOfLineOffset - 2)
-        if ((currentVerbosity != "All" && !isMatchingVerbosity(unrealLogEvent.info.type, currentVerbosity))
-                || (currentCategory != "All" && unrealLogEvent.info.category.data != currentCategory)) {
+
+        val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
+        val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
+        if (!isMatchingVerbosity(unrealLogEvent.info.type, selectedVerbosities) || !(unrealLogEvent.info.category.data in selectedCategories)) {
             foldingModel.runBatchFoldingOperation {
                 if (existingRegion != null) {
                     startOfLineOffset = existingRegion.getStartOffset()

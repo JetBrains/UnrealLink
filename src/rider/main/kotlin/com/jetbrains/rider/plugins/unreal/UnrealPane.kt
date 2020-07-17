@@ -22,8 +22,8 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
     companion object {
         lateinit var currentConsoleView : ConsoleViewImpl
-        val verbosityFilterActionGroup: FilterComboAction = FilterComboAction("", arrayListOf())
-        val categoryFilterActionGroup: FilterComboAction = FilterComboAction("All", arrayListOf("All"))
+        val verbosityFilterActionGroup: FilterComboAction = FilterComboAction("Verbosity")
+        val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
     }
 
     init {
@@ -41,35 +41,19 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
         val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component
 
-        for (verbosity in VerbosityType.values()) {
-            verbosityFilterActionGroup.addItem(verbosity.name)
-            if (verbosity.equals(VerbosityType.VeryVerbose)) {
-                verbosityFilterActionGroup.setText(verbosity.name)
-                break
-            }
-        }
-        val verbosityGroup = DefaultActionGroup().apply {
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Errors", true))
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Warnings", true))
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Messages", true))
+        categoryFilterActionGroup.addItem(FilterCheckboxAction("All", true))
+        val topGroup = DefaultActionGroup().apply {
             add(verbosityFilterActionGroup)
-        }
-        val verbosityToolbar = ActionManager.getInstance().createActionToolbar("", verbosityGroup, true).component
-
-        val categoryGroup = DefaultActionGroup().apply {
             add(categoryFilterActionGroup)
         }
-        val categoryToolbar = ActionManager.getInstance().createActionToolbar("", categoryGroup, true).component
+        val topToolbar = ActionManager.getInstance().createActionToolbar("", topGroup, true).component
 
         consoleView.scrollTo(0)
 
-        val topPanel = JPanel(HorizontalLayout(0))
-
-        topPanel.add(JLabel("Verbosity"))
-        topPanel.add(verbosityToolbar)
-
-        topPanel.add(JLabel("Category"))
-        topPanel.add(categoryToolbar)
-        topPanel.border = BorderFactory.createEmptyBorder(0, 5, 0, 0)
-
-        consoleView.add(topPanel, BorderLayout.NORTH)
+        consoleView.add(topToolbar, BorderLayout.NORTH)
         setContent(consoleView)
         setToolbar(toolbar)
     }
