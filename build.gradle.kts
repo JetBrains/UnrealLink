@@ -18,7 +18,7 @@ buildscript {
 
     dependencies {
         classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.21")
-        classpath("com.jetbrains.rd", "rd-gen", "0.202.99")
+        classpath("com.jetbrains.rd", "rd-gen", "0.202.118")
     }
 }
 
