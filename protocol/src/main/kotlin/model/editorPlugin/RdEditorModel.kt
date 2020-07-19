@@ -16,13 +16,14 @@ import java.io.File
 @Suppress("unused")
 object RdEditorRoot : Root(
         CSharp50Generator(FlowTransform.AsIs, "JetBrains.Platform.Unreal.EditorPluginModel", File(syspropertyOrInvalid("model.out.src.editorPlugin.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")))
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.editorPlugin.cpp.dir")), generatedFileSuffix = "")
 ) {
     init {
         setting(CSharp50Generator.AdditionalUsings) {
             listOf("JetBrains.Unreal.Lib")
         }
         setting(Cpp17Generator.AdditionalHeaders, listOf("UE4TypesMarshallers.h"))
+        setting(Cpp17Generator.ExportMacroName,  "RIDERLINK_API")
     }
 }
 

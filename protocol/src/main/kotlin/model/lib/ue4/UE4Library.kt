@@ -11,7 +11,7 @@ import java.io.File
 
 object UE4Library : Root(
         CSharp50Generator(FlowTransform.AsIs, "JetBrains.Unreal.Lib", File(syspropertyOrInvalid("model.out.src.lib.ue4.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir"))),
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatedFileSuffix = ""),
         Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
 ) {
     init {
@@ -22,6 +22,7 @@ object UE4Library : Root(
         ))
         setting(Cpp17Generator.ListType, CppIntrinsicType(null, "TArray", "Runtime/Core/Public/Containers/Array.h"))
         setting(Cpp17Generator.AllocatorType) { "FDefaultAllocator" }
+        setting(Cpp17Generator.ExportMacroName,  "RIDERLINK_API")
     }
 
     private fun <T : Declaration> declare(intrinsic: CppIntrinsicType, factory: Toplevel.() -> T): T {
