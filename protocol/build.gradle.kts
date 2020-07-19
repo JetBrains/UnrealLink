@@ -97,9 +97,8 @@ tasks {
         group = "protocol"
         description = "Generates protocol models."
         dependsOn(generateRiderModel)
-// [HACK]: disable editor plugin model generation for now, fixing linking errors for RIDERLINK_API
-//        dependsOn(generateEditorPluginModel)
-//        dependsOn(generateUE4Lib)
+        dependsOn(generateEditorPluginModel)
+        dependsOn(generateUE4Lib)
     }
 
     withType<RdgenTask> {
