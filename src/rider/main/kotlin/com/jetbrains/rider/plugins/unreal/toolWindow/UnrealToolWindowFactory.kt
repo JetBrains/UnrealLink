@@ -83,6 +83,10 @@ class UnrealToolWindowFactory(val project: Project)
             filter()
         })
 
+        UnrealPane.timestampCheckBox.addChangeListener { event ->
+            filter()
+        }
+
         return toolWindow
     }
 
@@ -121,13 +125,15 @@ class UnrealToolWindowFactory(val project: Project)
             }
             val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
             val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
-            if ("All" in selectedCategories && selectedVerbosities.size == 3) {
+            if ("All" in selectedCategories && selectedVerbosities.size == 3 && UnrealPane.timestampCheckBox.isSelected()) {
                 return@runBatchFoldingOperation
             }
             val doc = UnrealPane.currentConsoleView.editor.document
             val text = UnrealPane.currentConsoleView.editor.document.text
             var index = 0
             var lastOffset = 0
+
+            val showTimestamp = UnrealPane.timestampCheckBox.isSelected()
 
             while (index < text.length) {
                 val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
@@ -141,7 +147,9 @@ class UnrealToolWindowFactory(val project: Project)
                     index = lineEndOffset + 1
                     continue
                 }
-                if (index != lastOffset) {
+                if (!showTimestamp) {
+                    foldingModel.createFoldRegion(lastOffset, index + TIME_WIDTH + 2, "", null, true)
+                } else if (lastOffset != index) {
                     foldingModel.createFoldRegion(lastOffset, index, "", null, true)
                 }
                 lastOffset = lineEndOffset + 1
@@ -273,7 +281,10 @@ class UnrealToolWindowFactory(val project: Project)
 
         val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
         val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
-        if (!isMatchingVerbosity(unrealLogEvent.info.type, selectedVerbosities) || !(unrealLogEvent.info.category.data in selectedCategories)) {
+        val showTimestamp = UnrealPane.timestampCheckBox.isSelected()
+        if (!isMatchingVerbosity(unrealLogEvent.info.type, selectedVerbosities) ||
+                !(unrealLogEvent.info.category.data in selectedCategories) ||
+                !showTimestamp) {
             foldingModel.runBatchFoldingOperation {
                 if (existingRegion != null) {
                     startOfLineOffset = existingRegion.getStartOffset()
@@ -287,7 +298,10 @@ class UnrealToolWindowFactory(val project: Project)
             foldingModel.runBatchFoldingOperation {
                 val start = existingRegion.getStartOffset()
                 foldingModel.removeFoldRegion(existingRegion)
-                foldingModel.createFoldRegion(start, startOfLineOffset, "", null, true)
+                if (showTimestamp)
+                    foldingModel.createFoldRegion(start, startOfLineOffset, "", null, true)
+                else
+                    foldingModel.createFoldRegion(start, startOfLineOffset + TIME_WIDTH + 1, "", null, true)
             }
         }
     }
