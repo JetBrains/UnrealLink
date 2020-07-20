@@ -129,6 +129,7 @@ class UnrealToolWindowFactory(val project: Project)
                 return@runBatchFoldingOperation
             }
             val doc = UnrealPane.currentConsoleView.editor.document
+            val chars: CharSequence = doc.getCharsSequence()
             val text = UnrealPane.currentConsoleView.editor.document.text
             var index = 0
             var lastOffset = 0
@@ -137,8 +138,8 @@ class UnrealToolWindowFactory(val project: Project)
 
             while (index < text.length) {
                 val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
-                val verbosity = text.substring(index + TIME_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + 2)
-                val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 3, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3)
+                val verbosity = text.substring(index + TIME_WIDTH + 1, index + TIME_WIDTH + VERBOSITY_WIDTH + 1)
+                val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2)
                 if (!(category.trim() in selectedCategories)) {
                     index = lineEndOffset + 1
                     continue
@@ -148,7 +149,7 @@ class UnrealToolWindowFactory(val project: Project)
                     continue
                 }
                 if (!showTimestamp) {
-                    foldingModel.createFoldRegion(lastOffset, index + TIME_WIDTH + 2, "", null, true)
+                    foldingModel.createFoldRegion(lastOffset, index + TIME_WIDTH + 1, "", null, true)
                 } else if (lastOffset != index) {
                     foldingModel.createFoldRegion(lastOffset, index, "", null, true)
                 }
@@ -169,7 +170,9 @@ class UnrealToolWindowFactory(val project: Project)
 
     fun print(s: LogMessageInfo) {
         val consoleView = UnrealPane.currentConsoleView
-        val timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
+        var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
+        if (timeString.length < TIME_WIDTH)
+            timeString = timeString + " ".repeat(TIME_WIDTH - timeString.length)
         consoleView.print(timeString, SYSTEM_OUTPUT)
         printSpaces()
 
@@ -244,7 +247,7 @@ class UnrealToolWindowFactory(val project: Project)
 
         consoleView.flushDeferredText()
         val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
-        var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 4)
+        var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3)
         if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty()) {
             for (range in unrealLogEvent.bpPathRanges) {
                 val match = unrealLogEvent.text.data.substring(range.first, range.last)
