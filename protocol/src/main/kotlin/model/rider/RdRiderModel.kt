@@ -19,7 +19,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         }
     }
 
-    val LinkRequest = structdef("LinkRequest") {
+    private val LinkRequest = structdef("LinkRequest") {
         field("data", FString)
     }
 
@@ -51,6 +51,13 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         +"InGame"
     }
 
+
+    private val EditorPluginOutOfSync = structdef("EditorPluginOutOfSync") {
+        field("installedVersion", string)
+        field("requiredVersion", string)
+        field("status", PluginInstallStatus)
+    }
+
     private val PluginInstallLocation = enum("PluginInstallLocation") {
         +"Engine"
         +"Game"
@@ -77,7 +84,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("isConnectedToUnrealEditor", false).readonly.async
         property("isUnrealEngineSolution", false)
 
-        sink("onEditorModelOutOfSync", PluginInstallStatus)
+        sink("onEditorPluginOutOfSync", EditorPluginOutOfSync)
         source("installEditorPlugin", PluginInstallLocation)
         source("enableAutoupdatePlugin", void)
 

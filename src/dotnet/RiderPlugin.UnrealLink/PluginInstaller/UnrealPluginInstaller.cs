@@ -73,18 +73,25 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var status = PluginInstallStatus.NoPlugin;
             var outOfSync = true;
+            Version installedVersion = new Version();
             if (unrealPluginInstallInfo.Location == PluginInstallLocation.Engine)
             {
                 status = PluginInstallStatus.InEngine;
                 outOfSync = unrealPluginInstallInfo.EnginePlugin.PluginVersion !=
                             myPathsProvider.CurrentPluginVersion;
+                installedVersion = unrealPluginInstallInfo.EnginePlugin.PluginVersion;
             }
 
             if (unrealPluginInstallInfo.Location == PluginInstallLocation.Game)
             {
                 status = PluginInstallStatus.InGame;
                 outOfSync = unrealPluginInstallInfo.ProjectPlugins.Any(description =>
-                    description.PluginVersion != myPathsProvider.CurrentPluginVersion);
+                {
+                    var isNotSynced = description.PluginVersion != myPathsProvider.CurrentPluginVersion;
+                    if(isNotSynced)
+                        installedVersion = description.PluginVersion;
+                    return isNotSynced;
+                });
             }
 
             if (!myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin) ||
@@ -93,7 +100,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 if (outOfSync)
                 {
                     myLogger.Warn("[UnrealLink]: Plugin is out of sync");
-                    myUnrealHost.PerformModelAction(model => model.OnEditorModelOutOfSync(status));
+                    myUnrealHost.PerformModelAction(model => model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(
+                        installedVersion.ToString(), myPathsProvider.CurrentPluginVersion.ToString(), status)));
                 }
 
                 return;

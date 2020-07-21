@@ -20,24 +20,31 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
     }
 
     init {
-        project.solution.rdRiderModel.onEditorModelOutOfSync.adviseNotNull(projectComponentLifetime) {
-            if(it == PluginInstallStatus.UpToDate) return@adviseNotNull
+        project.solution.rdRiderModel.onEditorPluginOutOfSync.adviseNotNull(projectComponentLifetime) {
+            if(it.status == PluginInstallStatus.UpToDate) return@adviseNotNull
 
-            var message = if(it == PluginInstallStatus.NoPlugin)
-                "The RiderLink Unreal Editor plugin is not installed and automatic plugin updates are disabled."
-            else
-                "The RiderLink Unreal Editor plugin is out of date and automatic plugin updates are disabled."
-            message +=  " Advanced Unreal integration features are unavailable until the plugin is updated."
+            val message = if(it.status == PluginInstallStatus.NoPlugin) {
+                "The RiderLink Unreal Editor plugin is not installed." +
+                " Advanced Unreal integration features are unavailable until the plugin is updated."
+            }
+            else {
+                "<html>" +
+                "The RiderLink Unreal Editor plugin is not in sync with UnrealLink Rider plugin." +
+                " Different versions of plugins are not guarantied to work together.<br>" +
+                "Installed version:\t${it.installedVersion}<br>"+
+                "Required version:\t${it.requiredVersion}" +
+                "</html>"
+            }
 
-            val title = if(it == PluginInstallStatus.NoPlugin)
+            val title = if(it.status == PluginInstallStatus.NoPlugin)
                 "RiderLink plugin is required"
             else
-                "RiderLink plugin update is required"
+                "RiderLink plugin synchronization is required"
 
             val notification = Notification(notificationGroupId.displayId, title, message, NotificationType.WARNING)
 
             @Suppress("NON_EXHAUSTIVE_WHEN")
-            when (it) {
+            when (it.status) {
                 PluginInstallStatus.NoPlugin -> {
                     notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginToEngineAction"))
                     notification.addAction(ActionManager.getInstance().getAction("UnrealLink.InstallEditorPluginToGameAction"))
