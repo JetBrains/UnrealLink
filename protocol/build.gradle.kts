@@ -96,9 +96,9 @@ tasks {
     @Suppress("UNUSED_VARIABLE") val generateModel by creating {
         group = "protocol"
         description = "Generates protocol models."
-        dependsOn(generateRiderModel)
-        dependsOn(generateEditorPluginModel)
         dependsOn(generateUE4Lib)
+        dependsOn(generateEditorPluginModel)
+        dependsOn(generateRiderModel)
     }
 
     withType<RdgenTask> {

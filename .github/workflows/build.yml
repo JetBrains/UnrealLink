@@ -37,14 +37,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - name: Hack Generate common model
-      run: gradlew.bat generateUE4Lib
-      shell: cmd
-    - name: Hack Generate Unreal Editor<>Rider model
-      run: gradlew.bat generateEditorPluginModel
-      shell: cmd
-    - name: Hack Clean files in model
-      run: git reset --hard
     - name: Build Plugin
       run: gradlew.bat buildPlugin -PproductVersion=${{ env.major-version }} -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
       shell: cmd
