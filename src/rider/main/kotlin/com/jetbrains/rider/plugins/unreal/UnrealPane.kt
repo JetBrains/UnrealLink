@@ -8,10 +8,12 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.ComboBoxFieldPanel
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.ui.components.ComponentFactories
 import com.jetbrains.rider.model.*
+import com.jetbrains.rider.plugins.unreal.actions.*
 
 import javax.swing.*
 import java.awt.*
@@ -21,8 +23,9 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
     companion object {
         lateinit var currentConsoleView : ConsoleViewImpl
-        val verbosityCombobox: ComboBoxFieldPanel = ComboBoxFieldPanel()
-        val categoryCombobox: ComboBoxFieldPanel = ComboBoxFieldPanel()
+        val verbosityFilterActionGroup: FilterComboAction = FilterComboAction("Verbosity")
+        val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
+        val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
     }
 
     init {
@@ -40,28 +43,21 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
         val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component
 
-        consoleView.scrollTo(0)
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Errors", true))
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Warnings", true))
+        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Messages", true))
+        categoryFilterActionGroup.addItem(FilterCheckboxAction("All", true))
+        val topGroup = DefaultActionGroup().apply {
+            add(verbosityFilterActionGroup)
+            add(categoryFilterActionGroup)
+        }
+        val topToolbar = ActionManager.getInstance().createActionToolbar("", topGroup, true).component
 
         val topPanel = JPanel(HorizontalLayout(0))
+        topPanel.add(topToolbar)
+        topPanel.add(timestampCheckBox)
 
-        verbosityCombobox.createComponent()
-        val comboBox = verbosityCombobox.getComboBox()
-        for (verbosity in VerbosityType.values()) {
-            comboBox.addItem(verbosity.name)
-            if (verbosity.equals(VerbosityType.All)) {
-                break
-            }
-        }
-        verbosityCombobox.setText("All")
-
-        topPanel.add(JLabel("Verbosity"))
-        topPanel.add(verbosityCombobox)
-
-        categoryCombobox.createComponent()
-        categoryCombobox.getComboBox().addItem("All")
-        topPanel.add(JLabel("Category"))
-        topPanel.add(categoryCombobox)
-        topPanel.border = BorderFactory.createEmptyBorder(0, 5, 0, 0)
+        consoleView.scrollTo(0)
 
         consoleView.add(topPanel, BorderLayout.NORTH)
         setContent(consoleView)
