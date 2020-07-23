@@ -16,6 +16,10 @@ public class RD : ModuleRules
 		var Platform = "";
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
+			// TODO: Remove this when RD will hide windows API from its headers
+			// <hack>
+			PublicDefinitions.Add("WIN32_LEAN_AND_MEAN");
+			// </hack>
 			Platform = "Win";
 			switch (Target.WindowsPlatform.Compiler)
 			{
