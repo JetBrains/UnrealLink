@@ -198,11 +198,6 @@ tasks {
             val changeNotes = changelogMatches.toList().map {
                 it.groups[1]!!.value.replace(Regex("/(?s)- /"), "\u2022 ").replace(Regex("/`/"), "").replace(Regex("/,/"), "%2C")
             }.take(1).joinToString("", "", "")
-
-            exec {
-                executable = getByName("findMsBuild").extra["executable"] as String
-                args = listOf("/t:Pack", dotnetSolution.absolutePath, "/v:minimal", "/p:Configuration=$buildConfiguration", "/p:PackageOutputPath=$rootDir/output", "/p:PackageReleaseNotes=$changeNotes", "/p:PackageVersion=$archiveVersion")
-            }
         }
     }
 
