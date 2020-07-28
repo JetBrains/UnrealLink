@@ -4,10 +4,12 @@ on:
   push:
     paths-ignore:
     - README.md
+    - CHANGELOG.md
     branches: [ net202 ]
   pull_request:
     paths-ignore:
     - README.md
+    - CHANGELOG.md
     branches: [ net202 ]
 
 jobs:
