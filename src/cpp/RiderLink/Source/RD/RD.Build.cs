@@ -105,7 +105,7 @@ public class RD : ModuleRules
 
 		foreach(var Item in Paths)
         {
-            PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Toolchain, Item));
+            PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
         }
 	}
 }

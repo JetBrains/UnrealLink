@@ -67,13 +67,13 @@ tasks {
     }
 
     versionsOfRdCpp.forEach {
-        tasks.register<Copy>("unzip-$it") {
+        tasks.register<Copy>("unzip_libs_$it") {
             dependsOn(getRdCpp)
             val toolchain = it
             val outputFile = generateOutputFile(toolchain)
             val destinationDir = File("$riderLinkDir/Source/RD/$toolchain")
             from(zipTree("build/$outputFile")) {
-                include("native/**")
+                include("native/libs/**")
                 eachFile {
                     relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
                 }
@@ -83,10 +83,25 @@ tasks {
         }
     }
 
+    val unzipInclude by creating(Copy::class) {
+        val toolchain = versionsOfRdCpp.get(0)
+        val outputFile = generateOutputFile(toolchain)
+        val destinationDir = File("$riderLinkDir/Source/RD")
+        from(zipTree("build/$outputFile")) {
+            include("native/include/**")
+            eachFile {
+                relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+            }
+            includeEmptyDirs = false
+        }
+        into(destinationDir.absolutePath)
+    }
+
     @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
         dependsOn(patchUpluginVersion)
+        dependsOn(unzipInclude)
         versionsOfRdCpp.forEach {
-            dependsOn("unzip-$it")
+            dependsOn("unzip_libs_$it")
         }
         from("${project.rootDir}/src/cpp/RiderLink") {
             include("RiderLink.uplugin", "Resources/**", "Source/**")
@@ -96,8 +111,9 @@ tasks {
 
     @Suppress("UNUSED_VARIABLE") val symlinkPluginToUnrealProject by creating {
         dependsOn(getUnrealEngineProject)
+        dependsOn(unzipInclude)
         versionsOfRdCpp.forEach {
-            dependsOn("unzip-$it")
+            dependsOn("unzip-libs-$it")
         }
         dependsOn(patchUpluginVersion)
         doLast {
