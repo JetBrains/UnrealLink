@@ -31,11 +31,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Patch CHANGELOG.md
-      run: gradlew patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+      run: gradlew.bat patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+      shell: cmd
     - name: Build Plugin
-      run: gradlew buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true
+      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true
+      shell: cmd
     - name: Create Release Notes file
-      run: gradlew dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+      run: gradlew.bat dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+      shell: cmd
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
