@@ -61,7 +61,7 @@ jobs:
         asset_name: UnrealLink.zip
         asset_content_type: application/zip
     - name: Commit patched CHANGELOG.md
-      run:|
+      run: |
         git add CHANGELOG.md
         git commit -m "Update CHANGELOG.md for Release"
         git push
