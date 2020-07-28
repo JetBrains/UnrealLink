@@ -27,7 +27,13 @@ object RdEditorRoot : Root(
     }
 }
 
+@Suppress("unused")
 object RdEditorModel : Ext(RdEditorRoot) {
+    private val SolutionConfiguration = structdef("SolutionConfiguration") {
+        field("BuildType", string)
+        field("TargetType", string)
+        field("Platform", string)
+    }
     init {
         signal("unrealLog", UnrealLogEvent).async
         property("playMode", int)
@@ -43,5 +49,7 @@ object RdEditorModel : Ext(RdEditorRoot) {
 
         sink("PlayStateFromEditor", UE4Library.PlayState)
         source("PlayStateFromRider", UE4Library.PlayState)
+
+        property("solutionConfiguration", SolutionConfiguration).readonly
     }
 }

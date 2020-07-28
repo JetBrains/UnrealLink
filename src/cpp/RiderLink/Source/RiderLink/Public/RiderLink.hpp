@@ -36,4 +36,8 @@ public:
 	rd::Lifetime CreateNestedLifetime() const { return RdConnection.Scheduler.lifetime.create_nested(); }
 
 	RdConnection RdConnection;
+	
+private:
+	FString GetPlatformName();
+	void InitConfigurationInfo();
 };

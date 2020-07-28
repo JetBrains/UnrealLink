@@ -24,6 +24,10 @@ namespace RiderPlugin.UnrealLink.Settings
         [SettingsEntry(false,
             "If this option is enabled, the RiderLink editor plugin will be automatically updated.")]
         public bool InstallRiderLinkPlugin;
+        
+        [SettingsEntry(true,
+            "Show notification when Hot Reload is not working")]
+        public bool ShowHotReloadNotification;
     }
 
     [OptionsPage(PID, Name, typeof(CppThemedIcons.Unreal), Sequence = 0.02,
@@ -41,6 +45,9 @@ namespace RiderPlugin.UnrealLink.Settings
         {
             AddBoolOption((UnrealLinkSettings k) => k.InstallRiderLinkPlugin,
                 "Automatically update RiderLink plugin for Unreal Editor (recommended)");
+            
+            AddBoolOption((UnrealLinkSettings k) => k.ShowHotReloadNotification,
+                "Show notification when Hot Reload is not working");
             
             SetupInstallButtons();
         }

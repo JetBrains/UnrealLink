@@ -27,6 +27,8 @@ namespace RiderPlugin.UnrealLink
         private readonly UnrealLinkResolver myLinkResolver;
         private readonly EditorNavigator myEditorNavigator;
         private readonly ViewableProperty<RdEditorModel> myEditorModel = new ViewableProperty<RdEditorModel>(null);
+
+        public ViewableProperty<RdEditorModel> EditorModel => myEditorModel;
         
         private bool PlayModeFromUnreal = false;
         private bool PlayModeFromRider = false;

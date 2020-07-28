@@ -2,6 +2,9 @@
 
 #include "RiderLink.hpp"
 
+#include <SolutionConfiguration.Generated.h>
+
+
 #include "Modules/ModuleManager.h"
 
 #if PLATFORM_WINDOWS
@@ -29,10 +32,37 @@ void FRiderLinkModule::ShutdownModule()
   UE_LOG(FLogRiderLinkModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
 
+FString FRiderLinkModule::GetPlatformName()
+{
+  // FString ExecutableName = FPlatformProcess::ExecutableName(true);
+  // int32 Index;
+  // ExecutableName.FindChar('-', Index);
+  // ExecutableName = ExecutableName.RightChop(Index+1);
+  // ExecutableName.FindChar('-', Index);
+  return "";
+}
+
+void FRiderLinkModule::InitConfigurationInfo()
+{
+  // const EBuildConfiguration BuildConfiguration = FApp::GetBuildConfiguration();
+  // const EBuildTargetType BuildTargetType = FApp::GetBuildTargetType();
+  // const FString PlatformName = GetPlatformName();
+  //
+  // Jetbrains::EditorPlugin::SolutionConfiguration SolutionConfiguration{
+  //   LexToString(BuildConfiguration),
+  //   LexToString(BuildTargetType),
+  //   *PlatformName
+  // };
+  //
+  // RdConnection.UnrealToBackendModel.get_solutionConfiguration().set(SolutionConfiguration);
+}
+
 void FRiderLinkModule::StartupModule()
 {
   UE_LOG(FLogRiderLinkModule, Verbose, TEXT("STARTUP START"));
   RdConnection.Init();
+
+  InitConfigurationInfo();
   UE_LOG(FLogRiderLinkModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
