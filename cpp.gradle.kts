@@ -114,7 +114,7 @@ tasks {
         dependsOn(getUnrealEngineProject)
         dependsOn(unzipInclude)
         versionsOfRdCpp.forEach {
-            dependsOn("unzip-libs-$it")
+            dependsOn("unzip_libs_$it")
         }
         dependsOn(patchUpluginVersion)
         doLast {
