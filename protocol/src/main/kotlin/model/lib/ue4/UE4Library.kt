@@ -11,7 +11,7 @@ import java.io.File
 
 object UE4Library : Root(
         CSharp50Generator(FlowTransform.AsIs, "JetBrains.Unreal.Lib", File(syspropertyOrInvalid("model.out.src.lib.ue4.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatedFileSuffix = ""),
+        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatePrecompiledHeaders = false),
         Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
 ) {
     init {

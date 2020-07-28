@@ -2,9 +2,9 @@
 
 #include "RiderLink.hpp"
 #include "BlueprintProvider.hpp"
-#include "RdEditorProtocol/UE4Library/LogMessageInfo.h"
-#include "RdEditorProtocol/UE4Library/StringRange.h"
-#include "RdEditorProtocol/UE4Library/UnrealLogEvent.h"
+#include "RdEditorProtocol/UE4Library/LogMessageInfo.Generated.h"
+#include "RdEditorProtocol/UE4Library/StringRange.Generated.h"
+#include "RdEditorProtocol/UE4Library/UnrealLogEvent.Generated.h"
 
 #include "Internationalization/Regex.h"
 #include "Misc/DateTime.h"

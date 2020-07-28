@@ -1,7 +1,7 @@
 #include "RdConnection.hpp"
 
 #include "ProtocolFactory.h"
-#include "RdEditorProtocol/UE4Library/UE4Library.h"
+#include "RdEditorProtocol/UE4Library/UE4Library.Generated.h"
 
 RdConnection::RdConnection():
     SocketLifetimeDef{rd::Lifetime::Eternal()}

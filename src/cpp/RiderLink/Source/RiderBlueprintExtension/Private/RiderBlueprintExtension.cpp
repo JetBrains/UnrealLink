@@ -6,7 +6,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/PreWindowsApi.h"
 
-#include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
+#include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/PostWindowsApi.h"

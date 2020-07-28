@@ -9,7 +9,7 @@
 
 #include "rd_framework_cpp/base/IProtocol.h"
 #include "rd_framework_cpp/scheduler/SingleThreadScheduler.h"
-#include "RdEditorProtocol/RdEditorModel/RdEditorModel.h"
+#include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 #include "Windows/PostWindowsApi.h"
 // ReSharper disable once CppUnusedIncludeDirective
