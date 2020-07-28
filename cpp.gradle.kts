@@ -84,6 +84,7 @@ tasks {
     }
 
     val unzipInclude by creating(Copy::class) {
+        dependsOn(getRdCpp)
         val toolchain = versionsOfRdCpp.get(0)
         val outputFile = generateOutputFile(toolchain)
         val destinationDir = File("$riderLinkDir/Source/RD")
