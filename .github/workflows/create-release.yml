@@ -30,10 +30,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build Plugin
-      run: gradlew buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release
     - name: Patch CHANGELOG.md
       run: gradlew patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+    - name: Build Plugin
+      run: gradlew buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true
     - name: Create Release Notes file
       run: gradlew dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
     - name: Create Release

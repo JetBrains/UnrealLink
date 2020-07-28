@@ -255,12 +255,16 @@ intellij {
     instrumentCode = false
     downloadSources = false
     tasks.withType<PatchPluginXmlTask> {
+        val changelogProject = if (properties["isReleaseBuild"].toString().toBoolean())
+            changelog.get(project.version as String)
+        else
+            changelog.getUnreleased()
         changeNotes(closure {
         """
             <body>
             <p><b>New in "${project.version}"</b></p>
             <p>
-            ${changelog.get(project.version as String).toHTML()}
+            ${changelogProject.toHTML()}
             </p>
             <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
