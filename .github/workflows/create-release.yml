@@ -31,8 +31,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release
-      shell: cmd
+      run: gradlew buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release
+    - name: Patch CHANGELOG.md
+      run: gradlew patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
+    - name: Create Release Notes file
+      run: gradlew dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -41,9 +44,8 @@ jobs:
       with:
         tag_name: v${{ github.event.inputs.release-major-version }}.${{ github.event.inputs.release-minor-version }}
         release_name: Release ${{ github.event.inputs.release-major-version }}.${{ github.event.inputs.release-minor-version }}
-        body: |
-          TODO: add changelist for release
-        draft: true
+        body_path: release_notes.md
+        draft: false
         prerelease: false
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -55,3 +57,12 @@ jobs:
         asset_path: ./output/UnrealLink-${{ github.event.inputs.release-major-version }}.${{ github.event.inputs.release-minor-version }}.zip
         asset_name: UnrealLink.zip
         asset_content_type: application/zip
+    - name: Commit patched CHANGELOG.md
+      uses: github-actions-x/commit@v2.6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        push-branch: 'net202'
+        commit-message: 'Update CHANGELOG.md'
+        force-add: 'true'
+        files: CHANGELOG.md
+        name: GH Release Action
