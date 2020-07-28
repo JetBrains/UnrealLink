@@ -32,3 +32,6 @@ src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol
 src/cpp/RiderLink/RiderLink.uplugin
 src/cpp/RiderLink/Source/RD
 !src/cpp/RiderLink/Source/RD/RD.Build.cs
+
+# Tmp release files
+release_notes.md

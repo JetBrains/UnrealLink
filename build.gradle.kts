@@ -1,4 +1,5 @@
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
@@ -23,6 +24,7 @@ buildscript {
 }
 
 plugins {
+    id("org.jetbrains.changelog") version "0.4.0"
     id("org.jetbrains.intellij") version "0.4.21"
     kotlin("jvm") version "1.3.72"
 }
@@ -181,6 +183,17 @@ tasks {
 
     }
 
+    @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
+        doLast {
+            File("release_notes.md").writeText(
+"""## New in ${project.version}
+${changelog.get(project.version as String)}
+
+See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md) for more details and history.
+""".trimIndent())
+        }
+    }
+
     @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(compileDotNet)
         outputs.upToDateWhen { false }
@@ -192,12 +205,6 @@ tasks {
                 from("$buildDir/distributions/${rootProject.name}-${project.version}.zip")
                 into("$rootDir/output")
             }
-
-            val changelogText = File("$repoRoot/CHANGELOG.md").readText()
-            val changelogMatches = Regex("/(?s)(-.+?)(?=##|$)/").findAll(changelogText)
-            val changeNotes = changelogMatches.toList().map {
-                it.groups[1]!!.value.replace(Regex("/(?s)- /"), "\u2022 ").replace(Regex("/`/"), "").replace(Regex("/,/"), "%2C")
-            }.take(1).joinToString("", "", "")
         }
     }
 
@@ -236,6 +243,10 @@ tasks {
     }
 }
 
+changelog {
+    groups = listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues")
+    keepUnreleasedSection = true
+}
 
 intellij {
     type = "RD"
@@ -243,7 +254,19 @@ intellij {
 
     instrumentCode = false
     downloadSources = false
-    tasks.withType<PatchPluginXmlTask> {}
+    tasks.withType<PatchPluginXmlTask> {
+        changeNotes(closure {
+        """
+            <body>
+            <p><b>New in "${project.version}"</b></p>
+            <p>
+            ${changelog.get(project.version as String).toHTML()}
+            </p>
+            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
+            </body>
+        """.trimIndent()
+        })
+    }
 }
 
 
