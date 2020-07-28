@@ -16,10 +16,6 @@ public class RD : ModuleRules
 		var Platform = "";
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			// TODO: Remove this when RD will hide windows API from its headers
-			// <hack>
-			PublicDefinitions.Add("WIN32_LEAN_AND_MEAN");
-			// </hack>
 			Platform = "Win";
 			switch (Target.WindowsPlatform.Compiler)
 			{
@@ -66,18 +62,21 @@ public class RD : ModuleRules
         string[] Libs = {
             "rd_framework_cpp.lib",
             "clsocket.lib",
-            "rd_core_cpp.lib"
+            "rd_core_cpp.lib",
+            "spdlog.lib"
         };
         foreach (string Lib in Libs)
         {
             PublicAdditionalLibraries.Add(Path.Combine(LibFolder, Lib));
         }
+        
+        // Common dependencies
+        PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
 
         string[] Paths = {
             "include",
             "include/rd_core_cpp",
             "include/rd_framework_cpp",
-            "include/thirdparty",
             "include/rd_core_cpp/lifetime",
             "include/rd_core_cpp/reactive",
             "include/rd_core_cpp/std",
@@ -94,6 +93,7 @@ public class RD : ModuleRules
             "include/rd_framework_cpp/util",
             "include/rd_framework_cpp/wire",
             "include/rd_framework_cpp/scheduler/base",
+            "include/thirdparty",
             "include/thirdparty/clsocket",
             "include/thirdparty/mpark",
             "include/thirdparty/nonstd",
