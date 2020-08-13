@@ -10,6 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2020.2.61]
+### Added
 - Unreal log filters
   - Verbosity
   - Category
