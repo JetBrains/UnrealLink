@@ -66,6 +66,8 @@ jobs:
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
     - name: Commit patched CHANGELOG.md
+      # [TODO]: Fix error code failure even though commit is successful
+      continue-on-error: true
       run: |
         git add CHANGELOG.md
         git commit -m "Update CHANGELOG.md for Release"
