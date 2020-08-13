@@ -15,13 +15,19 @@ The plugin is always bundled with Rider.
   - Category
   - Show/hide timestamps
 ### Changed
+- Generated files for RD protocol will have ".Generated.h" suffix
 
 ### Deprecated
 
 ### Removed
+- Packing plugin for ReSharper
+  - Not supported yet
 
 ### Fixed
 - Fixed: building RiderLink with Unity build disabled
+- Fixed: Wording in "Install RiderLink" popup
+- Fixed: Wording in UnrealEngine settings
+  - No more auto-install plugin, only auto-update plugin
 
 ### Known Issues
 
