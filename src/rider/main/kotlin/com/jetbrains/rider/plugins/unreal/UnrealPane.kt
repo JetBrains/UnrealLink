@@ -1,22 +1,24 @@
 package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.execution.impl.ConsoleViewImpl
+import com.intellij.find.SearchReplaceComponent
 import com.intellij.ide.actions.NextOccurenceToolbarAction
 import com.intellij.ide.actions.PreviousOccurenceToolbarAction
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import com.intellij.ui.ComboBoxFieldPanel
+import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.panels.HorizontalLayout
+import com.intellij.ui.components.panels.NonOpaquePanel
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
+import com.jetbrains.rider.plugins.unreal.actions.FilterComboAction
+import com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory
 import com.jetbrains.rider.ui.components.ComponentFactories
-import com.jetbrains.rider.model.*
-import com.jetbrains.rider.plugins.unreal.actions.*
-
-import javax.swing.*
-import java.awt.*
+import java.awt.BorderLayout
+import javax.swing.JPanel
 
 class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     private val consoleView: ConsoleViewImpl = ComponentFactories.getConsoleView(project, lifetime)
@@ -26,6 +28,7 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         val verbosityFilterActionGroup: FilterComboAction = FilterComboAction("Verbosity")
         val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
         val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
+        lateinit var filter: SearchReplaceComponent
     }
 
     init {
@@ -55,6 +58,20 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
 
         val topPanel = JPanel(HorizontalLayout(0))
         topPanel.add(topToolbar)
+
+        filter = SearchReplaceComponent.buildFor(project, consoleView.editor.contentComponent).withDataProvider(consoleView).build()
+        for (component in filter.components) {
+            if (component is OnePixelSplitter) {
+                for (innerComponent in component.components) {
+                    if (innerComponent is NonOpaquePanel || innerComponent !is JPanel) {
+                        component.remove(innerComponent)
+                    }
+                }
+                break
+            }
+        }
+
+        topPanel.add(filter)
         topPanel.add(timestampCheckBox)
 
         consoleView.scrollTo(0)
@@ -62,5 +79,7 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         consoleView.add(topPanel, BorderLayout.NORTH)
         setContent(consoleView)
         setToolbar(toolbar)
+
+        UnrealToolWindowFactory.getInstance(project).onUnrealPaneCreated()
     }
 }

@@ -1,10 +1,14 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.execution.ui.ConsoleViewContentType.*
+import com.intellij.find.SearchReplaceComponent
 import com.intellij.ide.impl.ContentManagerWatcher
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.impl.DocumentMarkupModel
 import com.intellij.openapi.editor.impl.FoldingModelImpl
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -13,18 +17,16 @@ import com.intellij.util.DocumentUtil
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
+import com.jetbrains.rdclient.daemon.util.attributeKey
 import com.jetbrains.rider.model.*
-import com.jetbrains.rider.plugins.unreal.actions.*
 import com.jetbrains.rider.plugins.unreal.UnrealPane
+import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
-
-import java.awt.event.ItemEvent
-import java.awt.event.ItemListener
 
 class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
@@ -47,10 +49,14 @@ class UnrealToolWindowFactory(val project: Project)
         toolWindow.title = "unreal"
         toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
-        UnrealPane.categoryFilterActionGroup.addItemListener({
+        return toolWindow
+    }
+
+    fun onUnrealPaneCreated() {
+        UnrealPane.categoryFilterActionGroup.addItemListener {
             val selected = UnrealPane.categoryFilterActionGroup.selected()
             if (allCetegoriesSelected) {
-                if (!("All" in selected)) {
+                if ("All" !in selected) {
                     UnrealPane.categoryFilterActionGroup.selectAll(false)
                     allCetegoriesSelected = false
                 } else if (selected.size != UnrealPane.categoryFilterActionGroup.items().size) {
@@ -77,17 +83,28 @@ class UnrealToolWindowFactory(val project: Project)
                 }
             }
             filter()
-        })
+        }
 
-        UnrealPane.verbosityFilterActionGroup.addItemListener({
-            filter()
-        })
-
-        UnrealPane.timestampCheckBox.addChangeListener { event ->
+        UnrealPane.verbosityFilterActionGroup.addItemListener {
             filter()
         }
 
-        return toolWindow
+        UnrealPane.timestampCheckBox.addChangeListener {
+            filter()
+        }
+
+        UnrealPane.filter.addListener(object : SearchReplaceComponent.Listener {
+            override fun searchFieldDocumentChanged() {
+                filter()
+            }
+
+            override fun replaceFieldDocumentChanged() {
+            }
+
+            override fun multilineStateChanged() {
+            }
+
+        })
     }
 
     private fun isMatchingVerbosity(valueToCheck: VerbosityType, currentList: List<String>): Boolean {
@@ -120,27 +137,40 @@ class UnrealToolWindowFactory(val project: Project)
     private fun filter() {
         val foldingModel = UnrealPane.currentConsoleView.editor.foldingModel as FoldingModelImpl
         foldingModel.runBatchFoldingOperation {
-            for (region in foldingModel.getAllFoldRegions()) {
+            for (region in foldingModel.allFoldRegions) {
                 foldingModel.removeFoldRegion(region)
             }
+            val markupModel = DocumentMarkupModel.forDocument(UnrealPane.currentConsoleView.editor.document, project, false)
+            val allHighlighters = markupModel.allHighlighters
+            for (highlighter in allHighlighters) {
+                if (highlighter.attributeKey == EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES) {
+                    markupModel.removeHighlighter(highlighter)
+                }
+            }
+
             val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
             val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
-            if ("All" in selectedCategories && selectedVerbosities.size == 3 && UnrealPane.timestampCheckBox.isSelected()) {
+            val filterText = UnrealPane.filter.searchTextComponent.text
+            if ("All" in selectedCategories && selectedVerbosities.size == 3 && UnrealPane.timestampCheckBox.isSelected && filterText.isEmpty()) {
                 return@runBatchFoldingOperation
             }
             val doc = UnrealPane.currentConsoleView.editor.document
-            val chars: CharSequence = doc.getCharsSequence()
             val text = UnrealPane.currentConsoleView.editor.document.text
             var index = 0
             var lastOffset = 0
 
-            val showTimestamp = UnrealPane.timestampCheckBox.isSelected()
+            val showTimestamp = UnrealPane.timestampCheckBox.isSelected
 
             while (index < text.length) {
                 val lineEndOffset = DocumentUtil.getLineEndOffset(index, doc)
                 val verbosity = text.substring(index + TIME_WIDTH + 1, index + TIME_WIDTH + VERBOSITY_WIDTH + 1)
                 val category = text.substring(index + TIME_WIDTH + VERBOSITY_WIDTH + 2, index + TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2)
-                if (!(category.trim() in selectedCategories)) {
+
+                if (!text.substring(index, lineEndOffset).contains(filterText)) {
+                    index = lineEndOffset + 1
+                    continue
+                }
+                if (category.trim() !in selectedCategories) {
                     index = lineEndOffset + 1
                     continue
                 }
@@ -153,12 +183,19 @@ class UnrealToolWindowFactory(val project: Project)
                 } else if (lastOffset != index) {
                     foldingModel.createFoldRegion(lastOffset, index, "", null, true)
                 }
+                if (filterText.isNotEmpty()) {
+                    val filterOffset = UnrealPane.currentConsoleView.text.substring(lastOffset, lineEndOffset).indexOf(filterText) + lastOffset
+                    markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, filterOffset,
+                            filterOffset + filterText.length, HighlighterLayer.ELEMENT_UNDER_CARET,
+                            HighlighterTargetArea.EXACT_RANGE)
+                }
+
                 lastOffset = lineEndOffset + 1
                 index = lastOffset
             }
             if (lastOffset < text.length) {
                 val region = foldingModel.createFoldRegion(lastOffset, text.length, "", null, true)
-                region!!.setExpanded(false)
+                region!!.isExpanded = false
             }
         }
     }
@@ -172,7 +209,7 @@ class UnrealToolWindowFactory(val project: Project)
         val consoleView = UnrealPane.currentConsoleView
         var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
         if (timeString.length < TIME_WIDTH)
-            timeString = timeString + " ".repeat(TIME_WIDTH - timeString.length)
+            timeString += " ".repeat(TIME_WIDTH - timeString.length)
         consoleView.print(timeString, SYSTEM_OUTPUT)
         printSpaces()
 
@@ -248,7 +285,7 @@ class UnrealToolWindowFactory(val project: Project)
         consoleView.flushDeferredText()
         val startOffset = consoleView.contentSize - unrealLogEvent.text.data.length
         var startOfLineOffset = startOffset - (TIME_WIDTH + VERBOSITY_WIDTH + CATEGORY_WIDTH + 3)
-        if (!unrealLogEvent.bpPathRanges.isEmpty() || !unrealLogEvent.methodRanges.isEmpty()) {
+        if (unrealLogEvent.bpPathRanges.isNotEmpty() || unrealLogEvent.methodRanges.isNotEmpty()) {
             for (range in unrealLogEvent.bpPathRanges) {
                 val match = unrealLogEvent.text.data.substring(range.first, range.last)
                 val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
@@ -284,27 +321,45 @@ class UnrealToolWindowFactory(val project: Project)
 
         val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
         val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
-        val showTimestamp = UnrealPane.timestampCheckBox.isSelected()
+        val filterText = UnrealPane.filter.searchTextComponent.text
+        val showTimestamp = UnrealPane.timestampCheckBox.isSelected
+
+        val filterTextMatches = filterText.isEmpty() ||
+                consoleView.text.substring(startOfLineOffset, consoleView.contentSize).contains(filterText)
+
         if (!isMatchingVerbosity(unrealLogEvent.info.type, selectedVerbosities) ||
-                !(unrealLogEvent.info.category.data in selectedCategories) ||
-                !showTimestamp) {
+                unrealLogEvent.info.category.data !in selectedCategories ||
+                !filterTextMatches) {
             foldingModel.runBatchFoldingOperation {
                 if (existingRegion != null) {
-                    startOfLineOffset = existingRegion.getStartOffset()
+                    startOfLineOffset = existingRegion.startOffset
                     foldingModel.removeFoldRegion(existingRegion)
                 }
                 foldingModel.createFoldRegion(startOfLineOffset, consoleView.contentSize, "", null, true)
             }
         }
-        else if (existingRegion != null) {
+        else {
             // expand region to cover the whole line with EOL
             foldingModel.runBatchFoldingOperation {
-                val start = existingRegion.getStartOffset()
-                foldingModel.removeFoldRegion(existingRegion)
-                if (showTimestamp)
-                    foldingModel.createFoldRegion(start, startOfLineOffset, "", null, true)
-                else
+                var start = startOfLineOffset
+                if (existingRegion != null) {
+                    start = existingRegion.startOffset
+                    foldingModel.removeFoldRegion(existingRegion)
+                }
+                if (showTimestamp) {
+                    if (start != startOfLineOffset)
+                        foldingModel.createFoldRegion(start, startOfLineOffset, "", null, true)
+                } else {
                     foldingModel.createFoldRegion(start, startOfLineOffset + TIME_WIDTH + 1, "", null, true)
+                }
+
+                if (filterText.isNotEmpty()) {
+                    val markupModel = DocumentMarkupModel.forDocument(consoleView.editor.document, project, false)
+                    val filterOffset = consoleView.text.substring(startOfLineOffset, consoleView.contentSize).indexOf(filterText) + startOfLineOffset
+                    markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, filterOffset,
+                            filterOffset + filterText.length, HighlighterLayer.ELEMENT_UNDER_CARET,
+                            HighlighterTargetArea.EXACT_RANGE)
+                }
             }
         }
     }
