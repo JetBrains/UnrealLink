@@ -72,6 +72,7 @@ public class RD : ModuleRules
         
         // Common dependencies
         PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
+		PublicDefinitions.Add("nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
 
         string[] Paths = {
             "include",
