@@ -6,6 +6,7 @@
 #include "BlueprintEditor.h"
 #include "MessageEndpointBuilder.h"
 #include "MessageEndpoint.h"
+#include "Kismet2/KismetEditorUtilities.h"
 #include "Toolkits/AssetEditorManager.h"
 
 #include "Runtime/Launch/Resources/Version.h"
@@ -34,15 +35,26 @@ bool BluePrintProvider::IsBlueprint(FString const& pathName) {
     return FPackageName::IsValidObjectPath(pathName);
 }
 
-void BluePrintProvider::OpenBlueprint(FString const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
+void BluePrintProvider::OpenBlueprint(FString const& AssetPathName, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
     // Just to create asset manager if it wasn't created already
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
     FAssetEditorManager::Get();
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
 #else
-    AsyncTask(ENamedThreads::GameThread, [path]()
+    AsyncTask(ENamedThreads::GameThread, [AssetPathName]()
     {
-        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(path);
+        // An asset needs loading
+        UPackage* Package = LoadPackage(nullptr, *AssetPathName, LOAD_NoRedirects);
+
+        if (Package)
+        {
+            Package->FullyLoad();
+
+            FString AssetName = FPaths::GetBaseFilename(AssetPathName);
+            UObject* Object = FindObject<UObject>(Package, *AssetName);
+            if(Object != nullptr)
+                FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(Object);
+        }
     });
 #endif
 }
