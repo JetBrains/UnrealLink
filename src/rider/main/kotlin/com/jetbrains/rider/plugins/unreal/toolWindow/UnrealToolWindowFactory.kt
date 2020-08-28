@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.impl.DocumentMarkupModel
 import com.intellij.openapi.editor.impl.FoldingModelImpl
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -40,6 +41,7 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     var allCetegoriesSelected: Boolean = true
+    var rangeHighlighters: ArrayList<RangeHighlighter> = arrayListOf()
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
@@ -141,12 +143,10 @@ class UnrealToolWindowFactory(val project: Project)
                 foldingModel.removeFoldRegion(region)
             }
             val markupModel = DocumentMarkupModel.forDocument(UnrealPane.currentConsoleView.editor.document, project, false)
-            val allHighlighters = markupModel.allHighlighters
-            for (highlighter in allHighlighters) {
-                if (highlighter.attributeKey == EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES) {
-                    markupModel.removeHighlighter(highlighter)
-                }
+            for (highlighter in rangeHighlighters) {
+                markupModel.removeHighlighter(highlighter)
             }
+            rangeHighlighters.clear()
 
             val selectedCategories = UnrealPane.categoryFilterActionGroup.selected()
             val selectedVerbosities = UnrealPane.verbosityFilterActionGroup.selected()
@@ -184,10 +184,14 @@ class UnrealToolWindowFactory(val project: Project)
                     foldingModel.createFoldRegion(lastOffset, index, "", null, true)
                 }
                 if (filterText.isNotEmpty()) {
-                    val filterOffset = UnrealPane.currentConsoleView.text.substring(lastOffset, lineEndOffset).indexOf(filterText) + lastOffset
-                    markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, filterOffset,
-                            filterOffset + filterText.length, HighlighterLayer.ELEMENT_UNDER_CARET,
-                            HighlighterTargetArea.EXACT_RANGE)
+                    val line = UnrealPane.currentConsoleView.text.substring(lastOffset, lineEndOffset)
+                    var filterOffset = line.indexOf(filterText)
+                    while (filterOffset != -1) {
+                        rangeHighlighters.add(markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, lastOffset + filterOffset,
+                                lastOffset + filterOffset + filterText.length, HighlighterLayer.ELEMENT_UNDER_CARET,
+                                HighlighterTargetArea.EXACT_RANGE))
+                        filterOffset = line.indexOf(filterText, filterOffset + filterText.length)
+                    }
                 }
 
                 lastOffset = lineEndOffset + 1
@@ -355,10 +359,14 @@ class UnrealToolWindowFactory(val project: Project)
 
                 if (filterText.isNotEmpty()) {
                     val markupModel = DocumentMarkupModel.forDocument(consoleView.editor.document, project, false)
-                    val filterOffset = consoleView.text.substring(startOfLineOffset, consoleView.contentSize).indexOf(filterText) + startOfLineOffset
-                    markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, filterOffset,
-                            filterOffset + filterText.length, HighlighterLayer.ELEMENT_UNDER_CARET,
-                            HighlighterTargetArea.EXACT_RANGE)
+                    val line = consoleView.text.substring(startOfLineOffset, consoleView.contentSize)
+                    var filterOffset = line.indexOf(filterText)
+                    while (filterOffset != -1) {
+                        rangeHighlighters.add(markupModel.addRangeHighlighter(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES,
+                                startOfLineOffset + filterOffset, startOfLineOffset + filterOffset + filterText.length,
+                                HighlighterLayer.ELEMENT_UNDER_CARET, HighlighterTargetArea.EXACT_RANGE))
+                        filterOffset = line.indexOf(filterText, filterOffset + filterText.length)
+                    }
                 }
             }
         }
