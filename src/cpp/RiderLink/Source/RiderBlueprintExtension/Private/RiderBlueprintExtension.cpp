@@ -72,6 +72,8 @@ void FRiderBlueprintExtensionModule::StartupModule()
             AllowSetForeGroundForEditor(UnrealToBackendModel);
 
             auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+            if(!Window.IsValid()) return;
+
             if (Window->IsWindowMinimized()) {
                 Window->Restore();
             } else {
