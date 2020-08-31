@@ -253,7 +253,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             progressProperty.Value = buildProgress + BUILD_STEP;
 
-            if (!PatchEnabledByDefaultOfUpluginFile(pluginBuildOutput))
+            if (!PatchUpluginFileAfterInstallation(pluginBuildOutput))
             {
                 const string failedToPatch = "Failed to build RiderLink plugin";
                 var failedPatchText = "<html>" +
@@ -282,7 +282,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private bool PatchEnabledByDefaultOfUpluginFile(FileSystemPath pluginBuildOutput)
+        private bool PatchUpluginFileAfterInstallation(FileSystemPath pluginBuildOutput)
         {
             var upluginFile = pluginBuildOutput / "RiderLink.uplugin";
             if (!upluginFile.ExistsFile) return false;
@@ -297,6 +297,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     return false;
                 }
                 jsonObject["EnabledByDefault"] = true;
+                jsonObject["Installed"] = false;
                 File.WriteAllText(upluginFile.FullPath, jsonObject.ToString());
             }
             catch (Exception e)
