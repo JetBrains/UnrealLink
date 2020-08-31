@@ -18,6 +18,18 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+
+### Known Issues
+## [2020.2.67]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Fix showing popup "update project file" after installing RiderLink
   - After pressing "update project file", it'd update {GameProject}.uproject file, adding reference to RiderLink. This is not necessary for RiderLink to work properly, but it'll break project for people that will sink to {GameProject}.uproject, but who doesn't have RiderLink installed
 
