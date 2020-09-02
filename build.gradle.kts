@@ -255,7 +255,18 @@ intellij {
     instrumentCode = false
     downloadSources = false
     tasks.withType<PatchPluginXmlTask> {
-        val changelogProject = if (properties["isReleaseBuild"].toString().toBoolean())
+        val isReleaseBuild = properties["isReleaseBuild"].toString().toBoolean()
+
+        if(isReleaseBuild) {
+            val sinceVersion = properties["riderVersionSince"] as String?
+            if(sinceVersion != null && sinceVersion.isNotEmpty())
+                sinceBuild(sinceVersion)
+            val untilVersion = properties["riderVersionUntil"] as String?
+            if(untilVersion != null && untilVersion.isNotEmpty())
+                untilBuild(untilVersion)
+        }
+
+        val changelogProject = if (isReleaseBuild)
             changelog.get(project.version as String)
         else
             changelog.getUnreleased()
