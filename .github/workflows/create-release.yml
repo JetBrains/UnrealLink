@@ -11,12 +11,8 @@ on:
         description: 'Minor version of release (e.g. 55)'     
         required: true
 
-      rider-version-since:
+      rider-sdk-version:
         description: 'Set earliest version of SDK that plugin compatible with (e.g. 202.6397).'
-        required: true
-
-      rider-version-until:
-        description: 'Set latest version of SDK that plugin compatible with. Usually use the same as "since" version (e.g. 202.6397).'
         required: true
 
 jobs:
@@ -42,7 +38,7 @@ jobs:
       run: gradlew.bat patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
       shell: cmd
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true -PriderVersionSince=${{ github.event.inputs.rider-version-since }} -PriderVersionUntil=${{ github.event.inputs.rider-version-until }}
+      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true -PriderSdkVersion=${{ github.event.inputs.rider-sdk-version }}
       shell: cmd
     - name: Create Release Notes file
       run: gradlew.bat dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}

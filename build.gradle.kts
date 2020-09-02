@@ -258,16 +258,15 @@ intellij {
         val isReleaseBuild = properties["isReleaseBuild"].toString().toBoolean()
 
         if(isReleaseBuild) {
-            val sinceVersion = properties["riderVersionSince"] as String?
-            if(sinceVersion != null && sinceVersion.isNotEmpty())
-                sinceBuild(sinceVersion)
-            val untilVersion = properties["riderVersionUntil"] as String?
-            if(untilVersion != null && untilVersion.isNotEmpty())
-                untilBuild(untilVersion)
+            val riderSdkVersion = properties["riderSdkVersion"] as String?
+            if(riderSdkVersion != null && riderSdkVersion.isNotEmpty()) {
+                sinceBuild(riderSdkVersion)
+                untilBuild("$riderSdkVersion.*")
+            }
         }
 
         val changelogProject = if (isReleaseBuild)
-            changelog.get(project.version as String)
+            changelog.getLatest()
         else
             changelog.getUnreleased()
         changeNotes(closure {
