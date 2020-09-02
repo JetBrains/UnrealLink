@@ -39,7 +39,7 @@ void BluePrintProvider::OpenBlueprint(FString const& AssetPathName, TSharedPtr<F
     // Just to create asset manager if it wasn't created already
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
     FAssetEditorManager::Get();
-    messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(path), EMessageScope::Process);
+    messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(AssetPathName), EMessageScope::Process);
 #else
     AsyncTask(ENamedThreads::GameThread, [AssetPathName]()
     {
