@@ -21,7 +21,6 @@ class UnrealToolWindowManager(project: Project,
 
         host.model.unrealLog.advise(componentLifetime) { event ->
             unrealToolWindowContextFactory.print(event)
-            unrealToolWindowContextFactory.flush()
         }
     }
 }
