@@ -1,6 +1,5 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow
 
-import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType.*
 import com.intellij.ide.impl.ContentManagerWatcher
 import com.intellij.openapi.components.service
@@ -33,6 +32,7 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     var allCategoriesSelected: Boolean = true
+    var timeIsShown: Boolean = false
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
@@ -78,9 +78,11 @@ class UnrealToolWindowFactory(val project: Project)
             filter()
         }
 
-        UnrealPane.timestampCheckBox.addChangeListener { event ->
-            val showTimestamp = UnrealPane.timestampCheckBox.isSelected
-            UnrealPane.currentTimeConsoleView.isVisible = showTimestamp
+        UnrealPane.timestampCheckBox.addChangeListener {
+            if (timeIsShown != UnrealPane.timestampCheckBox.isSelected) {
+                filter()
+                timeIsShown = !timeIsShown
+            }
         }
 
         return toolWindow
@@ -91,7 +93,7 @@ class UnrealToolWindowFactory(val project: Project)
             return false
         }
 
-        if (valueToCheck.compareTo(VerbosityType.Error) <= 0)
+        if (valueToCheck <= VerbosityType.Error)
             return "Errors" in currentList
         if (valueToCheck == VerbosityType.Warning)
             return "Warnings" in currentList
@@ -105,7 +107,7 @@ class UnrealToolWindowFactory(val project: Project)
         }
 
         val value = VerbosityType.valueOf(valueToCheck)
-        if (value.compareTo(VerbosityType.Error) <= 0)
+        if (value <= VerbosityType.Error)
             return "Errors" in currentList
         if (value == VerbosityType.Warning)
             return "Warnings" in currentList
@@ -125,29 +127,31 @@ class UnrealToolWindowFactory(val project: Project)
         for (logEvent in UnrealPane.logData) {
             if (printImpl(logEvent)) {
                 UnrealPane.logSize += VERBOSITY_WIDTH + CATEGORY_WIDTH + logEvent.text.data.length + 3
+                if (UnrealPane.timestampCheckBox.isSelected) {
+                    UnrealPane.logSize += TIME_WIDTH + 1
+                }
                 println()
             }
         }
         // Flush not to show an empty window for some msecs
         UnrealPane.currentConsoleView.flushDeferredText()
-        UnrealPane.currentTimeConsoleView.flushDeferredText()
-
         UnrealPane.currentConsoleView.editor.scrollingModel.scrollVertically(currentScroll)
     }
 
-    private fun printSpaces(n: Int = 1, consoleView: ConsoleViewImpl = UnrealPane.currentConsoleView) {
-        consoleView.print(" ".repeat(n), NORMAL_OUTPUT)
+    private fun printSpaces(n: Int = 1) {
+        UnrealPane.currentConsoleView.print(" ".repeat(n), NORMAL_OUTPUT)
     }
 
     fun print(s: LogMessageInfo) {
-        var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
-        if (timeString.length < TIME_WIDTH)
-            timeString += " ".repeat(TIME_WIDTH - timeString.length)
-
-        UnrealPane.currentTimeConsoleView.print(timeString, SYSTEM_OUTPUT)
-        UnrealPane.currentTimeConsoleView.print(eol, NORMAL_OUTPUT)
-
         val consoleView = UnrealPane.currentConsoleView
+
+        if (UnrealPane.timestampCheckBox.isSelected) {
+            var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
+            if (timeString.length < TIME_WIDTH)
+                timeString += " ".repeat(TIME_WIDTH - timeString.length)
+            consoleView.print(timeString, SYSTEM_OUTPUT)
+            printSpaces()
+        }
 
         val verbosityContentType = when (s.type) {
             VerbosityType.Fatal -> ERROR_OUTPUT
@@ -247,12 +251,15 @@ class UnrealToolWindowFactory(val project: Project)
                     val currentLogSize = UnrealPane.logSize
                     model.isMethodReference.startAndAdviseSuccess(methodReference) {
                         if (it) {
-                            val startOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.first
-                            val endOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.last
+                            var startOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.first
+                            var endOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.last
+                            if (UnrealPane.timestampCheckBox.isSelected) {
+                                startOfLine += TIME_WIDTH + 1
+                                endOfLine += TIME_WIDTH + 1
+                            }
                             // we need to flush here if range doesn't exist
                             if (endOfLine > consoleView.text.length) {
                                 consoleView.flushDeferredText()
-                                UnrealPane.currentTimeConsoleView.flushDeferredText()
                             }
                             run {
                                 val last = startOfLine + `class`.length
@@ -284,6 +291,9 @@ class UnrealToolWindowFactory(val project: Project)
         UnrealPane.logData.add(unrealLogEvent)
         if (printImpl(unrealLogEvent)) {
             UnrealPane.logSize += VERBOSITY_WIDTH + CATEGORY_WIDTH + unrealLogEvent.text.data.length + 3
+            if (UnrealPane.timestampCheckBox.isSelected) {
+                UnrealPane.logSize += TIME_WIDTH + 1
+            }
             flush()
         }
     }
