@@ -41,16 +41,23 @@ class FilterComboAction constructor(defaultItem: String): ComboBoxAction(), Dumb
     private var myItems: ArrayList<FilterCheckboxAction> = arrayListOf()
     private var myItemListeners: ArrayList<() -> Unit> = arrayListOf()
 
+    private var myLastSelected: ArrayList<String> = arrayListOf()
+
     override fun update(e: AnActionEvent) {
-        val presentation: Presentation = e.getPresentation()
-        presentation.setText(myText)
-        presentation.setEnabledAndVisible(true)
-        for (listener in myItemListeners) {
-            listener.invoke()
+        val presentation: Presentation = e.presentation
+        presentation.text = myText
+        presentation.isEnabledAndVisible = true
+        val currentSelected = selected()
+        if (myLastSelected != currentSelected) {
+            myLastSelected = currentSelected
+            for (listener in myItemListeners) {
+                listener.invoke()
+            }
         }
+
     }
 
-    override protected fun createPopupActionGroup(button: JComponent?): DefaultActionGroup {
+    override fun createPopupActionGroup(button: JComponent?): DefaultActionGroup {
         val group = DefaultActionGroup()
         for (item in myItems) {
             group.add(item)
@@ -60,14 +67,17 @@ class FilterComboAction constructor(defaultItem: String): ComboBoxAction(), Dumb
 
     fun addItem(item: FilterCheckboxAction) {
         myItems.add(item)
+        if (item.isSelected()) {
+            myLastSelected.add(item.getName())
+        }
     }
 
-    fun items() : List<FilterCheckboxAction> {
+    fun items() : ArrayList<FilterCheckboxAction> {
         return myItems
     }
 
-    fun selected() : List<String> {
-        var result = arrayListOf<String>()
+    fun selected() : ArrayList<String> {
+        val result = arrayListOf<String>()
         for (item in myItems) {
             if (item.isSelected()) {
                 result.add(item.getName())
