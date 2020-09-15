@@ -29,8 +29,17 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
 
         val logData: ArrayList<UnrealLogEvent> = arrayListOf()
+        var revision = 0
         var logSize = 0
         var filteringInProgress = false
+
+        fun bumpRevision() {
+            if (revision == Int.MAX_VALUE) {
+                revision = 0
+            } else {
+                revision++
+            }
+        }
     }
 
     init {
@@ -39,6 +48,7 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         currentConsoleView.editor.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 if (event.oldLength > 0 && event.newLength == 0) {
+                    bumpRevision()
                     logSize = 0
                     if (!filteringInProgress) {
                         logData.clear()

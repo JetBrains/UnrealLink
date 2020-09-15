@@ -119,6 +119,7 @@ class UnrealToolWindowFactory(val project: Project)
         val currentScroll = UnrealPane.currentConsoleView.editor.scrollingModel.verticalScrollOffset
         try {
             UnrealPane.filteringInProgress = true // keep the logData
+            UnrealPane.currentConsoleView.flushDeferredText()
             UnrealPane.currentConsoleView.editor.document.deleteString(0,
                     UnrealPane.currentConsoleView.editor.document.textLength)
         } finally {
@@ -249,8 +250,12 @@ class UnrealToolWindowFactory(val project: Project)
 
                     consoleView.print(match, NORMAL_OUTPUT)
                     val currentLogSize = UnrealPane.logSize
+                    val currentRevision = UnrealPane.revision
                     model.isMethodReference.startAndAdviseSuccess(methodReference) {
                         if (it) {
+                            if (currentRevision != UnrealPane.revision) {
+                                return@startAndAdviseSuccess
+                            }
                             var startOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.first
                             var endOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.last
                             if (UnrealPane.timestampCheckBox.isSelected) {
@@ -262,11 +267,17 @@ class UnrealToolWindowFactory(val project: Project)
                                 consoleView.flushDeferredText()
                             }
                             run {
+                                if (currentRevision != UnrealPane.revision) {
+                                    return@run
+                                }
                                 val last = startOfLine + `class`.length
                                 val linkInfo = UnrealClassHyperLinkInfo(model.navigateToClass, UClass(FString(`class`)))
                                 consoleView.hyperlinks.createHyperlink(startOfLine, last, null, linkInfo)
                             }
                             run {
+                                if (currentRevision != UnrealPane.revision) {
+                                    return@run
+                                }
                                 val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
                                 val first = endOfLine - method.length
                                 consoleView.hyperlinks.createHyperlink(first, endOfLine, null, linkInfo)
