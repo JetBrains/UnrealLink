@@ -30,7 +30,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
             else {
                 "<html>" +
                 "The RiderLink Unreal Editor plugin is not in sync with UnrealLink Rider plugin." +
-                " Different versions of plugins are not guarantied to work together.<br>" +
+                " Different versions of plugins are not guaranteed to work together.<br>" +
                 "Installed version:\t${it.installedVersion}<br>"+
                 "Required version:\t${it.requiredVersion}" +
                 "</html>"
