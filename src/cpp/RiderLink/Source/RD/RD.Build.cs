@@ -60,7 +60,8 @@ public class RD : ModuleRules
 
 		var LibFolder = Path.Combine(ModuleDirectory, Toolchain, "libs", Platform, "x64", "Release");
         string[] Libs = {
-            "rd_framework_cpp.lib",
+	        "rd_framework_cpp.lib",
+	        "rd_framework_cpp_util.lib",
             "clsocket.lib",
             "rd_core_cpp.lib",
             "spdlog.lib"
