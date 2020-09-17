@@ -54,6 +54,7 @@ void FRiderBlueprintExtensionModule::StartupModule()
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP START"));
 
     FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
+    RdConnection& RdConnection = RiderLinkModule.RdConnection;
 
     const FAssetRegistryModule* AssetRegistryModule = &FModuleManager::LoadModuleChecked<FAssetRegistryModule>
         (AssetRegistryConstants::ModuleName);
@@ -64,38 +65,55 @@ void FRiderBlueprintExtensionModule::StartupModule()
         // TODO: Fix loading uasset's on 4.23-
         // BluePrintProvider::AddAsset(AssetData);
     });
-    Jetbrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RiderLinkModule.RdConnection.UnrealToBackendModel;
+
     const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
-    UnrealToBackendModel.get_openBlueprint().advise( NestedLifetime,
-[this, &UnrealToBackendModel](Jetbrains::EditorPlugin::BlueprintReference const& s) {
-        try {
-            AllowSetForeGroundForEditor(UnrealToBackendModel);
+    Jetbrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
+    RdConnection.Scheduler.queue([this, NestedLifetime, &UnrealToBackendModel]()
+    {
+        UnrealToBackendModel.get_openBlueprint().advise(
+            NestedLifetime,
+            [this, &UnrealToBackendModel](
+            Jetbrains::EditorPlugin::BlueprintReference const& s)
+            {
+                try
+                {
+                    AllowSetForeGroundForEditor(UnrealToBackendModel);
 
-            auto Window = FGlobalTabmanager::Get()->GetRootWindow();
-            if(!Window.IsValid()) return;
+                    auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+                    if (!Window.IsValid()) return;
 
-            if (Window->IsWindowMinimized()) {
-                Window->Restore();
-            } else {
-                Window->HACK_ForceToFront();
+                    if (Window->IsWindowMinimized())
+                    {
+                        Window->Restore();
+                    }
+                    else
+                    {
+                        Window->HACK_ForceToFront();
+                    }
+                    BluePrintProvider::OpenBlueprint(
+                        s.get_pathName(), MessageEndpoint);
+                }
+                catch (std::exception const& e)
+                {
+                    std::cerr << rd::to_string(e);
+                }
             }
-            BluePrintProvider::OpenBlueprint(s.get_pathName(), MessageEndpoint);
-        } catch (std::exception const& e) {
-            std::cerr << rd::to_string(e);
-        }
-    });
+        );
 
-    UnrealToBackendModel.get_isBlueprintPathName().set([](FString const& pathName) -> bool {
-        return BluePrintProvider::IsBlueprint(pathName);
+        UnrealToBackendModel.get_isBlueprintPathName().set([](FString const& pathName) -> bool
+        {
+            return BluePrintProvider::IsBlueprint(pathName);
+        });
     });
-
-    BluePrintProvider::OnBlueprintAdded.BindLambda([this, &UnrealToBackendModel](UBlueprint* Blueprint) {
-        FRiderLinkModule::Get().RdConnection.Scheduler.queue([this, Blueprint, &UnrealToBackendModel] {
+    BluePrintProvider::OnBlueprintAdded.BindLambda([this, &UnrealToBackendModel, &RdConnection](UBlueprint* Blueprint)
+    {
+        RdConnection.Scheduler.queue([this, Blueprint, &UnrealToBackendModel]
+        {
             UnrealToBackendModel.get_onBlueprintAdded().fire(
                 Jetbrains::EditorPlugin::UClass(Blueprint->GetPathName()));
         });
     });
-    
+
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
 

@@ -312,86 +312,104 @@ void FRiderGameControlExtensionModule::StartupModule()
         SlateApplication = &FSlateApplication::Get();
     }
 
-    const rd::Lifetime NestedLifetime = FRiderLinkModule::Get().CreateNestedLifetime();
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromRider().advise(
-        NestedLifetime, [this](Jetbrains::EditorPlugin::PlayState State)
-        {
-            if(!GUnrealEd) return;
-            switch(State)
-            {
-            case Jetbrains::EditorPlugin::PlayState::Idle:
-                if (GUnrealEd->PlayWorld)
-                {
-                    GUnrealEd->RequestEndPlayMap();
-                }
-                break;
-            case Jetbrains::EditorPlugin::PlayState::Play:
-                if (GUnrealEd->PlayWorld &&
-                    GUnrealEd->PlayWorld->IsPaused())
-                {
-                    GUnrealEd->PlayWorld->bDebugPauseExecution = false;
-                    // Simply switching flag doesn't work, `ResumePIE` delegate won't be triggered
-                    GUnrealEd->PlaySessionResumed();
-                }
-                else
-                {
-                    const int Mode = FRiderLinkModule::Get()
-                                     .RdConnection.UnrealToBackendModel.get_playMode().get();
-                    RequestPlay(Mode);
-                }
-                break;
-            case Jetbrains::EditorPlugin::PlayState::Pause:
-                if (GUnrealEd->PlayWorld)
-                {
-                    GUnrealEd->PlayWorld->bDebugPauseExecution = true;
-                    // Simply switching flag doesn't work, `PausePIE` delegate won't be triggered
-                    GUnrealEd->PlaySessionPaused();
-                }
-                break;
-            }
-        });
+    FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
+    RdConnection& RdConnection = RiderLinkModule.RdConnection;
+    Jetbrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
 
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, [this]()
+    const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
+    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel]()
+    {
+        UnrealToBackendModel.get_playStateFromRider().advise(
+            NestedLifetime,
+            [&UnrealToBackendModel](Jetbrains::EditorPlugin::PlayState State)
+            {
+                if (!GUnrealEd) return;
+                switch (State)
+                {
+                case Jetbrains::EditorPlugin::PlayState::Idle:
+                    if (GUnrealEd->PlayWorld)
+                    {
+                        GUnrealEd->RequestEndPlayMap();
+                    }
+                    break;
+                case Jetbrains::EditorPlugin::PlayState::Play:
+                    if (GUnrealEd->PlayWorld &&
+                        GUnrealEd->PlayWorld->IsPaused())
+                    {
+                        GUnrealEd->PlayWorld->bDebugPauseExecution = false;
+                        // Simply switching flag doesn't work, `ResumePIE` delegate won't be triggered
+                        GUnrealEd->PlaySessionResumed();
+                    }
+                    else
+                    {
+                        const int Mode = UnrealToBackendModel.get_playMode().get();
+                        RequestPlay(Mode);
+                    }
+                    break;
+                case Jetbrains::EditorPlugin::PlayState::Pause:
+                    if (GUnrealEd->PlayWorld)
+                    {
+                        GUnrealEd->PlayWorld->bDebugPauseExecution = true;
+                        // Simply switching flag doesn't work, `PausePIE` delegate won't be triggered
+                        GUnrealEd->PlaySessionPaused();
+                    }
+                    break;
+                }
+            });
+    });
+
+    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel]()
+    {
+        UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, []()
         {
+            if (!GUnrealEd) return;
             GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
             GUnrealEd->PlayWorld->bDebugPauseExecution = false;
         });
-
-    FEditorDelegates::BeginPIE.AddLambda([this](const bool)
-    {
-        if (GUnrealEd)
-        {
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
-        }
     });
 
-    FEditorDelegates::EndPIE.AddLambda([this](const bool)
+    FEditorDelegates::BeginPIE.AddLambda([this, &RdConnection](const bool)
     {
-        if (GUnrealEd)
+        RdConnection.Scheduler.queue([&RdConnection]()
         {
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Idle);
-        }
+            if (!GUnrealEd) return;
+            RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
+        });
     });
 
-    FEditorDelegates::PausePIE.AddLambda([this](const bool)
+    FEditorDelegates::EndPIE.AddLambda([this, &RdConnection](const bool)
     {
-        if (GUnrealEd)
+        RdConnection.Scheduler.queue([&RdConnection]()
         {
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Pause);
-        }
+            if (!GUnrealEd) return;
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Idle);
+        });
     });
 
-    FEditorDelegates::ResumePIE.AddLambda([this](const bool)
+    FEditorDelegates::PausePIE.AddLambda([this, &RdConnection](const bool)
     {
-        if (GUnrealEd)
+        RdConnection.Scheduler.queue([&RdConnection]()
         {
-            FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
-        }
+            if (!GUnrealEd) return;
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Pause);
+        });
+    });
+
+    FEditorDelegates::ResumePIE.AddLambda([this, &RdConnection](const bool)
+    {
+        RdConnection.Scheduler.queue([&RdConnection]()
+        {
+            if (!GUnrealEd) return;
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(Jetbrains::EditorPlugin::PlayState::Play);
+        });
     });
 
     // Initial sync.
-    FRiderLinkModule::Get().RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
+    RdConnection.Scheduler.queue([&RdConnection]()
+    {
+        RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
+    });
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
