@@ -74,7 +74,8 @@ namespace RiderPlugin.UnrealLink
                         var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
                         if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
                         {
-                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
+                            myLogger.Info($"FileSystemWatcher event {fileSystemEvent.ChangeType} found \"{path.NameWithoutExtension}\"");
+                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", 
                                 () => CreateProtocols(path));
                         }
                     };
@@ -104,11 +105,11 @@ namespace RiderPlugin.UnrealLink
 
         private void CreateProtocols(FileSystemPath portFileFullPath)
         {
+            myLogger.Info($"Trying to read port file {portFileFullPath}");
             if (!portFileFullPath.ExistsFile) return;
 
             if (!ReadPortFile(portFileFullPath, out var text))
             {
-                myLogger.Error($"[UnrealLink]: Failed to read {portFileFullPath}");
                 return;
             }
             if (!int.TryParse(text, out var port))
@@ -134,27 +135,19 @@ namespace RiderPlugin.UnrealLink
             });
         }
 
-        // [TODO]: Fix reading port file in a sustainable way, instead of randomly trying to read it 3 times in a row 
         private bool ReadPortFile(FileSystemPath portFileFullPath, out string text)
         {
             text = "";
-            int tries = 3;
-            while (tries != 0)
+            try
             {
-                try
-                {
-                    text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
-                    return true;
-                }
-                catch (Exception exception)
-                {
-                    --tries;
-                    myLogger.Warn(exception, ExceptionOrigin.OuterWorld,$"[UnrealLink]: Couldn't read connection port from {portFileFullPath} on {3 - tries} try");
-                    System.Threading.Thread.Sleep(1000);
-                }
+                text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
             }
-            myLogger.Error($"[UnrealLink]: Failed to read connection port from {portFileFullPath} 3 times in a row");
-            return false;
+            catch (Exception exception)
+            {
+                myLogger.Warn($"[UnrealLink]: Failed to read connection port from {portFileFullPath}, reason: {exception.Message}");
+                return false;
+            }
+            return true;
         }
 
         void OnMessageReceived(RdRiderModel riderModel, UnrealLogEvent message)
