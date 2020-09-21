@@ -18,13 +18,17 @@ RdConnection::~RdConnection()
 void RdConnection::Init()
 {
     Protocol = ProtocolFactory::Create(&Scheduler, SocketLifetime);
-    UnrealToBackendModel.connect(SocketLifetime, Protocol.Get());
-    Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
-        UnrealToBackendModel.get_serialization_context().get_serializers()
-    );
+    Scheduler.queue([&]()
+    {
+        UnrealToBackendModel.connect(SocketLifetime, Protocol.Get());
+        Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
+            UnrealToBackendModel.get_serialization_context().get_serializers()
+        );
+    });
 }
 
 void RdConnection::Shutdown()
 {
+	Scheduler.flush();
     SocketLifetimeDef.terminate();
 }
