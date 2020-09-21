@@ -59,55 +59,55 @@ public class RD : ModuleRules
 		}
 
 		var LibFolder = Path.Combine(ModuleDirectory, Toolchain, "libs", Platform, "x64", "Release");
-        string[] Libs = {
-	        "rd_framework_cpp.lib",
-	        "rd_framework_cpp_util.lib",
-            "clsocket.lib",
-            "rd_core_cpp.lib",
-            "spdlog.lib"
-        };
-        foreach (string Lib in Libs)
-        {
-            PublicAdditionalLibraries.Add(Path.Combine(LibFolder, Lib));
-        }
-        
-        // Common dependencies
-        PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
+		string[] Libs = {
+			"rd_framework_cpp.lib",
+			"rd_framework_cpp_util.lib",
+			"clsocket.lib",
+			"rd_core_cpp.lib",
+			"spdlog.lib"
+		};
+		foreach (string Lib in Libs)
+		{
+			PublicAdditionalLibraries.Add(Path.Combine(LibFolder, Lib));
+		}
+
+		// Common dependencies
+		PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
 		PublicDefinitions.Add("nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
 
-        string[] Paths = {
-            "include",
-            "include/rd_core_cpp",
-            "include/rd_framework_cpp",
-            "include/rd_core_cpp/lifetime",
-            "include/rd_core_cpp/reactive",
-            "include/rd_core_cpp/std",
-            "include/rd_core_cpp/types",
-            "include/rd_core_cpp/util",
-            "include/rd_core_cpp/reactive/base",
-            "include/rd_framework_cpp/base",
-            "include/rd_framework_cpp/ext",
-            "include/rd_framework_cpp/impl",
-            "include/rd_framework_cpp/intern",
-            "include/rd_framework_cpp/scheduler",
-            "include/rd_framework_cpp/serialization",
-            "include/rd_framework_cpp/task",
-            "include/rd_framework_cpp/util",
-            "include/rd_framework_cpp/wire",
-            "include/rd_framework_cpp/scheduler/base",
-            "include/thirdparty",
-            "include/thirdparty/clsocket",
-            "include/thirdparty/mpark",
-            "include/thirdparty/nonstd",
-            "include/thirdparty/optional",
-            "include/thirdparty/tsl",
-            "include/thirdparty/clsocket/src",
-            "include/thirdparty/optional/tl"
-        };
+		string[] Paths = {
+			"include",
+			"include/rd_core_cpp",
+			"include/rd_framework_cpp",
+			"include/rd_core_cpp/lifetime",
+			"include/rd_core_cpp/reactive",
+			"include/rd_core_cpp/std",
+			"include/rd_core_cpp/types",
+			"include/rd_core_cpp/util",
+			"include/rd_core_cpp/reactive/base",
+			"include/rd_framework_cpp/base",
+			"include/rd_framework_cpp/ext",
+			"include/rd_framework_cpp/impl",
+			"include/rd_framework_cpp/intern",
+			"include/rd_framework_cpp/scheduler",
+			"include/rd_framework_cpp/serialization",
+			"include/rd_framework_cpp/task",
+			"include/rd_framework_cpp/util",
+			"include/rd_framework_cpp/wire",
+			"include/rd_framework_cpp/scheduler/base",
+			"include/thirdparty",
+			"include/thirdparty/clsocket",
+			"include/thirdparty/mpark",
+			"include/thirdparty/nonstd",
+			"include/thirdparty/optional",
+			"include/thirdparty/tsl",
+			"include/thirdparty/clsocket/src",
+			"include/thirdparty/optional/tl"
+		};
 
 		foreach(var Item in Paths)
-        {
-            PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
-        }
+		{
+			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
+		}
 	}
 }
