@@ -121,7 +121,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             IProperty<double> progress, bool forceInstall = false)
         {
             if (!forceInstall && unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
-                unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion) return;
+                unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion)
+            {
+                var text = $"<html>" +
+                           $"Installed in Engine plugin version: {unrealPluginInstallInfo.EnginePlugin.PluginVersion}<br>" +
+                           $"</html>";
+                Notify("Plugin is up to date", text, RdNotificationEntryType.INFO);
+                return;
+            }
             
             InstallPluginInEngine(unrealPluginInstallInfo, progress);
         }
@@ -131,7 +138,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             if (!forceInstall && unrealPluginInstallInfo.ProjectPlugins.All(description =>
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
+            {
+                var text = $"<html>";
+                foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
+                {
+                    text += $"Installed in {installDescription.UprojectFilePath.Name} plugin version: {installDescription.PluginVersion}<br>";
+                }
+                text += "</html>";
+                Notify("Plugin is up to date", text, RdNotificationEntryType.INFO);
                 return;
+            }
 
             InstallPluginInGame(unrealPluginInstallInfo, progress);
         }
@@ -172,12 +188,37 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var result = new List<BackupDir>();
             if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
             {
-               result.Add(new BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, TMP_PREFIX)); 
+                try
+                {
+                    result.Add(new BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, TMP_PREFIX));
+                }
+                catch
+                {
+                    var text = "<html>" +
+                               "Close all running instances of Unreal Editor and try again<br>" +
+                               $"Path to old plugin: <a href=\"file:///{unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder}\">{unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder}</a><br>" +
+                               "</html>";
+                    Notify("Failed to backup old plugin", text, RdNotificationEntryType.ERROR);
+                    throw;
+                }
+                
             }
             foreach (var installDescription in unrealPluginInstallInfo.ProjectPlugins)
             {
-                if(installDescription.IsPluginAvailable)
-                    result.Add(new BackupDir(installDescription.UnrealPluginRootFolder, TMP_PREFIX));
+                try
+                {
+                    if(installDescription.IsPluginAvailable)
+                        result.Add(new BackupDir(installDescription.UnrealPluginRootFolder, TMP_PREFIX));
+                }
+                catch
+                {
+                    var text = "<html>" +
+                               "Close all running instances of Unreal Editor and try again<br>" +
+                               $"Path to old plugin: <a href=\"file:///{installDescription.UnrealPluginRootFolder}\">{installDescription.UnrealPluginRootFolder}</a><br>" +
+                               "</html>";
+                    Notify("Failed to backup old plugin", text, RdNotificationEntryType.ERROR);
+                    throw;
+                }
             }
 
             return result;
@@ -246,7 +287,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 const string failedBuildTitle = "Failed to build RiderLink plugin";
                 var failedBuildText = "<html>" +
                                       "Check build logs for more info<br>" +
-                                      "<b>Help > Diagnostic Tools > Show Log in Explorer</b>" +
+                                      "<b>Help > Diagnostic Tools > Show Log in Explorer</b><br>" +
+                                      "And contact dev team for help at <a href=\"https://github.com/JetBrains/UnrealLink/issues\">GitHub Issues page</a>" +
                                       "</html>";
                 Notify(failedBuildTitle, failedBuildText, RdNotificationEntryType.ERROR);
                 return false;
@@ -382,25 +424,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             if (uprojectFilePath.IsNullOrEmpty())
             {
-                myLogger.Error(
+                myLogger.Warn(
                     $"[UnrealLink]: Failed refresh project files, couldn't find uproject path: {uprojectFilePath}");
+                var errorText = "<html>Couldn't find uproject path: {uprojectFilePath}<br>" +
+                           "</html>";
+            
+                Notify("Failed to refresh project files", errorText,RdNotificationEntryType.WARN);
                 return;
             }
 
             var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFilePath);
+            var text = "<html>RiderLink has been successfully installed to the project:<br>" +
+                       $"<b>{uprojectFilePath.NameWithoutExtension}<b>" +
+                       "but refresh project action has failed.<br>" +
+                       "</html>";
             if (engineRoot.IsEmpty)
             {
-                myLogger.Error($"[UnrealLink]: Couldn't find Unreal Engine root for {uprojectFilePath}");
-                var notificationNoEngine = new NotificationModel($"Failed to refresh project files",
-                    "<html>RiderLink has been successfully installed to the project:<br>" +
-                    $"<b>{uprojectFilePath.NameWithoutExtension}<b>" +
-                    "but refresh project action has failed.<br>" +
-                    "Couldn't find Unreal Engine root for:<br>" +
-                    $"{uprojectFilePath}<br>" +
-                    "</html>", true, RdNotificationEntryType.WARN);
-
-                mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.RefreshProject",
-                    () => { myNotificationsModel.Notification(notificationNoEngine); });
+                myLogger.Warn($"[UnrealLink]: Couldn't find Unreal Engine root for {uprojectFilePath}");
+                Notify("Failed to refresh project files", text, RdNotificationEntryType.WARN);
                 return;
             }
 
@@ -414,15 +455,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             // 3. If UVS is missing or have failed, fallback to UnrealBuildTool
             if (RegenerateProjectUsingUBT(uprojectFilePath, pathToUnrealBuildToolBin, engineRoot)) return;
 
-            myLogger.Error("[UnrealLink]: Couldn't refresh project files");
-            var notification = new NotificationModel($"Failed to refresh project files",
-                "<html>RiderLink has been successfully installed to the project:<br>" +
-                $"<b>{uprojectFilePath.NameWithoutExtension}<b>" +
-                "but refresh project action has failed.<br>" +
-                "</html>", true, RdNotificationEntryType.WARN);
-
-            mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.RefreshProject",
-                () => { myNotificationsModel.Notification(notification); });
+            myLogger.Warn("[UnrealLink]: Couldn't refresh project files");
+            
+            Notify("Failed to refresh project files", text, RdNotificationEntryType.WARN);
         }
 
         private bool GenerateProjectFilesUsingBat(FileSystemPath engineRoot)
@@ -566,6 +601,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 myLogger.Error(
                     $"[UnrealLink]: Failed to build plugin for {uprojectFile}, couldn't find Unreal Engine root");
+                var text = "<html>" +
+                           $"Couldn't find Unreal Engine root for {uprojectFile}<br>" +
+                           "</html>";
+                Notify("Failed to build plugin", text, RdNotificationEntryType.ERROR);
                 return false;
                 
             }
@@ -574,6 +613,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (!pathToUat.ExistsFile)
             {
                 myLogger.Error("[UnrealLink]: Failed build plugin: RunUAT.bat is not available");
+                var text = "<html>" +
+                           $"RunUAT.bat is not available is not available at expected destination: {pathToUat}<br>" +
+                           "</html>";
+                Notify("Failed to build plugin", text, RdNotificationEntryType.ERROR);
                 return false;
             }
             
@@ -634,6 +677,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 if (result != 0)
                 {
                     myLogger.Error($"[UnrealLink]: Failed to build plugin for {uprojectFile}");
+                    var text = "<html>" +
+                               $"Failed to build plugin for {uprojectFile}<br>" +
+                               "<code>" +
+                               stdOut.Where(it => it.Contains(": error ")).Join("\n") +
+                               "</code>" +
+                               $"<code>" +
+                               stdErr.Join("\n") +
+                               $"</code>" +
+                               "</html>";
+                    Notify("Failed to build RiderLink plugin", text, RdNotificationEntryType.ERROR);
                     return false;
                 }
             }
@@ -646,6 +699,19 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     myLogger.Error(stdErr.Join("\n"));
                 myLogger.Error(exception,
                     $"[UnrealLink]: Failed to build plugin for {uprojectFile}");
+                
+                var text = "<html>" +
+                           $"Failed to build plugin for {uprojectFile}<br>" +
+                           "<code>" +
+                           stdOut.Where(it => it.Contains(": error ")).Join("\n") +
+                           "</code>" +
+                           $"<code>" +
+                           stdErr.Join("\n") +
+                           $"</code><br>" +
+                           $"Exception:<br>" +
+                           $"{exception}" +
+                           "</html>";
+                Notify("Failed to build RiderLink plugin", text, RdNotificationEntryType.ERROR);
                 return false;
             }
 
