@@ -10,6 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2020.2.79]
+### Added
 - More info and notifications when RiderLink can't be built
 - Unable auto-update plugin from JetBrains Marketplace
 ### Changed
