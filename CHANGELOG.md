@@ -10,15 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
-
+- More info and notifications when RiderLink can't be built
+- Unable auto-update plugin from JetBrains Marketplace
 ### Changed
 
 ### Deprecated
 
 ### Removed
+- Removed verbose log messages from RD framework in stdout
 
 ### Fixed
-
+- Fix https://youtrack.jetbrains.com/issue/RIDER-50354
+- Fix corrupted hyperlinks after toggling timestamps
 ### Known Issues
 ## [2020.2.69]
 ### Added
