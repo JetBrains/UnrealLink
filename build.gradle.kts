@@ -35,7 +35,7 @@ dependencies {
 }
 
 val repoRoot by extra { project.rootDir }
-val sdkVersion = "2020.2"
+val sdkVersion = "2020.3"
 val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
 val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
