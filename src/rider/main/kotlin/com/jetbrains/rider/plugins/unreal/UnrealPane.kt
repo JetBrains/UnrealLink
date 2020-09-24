@@ -25,7 +25,14 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
         val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
 
-        val logData: ArrayList<UnrealLogEvent> = arrayListOf()
+        private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
+        val logData: ArrayDeque<UnrealLogEvent> = ArrayDeque()
+
+        fun addLogDataItem(item : UnrealLogEvent) {
+            while (logData.size >= MAX_STORED_LOG_DATA_ITEMS)
+                logData.removeFirst()
+            logData.add(item)
+        }
     }
 
     init {

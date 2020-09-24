@@ -240,7 +240,7 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     fun print(unrealLogEvent: UnrealLogEvent) {
-        UnrealPane.logData.add(unrealLogEvent)
+        UnrealPane.addLogDataItem(unrealLogEvent)
         if (printImpl(unrealLogEvent)) {
             println()
         }
