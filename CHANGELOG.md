@@ -18,6 +18,7 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+- More fixes to https://youtrack.jetbrains.com/issue/RIDER-50354
 
 ### Known Issues
 ## [2020.2.79]
