@@ -1,12 +1,8 @@
 package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.execution.impl.ConsoleViewImpl
-import com.intellij.ide.actions.NextOccurenceToolbarAction
-import com.intellij.ide.actions.PreviousOccurenceToolbarAction
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.editor.event.DocumentEvent
-import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBCheckBox
@@ -17,6 +13,7 @@ import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import com.jetbrains.rider.plugins.unreal.actions.FilterComboAction
 import com.jetbrains.rider.ui.components.ComponentFactories
 import java.awt.BorderLayout
+import java.util.*
 import javax.swing.JPanel
 
 class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
@@ -28,42 +25,22 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
         val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
 
-        val logData: ArrayList<UnrealLogEvent> = arrayListOf()
-        var revision = 0
-        var logSize = 0
-        var filteringInProgress = false
+        private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
+        val logData: ArrayDeque<UnrealLogEvent> = ArrayDeque()
 
-        fun bumpRevision() {
-            if (revision == Int.MAX_VALUE) {
-                revision = 0
-            } else {
-                revision++
-            }
+        fun addLogDataItem(item : UnrealLogEvent) {
+            while (logData.size >= MAX_STORED_LOG_DATA_ITEMS)
+                logData.removeFirst()
+            logData.add(item)
         }
     }
 
     init {
         currentConsoleView = consoleView
 
-        currentConsoleView.editor.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                if (event.oldLength > 0 && event.newLength == 0) {
-                    bumpRevision()
-                    logSize = 0
-                    if (!filteringInProgress) {
-                        logData.clear()
-                    }
-                }
-            }
-        })
-
+        setContent(consoleView)
         val actionGroup = DefaultActionGroup().apply {
-
-            addAll(consoleView.createConsoleActions()
-                    .filter {
-                        !(it is PreviousOccurenceToolbarAction ||
-                                it is NextOccurenceToolbarAction/* || it is ConsoleViewImpl.ClearAllAction*/)
-                    }.toList())
+            addAll(consoleView.createConsoleActions().toList())
         }
 
         val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component
@@ -85,7 +62,6 @@ class UnrealPane(val model: Any, lifetime: Lifetime, val project: Project) : Sim
         consoleView.scrollTo(0)
 
         consoleView.add(topPanel, BorderLayout.NORTH)
-        setContent(consoleView)
         setToolbar(toolbar)
     }
 }

@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
-import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.model.*
@@ -53,7 +52,7 @@ class UnrealToolWindowFactory(val project: Project)
                     for (item in UnrealPane.categoryFilterActionGroup.items()) {
                         if (item.getName() == "All") {
                             item.setSelected(false)
-                            break;
+                            break
                         }
                     }
                 }
@@ -66,7 +65,7 @@ class UnrealToolWindowFactory(val project: Project)
                     for (item in UnrealPane.categoryFilterActionGroup.items()) {
                         if (item.getName() == "All") {
                             item.setSelected(true)
-                            break;
+                            break
                         }
                     }
                 }
@@ -117,20 +116,10 @@ class UnrealToolWindowFactory(val project: Project)
 
     private fun filter() {
         val currentScroll = UnrealPane.currentConsoleView.editor.scrollingModel.verticalScrollOffset
-        try {
-            UnrealPane.filteringInProgress = true // keep the logData
-            UnrealPane.currentConsoleView.flushDeferredText()
-            UnrealPane.currentConsoleView.editor.document.deleteString(0,
-                    UnrealPane.currentConsoleView.editor.document.textLength)
-        } finally {
-            UnrealPane.filteringInProgress = false
-        }
+        UnrealPane.currentConsoleView.clear()
+        UnrealPane.currentConsoleView.waitAllRequests()
         for (logEvent in UnrealPane.logData) {
             if (printImpl(logEvent)) {
-                UnrealPane.logSize += VERBOSITY_WIDTH + CATEGORY_WIDTH + logEvent.text.data.length + 3
-                if (UnrealPane.timestampCheckBox.isSelected) {
-                    UnrealPane.logSize += TIME_WIDTH + 1
-                }
                 println()
             }
         }
@@ -143,7 +132,7 @@ class UnrealToolWindowFactory(val project: Project)
         UnrealPane.currentConsoleView.print(" ".repeat(n), NORMAL_OUTPUT)
     }
 
-    fun print(s: LogMessageInfo) {
+    private fun print(s: LogMessageInfo) {
         val consoleView = UnrealPane.currentConsoleView
 
         if (UnrealPane.timestampCheckBox.isSelected) {
@@ -182,26 +171,6 @@ class UnrealToolWindowFactory(val project: Project)
         }
     }
 
-/*
-    private fun print(scriptMsg: IScriptMsg) {
-        with(UnrealPane.publicConsoleView) {
-            print(IScriptMsg.header, NORMAL_OUTPUT)
-            println()
-            when (scriptMsg) {
-                is ScriptMsgException -> {
-                    print(scriptMsg.message)
-                }
-                is ScriptMsgCallStack -> {
-                    print(scriptMsg.message)
-                    println()
-                    print(scriptMsg.scriptCallStack)
-                }
-            }
-
-        }
-    }
-*/
-
     private fun printImpl(unrealLogEvent: UnrealLogEvent): Boolean {
         val category = unrealLogEvent.info.category.data.take(CATEGORY_WIDTH)
         var exists = false
@@ -212,7 +181,7 @@ class UnrealToolWindowFactory(val project: Project)
             }
             if (item.getName() == category) {
                 exists = true
-                break;
+                break
             }
         }
         if (!exists) {
@@ -232,95 +201,58 @@ class UnrealToolWindowFactory(val project: Project)
 
         if (unrealLogEvent.bpPathRanges.isEmpty() && unrealLogEvent.methodRanges.isEmpty()) {
             print(unrealLogEvent.text)
-        } else {
-            val allRanges = (unrealLogEvent.bpPathRanges + unrealLogEvent.methodRanges).sortedBy { it.first }
-            val line = unrealLogEvent.text.data
-            if (allRanges.first().first > 0) {
-                consoleView.print(line.substring(0, allRanges[0].first), NORMAL_OUTPUT)
-            }
+            return true
+        }
 
-            for (rangeWithIndex in allRanges.withIndex()) {
-                val match = line.substring(rangeWithIndex.value.first, rangeWithIndex.value.last)
-                if (rangeWithIndex.value in unrealLogEvent.bpPathRanges) {
-                    val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
-                    consoleView.printHyperlink(match, hyperLinkInfo)
-                } else {
-                    val (`class`, method) = match.split(MethodReference.separator)
-                    val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
+        val allRanges = (unrealLogEvent.bpPathRanges + unrealLogEvent.methodRanges).sortedBy { it.first }
+        val line = unrealLogEvent.text.data
+        if (allRanges.first().first > 0) {
+            consoleView.print(line.substring(0, allRanges[0].first), NORMAL_OUTPUT)
+        }
 
-                    consoleView.print(match, NORMAL_OUTPUT)
-                    val currentLogSize = UnrealPane.logSize
-                    val currentRevision = UnrealPane.revision
-                    model.isMethodReference.startAndAdviseSuccess(methodReference) {
-                        if (it) {
-                            if (currentRevision != UnrealPane.revision) {
-                                return@startAndAdviseSuccess
-                            }
-                            var startOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.first
-                            var endOfLine = currentLogSize + VERBOSITY_WIDTH + CATEGORY_WIDTH + 2 + rangeWithIndex.value.last
-                            if (UnrealPane.timestampCheckBox.isSelected) {
-                                startOfLine += TIME_WIDTH + 1
-                                endOfLine += TIME_WIDTH + 1
-                            }
-                            // we need to flush here if range doesn't exist
-                            if (endOfLine > consoleView.text.length) {
-                                consoleView.flushDeferredText()
-                            }
-                            run {
-                                if (currentRevision != UnrealPane.revision) {
-                                    return@run
-                                }
-                                val last = startOfLine + `class`.length
-                                val linkInfo = UnrealClassHyperLinkInfo(model.navigateToClass, UClass(FString(`class`)))
-                                consoleView.hyperlinks.createHyperlink(startOfLine, last, null, linkInfo)
-                            }
-                            run {
-                                if (currentRevision != UnrealPane.revision) {
-                                    return@run
-                                }
-                                val linkInfo = MethodReferenceHyperLinkInfo(model.navigateToMethod, methodReference)
-                                val first = endOfLine - method.length
-                                consoleView.hyperlinks.createHyperlink(first, endOfLine, null, linkInfo)
-                            }
-                        }
-                    }
-                }
-                if (rangeWithIndex.index < allRanges.size - 1 &&
-                        allRanges[rangeWithIndex.index + 1].first != rangeWithIndex.value.last) {
-                    consoleView.print(line.substring(rangeWithIndex.value.last,
-                            allRanges[rangeWithIndex.index + 1].first), NORMAL_OUTPUT)
-                }
+        for (rangeWithIndex in allRanges.withIndex()) {
+            val match = line.substring(rangeWithIndex.value.first, rangeWithIndex.value.last)
+            if (rangeWithIndex.value in unrealLogEvent.bpPathRanges) {
+                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
+                consoleView.printHyperlink(match, hyperLinkInfo)
+            } else {
+                val (`class`, method) = match.split(MethodReference.separator)
+                val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
+
+                val classHyperLinkInfo = UnrealClassHyperLinkInfo(model, methodReference, UClass(FString(`class`)))
+                consoleView.printHyperlink(`class`, classHyperLinkInfo)
+
+                consoleView.print(MethodReference.separator, NORMAL_OUTPUT)
+
+                val methodHyperLinkInfo = MethodReferenceHyperLinkInfo(model, methodReference)
+                consoleView.printHyperlink(method, methodHyperLinkInfo)
             }
-            if (allRanges.last().last < line.length) {
-                consoleView.print(line.substring(allRanges.last().last), NORMAL_OUTPUT)
+            if (rangeWithIndex.index < allRanges.size - 1 &&
+                    allRanges[rangeWithIndex.index + 1].first != rangeWithIndex.value.last) {
+                consoleView.print(line.substring(rangeWithIndex.value.last,
+                        allRanges[rangeWithIndex.index + 1].first), NORMAL_OUTPUT)
             }
+        }
+        if (allRanges.last().last < line.length) {
+            consoleView.print(line.substring(allRanges.last().last), NORMAL_OUTPUT)
         }
         return true
     }
 
     fun print(unrealLogEvent: UnrealLogEvent) {
-        UnrealPane.logData.add(unrealLogEvent)
+        UnrealPane.addLogDataItem(unrealLogEvent)
         if (printImpl(unrealLogEvent)) {
-            UnrealPane.logSize += VERBOSITY_WIDTH + CATEGORY_WIDTH + unrealLogEvent.text.data.length + 3
-            if (UnrealPane.timestampCheckBox.isSelected) {
-                UnrealPane.logSize += TIME_WIDTH + 1
-            }
-            flush()
+            println()
         }
     }
 
     fun showTabForNewSession() {
-        showTab("$TITLE_ID", project.lifetime)
+        showTab(TITLE_ID, project.lifetime)
     }
 
     private fun println() {
         with(UnrealPane.currentConsoleView) {
             print(eol, NORMAL_OUTPUT)
         }
-    }
-
-    fun flush() {
-        println()
-//        UnrealPane.publicConsoleView.flushDeferredText()
     }
 }

@@ -20,6 +20,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
     <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
+    <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.UnrealPaneConsoleActionsPostProcessor" />
   </extensions>
 
   <actions>
