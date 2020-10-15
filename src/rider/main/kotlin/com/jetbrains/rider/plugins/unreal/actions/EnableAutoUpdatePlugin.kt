@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
-open class EnableAutoUpdatePlugin : NotificationAction("Enable Auto-Update") {
+open class EnableAutoUpdatePlugin : NotificationAction("Enable auto-update") {
     override fun actionPerformed(e: AnActionEvent, notifcation:Notification) {
         notifcation.expire()
         val project = e.project ?: return

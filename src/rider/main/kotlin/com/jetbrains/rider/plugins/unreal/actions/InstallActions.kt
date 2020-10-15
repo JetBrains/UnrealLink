@@ -7,7 +7,7 @@ import com.jetbrains.rd.ide.model.PluginInstallLocation
 import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
-open class InstallEditorPluginToEngineAction(private val text: String = "Install in Engine") : NotificationAction(text) {
+open class InstallEditorPluginToEngineAction(text: String = "Install in Engine") : NotificationAction(text) {
     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
         notification.expire()
         val project = e.project ?: return
@@ -16,7 +16,7 @@ open class InstallEditorPluginToEngineAction(private val text: String = "Install
     }
 }
 
-open class InstallEditorPluginToGameAction(private val text: String = "Install in Game") : NotificationAction(text) {
+open class InstallEditorPluginToGameAction(text: String = "Install in Game") : NotificationAction(text) {
     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
         notification.expire()
         val project = e.project ?: return

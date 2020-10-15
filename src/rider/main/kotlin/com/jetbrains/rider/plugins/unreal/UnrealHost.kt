@@ -9,12 +9,12 @@ import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     companion object {
-        fun getInstance(project: Project) = project.getComponent(UnrealHost::class.java)
+        fun getInstance(project: Project): UnrealHost = project.getComponent(UnrealHost::class.java)
     }
 
     val logger = Logger.getInstance(UnrealHost::class.java)
 
-    var playState: PlayState = PlayState.Idle;
+    var playState: PlayState = PlayState.Idle
 
     internal val model = project.solution.rdRiderModel
     val isUnrealEngineSolution:Boolean

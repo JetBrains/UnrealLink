@@ -40,7 +40,7 @@ class UnrealToolWindowFactory(val project: Project)
 
         ContentManagerWatcher.watchContentManager(toolWindow, toolWindow.contentManager)
 
-        toolWindow.title = "unreal"
+        toolWindow.title = "Unreal"
         toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
         UnrealPane.categoryFilterActionGroup.addItemListener {
@@ -97,20 +97,6 @@ class UnrealToolWindowFactory(val project: Project)
         if (valueToCheck <= VerbosityType.Error)
             return "Errors" in currentList
         if (valueToCheck == VerbosityType.Warning)
-            return "Warnings" in currentList
-
-        return "Messages" in currentList
-    }
-
-    private fun isMatchingVerbosity(valueToCheck: String, currentList: List<String>): Boolean {
-        if (currentList.isEmpty()) {
-            return false
-        }
-
-        val value = VerbosityType.valueOf(valueToCheck)
-        if (value <= VerbosityType.Error)
-            return "Errors" in currentList
-        if (value == VerbosityType.Warning)
             return "Warnings" in currentList
 
         return "Messages" in currentList

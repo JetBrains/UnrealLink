@@ -1,14 +1,12 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
-import com.intellij.openapi.project.DumbAware
-import com.intellij.openapi.project.DumbAwareAction
-import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.actionSystem.ex.ActionUtil
-import com.intellij.openapi.actionSystem.ex.ComboBoxAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.actionSystem.ex.CheckboxAction
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl
-
-import javax.swing.*
+import com.intellij.openapi.actionSystem.ex.ComboBoxAction
+import com.intellij.openapi.project.DumbAware
+import javax.swing.JComponent
 
 class FilterCheckboxAction constructor(text: String, defaultSelected: Boolean) : CheckboxAction(text), DumbAware {
     private var myIsSelected: Boolean = defaultSelected
