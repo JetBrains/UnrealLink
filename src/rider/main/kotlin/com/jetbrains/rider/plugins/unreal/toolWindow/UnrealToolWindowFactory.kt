@@ -7,6 +7,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.jetbrains.rd.ide.model.MethodReference
+import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.model.*

@@ -4,8 +4,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.diagnostic.Logger
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.model.PlayState
-import com.jetbrains.rider.model.RdRiderModel
-import com.jetbrains.rider.model.rdRiderModel
+import com.jetbrains.rd.ide.model.RdRiderModel
+import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     companion object {

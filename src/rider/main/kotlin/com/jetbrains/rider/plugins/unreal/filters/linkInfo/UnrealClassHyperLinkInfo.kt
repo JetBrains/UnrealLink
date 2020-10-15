@@ -5,8 +5,8 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
-import com.jetbrains.rider.model.MethodReference
-import com.jetbrains.rider.model.RdRiderModel
+import com.jetbrains.rd.ide.model.MethodReference
+import com.jetbrains.rd.ide.model.RdRiderModel
 import com.jetbrains.rider.model.UClass
 
 class UnrealClassHyperLinkInfo(private val model: RdRiderModel,

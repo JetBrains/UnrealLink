@@ -6,11 +6,11 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.reactive.adviseNotNull
-import com.jetbrains.rider.model.rdRiderModel
+import com.jetbrains.rd.ide.model.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.intellij.openapi.actionSystem.ActionManager
 import com.jetbrains.rd.platform.util.idea.ProtocolSubscribedProjectComponent
-import com.jetbrains.rider.model.PluginInstallStatus
+import com.jetbrains.rd.ide.model.PluginInstallStatus
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction
 
