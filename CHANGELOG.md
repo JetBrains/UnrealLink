@@ -10,6 +10,7 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+- Supported Rider 2020.3
 
 ### Changed
 
