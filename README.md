@@ -83,12 +83,14 @@
 <p>A few typical issues, and what to do in such cases:</p>
 
 <h5 id=failed_build>Failed to build RiderLink plugin</h5>
+
 ```
 Failed to build RiderLink plugin
 Check build logs for more info
 Help &gt; Diagnostic Tools &gt; Show Log in Explorer
 And contact dev team for help at GitHub Issues page
 ```
+
 <p>There are several reasons you might get this message:</p>
 <ul>
     <li>
@@ -103,11 +105,13 @@ And contact dev team for help at GitHub Issues page
 </ul>
 
 <h5 id=failed_backup>Failed to backup old plugin</h5>
+
 ```
 Failed to backup old plugin
 Close all running instances of Unreal Editor and try again
 Path to old plugin:
 ```
+
 <p>You tried to install a new version of RiderLink while you have a running instance of Unreal Editor with the plugin installed. Please close Unreal Editor and try again to install the plugin.</p>
 
 <h5 id=failed_refresh>Failed to refresh project files</h5>
