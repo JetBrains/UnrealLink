@@ -1,6 +1,6 @@
 <idea-plugin allow-bundled-update="true">
   <id>unreal-link</id>
-  <name>Unreal Link</name>
+  <name>UnrealLink</name>
   <version>_PLACEHOLDER_</version>
   <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
   <idea-version since-build="_PLACEHOLDER_" until-build="_PLACEHOLDER_" />

@@ -1,10 +1,10 @@
-# UnrealLink for Rider, RiderLink for Unreal Editor
+# UnrealLink for Unreal Engine
 
-<p>The UnrealLink and RiderLink plugins enable advanced integration between JetBrains <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a> and Epic Games’ <a href="https://www.unrealengine.com/en-US/">Unreal Editor</a>.</p>
+<p>The UnrealLink plugin enables advanced integration between JetBrains <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a> and Epic Games’ <a href="https://www.unrealengine.com/en-US/">Unreal Editor</a>.</p>
 
 <p>Rider is a fast and powerful IDE for Unreal Engine and C++ development. It provides rich code navigation, inspections, refactorings, understands Blueprints and the Unreal Engine reflection mechanism, and supports HLSL. The <em>Unreal Engine edition </em>of Rider is currently available as a free Early Preview for Windows only. <a href="https://www.jetbrains.com/rider/unreal/">Join the Early Preview</a>.</p>
 
-<p>The plugins bring Blueprints information to the editor, add settings to manage game launch, and provide a more convenient version of the Unreal Editor log.</p>
+<p>The plugin brings Blueprints information to the editor, adds settings to manage game launch, and provides a more convenient version of the Unreal Editor log.</p>
 
 <ul>
     <li>
