@@ -87,7 +87,7 @@
 ```
 Failed to build RiderLink plugin
 Check build logs for more info
-Help &gt; Diagnostic Tools &gt; Show Log in Explorer
+Help > Diagnostic Tools > Show Log in Explorer
 And contact dev team for help at GitHub Issues page
 ```
 
