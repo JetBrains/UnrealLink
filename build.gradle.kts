@@ -7,26 +7,21 @@ import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/dl.bintray.com/kotlin/kotlin-eap") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
-        maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
-    }
-
-    dependencies {
-        classpath("gradle.plugin.org.jetbrains.intellij.plugins", "gradle-intellij-plugin", "0.4.21")
-        classpath("com.jetbrains.rd", "rd-gen", "0.202.121")
-    }
-}
-
 plugins {
+    java
+    kotlin("jvm") version "1.3.72"
+    idea
+
     id("org.jetbrains.changelog") version "0.4.0"
     id("org.jetbrains.intellij") version "0.4.21"
-    kotlin("jvm") version "1.3.72"
+    id("com.jetbrains.rdgen") version "0.202.121"
+}
+
+repositories {
+    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 }
 
 dependencies {
@@ -51,12 +46,6 @@ val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
 
-repositories {
-    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
-}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
