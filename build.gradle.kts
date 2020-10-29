@@ -22,6 +22,11 @@ repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 }
 
+tasks.named<Wrapper>("wrapper") {
+    gradleVersion = "6.6.1"
+    distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
