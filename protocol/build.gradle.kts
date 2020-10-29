@@ -1,10 +1,15 @@
-import com.jetbrains.rd.generator.gradle.RdgenParams
-import com.jetbrains.rd.generator.gradle.RdgenTask
+import com.jetbrains.rd.generator.gradle.RdGenExtension
+import com.jetbrains.rd.generator.gradle.RdGenTask
+
+val rdLibDirectory: File by rootProject.extra
 
 repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
+    flatDir {
+        dir(rdLibDirectory)
+    }
 }
 
 plugins {
@@ -13,24 +18,17 @@ plugins {
     id("com.jetbrains.rdgen")
 }
 dependencies {
-    val rdLibDirectory by rootProject.extra.properties
-
     implementation(kotlin("stdlib"))
 
-    implementation(files("$rdLibDirectory/rider-model.jar"))
-    implementation(group = "com.jetbrains.rd", name = "rd-gen", version = "0.202.121")
+    implementation(":rider-model")
+    implementation(":rd-gen") // provided by sdk
 }
 
-val rdLibDirectory: File by rootProject.extra
 val repoRoot: File by rootProject.extra
 
 val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
 
-configure<RdgenParams> {
-    verbose = true
-    classpath("$rdLibDirectory/rider-model.jar", sourceSets.main.get().output)
-}
 tasks {
     val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol")
     val csEditorOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdEditorProtocol")
@@ -39,12 +37,31 @@ tasks {
     val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
 
 
-    val generateRiderModel by creating(RdgenTask::class) {
-        configure<RdgenParams> {
+    val generateUE4Lib by creating(RdGenTask::class) {
+        configure<RdGenExtension> {
+            verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
+            classpath("$rdLibDirectory/rider-model.jar")
+
+            sources("$modelDir/lib/ue4")
+            hashFolder = "$hashBaseDir/lib/ue4"
+            packages = "model.lib.ue4"
+
+            systemProperty("model.out.src.lib.ue4.csharp.dir", "$csLibraryOutput")
+            systemProperty("model.out.src.lib.ue4.cpp.dir", "$unrealEditorCppOutput")
+            systemProperty("model.out.src.lib.ue4.kt.dir", "$ktOutput")
+        }
+    }
+
+    val generateRiderModel by creating(RdGenTask::class) {
+        dependsOn(generateUE4Lib)
+
+        configure<RdGenExtension> {
             // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
             // intellij SDK, which is extracted in afterEvaluate
+            verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
+            classpath("$rdLibDirectory/rider-model.jar")
 
-            sources("$modelDir/rider")
+            sources("$modelDir")
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
 
@@ -64,44 +81,38 @@ tasks {
                 namespace = "JetBrains.Rider.Model"
                 directory = "$csRiderOutput"
             }
-            properties["model.out.src.rider.csharp.dir"] = "$csRiderOutput"
-            properties["model.out.src.rider.kotlin.dir"] = "$ktOutput"
+            systemProperty("model.out.src.rider.csharp.dir", "$csRiderOutput")
+            systemProperty("model.out.src.rider.kotlin.dir", "$ktOutput")
         }
     }
 
 
-    val generateEditorPluginModel by creating(RdgenTask::class) {
-        configure<RdgenParams> {
-            sources("$modelDir/editorPlugin")
+    val generateEditorPluginModel by creating(RdGenTask::class) {
+        dependsOn(generateUE4Lib)
+
+        configure<RdGenExtension> {
+            verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
+            classpath("$rdLibDirectory/rider-model.jar")
+
+            sources("$modelDir")
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
 
-            properties["model.out.src.editorPlugin.csharp.dir"] = "$csEditorOutput"
-            properties["model.out.src.editorPlugin.cpp.dir"] = "$unrealEditorCppOutput"
+            systemProperty("model.out.src.editorPlugin.csharp.dir", "$csEditorOutput")
+            systemProperty("model.out.src.editorPlugin.cpp.dir", "$unrealEditorCppOutput")
         }
     }
 
-    val generateUE4Lib by creating(RdgenTask::class) {
-        configure<RdgenParams> {
-            sources("$modelDir/lib/ue4")
-            hashFolder = "$hashBaseDir/lib/ue4"
-            packages = "model.lib.ue4"
-
-            properties["model.out.src.lib.ue4.csharp.dir"] = "$csLibraryOutput"
-            properties["model.out.src.lib.ue4.cpp.dir"] = "$unrealEditorCppOutput"
-            properties["model.out.src.lib.ue4.kt.dir"] = "$ktOutput"
-        }
-    }
-
-    @Suppress("UNUSED_VARIABLE") val generateModel by creating {
+    @Suppress("UNUSED_VARIABLE")
+    val generateModels by creating {
         group = "protocol"
         description = "Generates protocol models."
-        dependsOn(generateUE4Lib)
         dependsOn(generateEditorPluginModel)
         dependsOn(generateRiderModel)
     }
 
-    withType<RdgenTask> {
+    withType<RdGenTask> {
+        classpath("$rdLibDirectory/rd-gen.jar")
         dependsOn(build)
     }
 }

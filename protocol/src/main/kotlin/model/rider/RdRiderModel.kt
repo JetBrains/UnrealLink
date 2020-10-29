@@ -4,12 +4,7 @@ import com.jetbrains.rd.generator.nova.*
 import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
-import com.jetbrains.rider.model.nova.ide.UiContextModel
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.UClass
-import model.lib.ue4.UE4Library.BlueprintReference
-import model.lib.ue4.UE4Library.FString
-import model.lib.ue4.UE4Library.StringRange
 
 @Suppress("unused")
 object RdRiderModel : Ext(SolutionModel.Solution) {
@@ -20,26 +15,26 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     }
 
     private val LinkRequest = structdef("LinkRequest") {
-        field("data", FString)
+        field("data", UE4Library.FString)
     }
 
     val ILinkResponse = basestruct("ILinkResponse") {}
 
     val LinkResponseBlueprint = structdef("LinkResponseBlueprint") extends ILinkResponse {
-        field("fullPath", FString)
-        field("range", StringRange)
+        field("fullPath", UE4Library.FString)
+        field("range", UE4Library.StringRange)
     }
 
     val LinkResponseFilePath = structdef("LinkResponseFilePath") extends ILinkResponse {
-        field("fullPath", FString)
-        field("range", StringRange)
+        field("fullPath", UE4Library.FString)
+        field("range", UE4Library.StringRange)
     }
 
     val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends  ILinkResponse {}
 
     private val MethodReference = structdef("MethodReference") {
-        field("class", UClass)
-        field("method", FString)
+        field("class", UE4Library.UClass)
+        field("method", UE4Library.FString)
 
         const("separator", string, "::")
     }
@@ -75,9 +70,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         call("isMethodReference", MethodReference, bool).async
 
         signal("navigateToMethod", MethodReference)
-        signal("navigateToClass", UClass)
+        signal("navigateToClass", UE4Library.UClass)
 
-        signal("openBlueprint", BlueprintReference)
+        signal("openBlueprint", UE4Library.BlueprintReference)
 
         callback("AllowSetForegroundWindow", int, bool)
 
