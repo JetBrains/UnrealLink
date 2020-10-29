@@ -8,13 +8,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 
 plugins {
-    java
-    kotlin("jvm") version "1.3.72"
-    idea
+    kotlin("jvm") version "1.4.0"
 
     id("org.jetbrains.changelog") version "0.4.0"
     id("org.jetbrains.intellij") version "0.4.21"
-    id("com.jetbrains.rdgen") version "0.202.121"
+    id("com.jetbrains.rdgen") version "0.203.161"
 }
 
 repositories {
@@ -149,7 +147,7 @@ tasks {
 
     val compileDotNet by creating {
         dependsOn(findMsBuild)
-        dependsOn(":protocol:generateModel")
+        dependsOn(":protocol:generateModels")
         dependsOn(patchPropsFile)
 
         inputs.files(dotNetDir.listFiles())
@@ -197,7 +195,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
         }
     }
 
-    jar.get().dependsOn(":protocol:generateModel")
+    jar.get().dependsOn(":protocol:generateModels")
 
     withType<PrepareSandboxTask> {
         dependsOn(compileDotNet)

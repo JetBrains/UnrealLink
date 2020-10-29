@@ -6,9 +6,6 @@ import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import model.lib.ue4.UE4Library
-import model.lib.ue4.UE4Library.FString
-import model.lib.ue4.UE4Library.UClass
-import model.lib.ue4.UE4Library.UnrealLogEvent
 import java.io.File
 
 @Suppress("unused")
@@ -25,17 +22,18 @@ object RdEditorRoot : Root(
     }
 }
 
+@Suppress("unused")
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
-        signal("unrealLog", UnrealLogEvent).async
+        signal("unrealLog", UE4Library.UnrealLogEvent).async
         property("playMode", int)
         source("frameSkip", void)
 
         signal("openBlueprint", UE4Library.BlueprintReference)
 
-        signal("onBlueprintAdded", UClass).async
-        call("isBlueprintPathName", FString, bool)
-        call("getPathNameByPath", FString, FString.nullable)
+        signal("onBlueprintAdded", UE4Library.UClass).async
+        call("isBlueprintPathName", UE4Library.FString, bool)
+        call("getPathNameByPath", UE4Library.FString, UE4Library.FString.nullable)
 
         callback("AllowSetForegroundWindow", int, bool)
 
