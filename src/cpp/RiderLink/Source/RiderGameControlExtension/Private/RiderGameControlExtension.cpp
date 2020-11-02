@@ -2,7 +2,7 @@
 
 #include "RiderLink.hpp"
 
-#include "RdEditorProtocol/UE4Library/PlayState.Generated.h"
+#include "Model/Library/UE4Library/PlayState.Generated.h"
 
 #include "IHeadMountedDisplay.h"
 #include "IXRTrackingSystem.h"
