@@ -4,15 +4,15 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.project.Project
-import com.jetbrains.rd.util.reactive.adviseNotNull
-import com.jetbrains.rd.ide.model.rdRiderModel
-import com.jetbrains.rider.projectView.solution
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.project.Project
 import com.jetbrains.rd.platform.util.idea.ProtocolSubscribedProjectComponent
-import com.jetbrains.rd.ide.model.PluginInstallStatus
+import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction
 import com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallStatus
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.projectView.solution
 
 class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectComponent(project) {
     companion object {

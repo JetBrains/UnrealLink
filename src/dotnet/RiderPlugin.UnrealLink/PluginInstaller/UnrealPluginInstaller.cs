@@ -19,6 +19,7 @@ using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
 using Newtonsoft.Json.Linq;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.Settings;
 using RiderPlugin.UnrealLink.Utils;
 

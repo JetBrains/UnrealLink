@@ -11,9 +11,9 @@ using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
-using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {

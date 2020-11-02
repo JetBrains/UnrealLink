@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using JetBrains.Rider.Model;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {    

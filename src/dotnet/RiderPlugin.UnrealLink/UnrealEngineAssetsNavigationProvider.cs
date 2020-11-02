@@ -1,8 +1,8 @@
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Cpp.UEAsset.Reader;
 using JetBrains.ReSharper.Feature.Services.Cpp.UEAsset.Search;
-using JetBrains.Unreal.Lib;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model;
 
 namespace RiderPlugin.UnrealLink
 {

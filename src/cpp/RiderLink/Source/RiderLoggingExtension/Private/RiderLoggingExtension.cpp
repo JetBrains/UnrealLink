@@ -16,9 +16,9 @@ DEFINE_LOG_CATEGORY(FLogRiderLoggingExtensionModule);
 
 IMPLEMENT_MODULE(FRiderLoggingExtensionModule, RiderLoggingExtension);
 
-static TArray<rd::Wrapper<Jetbrains::EditorPlugin::StringRange>> GetPathRanges(const FRegexPattern &Pattern, const FString &Str)
+static TArray<rd::Wrapper<JetBrains::EditorPlugin::StringRange>> GetPathRanges(const FRegexPattern &Pattern, const FString &Str)
 {
-    using Jetbrains::EditorPlugin::StringRange;
+    using JetBrains::EditorPlugin::StringRange;
     FRegexMatcher Matcher(Pattern, Str);
     TArray<rd::Wrapper<StringRange>> Ranges;
     while (Matcher.FindNext())
@@ -32,9 +32,9 @@ static TArray<rd::Wrapper<Jetbrains::EditorPlugin::StringRange>> GetPathRanges(c
     return Ranges;
 }
 
-static TArray<rd::Wrapper<Jetbrains::EditorPlugin::StringRange>> GetMethodRanges(const FRegexPattern &Pattern, const FString &Str)
+static TArray<rd::Wrapper<JetBrains::EditorPlugin::StringRange>> GetMethodRanges(const FRegexPattern &Pattern, const FString &Str)
 {
-    using Jetbrains::EditorPlugin::StringRange;
+    using JetBrains::EditorPlugin::StringRange;
     FRegexMatcher Matcher(Pattern, Str);
     TArray<rd::Wrapper<StringRange>> Ranges;
     while (Matcher.FindNext())
@@ -65,7 +65,7 @@ void FRiderLoggingExtensionModule::StartupModule()
         {
             if (Type > ELogVerbosity::All) return;
 
-            rd::ISignal<Jetbrains::EditorPlugin::UnrealLogEvent> const & UnrealLog = RdConnection.UnrealToBackendModel.get_unrealLog();
+            rd::ISignal<JetBrains::EditorPlugin::UnrealLogEvent> const & UnrealLog = RdConnection.UnrealToBackendModel.get_unrealLog();
             rd::optional<rd::DateTime> DateTime;
             if (Time)
             {
@@ -76,7 +76,7 @@ void FRiderLoggingExtensionModule::StartupModule()
                     Name = Name.GetPlainNameString(),
                     DateTime]()
                 {
-                    Jetbrains::EditorPlugin::LogMessageInfo MessageInfo{Type, Name, DateTime};
+                    JetBrains::EditorPlugin::LogMessageInfo MessageInfo{Type, Name, DateTime};
 
                     // [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
                     // while we won't change BP hyperlink parsing
@@ -89,14 +89,14 @@ void FRiderLoggingExtensionModule::StartupModule()
                     {
                         ToSend.TrimEndInline();
                         UnrealLog.fire(
-                            Jetbrains::EditorPlugin::UnrealLogEvent{
+                            JetBrains::EditorPlugin::UnrealLogEvent{
                                 MessageInfo, ToSend, GetPathRanges(PathPattern, ToSend),
                                 GetMethodRanges(MethodPattern, ToSend)
                             });
                     }
                     Tail.TrimEndInline();
                     UnrealLog.fire(
-                        Jetbrains::EditorPlugin::UnrealLogEvent{
+                        JetBrains::EditorPlugin::UnrealLogEvent{
                             MessageInfo, Tail, GetPathRanges(PathPattern, Tail),
                             GetMethodRanges(MethodPattern, Tail)
                         });

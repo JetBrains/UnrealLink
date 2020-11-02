@@ -31,7 +31,7 @@ DEFINE_LOG_CATEGORY(FLogRiderBlueprintExtensionModule);
 
 IMPLEMENT_MODULE(FRiderBlueprintExtensionModule, RiderBlueprintExtension);
 
-static void AllowSetForeGroundForEditor(Jetbrains::EditorPlugin::RdEditorModel const & unrealToBackendModel) {
+static void AllowSetForeGroundForEditor(JetBrains::EditorPlugin::RdEditorModel const & unrealToBackendModel) {
     static const int32 CurrentProcessId = FPlatformProcess::GetCurrentProcessId();
     try {
         const rd::WiredRdTask<bool> Task = unrealToBackendModel.get_allowSetForegroundWindow().sync(CurrentProcessId);
@@ -67,13 +67,13 @@ void FRiderBlueprintExtensionModule::StartupModule()
     });
 
     const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
-    Jetbrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
+    JetBrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
     RdConnection.Scheduler.queue([this, NestedLifetime, &UnrealToBackendModel]()
     {
         UnrealToBackendModel.get_openBlueprint().advise(
             NestedLifetime,
             [this, &UnrealToBackendModel](
-            Jetbrains::EditorPlugin::BlueprintReference const& s)
+            JetBrains::EditorPlugin::BlueprintReference const& s)
             {
                 try
                 {
@@ -110,7 +110,7 @@ void FRiderBlueprintExtensionModule::StartupModule()
         RdConnection.Scheduler.queue([this, Blueprint, &UnrealToBackendModel]
         {
             UnrealToBackendModel.get_onBlueprintAdded().fire(
-                Jetbrains::EditorPlugin::UClass(Blueprint->GetPathName()));
+                JetBrains::EditorPlugin::UClass(Blueprint->GetPathName()));
         });
     });
 

@@ -3,8 +3,8 @@ package com.jetbrains.rider.plugins.unreal.actions
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.jetbrains.rd.ide.model.PluginInstallLocation
-import com.jetbrains.rd.ide.model.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
 open class InstallEditorPluginToEngineAction(text: String = "Install in Engine") : NotificationAction(text) {

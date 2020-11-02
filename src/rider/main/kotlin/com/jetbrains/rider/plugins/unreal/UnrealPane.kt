@@ -8,7 +8,7 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rider.model.UnrealLogEvent
+import com.jetbrains.rider.plugins.unreal.model.UnrealLogEvent
 import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import com.jetbrains.rider.plugins.unreal.actions.FilterComboAction
 import com.jetbrains.rider.ui.components.ComponentFactories

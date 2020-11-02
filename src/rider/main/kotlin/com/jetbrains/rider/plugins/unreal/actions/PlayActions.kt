@@ -4,8 +4,8 @@ import com.intellij.openapi.actionSystem.*
 import com.intellij.util.SmartList
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rd.util.reactive.valueOrDefault
-import com.jetbrains.rider.model.PlayState
 import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.model.PlayState
 import icons.UnrealIcons
 import javax.swing.Icon
 

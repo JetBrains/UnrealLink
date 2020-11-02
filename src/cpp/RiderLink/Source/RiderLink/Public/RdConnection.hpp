@@ -27,7 +27,7 @@ public:
 	void Init();
 	void Shutdown();
 
-	Jetbrains::EditorPlugin::RdEditorModel UnrealToBackendModel;
+	JetBrains::EditorPlugin::RdEditorModel UnrealToBackendModel;
 
 private:
 	TUniquePtr<rd::IProtocol> Protocol;

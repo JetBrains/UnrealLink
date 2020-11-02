@@ -3,15 +3,15 @@ package model.rider
 import com.jetbrains.rd.generator.nova.*
 import com.jetbrains.rd.generator.nova.PredefinedType.*
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
+import com.jetbrains.rd.generator.nova.kotlin.Kotlin11Generator
 import com.jetbrains.rider.model.nova.ide.SolutionModel
 import model.lib.ue4.UE4Library
 
 @Suppress("unused")
 object RdRiderModel : Ext(SolutionModel.Solution) {
     init {
-        setting(CSharp50Generator.AdditionalUsings) {
-            listOf("JetBrains.Unreal.Lib")
-        }
+        setting(Kotlin11Generator.Namespace, "com.jetbrains.rider.plugins.unreal.model.frontendBackend")
+        setting(CSharp50Generator.Namespace, "RiderPlugin.UnrealLink.Model.FrontendBackend")
     }
 
     private val LinkRequest = structdef("LinkRequest") {

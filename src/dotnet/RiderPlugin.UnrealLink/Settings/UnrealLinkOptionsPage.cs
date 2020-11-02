@@ -14,6 +14,7 @@ using JetBrains.ReSharper.Resources.Settings;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.UIAutomation;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.PluginInstaller;
 
 namespace RiderPlugin.UnrealLink.Settings

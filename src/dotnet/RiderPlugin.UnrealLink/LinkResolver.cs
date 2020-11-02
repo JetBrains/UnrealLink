@@ -4,13 +4,12 @@ using JetBrains.Annotations;
 using JetBrains.Diagnostics;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
-using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Model;
-using JetBrains.Unreal.Lib;
 using JetBrains.Util.DataStructures;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {

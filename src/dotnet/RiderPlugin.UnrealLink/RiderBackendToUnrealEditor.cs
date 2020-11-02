@@ -4,16 +4,16 @@ using System.Linq;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
 using JetBrains.Lifetimes;
-using JetBrains.Platform.Unreal.EditorPluginModel;
 using JetBrains.ProjectModel;
 using JetBrains.Rd;
 using JetBrains.Rd.Base;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
-using JetBrains.Rider.Model;
-using JetBrains.Unreal.Lib;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model;
+using RiderPlugin.UnrealLink.Model.BackendUnreal;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.PluginInstaller;
 
 namespace RiderPlugin.UnrealLink
