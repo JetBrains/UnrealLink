@@ -7,7 +7,7 @@ using JetBrains.Rd.Base;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features;
 using JetBrains.ReSharper.Psi.Cpp;
-using JetBrains.Rider.Model;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {

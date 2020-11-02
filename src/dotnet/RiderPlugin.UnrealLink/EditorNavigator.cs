@@ -8,9 +8,9 @@ using JetBrains.ReSharper.Psi.Cpp.Language;
 using JetBrains.ReSharper.Psi.Cpp.Symbols;
 using JetBrains.ReSharper.Psi.Cpp.Util;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Model;
-using JetBrains.Unreal.Lib;
 using JetBrains.Util.Caches;
+using RiderPlugin.UnrealLink.Model;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {

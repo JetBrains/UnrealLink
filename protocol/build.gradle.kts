@@ -47,9 +47,30 @@ tasks {
             val cppLibraryOutput = File(cppOutputRoot, "Library")
             val ktLibraryOutput = File(ktOutputRoot, "Library")
 
-            systemProperty("model.out.src.lib.ue4.csharp.dir", "$csLibraryOutput")
+            generator {
+                language = "csharp"
+                transform = "symmetric"
+                root = "model.lib.ue4.UE4Library"
+                directory = "$csLibraryOutput"
+            }
+
             systemProperty("model.out.src.lib.ue4.cpp.dir", "$cppLibraryOutput")
-            systemProperty("model.out.src.lib.ue4.kt.dir", "$ktLibraryOutput")
+            // TODO: use this generator instead of hardcoded
+            /*
+            generator {
+                language = "cpp"
+                transform = "reversed"
+                root = "model.lib.ue4.UE4Library"
+                directory = "$cppLibraryOutput"
+            }
+            */
+
+            generator {
+                language = "kotlin"
+                transform = "asis"
+                root = "model.lib.ue4.UE4Library"
+                directory = "$ktLibraryOutput"
+            }
         }
     }
 
@@ -73,7 +94,6 @@ tasks {
                 language = "kotlin"
                 transform = "asis"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
-                namespace = "com.jetbrains.rider.model"
                 directory = "$ktRiderOutput"
 
             }
@@ -82,11 +102,8 @@ tasks {
                 language = "csharp"
                 transform = "reversed"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
-                namespace = "JetBrains.Rider.Model"
                 directory = "$csRiderOutput"
             }
-            systemProperty("model.out.src.rider.csharp.dir", "$csRiderOutput")
-            systemProperty("model.out.src.rider.kotlin.dir", "$ktRiderOutput")
         }
     }
 
@@ -105,8 +122,25 @@ tasks {
             val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
             val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
 
-            systemProperty("model.out.src.editorPlugin.csharp.dir", "$csEditorOutput")
+            generator {
+                language = "csharp"
+                transform = "asis"
+                root = "model.editorPlugin.RdEditorRoot"
+                directory = "$csEditorOutput"
+            }
+
             systemProperty("model.out.src.editorPlugin.cpp.dir", "$cppEditorOutput")
+            // TODO: use this generator instead of hardcoded
+            /*
+            generator {
+                language = "cpp"
+                transform = "reversed"
+                root = "model.editorPlugin.RdEditorRoot"
+                directory = "$cppLibraryOutput"
+            }
+            */
+
+
         }
     }
 

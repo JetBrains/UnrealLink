@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.reactive.ISignal
-import com.jetbrains.rider.model.BlueprintFunction
+import com.jetbrains.rider.plugins.unreal.model.BlueprintFunction
 
 class BlueprintFunctionHyperLinkInfo(private val navigation: ISignal<BlueprintFunction>, private val function: BlueprintFunction) : HyperlinkInfo {
     companion object {

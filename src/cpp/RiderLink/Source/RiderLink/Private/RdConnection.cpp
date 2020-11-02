@@ -21,7 +21,7 @@ void RdConnection::Init()
     Scheduler.queue([&]()
     {
         UnrealToBackendModel.connect(SocketLifetime, Protocol.Get());
-        Jetbrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
+        JetBrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
             UnrealToBackendModel.get_serialization_context().get_serializers()
         );
     });

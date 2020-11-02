@@ -10,11 +10,14 @@ import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
 import java.io.File
 
 object UE4Library : Root(
-        CSharp50Generator(FlowTransform.AsIs, "JetBrains.Unreal.Lib", File(syspropertyOrInvalid("model.out.src.lib.ue4.csharp.dir"))),
-        Cpp17Generator(FlowTransform.Reversed, "Jetbrains::EditorPlugin", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatePrecompiledHeaders = false),
-        Kotlin11Generator(FlowTransform.Symmetric, "com.jetbrains.rider.model", File(syspropertyOrInvalid("model.out.src.lib.ue4.kt.dir")))
+        // TODO: use settings for precompiled headers when available and remove hardcoded generator
+        Cpp17Generator(FlowTransform.Reversed, "", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatePrecompiledHeaders = false),
 ) {
     init {
+        setting(Kotlin11Generator.Namespace, "com.jetbrains.rider.plugins.unreal.model")
+        setting(CSharp50Generator.Namespace, "RiderPlugin.UnrealLink.Model")
+        setting(Cpp17Generator.Namespace, "JetBrains::EditorPlugin")
+
         setting(Cpp17Generator.AdditionalHeaders, listOf(
                 "UE4TypesMarshallers.h",
                 "Runtime/Core/Public/Containers/Array.h",
@@ -31,7 +34,6 @@ object UE4Library : Root(
                 setting(Cpp17Generator.Namespace, ns)
             }
             setting(Cpp17Generator.Intrinsic, intrinsic)
-            setting(CSharp50Generator.Namespace, "JetBrains.Unreal.Lib")
         }
     }
 
