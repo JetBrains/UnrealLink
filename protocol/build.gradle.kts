@@ -30,12 +30,9 @@ val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
 
 tasks {
-    val unrealEditorCppOutput = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/RdEditorProtocol")
-    val csEditorOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdEditorProtocol")
-    val csRiderOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/RdRiderProtocol")
-    val csLibraryOutput = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model/Library")
-    val ktOutput = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model/RdRiderProtocol")
-
+    val cppOutputRoot = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/Model")
+    val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model")
+    val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
     val generateUE4Lib by creating(RdGenTask::class) {
         configure<RdGenExtension> {
@@ -46,9 +43,13 @@ tasks {
             hashFolder = "$hashBaseDir/lib/ue4"
             packages = "model.lib.ue4"
 
+            val csLibraryOutput = File(csOutputRoot, "Library")
+            val cppLibraryOutput = File(cppOutputRoot, "Library")
+            val ktLibraryOutput = File(ktOutputRoot, "Library")
+
             systemProperty("model.out.src.lib.ue4.csharp.dir", "$csLibraryOutput")
-            systemProperty("model.out.src.lib.ue4.cpp.dir", "$unrealEditorCppOutput")
-            systemProperty("model.out.src.lib.ue4.kt.dir", "$ktOutput")
+            systemProperty("model.out.src.lib.ue4.cpp.dir", "$cppLibraryOutput")
+            systemProperty("model.out.src.lib.ue4.kt.dir", "$ktLibraryOutput")
         }
     }
 
@@ -65,12 +66,15 @@ tasks {
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
 
+            val csRiderOutput = File(csOutputRoot, "RdRiderProtocol")
+            val ktRiderOutput = File(ktOutputRoot, "RdRiderProtocol")
+
             generator {
                 language = "kotlin"
                 transform = "asis"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
                 namespace = "com.jetbrains.rider.model"
-                directory = "$ktOutput"
+                directory = "$ktRiderOutput"
 
             }
 
@@ -82,7 +86,7 @@ tasks {
                 directory = "$csRiderOutput"
             }
             systemProperty("model.out.src.rider.csharp.dir", "$csRiderOutput")
-            systemProperty("model.out.src.rider.kotlin.dir", "$ktOutput")
+            systemProperty("model.out.src.rider.kotlin.dir", "$ktRiderOutput")
         }
     }
 
@@ -98,8 +102,11 @@ tasks {
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
 
+            val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
+            val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
+
             systemProperty("model.out.src.editorPlugin.csharp.dir", "$csEditorOutput")
-            systemProperty("model.out.src.editorPlugin.cpp.dir", "$unrealEditorCppOutput")
+            systemProperty("model.out.src.editorPlugin.cpp.dir", "$cppEditorOutput")
         }
     }
 
