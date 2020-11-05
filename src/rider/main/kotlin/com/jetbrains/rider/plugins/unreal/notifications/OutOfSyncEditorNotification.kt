@@ -15,8 +15,11 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
 class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectComponent(project) {
+    // TODO: move all public strings to resource bundle
     companion object {
-        private val notificationGroupId = NotificationGroup.balloonGroup("Unreal Editor connection is out of sync")
+        private val notificationGroupId =
+                NotificationGroup.createIdWithTitle("Unreal Editor connection is out of sync",
+                        "Unreal Editor connection is out of sync")
     }
 
     init {
@@ -41,7 +44,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
             else
                 "RiderLink plugin synchronization is required"
 
-            val notification = Notification(notificationGroupId.displayId, title, message, NotificationType.WARNING)
+            val notification = Notification(notificationGroupId, title, message, NotificationType.WARNING)
 
             @Suppress("NON_EXHAUSTIVE_WHEN")
             when (it.status) {

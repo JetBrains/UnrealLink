@@ -6,20 +6,19 @@ import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.UE4Library
 
-class UnrealToolWindowManager(project: Project,
-                              host: UnrealHost,
-                              private val unrealToolWindowContextFactory: UnrealToolWindowFactory
-) : LifetimedProjectComponent(project) {
-
+class UnrealToolWindowManager(project: Project) : LifetimedProjectComponent(project) {
     init {
+        val host = UnrealHost.getInstance(project)
+        val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
+
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
 
         host.model.isConnectedToUnrealEditor.whenTrue(componentLifetime) {
-            unrealToolWindowContextFactory.showTabForNewSession()
+            toolWindowsFactory.showTabForNewSession()
         }
 
         host.model.unrealLog.advise(componentLifetime) { event ->
-            unrealToolWindowContextFactory.print(event)
+            toolWindowsFactory.print(event)
         }
     }
 }
