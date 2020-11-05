@@ -2,11 +2,11 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.execution.ui.ConsoleViewContentType.*
 import com.intellij.ide.impl.ContentManagerWatcher
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.jetbrains.rd.platform.util.getComponent
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rider.plugins.unreal.UnrealPane
@@ -29,7 +29,7 @@ class UnrealToolWindowFactory(val project: Project)
         const val TITLE_ID = "Unreal Editor Log"
         const val ACTION_PLACE = "unreal"
 
-        fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
+        fun getInstance(project: Project): UnrealToolWindowFactory = project.getComponent()
     }
 
     var allCategoriesSelected: Boolean = true

@@ -25,8 +25,10 @@ import com.sun.jna.win32.StdCallLibrary
 // UnrealHost.init -> UnrealHost.model.isUnrealEngineSolution.advise -> StatusBarWidgetsManager.updateWidget -> UnrealStatusBarWidget.update ->
 // UnrealStatusBarWidget.isAvailable -> UnrealHost.model.isUnrealEngineSolution.value -> UnrealHost.init
 // We need to finish `init` first, then subscribe to changes in model
-class UnrealHostSetup(project: Project, unrealHost: UnrealHost) : LifetimedProjectComponent(project) {
+class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
     init {
+        val unrealHost = UnrealHost.getInstance(project)
+
         unrealHost.performModelAction {
             it.allowSetForegroundWindow.set { _, id ->
                 if (SystemInfo.isWindows) {
