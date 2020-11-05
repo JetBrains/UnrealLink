@@ -2,6 +2,7 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.execution.ui.ConsoleViewContentType.*
 import com.intellij.ide.impl.ContentManagerWatcher
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -105,15 +106,16 @@ class UnrealToolWindowFactory(val project: Project)
     private fun filter() {
         val currentScroll = UnrealPane.currentConsoleView.editor.scrollingModel.verticalScrollOffset
         UnrealPane.currentConsoleView.clear()
-        UnrealPane.currentConsoleView.waitAllRequests()
-        for (logEvent in UnrealPane.logData) {
-            if (printImpl(logEvent)) {
-                println()
+        // clear is not instant, it just adds an internal request in console
+        // so schedule filtered content printing on next UI update after clear had been already performed
+        invokeLater {
+            for (logEvent in UnrealPane.logData) {
+                if (printImpl(logEvent)) {
+                    println()
+                }
             }
+            UnrealPane.currentConsoleView.editor.scrollingModel.scrollVertically(currentScroll)
         }
-        // Flush not to show an empty window for some msecs
-        UnrealPane.currentConsoleView.flushDeferredText()
-        UnrealPane.currentConsoleView.editor.scrollingModel.scrollVertically(currentScroll)
     }
 
     private fun printSpaces(n: Int = 1) {
