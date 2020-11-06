@@ -64,14 +64,13 @@ class UnrealPaneConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
                     AllIcons.Actions.GC) {
 
         override fun update(e: AnActionEvent) {
-            val console = UnrealPane.currentConsoleView
+            val console = consolePanel.console
             val enabled: Boolean = console.contentSize > 0
             e.presentation.isEnabled = enabled
         }
 
         override fun actionPerformed(e: AnActionEvent) {
-            UnrealPane.logData.clear()
-            UnrealPane.currentConsoleView.clear()
+            consolePanel.clear()
         }
     }
 }

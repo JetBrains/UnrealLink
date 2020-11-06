@@ -9,16 +9,12 @@ import com.jetbrains.rider.plugins.unreal.model.UE4Library
 class UnrealToolWindowManager(project: Project) : LifetimedProjectComponent(project) {
     init {
         val host = UnrealHost.getInstance(project)
-        val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
 
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
 
         host.model.isConnectedToUnrealEditor.whenTrue(componentLifetime) {
+            val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
             toolWindowsFactory.showTabForNewSession()
-        }
-
-        host.model.unrealLog.advise(componentLifetime) { event ->
-            toolWindowsFactory.print(event)
         }
     }
 }
