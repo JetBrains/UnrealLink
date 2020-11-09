@@ -10,12 +10,12 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.jetbrains.rd.platform.util.getComponent
 import com.jetbrains.rd.platform.util.lifetime
-import com.jetbrains.rider.plugins.unreal.UnrealPane
+import com.jetbrains.rider.plugins.unreal.UnrealLogPanel
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
 class UnrealToolWindowFactory(val project: Project)
-    : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealPane, { it }) {
+    : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealLogPanel, { it }) {
 
     companion object {
         const val TOOLWINDOW_ID = "Unreal"
@@ -32,7 +32,7 @@ class UnrealToolWindowFactory(val project: Project)
         contentManager.addContentManagerListener(object : ContentManagerListener {
             override fun contentAdded(event: ContentManagerEvent) {
                 // hacky way to fix memory leaks on exit
-                val content = event.content.component as UnrealPane
+                val content = event.content.component as UnrealLogPanel
                 Disposer.register(toolWindow.disposable, content.console)
             }
         })
