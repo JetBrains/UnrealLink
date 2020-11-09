@@ -3,6 +3,7 @@ package com.jetbrains.rider.plugins.unreal.toolWindow
 import com.intellij.ide.impl.ContentManagerWatcher
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
@@ -26,7 +27,12 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
-        val toolWindow = toolWindowManager.registerToolWindow(TOOLWINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true, false)
+        val toolWindow = toolWindowManager.registerToolWindow(
+                RegisterToolWindowTask(id = TOOLWINDOW_ID, anchor = ToolWindowAnchor.BOTTOM,
+                        icon = RiderIcons.Stacktrace.Stacktrace, // TODO: change this placeholder to proper icon
+                        canCloseContent = false, canWorkInDumbMode = true, sideTool = false)
+        )
+        toolWindow.title = "Unreal" // TODO: move to resources
 
         val contentManager = toolWindow.contentManager
         contentManager.addContentManagerListener(object : ContentManagerListener {
@@ -38,9 +44,6 @@ class UnrealToolWindowFactory(val project: Project)
         })
 
         ContentManagerWatcher.watchContentManager(toolWindow, contentManager)
-
-        toolWindow.title = "Unreal"
-        toolWindow.setIcon(RiderIcons.Stacktrace.Stacktrace) //todo change
 
         return toolWindow
     }
