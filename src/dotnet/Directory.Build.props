@@ -18,6 +18,6 @@
 
   <Import Project="Plugin.props" />
   <Import Project="Versions.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\..\build\generated\DotNetSdkPath.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\build\generated\DotNetSdkPath.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\generated\DotNetSdkPath.generated.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\build\generated\DotNetSdkPath.generated.props')" />
 
 </Project>

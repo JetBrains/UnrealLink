@@ -125,7 +125,7 @@ namespace RiderPlugin.UnrealLink
             wire.Connected.Advise(modelLifetime, isConnected => myUnrealHost.PerformModelAction(riderModel =>
                 riderModel.IsConnectedToUnrealEditor.SetValue(isConnected)));
 
-            var protocol = new Protocol("UnrealEditorPlugin", new Serializers(),
+            var protocol = new Protocol("UnrealEditorPlugin", new Serializers(modelLifetime, null, null),
                 new Identities(IdKind.Client), myDispatcher, wire, modelLifetime);
 
             wire.Connected.WhenTrue(modelLifetime, lifetime =>

@@ -5,13 +5,16 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.ByteArrayOutputStream
+import com.jetbrains.rider.plugins.gradle.tasks.DotNetBuildTask
+import com.jetbrains.rider.plugins.gradle.tasks.GenerateNuGetConfig
+import com.jetbrains.rider.plugins.gradle.tasks.GenerateDotNetSdkPathPropsTask
+import com.jetbrains.rider.plugins.gradle.buildServer.initBuildServer
 
 plugins {
     kotlin("jvm") version "1.4.0"
 
     id("org.jetbrains.changelog") version "0.4.0"
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") // Version comes from buildSrc
     id("com.jetbrains.rdgen") version "0.203.161"
 }
 
@@ -48,6 +51,7 @@ val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.pro
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
+val buildServer by extra { initBuildServer(gradle) }
 
 
 java {
@@ -97,8 +101,8 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val dotNetSdkPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSDkForRdPlugins")
+val dotNetSdkPathLazy by lazy {
+    val sdkPath = sdkDirectory.resolve("lib").resolve("DotNetSdkForRdPlugins")
     assert(sdkPath.isDirectory)
     println(".NETSDK path: $sdkPath")
 
@@ -108,70 +112,24 @@ val dotNetSdkPath by lazy {
 apply(from = "cpp.gradle.kts")
 
 tasks {
-    val findMsBuild by creating {
-        doLast {
-            val stdout = ByteArrayOutputStream()
+    val prepareRiderBuildProps by creating(GenerateDotNetSdkPathPropsTask::class) {
+        group = "RiderBackend"
+        dotNetSdkPath = dotNetSdkPathLazy
 
-            if (isWindows) {
-                exec {
-                    executable = "${project.rootDir}/tools/vswhere.exe"
-                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "-property", "installationPath")
-                    standardOutput = stdout
-                    workingDir = project.rootDir
-                }
-                val vsRootDir = stdout.toString().trim()
-                var msBuildPath = "$vsRootDir/MSBuild/Current/Bin/MSBuild.exe"
-                if (!file(msBuildPath).exists())
-                    msBuildPath = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
-                extra["executable"] = msBuildPath
-            } else {
-                exec {
-                    executable = "which"
-                    args = listOf("msbuild")
-                    standardOutput = stdout
-                    workingDir = project.rootDir
-                }
-                extra["executable"] = stdout.toString().trim()
-            }
-        }
+    }
+    val prepareNuGetConfig by creating(GenerateNuGetConfig::class) {
+        group = "RiderBackend"
+        dependsOn(prepareRiderBuildProps)
+        dotNetSdkPath = dotNetSdkPathLazy
     }
 
-    val patchPropsFile by creating {
-        doLast {
-            if (pluginPropsFile.parentFile.exists().not()) {
-                pluginPropsFile.parentFile.mkdirs()
-            }
-            pluginPropsFile.writeText("""
-            |<Project>
-            |   <PropertyGroup>
-            |       <DotNetSdkPath>${dotNetSdkPath}</DotNetSdkPath>
-            |   </PropertyGroup>
-            |</Project>""".trimMargin())
-        }
-    }
 
-    val compileDotNet by creating {
-        dependsOn(findMsBuild)
+    val buildResharperHost by creating(DotNetBuildTask::class) {
+        group = "RiderBackend"
+        description = "Build backend for Rider"
         dependsOn(":protocol:generateModels")
-        dependsOn(patchPropsFile)
-
-        inputs.files(dotNetDir.listFiles())
-        outputs.dirs(dotNetBinDir)
-
-        doLast {
-            val stdout = ByteArrayOutputStream()
-            val result = exec {
-                executable = findMsBuild.extra["executable"] as String
-                standardOutput = stdout
-                args = listOf("/t:Restore;Rebuild", dotnetSolution.absolutePath, "/v:detailed", "/p:Configuration=$buildConfiguration")
-                isIgnoreExitValue = true
-            }
-
-            if (result.exitValue != 0) {
-                println(stdout.toString().trim())
-                throw GradleException("Problems with compileDotNet task")
-            }
-        }
+        dependsOn(prepareNuGetConfig)
+        buildFile.set(dotnetSolution)
 
     }
 
@@ -187,7 +145,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
     }
 
     @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
-        dependsOn(compileDotNet)
+        dependsOn(buildResharperHost)
         outputs.upToDateWhen { false }
         buildSearchableOptions {
             enabled = buildConfiguration == "Release"
@@ -203,7 +161,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
     jar.get().dependsOn(":protocol:generateModels")
 
     withType<PrepareSandboxTask> {
-        dependsOn(compileDotNet)
+        dependsOn(buildResharperHost)
         val packCppSide = getByName<Zip>("packCppSide")
         dependsOn(packCppSide)
 

@@ -13,5 +13,5 @@
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
-  <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" />
+  <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" Condition="Exists('$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props')" />
 </Project>
