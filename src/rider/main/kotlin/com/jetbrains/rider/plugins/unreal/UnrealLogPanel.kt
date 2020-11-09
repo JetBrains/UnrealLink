@@ -29,7 +29,7 @@ import java.awt.BorderLayout
 import java.util.*
 import javax.swing.JPanel
 
-class UnrealPane(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
+class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     companion object {
         private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
     }
