@@ -12,7 +12,7 @@ open class GenerateNuGetConfig: DefaultTask() {
     var dotNetSdkPath: Any? = null
 
     @OutputFile
-    var nuGetConfigFile = File("${project.projectDir}/../NuGet.Config")
+    var nuGetConfigFile = project.projectDir.resolve("NuGet.Config")
 
     @TaskAction
     fun generate() {
@@ -35,7 +35,7 @@ open class GenerateNuGetConfig: DefaultTask() {
         logger.info("Generated content:\n$nugetConfigText")
 
         val sb = StringBuilder("Dump dotNetSdkFile content:\n")
-        for(file in dotNetSdkFile.listFiles()) {
+        dotNetSdkFile.listFiles()?.forEach { file ->
             sb.append("${file.canonicalPath}\n")
         }
         logger.info(sb.toString())

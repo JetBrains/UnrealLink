@@ -6,8 +6,8 @@ import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.jetbrains.rider.plugins.gradle.tasks.DotNetBuildTask
+import com.jetbrains.rider.plugins.gradle.tasks.GenerateNuGetConfig
 import com.jetbrains.rider.plugins.gradle.buildServer.initBuildServer
-import java.io.ByteArrayOutputStream
 
 plugins {
     kotlin("jvm") version "1.4.0"
@@ -100,8 +100,8 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val dotNetSdkPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSDkForRdPlugins")
+val dotNetSdkPathLazy by lazy {
+    val sdkPath = sdkDirectory.resolve("lib").resolve("DotNetSDkForRdPlugins")
     assert(sdkPath.isDirectory)
     println(".NETSDK path: $sdkPath")
 
@@ -111,46 +111,9 @@ val dotNetSdkPath by lazy {
 apply(from = "cpp.gradle.kts")
 
 tasks {
-    val findMsBuild by creating {
-        doLast {
-            val stdout = ByteArrayOutputStream()
-
-            if (isWindows) {
-                exec {
-                    executable = "${project.rootDir}/tools/vswhere.exe"
-                    args = listOf("-latest", "-products", "*", "-requires", "Microsoft.Component.MSBuild", "-property", "installationPath")
-                    standardOutput = stdout
-                    workingDir = project.rootDir
-                }
-                val vsRootDir = stdout.toString().trim()
-                var msBuildPath = "$vsRootDir/MSBuild/Current/Bin/MSBuild.exe"
-                if (!file(msBuildPath).exists())
-                    msBuildPath = "$vsRootDir/MSBuild/15.0/Bin/MSBuild.exe"
-                extra["executable"] = msBuildPath
-            } else {
-                exec {
-                    executable = "which"
-                    args = listOf("msbuild")
-                    standardOutput = stdout
-                    workingDir = project.rootDir
-                }
-                extra["executable"] = stdout.toString().trim()
-            }
-        }
-    }
-
-    val patchPropsFile by creating {
-        doLast {
-            if (pluginPropsFile.parentFile.exists().not()) {
-                pluginPropsFile.parentFile.mkdirs()
-            }
-            pluginPropsFile.writeText("""
-            |<Project>
-            |   <PropertyGroup>
-            |       <DotNetSdkPath>${dotNetSdkPath}</DotNetSdkPath>
-            |   </PropertyGroup>
-            |</Project>""".trimMargin())
-        }
+    val prepareNuGetConfig by creating(GenerateNuGetConfig::class) {
+        group = "RiderBackend"
+        dotNetSdkPath = dotNetSdkPathLazy
     }
 
 
@@ -158,6 +121,7 @@ tasks {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(":protocol:generateModels")
+        dependsOn(prepareNuGetConfig)
         buildFile.set(dotnetSolution)
     }
 
