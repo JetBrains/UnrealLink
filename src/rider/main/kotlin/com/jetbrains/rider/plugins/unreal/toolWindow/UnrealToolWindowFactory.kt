@@ -10,7 +10,7 @@ import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.jetbrains.rd.platform.util.getComponent
 import com.jetbrains.rd.platform.util.lifetime
-import com.jetbrains.rider.plugins.unreal.UnrealLogPanel
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 

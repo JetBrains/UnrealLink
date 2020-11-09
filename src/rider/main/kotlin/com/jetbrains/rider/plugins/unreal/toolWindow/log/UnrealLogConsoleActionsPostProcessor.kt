@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.unreal
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.actions.ClearConsoleAction
