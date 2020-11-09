@@ -1,6 +1,8 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow
 
 import com.intellij.ide.impl.ContentManagerWatcher
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.RegisterToolWindowTask
@@ -9,12 +11,12 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
-import com.jetbrains.rd.platform.util.getComponent
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
+@Service
 class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealLogPanel, { it }) {
 
@@ -23,7 +25,7 @@ class UnrealToolWindowFactory(val project: Project)
         const val TITLE_ID = "Unreal Editor Log"
         const val ACTION_PLACE = "unreal"
 
-        fun getInstance(project: Project): UnrealToolWindowFactory = project.getComponent()
+        fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
