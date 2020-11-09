@@ -12,7 +12,7 @@ open class GenerateDotNetSdkPathPropsTask: DefaultTask() {
     var dotNetSdkPath: Any? = null
 
     @OutputFile
-    var propsFile = File("${project.projectDir}/../resharper/build/generated/DotNetSdkPath.generated.props")
+    var propsFile = File("${project.projectDir}/build/generated/DotNetSdkPath.generated.props")
 
     @TaskAction
     fun generate() {

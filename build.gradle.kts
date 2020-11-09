@@ -7,6 +7,7 @@ import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.jetbrains.rider.plugins.gradle.tasks.DotNetBuildTask
 import com.jetbrains.rider.plugins.gradle.tasks.GenerateNuGetConfig
+import com.jetbrains.rider.plugins.gradle.tasks.GenerateDotNetSdkPathPropsTask
 import com.jetbrains.rider.plugins.gradle.buildServer.initBuildServer
 
 plugins {
@@ -101,7 +102,7 @@ tasks.withType<KotlinCompile> {
 }
 
 val dotNetSdkPathLazy by lazy {
-    val sdkPath = sdkDirectory.resolve("lib").resolve("DotNetSDkForRdPlugins")
+    val sdkPath = sdkDirectory.resolve("lib").resolve("DotNetSdkForRdPlugins")
     assert(sdkPath.isDirectory)
     println(".NETSDK path: $sdkPath")
 
@@ -111,8 +112,14 @@ val dotNetSdkPathLazy by lazy {
 apply(from = "cpp.gradle.kts")
 
 tasks {
+    val prepareRiderBuildProps by creating(GenerateDotNetSdkPathPropsTask::class) {
+        group = "RiderBackend"
+        dotNetSdkPath = dotNetSdkPathLazy
+
+    }
     val prepareNuGetConfig by creating(GenerateNuGetConfig::class) {
         group = "RiderBackend"
+        dependsOn(prepareRiderBuildProps)
         dotNetSdkPath = dotNetSdkPathLazy
     }
 
@@ -123,10 +130,6 @@ tasks {
         dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
         buildFile.set(dotnetSolution)
-        doFirst {
-            println("Logging contents of $reSharperHostSdkDirectory")
-            reSharperHostSdkDirectory.listFiles()?.forEach { println( it.canonicalPath ) }
-        }
 
     }
 
