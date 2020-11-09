@@ -123,6 +123,7 @@ tasks {
         dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
         buildFile.set(dotnetSolution)
+        reSharperHostSdkDirectory.listFiles()?.forEach { println( it.canonicalPath ) }
     }
 
     @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
