@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.unreal
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
@@ -20,9 +20,6 @@ import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkI
 import com.jetbrains.rider.plugins.unreal.model.*
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
-import com.jetbrains.rider.plugins.unreal.toolWindow.CATEGORY_WIDTH
-import com.jetbrains.rider.plugins.unreal.toolWindow.TIME_WIDTH
-import com.jetbrains.rider.plugins.unreal.toolWindow.VERBOSITY_WIDTH
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.components.ComponentFactories
 import java.awt.BorderLayout
@@ -32,6 +29,9 @@ import javax.swing.JPanel
 class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     companion object {
         private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
+        private const val TIME_WIDTH = 29
+        private const val VERBOSITY_WIDTH = 12
+        private const val CATEGORY_WIDTH = 20
     }
 
     private val logData: ArrayDeque<UnrealLogEvent> = ArrayDeque()
