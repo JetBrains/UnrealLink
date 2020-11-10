@@ -1,3 +1,4 @@
+import com.jetbrains.rider.plugins.gradle.buildServer.buildServer
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
@@ -37,7 +38,40 @@ dependencies {
 
 val repoRoot by extra { project.rootDir }
 val sdkVersion = "2020.3"
-val sdkDirectory by extra { File(buildDir, "riderRD-$sdkVersion-SNAPSHOT") }
+
+fun getRiderSdkRootPath(): File {
+    var riderSdkPath: File? = null
+    if (project.buildServer.isAutomatedBuild) {
+        riderSdkPath = File(repoRoot, "rider/dependencies")
+        if (riderSdkPath.isDirectory) {
+            logger.info("Rider SDK bundle found: ${riderSdkPath.canonicalPath}")
+        } else {
+            logger.error("Bundle Rider SDK not found in '$riderSdkPath'. Falling back to public SDK")
+        }
+    }
+
+    if (riderSdkPath == null || !riderSdkPath.isDirectory)
+    {
+        val intellij = project.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
+
+        var root = File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT")
+        if (intellij.ideaDependencyCachePath != null) {
+            root = File(intellij.ideaDependencyCachePath)
+        }
+        if (!root.isDirectory) {
+            // If this assert fires, then you've likely called getRiderSdkPath during configuration
+            // Try to wrap this call in a closure, so that it's evaluated at execution time, once the
+            // intellij dependencies have been downloaded
+            assert(intellij.ideaDependency != null)
+            root = File(intellij.ideaDependency.classes.absolutePath)
+        }
+        riderSdkPath = root
+        logger.info("Rider SDK bundle found: ${root.canonicalPath}")
+    }
+    assert(riderSdkPath.isDirectory)
+    return riderSdkPath
+}
+val sdkDirectory by extra { getRiderSdkRootPath() }
 val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
 val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
 
