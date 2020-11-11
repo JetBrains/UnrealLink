@@ -10,6 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2020.3.104]
+### Added
 - Proper README for the https://github.com/JetBrains/UnrealLink
 
 ### Changed
