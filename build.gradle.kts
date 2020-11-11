@@ -1,4 +1,3 @@
-import com.jetbrains.rider.plugins.gradle.buildServer.buildServer
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
@@ -6,16 +5,12 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.jetbrains.rider.plugins.gradle.tasks.DotNetBuildTask
-import com.jetbrains.rider.plugins.gradle.tasks.GenerateNuGetConfig
-import com.jetbrains.rider.plugins.gradle.tasks.GenerateDotNetSdkPathPropsTask
-import com.jetbrains.rider.plugins.gradle.buildServer.initBuildServer
 
 plugins {
     kotlin("jvm") version "1.4.0"
 
     id("org.jetbrains.changelog") version "0.4.0"
-    id("org.jetbrains.intellij") // Version comes from buildSrc
+    id("org.jetbrains.intellij") version "0.4.21"
     id("com.jetbrains.rdgen") version "0.203.161"
 }
 
@@ -37,43 +32,16 @@ dependencies {
 }
 
 val repoRoot by extra { project.rootDir }
-val sdkVersion = "2020.3"
+val sdkVersion by extra { "2020.3" }
 
-fun getRiderSdkRootPath(): File {
-    var riderSdkPath: File? = null
-    if (project.buildServer.isAutomatedBuild) {
-        riderSdkPath = File(repoRoot, "rider/dependencies")
-        if (riderSdkPath.isDirectory) {
-            logger.info("Rider SDK bundle found: ${riderSdkPath.canonicalPath}")
-        } else {
-            logger.error("Bundle Rider SDK not found in '$riderSdkPath'. Falling back to public SDK")
-        }
-    }
+val dotNetSdkPath by lazy {
+    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
+    assert(sdkPath.isDirectory)
+    println(".NETSDK path: $sdkPath")
 
-    if (riderSdkPath == null || !riderSdkPath.isDirectory)
-    {
-        val intellij = project.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
-
-        var root = File(repoRoot, "build/riderRD-$sdkVersion-SNAPSHOT")
-        if (intellij.ideaDependencyCachePath != null) {
-            root = File(intellij.ideaDependencyCachePath)
-        }
-        if (!root.isDirectory) {
-            // If this assert fires, then you've likely called getRiderSdkPath during configuration
-            // Try to wrap this call in a closure, so that it's evaluated at execution time, once the
-            // intellij dependencies have been downloaded
-            assert(intellij.ideaDependency != null)
-            root = File(intellij.ideaDependency.classes.absolutePath)
-        }
-        riderSdkPath = root
-        logger.info("Rider SDK bundle found: ${root.canonicalPath}")
-    }
-    assert(riderSdkPath.isDirectory)
-    return riderSdkPath
+    return@lazy sdkPath
 }
-val sdkDirectory by extra { getRiderSdkRootPath() }
-val reSharperHostSdkDirectory by extra { File(sdkDirectory, "/lib/DotNetSdkForRdPlugins") }
-val rdLibDirectory by extra { File(sdkDirectory, "lib/rd") }
+
 
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetSolutionId by extra { "UnrealLink" }
@@ -85,7 +53,6 @@ val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.pro
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
-val buildServer by extra { initBuildServer(gradle) }
 
 
 java {
@@ -135,35 +102,112 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val dotNetSdkPathLazy by lazy {
-    val sdkPath = sdkDirectory.resolve("lib").resolve("DotNetSdkForRdPlugins")
-    assert(sdkPath.isDirectory)
-    println(".NETSDK path: $sdkPath")
-
-    return@lazy sdkPath
-}
-
 apply(from = "cpp.gradle.kts")
 
-tasks {
-    val prepareRiderBuildProps by creating(GenerateDotNetSdkPathPropsTask::class) {
-        group = "RiderBackend"
-        dotNetSdkPath = dotNetSdkPathLazy
-
+fun findDotNetCliPath(): String {
+    if (project.extra.has("dotNetCliPath")) {
+        val dotNetCliPath = project.extra["dotNetCliPath"] as String
+        logger.info("dotNetCliPath (cached): $dotNetCliPath")
+        return dotNetCliPath
     }
-    val prepareNuGetConfig by creating(GenerateNuGetConfig::class) {
+
+    val pathComponents = System.getenv("PATH").split(File.pathSeparatorChar)
+    for (dir in pathComponents) {
+        val dotNetCliFile = File(dir, if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            "dotnet.exe"
+        } else {
+            "dotnet"
+        })
+        if (dotNetCliFile.exists()) {
+            logger.info("dotNetCliPath: ${dotNetCliFile.canonicalPath}")
+            project.extra["dotNetCliPath"] = dotNetCliFile.canonicalPath
+            return dotNetCliFile.canonicalPath
+        }
+    }
+    error(".NET Core CLI not found. Please add: 'dotnet' in PATH")
+}
+
+tasks {
+    val prepareRiderBuildProps by creating {
+        group = "RiderBackend"
+        doLast {
+            val propsFile = "${project.projectDir}/build/DotNetSdkPath.generated.props"
+
+            val dotNetSdkFile = dotNetSdkPath
+//            project.buildServer.progress("Generating :${propsFile.canonicalPath}...")
+            project.file(propsFile).writeText("""<Project>
+            |  <PropertyGroup>
+            |    <DotNetSdkPath>${dotNetSdkFile.canonicalPath}</DotNetSdkPath>
+            |  </PropertyGroup>
+            |</Project>""".trimMargin())
+        }
+    }
+
+    val prepareNuGetConfig by creating {
         group = "RiderBackend"
         dependsOn(prepareRiderBuildProps)
-        dotNetSdkPath = dotNetSdkPathLazy
+        doLast {
+            val nuGetConfigFile = project.projectDir.resolve("NuGet.Config")
+
+            val dotNetSdkFile = dotNetSdkPath
+            logger.info("dotNetSdk location: '$dotNetSdkFile'")
+            assert(dotNetSdkFile.isDirectory)
+
+//            project.buildServer.progress("Generating :${nuGetConfigFile.canonicalPath}...")
+            val nugetConfigText = """<?xml version="1.0" encoding="utf-8"?>
+        |<configuration>
+        |  <packageSources>
+        |    <clear />
+        |    <add key="local-dotnet-sdk" value="${dotNetSdkFile.canonicalPath}" />
+        |    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+        |  </packageSources>
+        |</configuration>
+        """.trimMargin()
+            nuGetConfigFile.writeText(nugetConfigText)
+
+            logger.info("Generated content:\n$nugetConfigText")
+
+            val sb = StringBuilder("Dump dotNetSdkFile content:\n")
+            dotNetSdkFile.listFiles()?.forEach { file ->
+                sb.append("${file.canonicalPath}\n")
+            }
+            logger.info(sb.toString())
+        }
     }
 
 
-    val buildResharperHost by creating(DotNetBuildTask::class) {
+    val buildResharperHost by creating {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
-        buildFile.set(dotnetSolution)
+        doLast {
+            val buildConfiguration = project.extra["BuildConfiguration"] as String
+            val warningsAsErrors = project.extra["warningsAsErrors"] as String
+            val file = dotnetSolution
+
+//            project.buildServer.progress("Building $file ($buildConfiguration)")
+
+            val dotNetCliPath = findDotNetCliPath()
+            val slnDir = file.parentFile
+            val verbosity = "normal"
+            val buildArguments = listOf(
+                    "build",
+                    file.canonicalPath,
+                    "/p:Configuration=$buildConfiguration",
+                    "/p:Version=${project.version}",
+                    "/p:TreatWarningsAsErrors=$warningsAsErrors",
+                    "/v:$verbosity",
+                    "/bl:${file.name+".binlog"}",
+                    "/nologo")
+
+            logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
+            project.exec {
+                executable = dotNetCliPath
+                args = buildArguments
+                workingDir = file.parentFile
+            }
+        }
 
     }
 
