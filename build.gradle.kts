@@ -131,7 +131,9 @@ tasks {
     val prepareRiderBuildProps by creating {
         group = "RiderBackend"
         doLast {
-            val propsFile = "${project.projectDir}/build/DotNetSdkPath.generated.props"
+            val buildDir = File("${project.projectDir}/build/")
+            buildDir.mkdirs()
+            val propsFile = buildDir.resolve("DotNetSdkPath.generated.props")
 
             val dotNetSdkFile = dotNetSdkPath
 //            project.buildServer.progress("Generating :${propsFile.canonicalPath}...")
