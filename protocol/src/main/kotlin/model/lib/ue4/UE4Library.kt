@@ -6,13 +6,8 @@ import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.cpp.CppIntrinsicType
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import com.jetbrains.rd.generator.nova.kotlin.Kotlin11Generator
-import com.jetbrains.rd.generator.nova.util.syspropertyOrInvalid
-import java.io.File
 
-object UE4Library : Root(
-        // TODO: use settings for precompiled headers when available and remove hardcoded generator
-        Cpp17Generator(FlowTransform.Reversed, "", File(syspropertyOrInvalid("model.out.src.lib.ue4.cpp.dir")), generatePrecompiledHeaders = false),
-) {
+object UE4Library : Root() {
     init {
         setting(Kotlin11Generator.Namespace, "com.jetbrains.rider.plugins.unreal.model")
         setting(CSharp50Generator.Namespace, "RiderPlugin.UnrealLink.Model")
@@ -26,6 +21,8 @@ object UE4Library : Root(
         setting(Cpp17Generator.ListType, CppIntrinsicType(null, "TArray", "Runtime/Core/Public/Containers/Array.h"))
         setting(Cpp17Generator.AllocatorType) { "FDefaultAllocator" }
         setting(Cpp17Generator.ExportMacroName,  "RIDERLINK_API")
+        setting(Cpp17Generator.GeneratePrecompiledHeaders, false)
+        setting(Cpp17Generator.UsePrecompiledHeaders, false)
     }
 
     private fun <T : Declaration> declare(intrinsic: CppIntrinsicType, factory: Toplevel.() -> T): T {

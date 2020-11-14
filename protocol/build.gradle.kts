@@ -54,16 +54,12 @@ tasks {
                 directory = "$csLibraryOutput"
             }
 
-            systemProperty("model.out.src.lib.ue4.cpp.dir", "$cppLibraryOutput")
-            // TODO: use this generator instead of hardcoded
-            /*
             generator {
                 language = "cpp"
                 transform = "reversed"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$cppLibraryOutput"
             }
-            */
 
             generator {
                 language = "kotlin"
@@ -129,18 +125,12 @@ tasks {
                 directory = "$csEditorOutput"
             }
 
-            systemProperty("model.out.src.editorPlugin.cpp.dir", "$cppEditorOutput")
-            // TODO: use this generator instead of hardcoded
-            /*
             generator {
                 language = "cpp"
                 transform = "reversed"
                 root = "model.editorPlugin.RdEditorRoot"
-                directory = "$cppLibraryOutput"
+                directory = "$cppEditorOutput"
             }
-            */
-
-
         }
     }
 
