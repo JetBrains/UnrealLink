@@ -136,7 +136,6 @@ tasks {
             val propsFile = buildDir.resolve("DotNetSdkPath.generated.props")
 
             val dotNetSdkFile = dotNetSdkPath
-//            project.buildServer.progress("Generating :${propsFile.canonicalPath}...")
             project.file(propsFile).writeText("""<Project>
             |  <PropertyGroup>
             |    <DotNetSdkPath>${dotNetSdkFile.canonicalPath}</DotNetSdkPath>
@@ -155,7 +154,6 @@ tasks {
             logger.info("dotNetSdk location: '$dotNetSdkFile'")
             assert(dotNetSdkFile.isDirectory)
 
-//            project.buildServer.progress("Generating :${nuGetConfigFile.canonicalPath}...")
             val nugetConfigText = """<?xml version="1.0" encoding="utf-8"?>
         |<configuration>
         |  <packageSources>
@@ -168,12 +166,6 @@ tasks {
             nuGetConfigFile.writeText(nugetConfigText)
 
             logger.info("Generated content:\n$nugetConfigText")
-
-            val sb = StringBuilder("Dump dotNetSdkFile content:\n")
-            dotNetSdkFile.listFiles()?.forEach { file ->
-                sb.append("${file.canonicalPath}\n")
-            }
-            logger.info(sb.toString())
         }
     }
 
@@ -188,10 +180,9 @@ tasks {
             val warningsAsErrors = project.extra["warningsAsErrors"] as String
             val file = dotnetSolution
 
-//            project.buildServer.progress("Building $file ($buildConfiguration)")
-
             val dotNetCliPath = findDotNetCliPath()
             val slnDir = file.parentFile
+            // TODO: Pass verbosity as settings
             val verbosity = "normal"
             val buildArguments = listOf(
                     "build",
@@ -214,6 +205,7 @@ tasks {
     }
 
     @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
+        group = "CI Release"
         doLast {
             File("release_notes.md").writeText(
 """## New in ${project.version}
