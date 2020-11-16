@@ -20,6 +20,20 @@ The plugin is always bundled with Rider.
 ### Fixed
 
 ### Known Issues
+## [2020.3.104]
+### Added
+- Proper README for the https://github.com/JetBrains/UnrealLink
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fix memory leak in log panel on exit of Rider
+- Fix deprecated code 
+### Known Issues
 ## [2020.3.85]
 ### Added
 - Supported Rider 2020.3

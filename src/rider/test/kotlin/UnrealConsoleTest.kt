@@ -3,7 +3,7 @@ package com.jetbrains.rider.plugins.unreal.filters
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.command.impl.DummyProject
 import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rider.plugins.unreal.UnrealPane
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions
 

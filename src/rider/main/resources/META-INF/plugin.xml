@@ -163,7 +163,6 @@ Path to old plugin:</code></pre>
   <project-components>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
     <component><implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class></component>
   </project-components>
@@ -171,7 +170,8 @@ Path to old plugin:</code></pre>
   <extensions defaultExtensionNs="com.intellij">
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
     <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
-    <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.UnrealPaneConsoleActionsPostProcessor" />
+    <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor" />
+    <notificationGroup id="Unreal Editor connection is out of sync" displayType="BALLOON"/>
   </extensions>
 
   <actions>

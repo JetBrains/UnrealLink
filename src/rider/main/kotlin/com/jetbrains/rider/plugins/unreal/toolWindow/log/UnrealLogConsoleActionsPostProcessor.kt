@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.unreal
+package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
 import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.actions.ClearConsoleAction
@@ -12,14 +12,14 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAwareAction
 
-class UnrealPaneConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
+class UnrealLogConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
     override fun postProcess(console: ConsoleView, actions: Array<AnAction>): Array<AnAction> {
         if (console !is ConsoleViewImpl) {
             return super.postProcess(console, actions)
         }
 
         val consoleParent = console.parent
-        if (consoleParent !is UnrealPane) {
+        if (consoleParent !is UnrealLogPanel) {
             return super.postProcess(console, actions)
         }
 
@@ -27,13 +27,13 @@ class UnrealPaneConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
 
     }
 
-    private fun processActions(consolePanel: UnrealPane, actions: Array<AnAction>): Array<AnAction> {
+    private fun processActions(panel: UnrealLogPanel, actions: Array<AnAction>): Array<AnAction> {
         val filteredActions =  actions.filter {
                     it !is PreviousOccurenceToolbarAction &&
                             it !is NextOccurenceToolbarAction &&
                             it !is ClearConsoleAction
                 }.toMutableList()
-        filteredActions.add(ClearUnrealConsoleAction(consolePanel))
+        filteredActions.add(ClearUnrealConsoleAction(panel))
         return filteredActions.toTypedArray()
     }
 
@@ -43,35 +43,34 @@ class UnrealPaneConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
         }
 
         val consoleParent = console.parent
-        if (consoleParent !is UnrealPane) {
+        if (consoleParent !is UnrealLogPanel) {
             return super.postProcess(console, actions)
         }
 
         return processPopupActions(consoleParent, actions)
     }
 
-    private fun processPopupActions(consolePanel: UnrealPane, actions: Array<AnAction>): Array<AnAction> {
+    private fun processPopupActions(panel: UnrealLogPanel, actions: Array<AnAction>): Array<AnAction> {
         val filteredActions = actions.filter {
             it !is ClearConsoleAction
         }.toMutableList()
-        filteredActions.add(ClearUnrealConsoleAction(consolePanel))
+        filteredActions.add(ClearUnrealConsoleAction(panel))
         return filteredActions.toTypedArray()
     }
 
-    private class ClearUnrealConsoleAction(private val consolePanel: UnrealPane) :
+    private class ClearUnrealConsoleAction(private val panel: UnrealLogPanel) :
             DumbAwareAction(ExecutionBundle.messagePointer("clear.all.from.console.action.name"),
                     ExecutionBundle.messagePointer("clear.all.from.console.action.description"),
                     AllIcons.Actions.GC) {
 
         override fun update(e: AnActionEvent) {
-            val console = UnrealPane.currentConsoleView
+            val console = panel.console
             val enabled: Boolean = console.contentSize > 0
             e.presentation.isEnabled = enabled
         }
 
         override fun actionPerformed(e: AnActionEvent) {
-            UnrealPane.logData.clear()
-            UnrealPane.currentConsoleView.clear()
+            panel.clear()
         }
     }
 }
