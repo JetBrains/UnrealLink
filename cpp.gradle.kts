@@ -112,9 +112,9 @@ tasks {
 
     @Suppress("UNUSED_VARIABLE") val symlinkPluginToUnrealProject by creating {
         dependsOn(getUnrealEngineProject)
-        dependsOn(unzipInclude)
+//        dependsOn(unzipInclude)
         versionsOfRdCpp.forEach {
-            dependsOn("unzip_libs_$it")
+//            dependsOn("unzip_libs_$it")
         }
         dependsOn(patchUpluginVersion)
         doLast {

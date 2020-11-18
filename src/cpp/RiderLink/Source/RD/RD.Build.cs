@@ -9,64 +9,26 @@ public class RD : ModuleRules
 {
 	public RD(ReadOnlyTargetRules Target) : base(Target)
 	{
+#if UE_4_22_OR_LATER
 		PCHUsage = PCHUsageMode.NoPCHs;
+		CppStandard = CppStandardVersion.Cpp14;
+#else
+		PCHUsage = PCHUsageMode.NoSharedPCHs;
+#endif
 		
 		PublicDependencyModuleNames.Add("Core");
-		bUseUnity = false;
 
 		bUseRTTI = true;
-
-		CppStandard = CppStandardVersion.Cpp14;
 		bEnforceIWYU = false;
 		
 #if UE_4_24_OR_LATER
 		ShadowVariableWarningLevel = WarningLevel.Off;
 #else
 		bEnableShadowVariableWarnings = false;
-#endif					
-		
-		var Toolchain = "";
-		var Platform = "";
-		if (Target.Platform == UnrealTargetPlatform.Win64)
-		{
-			Platform = "Win";
-			switch (Target.WindowsPlatform.Compiler)
-			{
-				case WindowsCompiler.VisualStudio2017:
-					// Toolchain = "win-vs17";
-					break;
-#if UE_4_22_OR_LATER
-				case WindowsCompiler.VisualStudio2019:
-					// Toolchain = "win-vs19";
-					break;
-#endif					
-#if UE_4_21_OR_LATER
-				case WindowsCompiler.Clang:
-					Toolchain = "win-clang";
-					break;
 #endif
-				default:
-					throw new NotImplementedException();
-			}
-		}
-		else if (Target.Platform == UnrealTargetPlatform.Mac)
-		{
-			Platform = "Mac";
-			Toolchain = "mac-clang";
-		}
-		else if (Target.Platform == UnrealTargetPlatform.Linux)
-		{
-			Platform = "Linux";
-			Toolchain = "linux-clang";
-		}
-		else
-		{
-			throw new NotImplementedException();
-		}
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			// Add the import library
 			PublicDefinitions.Add("_WINSOCK_DEPRECATED_NO_WARNINGS");
 			PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
 			PublicDefinitions.Add("_CRT_NONSTDC_NO_DEPRECATE");

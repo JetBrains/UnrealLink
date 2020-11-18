@@ -7,6 +7,7 @@ output
 .tmp
 out/*
 *.generated.*
+NuGet.Config
 
 # User-specific files
 *.suo
@@ -24,13 +25,12 @@ _dotTrace*
 # Unreal Plugin generated files
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
+src/cpp/RiderLink/Source/RiderLink/Public/Model
+src/cpp/RiderLink/RiderLink.uplugin
 
 # Local setup specific files
 UnrealEngineProjectPath.txt
 
-src/cpp/RiderLink/Source/RiderLink/Public/Model
-
-src/cpp/RiderLink/RiderLink.uplugin
 
 # Tmp release files
 release_notes.md

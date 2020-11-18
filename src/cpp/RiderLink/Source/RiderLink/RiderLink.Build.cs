@@ -13,10 +13,14 @@ public class RiderLink : ModuleRules
 
 		PublicDependencyModuleNames.Add("Core");
 		PublicDependencyModuleNames.Add("RD");
-		PublicIncludePaths.AddRange(new[]
+		string[] Paths = {
+			"Public/Model",
+			"Public/Model/Library/UE4Library"
+		};
+		
+		foreach(var Item in Paths)
 		{
-			"$(ModuleDir)/Public/Model",
-			"$(ModuleDir)/Public/Model/Library/UE4Library"
-		});
+			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
+		}
 	}
 }
