@@ -9,6 +9,10 @@ public class RD : ModuleRules
 {
 	public RD(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PublicDependencyModuleNames.Add("Core");
+		bUseRTTI = true;
+		bEnforceIWYU = false;
+		
 #if UE_4_22_OR_LATER
 		PCHUsage = PCHUsageMode.NoPCHs;
 		CppStandard = CppStandardVersion.Cpp14;
@@ -16,15 +20,12 @@ public class RD : ModuleRules
 		PCHUsage = PCHUsageMode.NoSharedPCHs;
 #endif
 		
-		PublicDependencyModuleNames.Add("Core");
-
-		bUseRTTI = true;
-		bEnforceIWYU = false;
-		
 #if UE_4_24_OR_LATER
 		ShadowVariableWarningLevel = WarningLevel.Off;
+		bUseUnity = false;
 #else
 		bEnableShadowVariableWarnings = false;
+		bFasterWithoutUnity = true;
 #endif
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
