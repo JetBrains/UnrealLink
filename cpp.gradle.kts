@@ -1,6 +1,8 @@
 import java.io.File
 import java.io.ByteArrayOutputStream
 
+val isWindows: Boolean by rootProject.extra
+
 tasks {
     val getUnrealEngineProject by creating {
         doLast {
@@ -52,8 +54,9 @@ tasks {
                 val outputFile = generateOutputFile(it)
                 if(File(outputFile).exists()) return@forEach
                 val downloadUrl = "https://jetbrains.bintray.com/rd-nuget/$outputFile"
+                val args = if(isWindows) listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", "build/$outputFile") else listOf( "curl", "-L", downloadUrl, "-o", "build/$outputFile")
                 val result = exec {
-                    commandLine = listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", "build/$outputFile")
+                    commandLine = args
                     isIgnoreExitValue = true
                     errorOutput = stdOut
                 }

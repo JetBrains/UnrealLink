@@ -1,15 +1,27 @@
 import com.jetbrains.rd.generator.gradle.RdGenExtension
 import com.jetbrains.rd.generator.gradle.RdGenTask
+import org.jetbrains.intellij.IntelliJPluginExtension
 
-val rdLibDirectory: File by rootProject.extra
+val rdLibDirectory by lazy {
+    val intellij = rootProject.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
+    val rdLib = intellij.ideaDependency.classes.resolve("lib").resolve("rd")
+    assert(rdLib.isDirectory)
+    return@lazy rdLib
+}
 
 repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
     flatDir {
-        dir(rdLibDirectory)
+        dir ({rdLibDirectory})
     }
+}
+
+val riderModelJar by lazy {
+    val jarFile = File(rdLibDirectory, "rider-model.jar").canonicalFile
+    assert(jarFile.isFile)
+    return@lazy jarFile
 }
 
 plugins {
@@ -25,7 +37,6 @@ dependencies {
 }
 
 val repoRoot: File by rootProject.extra
-
 val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
 
@@ -37,7 +48,7 @@ tasks {
     val generateUE4Lib by creating(RdGenTask::class) {
         configure<RdGenExtension> {
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
-            classpath("$rdLibDirectory/rider-model.jar")
+            classpath(riderModelJar)
 
             sources("$modelDir/lib/ue4")
             hashFolder = "$hashBaseDir/lib/ue4"
@@ -77,7 +88,7 @@ tasks {
             // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
             // intellij SDK, which is extracted in afterEvaluate
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
-            classpath("$rdLibDirectory/rider-model.jar")
+            classpath(riderModelJar)
 
             sources("$modelDir")
             packages = "model.rider"
@@ -109,7 +120,7 @@ tasks {
 
         configure<RdGenExtension> {
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
-            classpath("$rdLibDirectory/rider-model.jar")
+            classpath(riderModelJar)
 
             sources("$modelDir")
             hashFolder = "$hashBaseDir/editorPlugin"
@@ -143,7 +154,7 @@ tasks {
     }
 
     withType<RdGenTask> {
-        classpath("$rdLibDirectory/rd-gen.jar")
+        classpath("${rdLibDirectory}/rd-gen.jar")
         dependsOn(build)
     }
 }
