@@ -5,7 +5,7 @@
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/PreWindowsApi.h"
 
-#include "rd_framework_cpp/protocol/Protocol.h"
+#include "protocol/Protocol.h"
 
 #include "Windows/PostWindowsApi.h"
 // ReSharper disable once CppUnusedIncludeDirective

@@ -7,7 +7,7 @@ public class RiderLink : ModuleRules
 {
 	public RiderLink(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		bUseRTTI = true;
 

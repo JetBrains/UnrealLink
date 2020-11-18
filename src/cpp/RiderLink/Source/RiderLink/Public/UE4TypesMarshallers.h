@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Polymorphic.h"
+#include "serialization/Polymorphic.h"
 #include "std/hash.h"
 
 #include "Containers/UnrealString.h"

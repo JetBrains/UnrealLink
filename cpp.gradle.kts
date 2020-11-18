@@ -100,9 +100,9 @@ tasks {
 
     @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
         dependsOn(patchUpluginVersion)
-        dependsOn(unzipInclude)
+        // dependsOn(unzipInclude)
         versionsOfRdCpp.forEach {
-            dependsOn("unzip_libs_$it")
+            // dependsOn("unzip_libs_$it")
         }
         from("${project.rootDir}/src/cpp/RiderLink") {
             include("RiderLink.uplugin", "Resources/**", "Source/**")
