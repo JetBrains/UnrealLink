@@ -1,7 +1,7 @@
 ﻿#include "ProtocolFactory.h"
 
-#include "rd_framework_cpp/scheduler/base/IScheduler.h"
-#include "rd_framework_cpp/wire/SocketWire.h"
+#include "scheduler/base/IScheduler.h"
+#include "wire/SocketWire.h"
 
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"

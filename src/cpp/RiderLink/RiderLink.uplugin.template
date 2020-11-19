@@ -16,6 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "RD",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
 			"Name": "RiderLink",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PreDefault",

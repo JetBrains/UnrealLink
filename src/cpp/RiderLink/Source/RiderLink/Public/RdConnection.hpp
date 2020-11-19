@@ -7,8 +7,8 @@
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/PreWindowsApi.h"
 
-#include "rd_framework_cpp/base/IProtocol.h"
-#include "rd_framework_cpp/scheduler/SingleThreadScheduler.h"
+#include "base/IProtocol.h"
+#include "scheduler/SingleThreadScheduler.h"
 #include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 #include "Windows/PostWindowsApi.h"

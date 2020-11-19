@@ -3,7 +3,7 @@
 #include "UE4TypesMarshallers.h"
 
 #include "Containers/StringConv.h"
-#include "ArraySerializer.h"
+#include "serialization/ArraySerializer.h"
 #include "Templates/UniquePtr.h"
 
 //region FString

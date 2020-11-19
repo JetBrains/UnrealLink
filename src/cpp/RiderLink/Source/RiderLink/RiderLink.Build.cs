@@ -7,16 +7,20 @@ public class RiderLink : ModuleRules
 {
 	public RiderLink(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		bUseRTTI = true;
 
 		PublicDependencyModuleNames.Add("Core");
 		PublicDependencyModuleNames.Add("RD");
-		PublicIncludePaths.AddRange(new[]
+		string[] Paths = {
+			"Public/Model",
+			"Public/Model/Library/UE4Library"
+		};
+		
+		foreach(var Item in Paths)
 		{
-			"$(ModuleDir)/Public/Model",
-			"$(ModuleDir)/Public/Model/Library/UE4Library"
-		});
+			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
+		}
 	}
 }

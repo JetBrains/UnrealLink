@@ -1,8 +1,6 @@
 import java.io.File
 import java.io.ByteArrayOutputStream
 
-val isWindows: Boolean by rootProject.extra
-
 tasks {
     val getUnrealEngineProject by creating {
         doLast {
@@ -43,70 +41,10 @@ tasks {
     }
 
     val riderLinkDir = "$rootDir/src/cpp/RiderLink"
-    val versionsOfRdCpp = arrayOf("win-vs17", "win-vs19", "mac-clang", "linux-clang")
-    val rdCppVersion = "203.1.2"
-    val generateOutputFile = {toolchain:String -> "JetBrains.RdFramework.Cpp.$rdCppVersion-$toolchain.nupkg"}
-
-    val getRdCpp by creating{
-        doLast {
-            versionsOfRdCpp.forEach {
-                val stdOut = ByteArrayOutputStream()
-                val outputFile = generateOutputFile(it)
-                if(File(outputFile).exists()) return@forEach
-                val downloadUrl = "https://jetbrains.bintray.com/rd-nuget/$outputFile"
-                val args = if(isWindows) listOf("cmd.exe", "/c", "curl", "-L", downloadUrl, "-o", "build/$outputFile") else listOf( "curl", "-L", downloadUrl, "-o", "build/$outputFile")
-                val result = exec {
-                    commandLine = args
-                    isIgnoreExitValue = true
-                    errorOutput = stdOut
-                }
-
-                if (result.exitValue != 0) {
-                    println(stdOut.toString().trim())
-                    throw AssertionError("Failed to download $downloadUrl")
-                }
-            }
-        }
-    }
-
-    versionsOfRdCpp.forEach {
-        tasks.register<Copy>("unzip_libs_$it") {
-            dependsOn(getRdCpp)
-            val toolchain = it
-            val outputFile = generateOutputFile(toolchain)
-            val destinationDir = File("$riderLinkDir/Source/RD/$toolchain")
-            from(zipTree("build/$outputFile")) {
-                include("native/libs/**")
-                eachFile {
-                    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
-                }
-                includeEmptyDirs = false
-            }
-            into(destinationDir.absolutePath)
-        }
-    }
-
-    val unzipInclude by creating(Copy::class) {
-        dependsOn(getRdCpp)
-        val toolchain = versionsOfRdCpp.get(0)
-        val outputFile = generateOutputFile(toolchain)
-        val destinationDir = File("$riderLinkDir/Source/RD")
-        from(zipTree("build/$outputFile")) {
-            include("native/include/**")
-            eachFile {
-                relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
-            }
-            includeEmptyDirs = false
-        }
-        into(destinationDir.absolutePath)
-    }
 
     @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
         dependsOn(patchUpluginVersion)
-        dependsOn(unzipInclude)
-        versionsOfRdCpp.forEach {
-            dependsOn("unzip_libs_$it")
-        }
+        dependsOn(":protocol:generateModels")
         from("${project.rootDir}/src/cpp/RiderLink") {
             include("RiderLink.uplugin", "Resources/**", "Source/**")
         }
@@ -115,10 +53,6 @@ tasks {
 
     @Suppress("UNUSED_VARIABLE") val symlinkPluginToUnrealProject by creating {
         dependsOn(getUnrealEngineProject)
-        dependsOn(unzipInclude)
-        versionsOfRdCpp.forEach {
-            dependsOn("unzip_libs_$it")
-        }
         dependsOn(patchUpluginVersion)
         doLast {
             val unrealProjectPath = getUnrealEngineProject.extra["UnrealProjectPath"] as File

@@ -13,6 +13,7 @@ NuGet.Config
 *.suo
 *.user
 *.sln.docstates
+*.sln.binlog
 *.cache
 
 # IDEs
@@ -24,15 +25,12 @@ _dotTrace*
 # Unreal Plugin generated files
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
+src/cpp/RiderLink/Source/RiderLink/Public/Model
+src/cpp/RiderLink/RiderLink.uplugin
 
 # Local setup specific files
 UnrealEngineProjectPath.txt
 
-src/cpp/RiderLink/Source/RiderLink/Public/Model
-
-src/cpp/RiderLink/RiderLink.uplugin
-src/cpp/RiderLink/Source/RD
-!src/cpp/RiderLink/Source/RD/RD.Build.cs
 
 # Tmp release files
 release_notes.md
