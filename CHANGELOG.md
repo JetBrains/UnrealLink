@@ -12,8 +12,12 @@ The plugin is always bundled with Rider.
 ### Added
 
 ### Changed
+- Build RiderLink plugin from source on user PC instead of bundling dll files.
+  - Reason: frequent changes of toolchains and breaking of ABI compatibility in MSVC toolchain render this practice impossible.
 
 ### Deprecated
+- Drop support for UE 4.21 and older
+  - Reason: RD framework doesn't use PCH files and doesn't comply with UE rules for include files. It's impossible to state that module doesn't use PCH files in UE 4.21 and older.
 
 ### Removed
 
