@@ -10,6 +10,20 @@
 
 //region FString
 
+inline std::string to_string(FString const& val) {
+    return TCHAR_TO_UTF8(*val);
+}
+
+template <typename T, typename A>
+int32_t size(TArray<T, A> const& value) {
+    return static_cast<int32_t>(value.Num());
+}
+
+template <typename T, typename A>
+void resize(TArray<T, A>& value, int32_t size) {
+    value.Reserve(size);
+}
+
 namespace rd {
     template <>
     class Polymorphic<FString> {
@@ -24,12 +38,6 @@ namespace rd {
     public:
         static void write(SerializationCtx& ctx, Buffer& buffer, Wrapper<FString> const& value);
     };
-
-    namespace detail {
-        inline std::string to_string(FString const& val) {
-            return TCHAR_TO_UTF8(*val);
-        }
-    }
 
     template <>
     struct hash<FString> {
@@ -49,16 +57,6 @@ namespace rd {
         Wrapper<T> Result;
         Result.reset(std::move(Ptr).Release());
         return Result;
-    }
-    
-    template <typename T, typename A>
-    int32_t size(TArray<T, A> const& value) {
-        return static_cast<int32_t>(value.Num());
-    }
-
-    template <typename T, typename A>
-    void resize(TArray<T, A>& value, int32_t size) {
-        value.Reserve(size);
     }
 }
 

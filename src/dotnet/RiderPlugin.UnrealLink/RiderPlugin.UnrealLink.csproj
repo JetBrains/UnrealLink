@@ -13,5 +13,12 @@
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" Condition="Exists('$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props')" />
 </Project>
