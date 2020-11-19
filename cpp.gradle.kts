@@ -44,6 +44,7 @@ tasks {
 
     @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
         dependsOn(patchUpluginVersion)
+        dependsOn(":protocol:generateModels")
         from("${project.rootDir}/src/cpp/RiderLink") {
             include("RiderLink.uplugin", "Resources/**", "Source/**")
         }
