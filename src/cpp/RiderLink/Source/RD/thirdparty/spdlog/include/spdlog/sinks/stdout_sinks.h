@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/details/console_globals.h>
 #include <spdlog/details/synchronous_factory.h>
 #include <spdlog/sinks/sink.h>
@@ -77,4 +82,8 @@ std::shared_ptr<logger> stderr_logger_st(const std::string &logger_name);
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "stdout_sinks-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

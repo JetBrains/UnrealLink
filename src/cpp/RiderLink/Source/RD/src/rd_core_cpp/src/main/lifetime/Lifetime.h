@@ -1,6 +1,11 @@
 #ifndef RD_CPP_CORE_LIFETIMEWRAPPER_H
 #define RD_CPP_CORE_LIFETIMEWRAPPER_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "LifetimeImpl.h"
 
 #include <std/hash.h>
@@ -63,5 +68,9 @@ inline size_t hash<Lifetime>::operator()(const Lifetime& value) const noexcept
 	return hash<std::shared_ptr<LifetimeImpl> >()(value.ptr);
 }
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_CORE_LIFETIMEWRAPPER_H

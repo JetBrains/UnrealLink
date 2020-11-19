@@ -1,6 +1,11 @@
 #ifndef RD_CPP_UNSAFEBUFFER_H
 #define RD_CPP_UNSAFEBUFFER_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "types/DateTime.h"
 #include "util/core_util.h"
 #include "types/wrapper.h"
@@ -308,5 +313,9 @@ public:
 	ByteArray& get_data();
 };
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_UNSAFEBUFFER_H

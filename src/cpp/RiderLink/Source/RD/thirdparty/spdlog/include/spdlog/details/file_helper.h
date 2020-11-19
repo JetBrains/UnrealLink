@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/common.h>
 #include <tuple>
 
@@ -56,4 +61,8 @@ private:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "file_helper-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

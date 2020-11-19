@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/details/log_msg.h>
 
 namespace spdlog {
@@ -30,4 +35,8 @@ public:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "log_msg_buffer-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

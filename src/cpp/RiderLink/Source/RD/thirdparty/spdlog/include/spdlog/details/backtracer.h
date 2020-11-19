@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/details/log_msg_buffer.h>
 #include <spdlog/details/circular_q.h>
 
@@ -42,4 +47,8 @@ public:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "backtracer-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

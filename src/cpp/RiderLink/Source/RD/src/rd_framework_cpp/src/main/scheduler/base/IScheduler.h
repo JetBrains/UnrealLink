@@ -1,6 +1,11 @@
 #ifndef RD_CPP_ISCHEDULER_H
 #define RD_CPP_ISCHEDULER_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <functional>
 #include <thread>
 
@@ -52,5 +57,9 @@ public:
 	}
 };
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_ISCHEDULER_H

@@ -1,6 +1,11 @@
 #ifndef RD_CPP_IPROTOCOL_H
 #define RD_CPP_IPROTOCOL_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "IRdDynamic.h"
 #include "serialization/Serializers.h"
 #include "protocol/Identities.h"
@@ -58,5 +63,9 @@ public:
 	const Serializers& get_serializers() const;
 };
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_IPROTOCOL_H

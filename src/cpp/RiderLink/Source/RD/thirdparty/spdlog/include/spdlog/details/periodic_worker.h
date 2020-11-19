@@ -9,6 +9,11 @@
 //    creates the thread on construction.
 //    stops and joins the thread on destruction (if the thread is executing a callback, wait for it to finish first).
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <chrono>
 #include <condition_variable>
 #include <functional>
@@ -37,4 +42,8 @@ private:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "periodic_worker-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

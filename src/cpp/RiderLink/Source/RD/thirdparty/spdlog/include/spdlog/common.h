@@ -3,6 +3,12 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#pragma warning(disable:4275)
+#endif
+
 #include <spdlog/tweakme.h>
 #include <spdlog/details/null_mutex.h>
 
@@ -243,4 +249,8 @@ std::unique_ptr<T> make_unique(Args &&... args)
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "common-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

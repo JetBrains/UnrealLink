@@ -1,6 +1,11 @@
 #ifndef RD_CPP_SINGLETHREADSCHEDULERBASE_H
 #define RD_CPP_SINGLETHREADSCHEDULERBASE_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "scheduler/base/IScheduler.h"
 #include "lifetime/Lifetime.h"
 #include "spdlog/spdlog.h"
@@ -51,5 +56,9 @@ public:
 	bool is_active() const override;
 };
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_SINGLETHREADSCHEDULERBASE_H

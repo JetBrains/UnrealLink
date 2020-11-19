@@ -1,6 +1,11 @@
 #ifndef RD_CPP_INTERNROOT_H
 #define RD_CPP_INTERNROOT_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "base/RdReactiveBase.h"
 #include "InternScheduler.h"
 #include "lifetime/Lifetime.h"
@@ -130,5 +135,9 @@ int32_t InternRoot::intern_value(Wrapper<T> value) const
 	return index;
 }
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_INTERNROOT_H

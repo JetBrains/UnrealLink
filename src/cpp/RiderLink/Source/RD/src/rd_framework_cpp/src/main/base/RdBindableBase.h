@@ -1,6 +1,11 @@
 #ifndef RD_CPP_RDBINDABLEBASE_H
 #define RD_CPP_RDBINDABLEBASE_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "IRdBindable.h"
 #include "base/IProtocol.h"
 
@@ -106,5 +111,9 @@ T& withIdFromName(T& that, std::string const& name)
 	return withId(that, RdId::Null().mix(name));
 }
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_RDBINDABLEBASE_H

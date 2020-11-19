@@ -1,6 +1,11 @@
 #ifndef RD_CPP_BYTEBUFFERASYNCPROCESSOR_H
 #define RD_CPP_BYTEBUFFERASYNCPROCESSOR_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "protocol/Buffer.h"
 #include "spdlog/spdlog.h"
 
@@ -98,5 +103,9 @@ public:
 
 std::string to_string(ByteBufferAsyncProcessor::StateKind state);
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_BYTEBUFFERASYNCPROCESSOR_H

@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/sinks/base_sink.h>
 #include <spdlog/details/file_helper.h>
 #include <spdlog/details/null_mutex.h>
@@ -75,4 +80,8 @@ inline std::shared_ptr<logger> rotating_logger_st(
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "rotating_file_sink-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

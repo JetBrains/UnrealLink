@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/details/log_msg_buffer.h>
 #include <spdlog/details/mpmc_blocking_q.h>
 #include <spdlog/details/os.h>
@@ -117,4 +122,8 @@ private:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "thread_pool-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

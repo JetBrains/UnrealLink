@@ -14,6 +14,11 @@
 // The use of private formatter per sink provides the opportunity to cache some
 // formatted data, and support for different format per sink.
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/common.h>
 #include <spdlog/details/log_msg.h>
 #include <spdlog/details/backtracer.h>
@@ -389,4 +394,8 @@ void swap(logger &a, logger &b);
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "logger-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

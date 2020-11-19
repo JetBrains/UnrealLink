@@ -1,6 +1,11 @@
 #ifndef RD_CPP_IWIRE_H
 #define RD_CPP_IWIRE_H
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include "reactive/base/interfaces.h"
 #include "base/IRdReactive.h"
 #include "reactive/Property.h"
@@ -43,5 +48,9 @@ public:
 	virtual void advise(Lifetime lifetime, IRdReactive const* entity) const = 0;
 };
 }	 // namespace rd
+#if _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif	  // RD_CPP_IWIRE_H

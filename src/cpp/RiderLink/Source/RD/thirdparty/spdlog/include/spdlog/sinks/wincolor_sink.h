@@ -3,6 +3,11 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
+
 #include <spdlog/common.h>
 #include <spdlog/details/console_globals.h>
 #include <spdlog/details/null_mutex.h>
@@ -91,4 +96,8 @@ using wincolor_stderr_sink_st = wincolor_stderr_sink<details::console_nullmutex>
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "wincolor_sink-inl.h"
+#endif
+
+#if _MSC_VER
+#pragma warning(pop)
 #endif

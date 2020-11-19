@@ -3,6 +3,12 @@
 
 #pragma once
 
+#if _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4251)
+#pragma warning(disable:4275)
+#endif
+
 #include <spdlog/common.h>
 #include <spdlog/details/log_msg.h>
 #include <spdlog/details/os.h>
@@ -123,4 +129,8 @@ private:
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "pattern_formatter-inl.h"
+
+#endif
+#if _MSC_VER
+#pragma warning(pop)
 #endif
