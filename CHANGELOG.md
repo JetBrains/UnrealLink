@@ -12,6 +12,18 @@ The plugin is always bundled with Rider.
 ### Added
 
 ### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2020.3.113]
+### Added
+
+### Changed
 - Build RiderLink plugin from source on user PC instead of bundling dll files.
   - Reason: frequent changes of toolchains and breaking of ABI compatibility in MSVC toolchain render this practice impossible.
 
