@@ -118,6 +118,7 @@ public:
 		int32_t len = read_integral<int32_t>();
 		RD_ASSERT_MSG(len >= 0, "read null array(length = " + std::to_string(len) + ")");
 		C<T, A> result;
+		using rd::resize;
 		resize(result, len);
 		if (len > 0)
 		{
@@ -131,6 +132,7 @@ public:
 	{
 		int32_t len = read_integral<int32_t>();
 		C<value_or_wrapper<T>, A> result;
+		using rd::resize;
 		resize(result, len);
 		for (int32_t i = 0; i < len; ++i)
 		{
@@ -143,7 +145,8 @@ public:
 		typename = typename std::enable_if_t<util::is_pod_v<T>>>
 	void write_array(C<T, A> const& container)
 	{
-		const int32_t& len = ::rd::size(container);
+		using rd::size;
+		const int32_t& len = size(container);
 		write_integral<int32_t>(static_cast<int32_t>(len));
 		if (len > 0)
 		{
@@ -155,7 +158,8 @@ public:
 		typename = typename std::enable_if_t<!std::is_abstract<T>::value>>
 	void write_array(C<T, A> const& container, std::function<void(T const&)> writer)
 	{
-		write_integral<int32_t>(::rd::size(container));
+		using rd::size;
+		write_integral<int32_t>(size(container));
 		for (auto const& e : container)
 		{
 			writer(e);
@@ -165,7 +169,8 @@ public:
 	template <template <class, class> class C, typename T, typename A = allocator<Wrapper<T>>>
 	void write_array(C<Wrapper<T>, A> const& container, std::function<void(T const&)> writer)
 	{
-		write_integral<int32_t>(::rd::size(container));
+		using rd::size;
+		write_integral<int32_t>(size(container));
 		for (auto const& e : container)
 		{
 			writer(*e);
