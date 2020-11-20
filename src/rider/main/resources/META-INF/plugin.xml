@@ -174,7 +174,7 @@ Path to old plugin:</code></pre>
     <notificationGroup id="Unreal Editor connection is out of sync" displayType="BALLOON"/>
   </extensions>
 
-  <actions>
+  <actions resource-bundle="messages.UnrealLinkBundle">
     <group id="UnrealInteractionToolbar">
       <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain" class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
         <group id="RiderLink.NumberOfPlayers" popup="true" text="Number of Players" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
@@ -206,13 +206,10 @@ Path to old plugin:</code></pre>
     </group>
 
     <action id="UnrealLink.InstallEditorPluginToEngineAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"
-            text="Install Unreal Editor Plugin in Engine" />
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"/>
     <action id="UnrealLink.InstallEditorPluginToGameAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"
-            text="Install Unreal Editor Plugin in Game" />
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"/>
     <action id="UnrealLink.EnableAutoUpdatePlugin"
-            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"
-            text="Enable Auto-Update" />
+            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
   </actions>
 </idea-plugin>
