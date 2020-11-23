@@ -188,13 +188,13 @@ Path to old plugin:</code></pre>
           <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Default Player Start"/>
         </group>
         <group id="RiderLink.Modes" popup="true" text="Mode" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Selected Viewport"/>
-          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Mobile Preview"/>
-          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="New Editor Window"/>
-          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="VR Preview"/>
-          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Standalone Game"/>
-          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Simulate"/>
-          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Vulkan Preview"/>
+          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
         </group>
         <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer" text="Run Dedicated Server"/>
         <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun" text="Compile Before Play"/>

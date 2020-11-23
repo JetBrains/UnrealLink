@@ -7,7 +7,7 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.util.Consumer
 import com.jetbrains.rd.platform.util.lifetime
-import com.jetbrains.rd.util.reactive.valueOrDefault
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import icons.UnrealIcons
 import java.awt.event.MouseEvent
@@ -15,6 +15,7 @@ import javax.swing.Icon
 
 class UnrealStatusBarIcon(project: Project): StatusBarWidget, StatusBarWidget.IconPresentation {
     companion object {
+        @Suppress("HardCodedStringLiteral")
         const val StatusBarIconId = "UnrealStatusIcon"
     }
 
@@ -49,9 +50,9 @@ class UnrealStatusBarIcon(project: Project): StatusBarWidget, StatusBarWidget.Ic
 
     override fun getTooltipText(): String? {
         return if(host.model.isConnectedToUnrealEditor.value)
-            "Connected to Unreal Editor"
+            UnrealLinkBundle.message("tooltip.ConnectionsToUnrealEditorStatus.text.connected")
         else
-            "No Unreal Editor connection\nLoad the project in the Unreal Editor to enable advanced functionality"
+            UnrealLinkBundle.message("tooltip.ConnectionsToUnrealEditorStatus.text.notConnected")
     }
 
     override fun getClickConsumer(): Consumer<MouseEvent>? = null

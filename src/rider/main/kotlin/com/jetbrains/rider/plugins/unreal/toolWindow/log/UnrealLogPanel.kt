@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import com.jetbrains.rider.plugins.unreal.actions.FilterComboAction
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
@@ -39,9 +40,9 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     val console: ConsoleViewImpl get() = consoleView
 
-    private val verbosityFilterActionGroup: FilterComboAction = FilterComboAction("Verbosity")
-    private val categoryFilterActionGroup: FilterComboAction = FilterComboAction("Categories")
-    private val timestampCheckBox: JBCheckBox = JBCheckBox("Show timestamps", false)
+    private val verbosityFilterActionGroup: FilterComboAction = FilterComboAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbositySelection.label"))
+    private val categoryFilterActionGroup: FilterComboAction = FilterComboAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categoriesSelection.label"))
+    private val timestampCheckBox: JBCheckBox = JBCheckBox(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), false)
 
     var allCategoriesSelected: Boolean = true
     var timeIsShown: Boolean = false

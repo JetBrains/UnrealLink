@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.*
 import com.intellij.util.SmartList
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rd.util.reactive.valueOrDefault
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import icons.UnrealIcons
@@ -151,7 +152,7 @@ class SpawnPlayer : OnlyOneSelectedAction() {
         }
 
         fun setSpawnLocation(mode: Int, location: String): Int {
-            return mode and 4.inv() or (if (location == "Current Camera Location") 0 else 4)
+            return mode and 4.inv() or (if (location == UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text")) 0 else 4)
         }
     }
 
@@ -161,7 +162,7 @@ class SpawnPlayer : OnlyOneSelectedAction() {
 
     override fun initialUpdate(e: AnActionEvent) {
         allActions.add(this)
-        selected = e.presentation.text == "Current Camera Location"
+        selected = e.presentation.text == UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text")
     }
 
     override fun setSelected(e: AnActionEvent, value: Boolean) {
@@ -247,13 +248,13 @@ class PlayMode : OnlyOneSelectedAction() {
         fun setPlayMode(mode: Int, playModeName: String): Int {
             var playModeIndex: Int = 0
             when (playModeName) {
-                "Selected Viewport" -> playModeIndex = 0
-                "Mobile Preview" -> playModeIndex = 1
-                "New Editor Window" -> playModeIndex = 2
-                "VR Preview" -> playModeIndex = 3
-                "Standalone Game" -> playModeIndex = 4
-                "Simulate" -> playModeIndex = 5
-                "Vulkan Preview" -> playModeIndex = 6
+                UnrealLinkBundle.message("action.RiderLink.SelectedViewport.text") -> playModeIndex = 0
+                UnrealLinkBundle.message("action.RiderLink.MobilePreview.text") -> playModeIndex = 1
+                UnrealLinkBundle.message("action.RiderLink.NewEditorWindow.text") -> playModeIndex = 2
+                UnrealLinkBundle.message("action.RiderLink.VRPreview.text") -> playModeIndex = 3
+                UnrealLinkBundle.message("action.RiderLink.StandaloneGame.text") -> playModeIndex = 4
+                UnrealLinkBundle.message("action.RiderLink.Simulate.text") -> playModeIndex = 5
+                UnrealLinkBundle.message("action.RiderLink.VulkanPreview.text") -> playModeIndex = 6
             }
             return mode and (16 + 32 + 64).inv() or playModeIndex.shl(4)
         }
@@ -265,7 +266,7 @@ class PlayMode : OnlyOneSelectedAction() {
 
     override fun initialUpdate(e: AnActionEvent) {
         allActions.add(this)
-        selected = e.presentation.text == "Selected Viewport"
+        selected = e.presentation.text == UnrealLinkBundle.message("action.RiderLink.SelectedViewport.text")
     }
 
     override fun setSelected(e: AnActionEvent, value: Boolean) {
