@@ -19,7 +19,6 @@ class InstallEditorPluginToEngineAction: DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        e.presentation.isEnabledAndVisible = project.solution.rdRiderModel.isUnrealEngineSolution.value
         val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
@@ -37,7 +36,6 @@ class InstallEditorPluginToGameAction: DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        e.presentation.isEnabledAndVisible = project.solution.rdRiderModel.isUnrealEngineSolution.value
         val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
