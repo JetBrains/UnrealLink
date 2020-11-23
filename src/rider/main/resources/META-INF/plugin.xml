@@ -184,8 +184,8 @@ Path to old plugin:</code></pre>
           <action id="RiderLink.FourPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="4"/>
         </group>
         <group id="RiderLink.SpawnPlayerAt" popup="true" text="Spawn Player at..." class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Current Camera Location"/>
-          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Default Player Start"/>
+          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
+          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
         </group>
         <group id="RiderLink.Modes" popup="true" text="Mode" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
           <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
@@ -196,8 +196,8 @@ Path to old plugin:</code></pre>
           <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
           <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
         </group>
-        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer" text="Run Dedicated Server"/>
-        <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun" text="Compile Before Play"/>
+        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer"/>
+        <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun"/>
       </group>
       <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
       <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
