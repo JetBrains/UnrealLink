@@ -12,6 +12,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.jetbrains.rd.platform.util.lifetime
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
@@ -34,7 +35,7 @@ class UnrealToolWindowFactory(val project: Project)
                         icon = RiderIcons.Stacktrace.Stacktrace, // TODO: change this placeholder to proper icon
                         canCloseContent = false, canWorkInDumbMode = true, sideTool = false)
         )
-        toolWindow.title = "Unreal" // TODO: move to resources
+        toolWindow.title = UnrealLinkBundle.message("toolWindow.UnrealLog.title")
 
         val contentManager = toolWindow.contentManager
         contentManager.addContentManagerListener(object : ContentManagerListener {

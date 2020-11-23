@@ -174,7 +174,7 @@ Path to old plugin:</code></pre>
     <notificationGroup id="Unreal Editor connection is out of sync" displayType="BALLOON"/>
   </extensions>
 
-  <actions>
+  <actions resource-bundle="messages.UnrealLinkBundle">
     <group id="UnrealInteractionToolbar">
       <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain" class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
         <group id="RiderLink.NumberOfPlayers" popup="true" text="Number of Players" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
@@ -184,20 +184,20 @@ Path to old plugin:</code></pre>
           <action id="RiderLink.FourPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="4"/>
         </group>
         <group id="RiderLink.SpawnPlayerAt" popup="true" text="Spawn Player at..." class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Current Camera Location"/>
-          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer" text="Default Player Start"/>
+          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
+          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
         </group>
         <group id="RiderLink.Modes" popup="true" text="Mode" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Selected Viewport"/>
-          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Mobile Preview"/>
-          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="New Editor Window"/>
-          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="VR Preview"/>
-          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Standalone Game"/>
-          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Simulate"/>
-          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode" text="Vulkan Preview"/>
+          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
         </group>
-        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer" text="Run Dedicated Server"/>
-        <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun" text="Compile Before Play"/>
+        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer"/>
+        <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun"/>
       </group>
       <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
       <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
@@ -206,13 +206,10 @@ Path to old plugin:</code></pre>
     </group>
 
     <action id="UnrealLink.InstallEditorPluginToEngineAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"
-            text="Install Unreal Editor Plugin in Engine" />
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"/>
     <action id="UnrealLink.InstallEditorPluginToGameAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"
-            text="Install Unreal Editor Plugin in Game" />
+            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"/>
     <action id="UnrealLink.EnableAutoUpdatePlugin"
-            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"
-            text="Enable Auto-Update" />
+            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
   </actions>
 </idea-plugin>
