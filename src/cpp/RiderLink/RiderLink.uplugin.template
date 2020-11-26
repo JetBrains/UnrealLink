@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "2000.0.0",
+	"VersionName": "%PLUGIN_VERSION%",
 	"FriendlyName": "RiderLink",
 	"Description": "Plugin for establishing IPC connection with JetBrains Rider IDE",
 	"Category": "Programming",
