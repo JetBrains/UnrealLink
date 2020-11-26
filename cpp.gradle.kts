@@ -29,15 +29,22 @@ tasks {
     val patchUpluginVersion by creating {
         val pathToUpluginTemplate = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin.template")
         val filePathToUplugin = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin")
-        if(filePathToUplugin.exists().not()) {
-            pathToUpluginTemplate.copyTo(filePathToUplugin)
-        }
+        inputs.file(pathToUpluginTemplate)
+        outputs.file(filePathToUplugin)
+        doLast {
+            if(filePathToUplugin.exists())
+                filePathToUplugin.delete()
 
-        val text = filePathToUplugin.readLines().map {
-            val pattern = "\"VersionName\": "
-            it.replaceAfter(pattern, "\"${project.version}\",")
+            pathToUpluginTemplate.copyTo(filePathToUplugin)
+
+            val text = filePathToUplugin.readLines().map {
+                it.replace("%PLUGIN_VERSION%", "${project.version}")
+            }
+            filePathToUplugin.writeText(text.joinToString(System.lineSeparator()))
         }
-        filePathToUplugin.writeText(text.joinToString(System.lineSeparator()))
+    }
+    withType<Delete> {
+        delete(patchUpluginVersion.outputs.files)
     }
 
     val riderLinkDir = "$rootDir/src/cpp/RiderLink"
