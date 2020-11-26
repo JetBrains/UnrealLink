@@ -18,6 +18,18 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+
+### Known Issues
+## [2020.3.116]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Fix https://github.com/JetBrains/UnrealLink/issues/62
 ### Known Issues
 ## [2020.3.113]
