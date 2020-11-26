@@ -30,6 +30,7 @@ tasks {
         val pathToUpluginTemplate = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin.template")
         val filePathToUplugin = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin")
         inputs.file(pathToUpluginTemplate)
+        inputs.property("version", project.version)
         outputs.file(filePathToUplugin)
         doLast {
             if(filePathToUplugin.exists())
