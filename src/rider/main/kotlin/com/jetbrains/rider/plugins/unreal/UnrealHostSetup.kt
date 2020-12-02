@@ -26,6 +26,7 @@ import com.sun.jna.win32.StdCallLibrary
 // UnrealStatusBarWidget.isAvailable -> UnrealHost.model.isUnrealEngineSolution.value -> UnrealHost.init
 // We need to finish `init` first, then subscribe to changes in model
 class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
+    var isUnrealEngineSolution = false
     init {
         val unrealHost = UnrealHost.getInstance(project)
 
@@ -44,7 +45,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         }
 
         unrealHost.performModelAction {
-            it.isUnrealEngineSolution.change.advise(project.lifetime) {
+            it.isUnrealEngineSolution.change.advise(project.lifetime) { isUnrealEngineSolution ->
+                this.isUnrealEngineSolution = isUnrealEngineSolution
                 project.getService(StatusBarWidgetsManager::class.java).updateWidget(UnrealStatusBarWidget::class.java)
             }
         }

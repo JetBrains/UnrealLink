@@ -1,26 +1,42 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.project.DumbAwareAction
+import com.jetbrains.rider.plugins.unreal.UnrealHostSetup
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
-open class InstallEditorPluginToEngineAction(text: String = "Install in Engine") : NotificationAction(text) {
-    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-        notification.expire()
-        val project = e.project ?: return
-        e.presentation.isEnabled = false
+class InstallEditorPluginToEngineAction: DumbAwareAction() {
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        val project = actionEvent.project?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(PluginInstallLocation.Engine)
+    }
+
+    override fun update(e: AnActionEvent) {
+        val project = e.project
+        if(project == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
 }
 
-open class InstallEditorPluginToGameAction(text: String = "Install in Game") : NotificationAction(text) {
-    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-        notification.expire()
-        val project = e.project ?: return
-        e.presentation.isEnabled = false
+class InstallEditorPluginToGameAction: DumbAwareAction() {
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        val project = actionEvent.project?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(PluginInstallLocation.Game)
+    }
+
+    override fun update(e: AnActionEvent) {
+        val project = e.project
+        if(project == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
 }
