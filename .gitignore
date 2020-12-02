@@ -27,6 +27,7 @@ src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
 src/cpp/RiderLink/Source/RiderLink/Public/Model
 src/cpp/RiderLink/RiderLink.uplugin
+src/cpp/RiderLink/checksum
 
 # Local setup specific files
 UnrealEngineProjectPath.txt
