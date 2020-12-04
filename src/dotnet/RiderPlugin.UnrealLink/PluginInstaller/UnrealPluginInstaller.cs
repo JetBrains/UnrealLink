@@ -12,7 +12,9 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
+using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
+using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
@@ -320,7 +322,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             Notify(title, text, RdNotificationEntryType.INFO);
 
-            RegenerateProjectFiles(uprojectFile);
+            var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
+            if(cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
+                RegenerateProjectFiles(uprojectFile);
             return true;
         }
 
@@ -448,7 +452,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
 
             // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
-            if (GenerateProjectFilesUsingBat(engineRoot)) return;
+            if (GenerateProjectFilesCmd(engineRoot)) return;
             // 2. If it's a standalone project, use UnrealVersionSelector
             //    The same way "Generate project files" from context menu of .uproject works
             if (RegenerateProjectUsingUVS(uprojectFilePath, engineRoot)) return;
@@ -460,7 +464,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             Notify("Failed to refresh project files", text, RdNotificationEntryType.WARN);
         }
 
-        private bool GenerateProjectFilesUsingBat(FileSystemPath engineRoot)
+        private bool GenerateProjectFilesCmd(FileSystemPath engineRoot)
         {
             var isProjectUnderEngine = mySolution.SolutionFilePath.Directory == engineRoot;
             if (!isProjectUnderEngine)
@@ -560,7 +564,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     pathToUnrealBuildToolBin.Directory
                 ));
             }
-            catch (ErrorLevelException errorLevelException)
+            catch (Exception errorLevelException)
             {
                 myLogger.Error(errorLevelException,
                     $"[UnrealLink]: Failed refresh project files: calling {commandLine}");
