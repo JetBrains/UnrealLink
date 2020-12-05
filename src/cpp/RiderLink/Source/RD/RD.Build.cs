@@ -12,14 +12,14 @@ public class RD : ModuleRules
 		PublicDependencyModuleNames.Add("Core");
 		bUseRTTI = true;
 		bEnforceIWYU = false;
-		
+
 #if UE_4_22_OR_LATER
 		PCHUsage = PCHUsageMode.NoPCHs;
 		CppStandard = CppStandardVersion.Cpp14;
 #else
 		PCHUsage = PCHUsageMode.NoSharedPCHs;
 #endif
-		
+
 #if UE_4_24_OR_LATER
 		ShadowVariableWarningLevel = WarningLevel.Off;
 		bUseUnity = false;
@@ -36,9 +36,14 @@ public class RD : ModuleRules
 			PrivateDefinitions.Add("WIN32_LEAN_AND_MEAN");
 		}
 
+		if (Target.Platform == UnrealTargetPlatform.Mac)
+		{
+			PublicDefinitions.Add("_DARWIN");
+		}
+
 		// Common dependencies
 		PrivateDefinitions.Add("FMT_EXPORT");
-		
+
 		PublicDefinitions.Add("SPDLOG_NO_EXCEPTIONS");
 		PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
 		PublicDefinitions.Add("nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
@@ -53,13 +58,13 @@ public class RD : ModuleRules
 			"src",
 			"src/rd_core_cpp",
 			"src/rd_core_cpp/src/main",
-			
+
 			"src/rd_framework_cpp",
 			"src/rd_framework_cpp/src/main",
 			"src/rd_framework_cpp/src/main/util",
-			
+
 			"src/rd_gen_cpp/src",
-			
+
 			"thirdparty",
 			"thirdparty/ordered-map/include",
 			"thirdparty/optional/tl",
@@ -69,7 +74,7 @@ public class RD : ModuleRules
 			"thirdparty/clsocket/src",
 			"thirdparty/CTPL/include"
 		};
-		
+
 		foreach(var Item in Paths)
 		{
 			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
