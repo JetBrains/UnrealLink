@@ -127,29 +127,40 @@ fun findDotNetCliPath(): String {
     error(".NET Core CLI not found. Please add: 'dotnet' in PATH")
 }
 
+fun TaskContainerScope.setupCleanup(task:Task) {
+    withType<Delete> {
+        delete(task.outputs.files)
+    }
+}
+
 tasks {
     val prepareRiderBuildProps by creating {
         group = "RiderBackend"
+
+        val buildDir = File("${project.projectDir}/build/")
+        val outputFile = buildDir.resolve("DotNetSdkPath.generated.props")
+
+        outputs.file(outputFile)
         doLast {
-            val buildDir = File("${project.projectDir}/build/")
             buildDir.mkdirs()
-            val propsFile = buildDir.resolve("DotNetSdkPath.generated.props")
 
             val dotNetSdkFile = dotNetSdkPath
-            project.file(propsFile).writeText("""<Project>
+            project.file(outputFile).writeText("""<Project>
             |  <PropertyGroup>
             |    <DotNetSdkPath>${dotNetSdkFile.canonicalPath}</DotNetSdkPath>
             |  </PropertyGroup>
             |</Project>""".trimMargin())
         }
     }
+    setupCleanup(prepareRiderBuildProps)
 
     val prepareNuGetConfig by creating {
         group = "RiderBackend"
         dependsOn(prepareRiderBuildProps)
-        doLast {
-            val nuGetConfigFile = project.projectDir.resolve("NuGet.Config")
 
+        val outputFile = project.projectDir.resolve("NuGet.Config")
+        outputs.file(outputFile)
+        doLast {
             val dotNetSdkFile = dotNetSdkPath
             logger.info("dotNetSdk location: '$dotNetSdkFile'")
             assert(dotNetSdkFile.isDirectory)
@@ -163,51 +174,58 @@ tasks {
         |  </packageSources>
         |</configuration>
         """.trimMargin()
-            nuGetConfigFile.writeText(nugetConfigText)
+            outputFile.writeText(nugetConfigText)
 
             logger.info("Generated content:\n$nugetConfigText")
         }
     }
 
+    setupCleanup(prepareNuGetConfig)
 
     val buildResharperHost by creating {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
+
+        inputs.file(dotnetSolution)
+        inputs.dir("$repoRoot/src/dotnet")
+
         doLast {
-            val buildConfiguration = project.extra["BuildConfiguration"] as String
-            val warningsAsErrors = project.extra["warningsAsErrors"] as String
-            val file = dotnetSolution
+            val warningsAsErrors: String by project.extra
 
             val dotNetCliPath = findDotNetCliPath()
-            val slnDir = file.parentFile
+            val slnDir = dotnetSolution.parentFile
             // TODO: Pass verbosity as settings
             val verbosity = "normal"
             val buildArguments = listOf(
                     "build",
-                    file.canonicalPath,
+                    dotnetSolution.canonicalPath,
                     "/p:Configuration=$buildConfiguration",
                     "/p:Version=${project.version}",
                     "/p:TreatWarningsAsErrors=$warningsAsErrors",
                     "/v:$verbosity",
-                    "/bl:${file.name+".binlog"}",
+                    "/bl:${dotnetSolution.name}.binlog",
                     "/nologo")
 
             logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
             project.exec {
                 executable = dotNetCliPath
                 args = buildArguments
-                workingDir = file.parentFile
+                workingDir = dotnetSolution.parentFile
             }
         }
-
+    }
+    withType<Delete> {
+        delete("${dotnetSolution}.binlog")
     }
 
     @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
         group = "CI Release"
+        val outputFile = File("release_notes.md")
+        outputs.file(outputFile)
         doLast {
-            File("release_notes.md").writeText(
+            outputFile.writeText(
 """## New in ${project.version}
 ${changelog.get(project.version as String)}
 
@@ -215,6 +233,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
 """.trimIndent())
         }
     }
+    setupCleanup(dumpChangelogResult)
 
     @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(buildResharperHost)
@@ -222,12 +241,17 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
         buildSearchableOptions {
             enabled = buildConfiguration == "Release"
         }
+        val outputDir = File("$rootDir/output")
+        outputs.dir(outputDir)
         doLast {
             copy {
                 from("$buildDir/distributions/${rootProject.name}-${project.version}.zip")
-                into("$rootDir/output")
+                into(outputDir)
             }
         }
+    }
+    withType<Delete> {
+        delete("$rootDir/output")
     }
 
     jar.get().dependsOn(":protocol:generateModels")
@@ -281,9 +305,11 @@ intellij {
 
         if(isReleaseBuild) {
             val riderSdkVersion = properties["riderSdkVersion"] as String?
-            if(riderSdkVersion != null && riderSdkVersion.isNotEmpty()) {
+            if(!riderSdkVersion.isNullOrEmpty()) {
                 sinceBuild(riderSdkVersion)
                 untilBuild("$riderSdkVersion.*")
+            } else {
+                updateSinceUntilBuild = true
             }
         }
 

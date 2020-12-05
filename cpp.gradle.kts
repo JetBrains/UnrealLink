@@ -1,5 +1,8 @@
+@file:Suppress("HardCodedStringLiteral")
+
 import java.io.File
 import java.io.ByteArrayOutputStream
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 
 tasks {
     val getUnrealEngineProject by creating {
@@ -29,24 +32,62 @@ tasks {
     val patchUpluginVersion by creating {
         val pathToUpluginTemplate = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin.template")
         val filePathToUplugin = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin")
-        if(filePathToUplugin.exists().not()) {
-            pathToUpluginTemplate.copyTo(filePathToUplugin)
-        }
+        inputs.file(pathToUpluginTemplate)
+        inputs.property("version", project.version)
+        outputs.file(filePathToUplugin)
+        doLast {
+            if(filePathToUplugin.exists())
+                filePathToUplugin.delete()
 
-        val text = filePathToUplugin.readLines().map {
-            val pattern = "\"VersionName\": "
-            it.replaceAfter(pattern, "\"${project.version}\",")
+            pathToUpluginTemplate.copyTo(filePathToUplugin)
+
+            val text = filePathToUplugin.readLines().map {
+                it.replace("%PLUGIN_VERSION%", "${project.version}")
+            }
+            filePathToUplugin.writeText(text.joinToString(System.lineSeparator()))
         }
-        filePathToUplugin.writeText(text.joinToString(System.lineSeparator()))
+    }
+    withType<Delete> {
+        delete(patchUpluginVersion.outputs.files)
     }
 
-    val riderLinkDir = "$rootDir/src/cpp/RiderLink"
+    val riderLinkDir = File("$rootDir/src/cpp/RiderLink")
+
+    val generateChecksum by creating {
+        dependsOn(patchUpluginVersion)
+        dependsOn(":protocol:generateModels")
+        val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
+        val resourcesDir = riderLinkDir.resolve("Resources")
+        val sourceDir = riderLinkDir.resolve("Source")
+        val checksumFile = riderLinkDir.resolve("checksum")
+        inputs.file(upluginFile)
+        inputs.dir(resourcesDir)
+        inputs.dir(sourceDir)
+        outputs.file(checksumFile)
+        doLast {
+            val inputFiles = sequence{
+                yield(upluginFile)
+                resourcesDir.listFilesOrdered().forEach { if(it.isFile) yield(it) }
+                sourceDir.listFilesOrdered().forEach { if(it.isFile) yield(it) }
+            }
+            val instance = java.security.MessageDigest.getInstance("MD5")
+            inputFiles.forEach { instance.update(it.readBytes()) }
+            checksumFile.writeBytes(instance.digest())
+        }
+    }
+    withType<Delete> {
+        delete(generateChecksum.outputs.files)
+    }
 
     @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
         dependsOn(patchUpluginVersion)
         dependsOn(":protocol:generateModels")
-        from("${project.rootDir}/src/cpp/RiderLink") {
-            include("RiderLink.uplugin", "Resources/**", "Source/**")
+        dependsOn(generateChecksum)
+        from(riderLinkDir) {
+            include("Resources/**", "Source/**")
+            include(generateChecksum.outputs.files.map { it.relativeTo(riderLinkDir).toString() })
+            include(patchUpluginVersion.outputs.files.map { it.relativeTo(riderLinkDir).toString() })
+
         }
         archiveFileName.set("RiderLink.zip")
     }
@@ -73,7 +114,7 @@ tasks {
                     if(output.isNotEmpty())
                     {
                         val pathToJunction = output.last()
-                        if(file(pathToJunction) == file(riderLinkDir)) {
+                        if(file(pathToJunction) == riderLinkDir) {
                             println("Junction is already correct")
                             throw StopExecutionException()
                         }
@@ -87,7 +128,7 @@ tasks {
             targetDir.parentFile.mkdirs();
             val stdOut = ByteArrayOutputStream()
             val result = exec {
-                    commandLine = listOf("cmd.exe", "/c", "mklink" , "/J" ,targetDir.absolutePath ,File(riderLinkDir).absolutePath)
+                    commandLine = listOf("cmd.exe", "/c", "mklink", "/J", targetDir.absolutePath, riderLinkDir.absolutePath)
                     errorOutput = stdOut
                     isIgnoreExitValue = true
                 }
