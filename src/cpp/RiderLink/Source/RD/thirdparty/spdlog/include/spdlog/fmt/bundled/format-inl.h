@@ -26,7 +26,7 @@
 #  include <windows.h>
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #  pragma warning(push)
 #  pragma warning(disable : 4702)  // unreachable code
 #endif
@@ -1396,7 +1396,7 @@ FMT_FUNC void vprint(string_view format_str, format_args args) {
 
 FMT_END_NAMESPACE
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #  pragma warning(pop)
 #endif
 

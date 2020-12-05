@@ -8,7 +8,7 @@
 // If user requests a non existing logger, nullptr will be returned
 // This class is thread safe
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4251)
 #endif
@@ -116,6 +116,6 @@ private:
 #include "registry-inl.h"
 #endif
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
