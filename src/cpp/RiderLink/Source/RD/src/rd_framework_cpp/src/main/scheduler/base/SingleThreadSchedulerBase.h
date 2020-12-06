@@ -23,7 +23,7 @@ namespace rd
 {
 class RD_FRAMEWORK_API SingleThreadSchedulerBase : public IScheduler
 {
-protected:p[l';.']
+protected:
 	std::shared_ptr<spdlog::logger> log;
 	std::string name;
 
