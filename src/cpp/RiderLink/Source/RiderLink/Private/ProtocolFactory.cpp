@@ -3,6 +3,7 @@
 #include "scheduler/base/IScheduler.h"
 #include "wire/SocketWire.h"
 
+#include "HAL/PlatformFilemanager.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -12,7 +13,6 @@
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/PreWindowsApi.h"
 
-#include "HAL/PlatformFilemanager.h"
 #include "Windows/WindowsPlatformMisc.h"
 
 #include "Windows/PostWindowsApi.h"

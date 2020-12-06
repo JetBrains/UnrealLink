@@ -3,18 +3,7 @@
 #include "RiderLink.hpp"
 
 #include "Modules/ModuleManager.h"
-
-#if PLATFORM_WINDOWS
-// ReSharper disable once CppUnusedIncludeDirective
-#include "Windows/AllowWindowsPlatformTypes.h"
-#include "Windows/PreWindowsApi.h"
-
 #include "HAL/Platform.h"
-
-#include "Windows/PostWindowsApi.h"
-// ReSharper disable once CppUnusedIncludeDirective
-#include "Windows/HideWindowsPlatformTypes.h"
-#endif
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
