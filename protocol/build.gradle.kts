@@ -46,6 +46,12 @@ tasks {
     val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
     val generateUE4Lib by creating(RdGenTask::class) {
+        val csLibraryOutput = File(csOutputRoot, "Library")
+        val cppLibraryOutput = File(cppOutputRoot, "Library")
+        val ktLibraryOutput = File(ktOutputRoot, "Library")
+
+        outputs.dirs(csLibraryOutput, cppLibraryOutput, ktLibraryOutput)
+
         configure<RdGenExtension> {
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
             classpath(riderModelJar)
@@ -53,11 +59,6 @@ tasks {
             sources("$modelDir/lib/ue4")
             hashFolder = "$hashBaseDir/lib/ue4"
             packages = "model.lib.ue4"
-
-            val csLibraryOutput = File(csOutputRoot, "Library")
-            val cppLibraryOutput = File(cppOutputRoot, "Library")
-            val ktLibraryOutput = File(ktOutputRoot, "Library")
-
             generator {
                 language = "csharp"
                 transform = "symmetric"
@@ -81,8 +82,17 @@ tasks {
         }
     }
 
+    withType<Delete> {
+        delete(generateUE4Lib.outputs.files)
+    }
+
     val generateRiderModel by creating(RdGenTask::class) {
         dependsOn(generateUE4Lib)
+
+        val csRiderOutput = File(csOutputRoot, "RdRiderProtocol")
+        val ktRiderOutput = File(ktOutputRoot, "RdRiderProtocol")
+
+        outputs.dirs(csRiderOutput, ktRiderOutput)
 
         configure<RdGenExtension> {
             // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
@@ -93,9 +103,6 @@ tasks {
             sources("$modelDir")
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
-
-            val csRiderOutput = File(csOutputRoot, "RdRiderProtocol")
-            val ktRiderOutput = File(ktOutputRoot, "RdRiderProtocol")
 
             generator {
                 language = "kotlin"
@@ -114,9 +121,17 @@ tasks {
         }
     }
 
+    withType<Delete> {
+        delete(generateRiderModel.outputs.files)
+    }
+
 
     val generateEditorPluginModel by creating(RdGenTask::class) {
         dependsOn(generateUE4Lib)
+
+        val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
+        val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
+        outputs.dirs(csEditorOutput, cppEditorOutput)
 
         configure<RdGenExtension> {
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
@@ -125,9 +140,6 @@ tasks {
             sources("$modelDir")
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
-
-            val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
-            val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
 
             generator {
                 language = "csharp"
@@ -145,12 +157,19 @@ tasks {
         }
     }
 
+    withType<Delete> {
+        delete(generateEditorPluginModel.outputs.files)
+    }
+
     @Suppress("UNUSED_VARIABLE")
     val generateModels by creating {
         group = "protocol"
         description = "Generates protocol models."
         dependsOn(generateEditorPluginModel)
         dependsOn(generateRiderModel)
+    }
+    withType<Delete> {
+        delete(csOutputRoot, cppOutputRoot, ktOutputRoot)
     }
 
     withType<RdGenTask> {

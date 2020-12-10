@@ -24,6 +24,7 @@ _dotTrace*
 
 # Unreal Plugin generated files
 src/cpp/RiderLink/RiderLink.uplugin
+src/cpp/RiderLink/checksum
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
 src/cpp/RiderLink/Source/RiderLink/Public/Model
