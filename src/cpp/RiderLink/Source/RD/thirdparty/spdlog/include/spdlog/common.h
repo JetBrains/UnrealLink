@@ -3,7 +3,7 @@
 
 #pragma once
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4251)
 #pragma warning(disable:4275)
@@ -251,6 +251,6 @@ std::unique_ptr<T> make_unique(Args &&... args)
 #include "common-inl.h"
 #endif
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

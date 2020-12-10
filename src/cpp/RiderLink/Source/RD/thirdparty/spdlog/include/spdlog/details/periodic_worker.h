@@ -9,7 +9,7 @@
 //    creates the thread on construction.
 //    stops and joins the thread on destruction (if the thread is executing a callback, wait for it to finish first).
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4251)
 #endif
@@ -44,6 +44,6 @@ private:
 #include "periodic_worker-inl.h"
 #endif
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

@@ -18,32 +18,27 @@
 		{
 			"Name": "RD",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": [ "Win64" ]
+			"LoadingPhase": "PreDefault"
 		},
 		{
 			"Name": "RiderLink",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": [ "Win64" ]
+			"LoadingPhase": "PreDefault"
 		},
 		{
 			"Name": "RiderLoggingExtension",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": [ "Win64" ]
+			"LoadingPhase": "PreDefault"
 		},
 		{
 			"Name": "RiderBlueprintExtension",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [ "Win64" ]
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "RiderGameControlExtension",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [ "Win64" ]
+			"LoadingPhase": "Default"
 		}
 	]
 }

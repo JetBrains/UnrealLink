@@ -33,8 +33,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         unrealHost.performModelAction {
             it.allowSetForegroundWindow.set { _, id ->
                 if (SystemInfo.isWindows) {
-                    return@set if (!user32.AllowSetForegroundWindow(id)) {
-                        val lastError = kernel32.GetLastError()
+                    return@set if (!user32!!.AllowSetForegroundWindow(id)) {
+                        val lastError = kernel32!!.GetLastError()
                         RdTask.faulted(LastErrorException(lastError))
                     } else {
                         RdTask.fromResult(true)
@@ -87,8 +87,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         ActivityTracker.getInstance().inc()
     }
 
-    private val user32 = Native.load("user32", User32::class.java)
-    private val kernel32 = Native.load("kernel32", Kernel32::class.java)
+    private val user32 = if(SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
+    private val kernel32 = if(SystemInfo.isWindows) Native.load("kernel32", Kernel32::class.java) else null
 
     @Suppress("FunctionName")
     private interface User32 : StdCallLibrary {

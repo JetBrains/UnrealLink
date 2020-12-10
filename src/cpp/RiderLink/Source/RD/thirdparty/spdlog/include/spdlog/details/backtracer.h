@@ -3,7 +3,7 @@
 
 #pragma once
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4251)
 #endif
@@ -49,6 +49,6 @@ public:
 #include "backtracer-inl.h"
 #endif
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

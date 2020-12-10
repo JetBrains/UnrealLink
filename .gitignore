@@ -23,11 +23,22 @@ _ReSharper*
 _dotTrace*
 
 # Unreal Plugin generated files
+src/cpp/RiderLink/RiderLink.uplugin
+src/cpp/RiderLink/checksum
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
 src/cpp/RiderLink/Source/RiderLink/Public/Model
-src/cpp/RiderLink/RiderLink.uplugin
-src/cpp/RiderLink/checksum
+# rd-cpp extra files
+src/cpp/RiderLink/Source/RD/**/CMakeLists.txt
+src/cpp/RiderLink/Source/RD/**/.*
+src/cpp/RiderLink/Source/RD/**/*.yml
+src/cpp/RiderLink/Source/RD/**/test
+src/cpp/RiderLink/Source/RD/**/tests
+src/cpp/RiderLink/Source/RD/**/bench
+src/cpp/RiderLink/Source/RD/**/example
+src/cpp/RiderLink/Source/RD/**/pch.*
+src/cpp/RiderLink/Source/RD/**/INSTALL
+src/cpp/RiderLink/Source/RD/**/doxygen.conf
 
 # Local setup specific files
 UnrealEngineProjectPath.txt

@@ -69,7 +69,7 @@
 #  define FMT_NVCC 0
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #  define FMT_MSC_VER _MSC_VER
 #else
 #  define FMT_MSC_VER 0

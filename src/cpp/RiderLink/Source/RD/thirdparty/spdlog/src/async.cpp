@@ -5,7 +5,7 @@
 #error Please define SPDLOG_COMPILED_LIB to compile this file.
 #endif
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4251)
 #endif
@@ -17,6 +17,6 @@
 
 template class SPDLOG_API spdlog::details::mpmc_blocking_queue<spdlog::details::async_msg>;
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

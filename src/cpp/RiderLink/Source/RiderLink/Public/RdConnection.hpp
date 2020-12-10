@@ -2,19 +2,9 @@
 
 #pragma once
 
-#if PLATFORM_WINDOWS
-// ReSharper disable once CppUnusedIncludeDirective
-#include "Windows/AllowWindowsPlatformTypes.h"
-#include "Windows/PreWindowsApi.h"
-
 #include "base/IProtocol.h"
 #include "scheduler/SingleThreadScheduler.h"
 #include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
-
-#include "Windows/PostWindowsApi.h"
-// ReSharper disable once CppUnusedIncludeDirective
-#include "Windows/HideWindowsPlatformTypes.h"
-#endif
 
 #include "Templates/UniquePtr.h"
 

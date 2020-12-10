@@ -12,9 +12,10 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
+using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
+using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
@@ -321,7 +322,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             Notify(title, text, RdNotificationEntryType.INFO);
 
-            RegenerateProjectFiles(uprojectFile);
+            var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
+            if(cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
+                RegenerateProjectFiles(uprojectFile);
             return true;
         }
 
@@ -448,8 +451,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
 
-            // 1. If project is under engine root, use GenerateProjectFiles.bat first
-            if (GenerateProjectFilesUsingBat(engineRoot)) return;
+            // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
+            if (GenerateProjectFilesCmd(engineRoot)) return;
             // 2. If it's a standalone project, use UnrealVersionSelector
             //    The same way "Generate project files" from context menu of .uproject works
             if (RegenerateProjectUsingUVS(uprojectFilePath, engineRoot)) return;
@@ -461,7 +464,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             Notify("Failed to refresh project files", text, RdNotificationEntryType.WARN);
         }
 
-        private bool GenerateProjectFilesUsingBat(FileSystemPath engineRoot)
+        private bool GenerateProjectFilesCmd(FileSystemPath engineRoot)
         {
             var isProjectUnderEngine = mySolution.SolutionFilePath.Directory == engineRoot;
             if (!isProjectUnderEngine)
@@ -470,36 +473,32 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
-            var generateProjectFilesBat = engineRoot / "GenerateProjectFiles.bat";
-            if (!generateProjectFilesBat.ExistsFile)
+            var generateProjectFilesCmd = engineRoot / $"GenerateProjectFiles.{GetPlatformCmdExtension()}";
+            if (!generateProjectFilesCmd.ExistsFile)
             {
-                myLogger.Info($"[UnrealLink]: {generateProjectFilesBat} is not available");
+                myLogger.Info($"[UnrealLink]: {generateProjectFilesCmd} is not available");
                 return false;
             }
 
             try
             {
-                var commandLine = new CommandLineBuilderJet()
-                    .AppendFileName(generateProjectFilesBat);
-            
-                var hackCmd = new CommandLineBuilderJet()
-                    .AppendSwitch("/C")
-                    .AppendSwitch($"\"{commandLine}\"");
+                var command = GetPlatformCommand(generateProjectFilesCmd);
+                var commandLine = GetPlatformCommandLine(generateProjectFilesCmd);
                 
                 myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
 
-                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(BatchUtils.GetPathToCmd(),
-                    hackCmd,
+                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(command,
+                    commandLine,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
-                    generateProjectFilesBat.Directory
+                    generateProjectFilesCmd.Directory
                 ));
             }
             catch (ErrorLevelException errorLevelException)
             {
                 myLogger.Error(errorLevelException,
-                    $"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesBat} went wrong");
+                    $"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesCmd} went wrong");
                 return false;
             }
 
@@ -508,6 +507,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private bool RegenerateProjectUsingUVS(FileSystemPath uprojectFilePath, FileSystemPath engineRoot)
         {
+            if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return false;
+            
             var pathToUnrealVersionSelector =
                 engineRoot / "Engine" / "Binaries" / "Win64" / "UnrealVersionSelector.exe";
             if (!pathToUnrealVersionSelector.ExistsFile)
@@ -516,20 +517,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
-            var commandLine = new CommandLineBuilderJet()
-                .AppendFileName(pathToUnrealVersionSelector)
-                .AppendSwitch("/projectFiles")
-                .AppendFileName(uprojectFilePath);
-            
-            var hackCmd = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
-                .AppendSwitch($"\"{commandLine}\"");
+            var commandLine =
+                GetPlatformCommandLine(pathToUnrealVersionSelector, "/projectFiles", $"\"{uprojectFilePath}\"");
 
             try
             {
                 myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
                 ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(BatchUtils.GetPathToCmd(),
-                    hackCmd,
+                    commandLine,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
@@ -552,32 +547,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             bool isInstalledBuild = IsInstalledBuild(engineRoot);
 
             var commandLine = new CommandLineBuilderJet()
-                .AppendFileName(pathToUnrealBuildToolBin)
                 .AppendSwitch("-ProjectFiles")
                 .AppendSwitch($"-project=\"{uprojectFilePath.FullPath}\"")
                 .AppendSwitch("-game");
 
-            if (isInstalledBuild)
-                commandLine.AppendSwitch("-rocket");
-            else
-                commandLine.AppendSwitch("-engine");
-
-            var hackCmd = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
-                .AppendSwitch($"\"{commandLine}\"");
+            commandLine.AppendSwitch(isInstalledBuild ? "-rocket" : "-engine");
 
             try
             {
                 myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
-                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(BatchUtils.GetPathToCmd(),
-                    hackCmd,
+                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(pathToUnrealBuildToolBin,
+                    commandLine,
                     LoggingLevel.INFO,
                     TimeSpan.FromMinutes(1),
                     InvokeChildProcess.TreatStderr.AsOutput,
                     pathToUnrealBuildToolBin.Directory
                 ));
             }
-            catch (ErrorLevelException errorLevelException)
+            catch (Exception errorLevelException)
             {
                 myLogger.Error(errorLevelException,
                     $"[UnrealLink]: Failed refresh project files: calling {commandLine}");
@@ -596,7 +583,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile, Action<double> progressPump)
         {
-            //engineRoot\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
+            //engineRoot\Engine\Build\BatchFiles\RunUAT.{extension}" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
             var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFile);
             if (engineRoot.IsEmpty)
             {
@@ -610,27 +597,21 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 
             }
 
-            var pathToUat = engineRoot / "Engine" / "Build" / "BatchFiles" / "RunUAT.bat";
+            var runUatName = $"RunUAT.{GetPlatformCmdExtension()}";
+            var pathToUat = engineRoot / "Engine" / "Build" / "BatchFiles" / runUatName;
             if (!pathToUat.ExistsFile)
             {
-                myLogger.Error("[UnrealLink]: Failed build plugin: RunUAT.bat is not available");
+                myLogger.Error($"[UnrealLink]: Failed build plugin: {runUatName} is not available");
                 var text = "<html>" +
-                           $"RunUAT.bat is not available is not available at expected destination: {pathToUat}<br>" +
+                           $"{runUatName} is not available is not available at expected destination: {pathToUat}<br>" +
                            "</html>";
                 Notify("Failed to build plugin", text, RdNotificationEntryType.ERROR);
                 return false;
             }
-            
-            var commandLine = new CommandLineBuilderJet()
-                .AppendFileName(pathToUat)
-                .AppendSwitch("BuildPlugin")
-                .AppendSwitch($"-Plugin=\"{upluginPath.FullPath}\"")
-                .AppendSwitch($"-Package=\"{outputDir.FullPath}\"")
-                .AppendSwitch("-Rocket");
-            
-            var hackCmd = new CommandLineBuilderJet()
-                .AppendSwitch("/C")
-                .AppendSwitch($"\"{commandLine}\"");
+
+            var command = GetPlatformCommand(pathToUat);
+            var commandLine = GetPlatformCommandLine(pathToUat, "BuildPlugin", $"-Plugin=\"{upluginPath.FullPath}\"",
+                $"-Package=\"{outputDir.FullPath}\"", "-Rocket");
 
             List<string> stdOut = new List<string>();
             List<string> stdErr = new List<string>();
@@ -665,10 +646,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     progressPump((double)leftInt / rightInt);
                 });
                 myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {commandLine}");
-                var pathToCmdExe = BatchUtils.GetPathToCmd();
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
-                var result = InvokeChildProcess.InvokeSync(pathToCmdExe, hackCmd,
+                var result = InvokeChildProcess.InvokeSync(command, commandLine,
                     pipeStreams,TimeSpan.FromMinutes(30), null, null, null, myLogger);
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
                 myLogger.Verbose("[UnrealLink]: Build logs:");
@@ -717,6 +697,45 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             return true;
+        }
+
+        private CommandLineBuilderJet GetPlatformCommandLine(FileSystemPath command, params string[] args)
+        {
+            var commandLine = new CommandLineBuilderJet();
+            if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
+            {
+                commandLine.AppendFileName(command);
+            }
+            foreach (var arg in args)
+            {
+                commandLine.AppendSwitch(arg);
+            }
+
+            if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
+            {
+                return new CommandLineBuilderJet().AppendSwitch("/C")
+                    .AppendSwitch($"\"{commandLine}\"");
+            }
+
+            return commandLine;
+        }
+
+        private FileSystemPath GetPlatformCommand(FileSystemPath command)
+        {
+            return PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows ? BatchUtils.GetPathToCmd() : command;
+        }
+
+        private string GetPlatformCmdExtension()
+        {
+            switch (PlatformUtil.RuntimePlatform)
+            {
+                case PlatformUtil.Platform.Windows:
+                    return "bat";
+                case PlatformUtil.Platform.MacOsX:
+                    return "command";
+                default:
+                    return "sh";
+            }
         }
     }
 }
