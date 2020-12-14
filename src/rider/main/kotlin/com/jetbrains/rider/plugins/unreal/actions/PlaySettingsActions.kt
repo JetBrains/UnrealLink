@@ -76,10 +76,8 @@ class DedicatedServer : ToggleAction() {
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        if(isSelected) {
-            host.playMode = setDedicatedServer(host.playMode, isSelected)
-            host.model.playModeFromRider.fire(host.playMode)
-        }
+        host.playMode = setDedicatedServer(host.playMode, isSelected)
+        host.model.playModeFromRider.fire(host.playMode)
     }
 }
 
@@ -97,10 +95,8 @@ class CompileBeforeRun : ToggleAction() {
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        if(isSelected) {
-            host.playMode = setCompileBeforeRun(host.playMode, isSelected)
-            host.model.playModeFromRider.fire(host.playMode)
-        }
+        host.playMode = setCompileBeforeRun(host.playMode, isSelected)
+        host.model.playModeFromRider.fire(host.playMode)
     }
 }
 
