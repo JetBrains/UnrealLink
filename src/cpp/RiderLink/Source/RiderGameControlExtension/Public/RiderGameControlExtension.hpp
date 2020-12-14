@@ -10,8 +10,6 @@ DECLARE_LOG_CATEGORY_EXTERN(FLogRiderGameControlExtensionModule, Log, All);
 
 class FRiderGameControlExtensionModule : public IModuleInterface
 {
-private:
-    int playMode;
 public:
     FRiderGameControlExtensionModule() = default;
     ~FRiderGameControlExtensionModule() = default;
@@ -20,4 +18,7 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
     virtual bool SupportsDynamicReloading() override { return true; };
+
+private:
+    int playMode;
 };
