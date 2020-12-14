@@ -1,9 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.actionSystem.*
-import com.intellij.util.SmartList
 import com.jetbrains.rd.util.reactive.fire
-import com.jetbrains.rd.util.reactive.valueOrDefault
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.PlayState
@@ -18,12 +16,13 @@ abstract class PlayStateAction(text: String?, description: String?, icon: Icon?)
     }
 }
 
-class PlayInUnrealAction : PlayStateAction("Play", "Play", UnrealIcons.Status.Play) {
+class PlayInUnrealAction : PlayStateAction(UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.text"),
+    UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.description"), UnrealIcons.Status.Play) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val value = e.getHost()?.playState
         e.presentation.isEnabled = e.presentation.isEnabled && value != PlayState.Play
-        e.presentation.text = if (value == PlayState.Pause) "Resume Unreal" else "Play"
+        e.presentation.text = if (value == PlayState.Pause) UnrealLinkBundle.message("action.RiderLink.ResumeInUnrealAction.text") else UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.text")
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -32,7 +31,7 @@ class PlayInUnrealAction : PlayStateAction("Play", "Play", UnrealIcons.Status.Pl
     }
 }
 
-class StopInUnrealAction : PlayStateAction("Stop", "Stop", UnrealIcons.Status.Stop) {
+class StopInUnrealAction : PlayStateAction(UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.text"), UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.description"), UnrealIcons.Status.Stop) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getHost()?: return
@@ -45,13 +44,14 @@ class StopInUnrealAction : PlayStateAction("Stop", "Stop", UnrealIcons.Status.St
     }
 }
 
-class PauseInUnrealAction : PlayStateAction("Pause", "Pause", UnrealIcons.Status.Pause) {
+class PauseInUnrealAction : PlayStateAction(UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.text"),
+    UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.description"), UnrealIcons.Status.Pause) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getHost()?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
         e.presentation.icon = if (host.playState == PlayState.Pause) UnrealIcons.Status.FrameSkip else UnrealIcons.Status.Pause
-        e.presentation.text = if (host.playState == PlayState.Pause) "Frame Skip" else "Pause"
+        e.presentation.text = if (host.playState == PlayState.Pause) UnrealLinkBundle.message("action.RiderLink.SkipFrame.text") else UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.text")
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -87,15 +87,13 @@ class NumberOfPlayers : ToggleAction() {
         return (host.playMode and 3 + 1).toString() == e.presentation.text
     }
 
-    override fun setSelected(e: AnActionEvent, value: Boolean) {
+    override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        host.playMode = setNumPlayers(host.playMode, e.presentation.text.toInt(10))
-        host.model.playModeFromRider.fire(host.playMode)
-    }
-
-    override fun update(e: AnActionEvent) {
-        super.update(e)
+        if(isSelected) {
+            host.playMode = setNumPlayers(host.playMode, e.presentation.text.toInt(10))
+            host.model.playModeFromRider.fire(host.playMode)
+        }
     }
 }
 
@@ -109,15 +107,16 @@ class SpawnPlayer : ToggleAction() {
     override fun isSelected(e: AnActionEvent): Boolean {
         val host: UnrealHost = e.getHost() ?: return false
 
-        var mode: Int = host.playMode
-        return (mode and 4).shr(2) == getSpawnPlayerMode(e.presentation.text)
+        return (host.playMode and 4).shr(2) == getSpawnPlayerMode(e.presentation.text)
     }
 
-    override fun setSelected(e: AnActionEvent, p1: Boolean) {
+    override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        host.playMode = (host.playMode and 4.inv()) or getSpawnPlayerMode(e.presentation.text).shl(2)
-        host.model.playModeFromRider.fire(host.playMode)
+        if(isSelected) {
+            host.playMode = (host.playMode and 4.inv()) or getSpawnPlayerMode(e.presentation.text).shl(2)
+            host.model.playModeFromRider.fire(host.playMode)
+        }
     }
 }
 
@@ -132,15 +131,13 @@ class DedicatedServer : ToggleAction() {
         return (host.playMode and 8) != 0
     }
 
-    override fun setSelected(e: AnActionEvent, value: Boolean) {
+    override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
-        host.playMode = setDedicatedServer(host.playMode, value)
-        host.model.playModeFromRider.fire(host.playMode)
-    }
 
-    override fun update(e: AnActionEvent) {
-        super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
+        if(isSelected) {
+            host.playMode = setDedicatedServer(host.playMode, isSelected)
+            host.model.playModeFromRider.fire(host.playMode)
+        }
     }
 }
 
@@ -155,16 +152,13 @@ class CompileBeforeRun : ToggleAction() {
         return (host.playMode and 128) != 0
     }
 
-    override fun setSelected(e: AnActionEvent, value: Boolean) {
+    override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        host.playMode = setCompileBeforeRun(host.playMode, value)
-        host.model.playModeFromRider.fire(host.playMode)
-    }
-
-    override fun update(e: AnActionEvent) {
-        super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
+        if(isSelected) {
+            host.playMode = setCompileBeforeRun(host.playMode, isSelected)
+            host.model.playModeFromRider.fire(host.playMode)
+        }
     }
 }
 
@@ -192,11 +186,13 @@ class PlayMode : ToggleAction() {
         return (host.playMode and (16 + 32 + 64)) == ind.shl(4)
     }
 
-    override fun setSelected(e: AnActionEvent, value: Boolean) {
+    override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        host.playMode = setPlayMode(host.playMode, e.presentation.text)
-        host.model.playModeFromRider.fire(host.playMode)
+        if(isSelected) {
+            host.playMode = setPlayMode(host.playMode, e.presentation.text)
+            host.model.playModeFromRider.fire(host.playMode)
+        }
     }
 }
 
