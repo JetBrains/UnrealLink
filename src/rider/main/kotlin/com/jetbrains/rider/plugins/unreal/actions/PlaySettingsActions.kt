@@ -8,14 +8,14 @@ import com.jetbrains.rider.plugins.unreal.UnrealHost
 
 class PlaySettings : DefaultActionGroup() {
     override fun update(e: AnActionEvent) {
-        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution?:false
-        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor?:false
+        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution ?: false
+        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
 
 class PlaySubsettings : DefaultActionGroup() {
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor?:false
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
 
@@ -32,7 +32,7 @@ class NumberOfPlayers : ToggleAction() {
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        if(isSelected) {
+        if (isSelected) {
             host.playMode = setNumPlayers(host.playMode, e.presentation.text.toInt(10))
             host.model.playModeFromRider.fire(host.playMode)
         }
@@ -40,7 +40,7 @@ class NumberOfPlayers : ToggleAction() {
 }
 
 class SpawnPlayer : ToggleAction() {
-    private fun getSpawnPlayerMode(text: String) = when(text) {
+    private fun getSpawnPlayerMode(text: String) = when (text) {
         UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.DefaultPlayerStart.text") -> 1
         else -> 0
@@ -55,7 +55,7 @@ class SpawnPlayer : ToggleAction() {
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        if(isSelected) {
+        if (isSelected) {
             host.playMode = (host.playMode and 4.inv()) or getSpawnPlayerMode(e.presentation.text).shl(2)
             host.model.playModeFromRider.fire(host.playMode)
         }
@@ -127,7 +127,7 @@ class PlayMode : ToggleAction() {
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
-        if(isSelected) {
+        if (isSelected) {
             host.playMode = setPlayMode(host.playMode, e.presentation.text)
             host.model.playModeFromRider.fire(host.playMode)
         }
