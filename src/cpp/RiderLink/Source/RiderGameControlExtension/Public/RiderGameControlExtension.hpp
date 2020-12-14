@@ -10,6 +10,8 @@ DECLARE_LOG_CATEGORY_EXTERN(FLogRiderGameControlExtensionModule, Log, All);
 
 class FRiderGameControlExtensionModule : public IModuleInterface
 {
+private:
+    int playMode;
 public:
     FRiderGameControlExtensionModule() = default;
     ~FRiderGameControlExtensionModule() = default;
