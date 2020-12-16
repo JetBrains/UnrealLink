@@ -27,7 +27,7 @@ namespace RiderPlugin.UnrealLink
         private readonly UnrealLinkResolver myLinkResolver;
         private readonly EditorNavigator myEditorNavigator;
         private readonly ViewableProperty<RdEditorModel> myEditorModel = new ViewableProperty<RdEditorModel>(null);
-        
+
         private bool PlayModeFromUnreal = false;
         private bool PlayModeFromRider = false;
         private Lifetime myComponentLifetime;
@@ -59,9 +59,9 @@ namespace RiderPlugin.UnrealLink
 
                 Directory.CreateDirectory(portDirectoryFullPath);
 
-                var projects = pluginInfo.ProjectPlugins.Select(it => it.UprojectFilePath.NameWithoutExtension)
+                var projects = pluginInfo.ProjectPlugins.Select(it => it.UprojectFilePath.Name)
                     .ToList();
-                
+
                 solution.Locks.Tasks.Queue(myComponentLifetime, () =>
                 {
                     var watcher = new FileSystemWatcher(portDirectoryFullPath)
@@ -72,10 +72,11 @@ namespace RiderPlugin.UnrealLink
                     FileSystemEventHandler handler = (obj, fileSystemEvent) =>
                     {
                         var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
-                        if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
+                        if (projects.Contains(path.Name) && myComponentLifetime.IsAlive)
                         {
-                            myLogger.Info($"FileSystemWatcher event {fileSystemEvent.ChangeType} found \"{path.NameWithoutExtension}\"");
-                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", 
+                            myLogger.Info(
+                                $"FileSystemWatcher event {fileSystemEvent.ChangeType} found \"{path.Name}\"");
+                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
                                 () => CreateProtocols(path));
                         }
                     };
@@ -91,7 +92,8 @@ namespace RiderPlugin.UnrealLink
                 foreach (var projectName in projects)
                 {
                     var portFileFullPath = FileSystemPath.Parse(portDirectoryFullPath) / projectName;
-                    myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", () => CreateProtocols(portFileFullPath));
+                    myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
+                        () => CreateProtocols(portFileFullPath));
                 }
             });
 
@@ -112,6 +114,7 @@ namespace RiderPlugin.UnrealLink
             {
                 return;
             }
+
             if (!int.TryParse(text, out var port))
             {
                 myLogger.Error($"[UnrealLink]: Couldn't parse port from file:{portFileFullPath}, text:{text}");
@@ -144,9 +147,11 @@ namespace RiderPlugin.UnrealLink
             }
             catch (Exception exception)
             {
-                myLogger.Warn($"[UnrealLink]: Failed to read connection port from {portFileFullPath}, reason: {exception.Message}");
+                myLogger.Warn(
+                    $"[UnrealLink]: Failed to read connection port from {portFileFullPath}, reason: {exception.Message}");
                 return false;
             }
+
             return true;
         }
 
@@ -171,7 +176,7 @@ namespace RiderPlugin.UnrealLink
                 return myUnrealHost.PerformModelAction(riderModel =>
                     riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
             });
-            
+
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
             myUnrealHost.myModel.PlayStateFromRider.Advise(lf, unrealModel.PlayStateFromRider);
 
@@ -185,7 +190,7 @@ namespace RiderPlugin.UnrealLink
             {
                 //todo
             });
-            
+
             unrealModel.PlayMode.Advise(lf, val =>
             {
                 myUnrealHost.PerformModelAction(riderModel =>
