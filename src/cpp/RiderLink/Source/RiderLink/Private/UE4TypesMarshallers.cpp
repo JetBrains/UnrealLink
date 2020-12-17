@@ -11,11 +11,14 @@
 namespace rd {
 
     FString Polymorphic<FString, void>::read(SerializationCtx& ctx, Buffer& buffer) {
-        return FString(std::move(buffer.read_wstring()).data());
+        UCS2CHAR * str = buffer.read_char16_string();
+        FString tmp{str};
+        delete str;
+        return tmp;
     }
 
     void Polymorphic<FString, void>::write(SerializationCtx& ctx, Buffer& buffer, FString const& value) {
-        buffer.write_wstring(wstring_view(GetData(value), value.Len()));
+        buffer.write_char16_string(reinterpret_cast<const uint16_t*>(GetData(value)), value.Len());
     }
 
 
