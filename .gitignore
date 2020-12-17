@@ -27,9 +27,8 @@ src/cpp/RiderLink/RiderLink.uplugin
 src/cpp/RiderLink/checksum
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
-src/cpp/RiderLink/Source/RiderLink/Public/Model
 # rd-cpp extra files
-src/cpp/RiderLink/Source/RD/**/CMakeLists.txt
+CMakeLists.txt
 src/cpp/RiderLink/Source/RD/**/.*
 src/cpp/RiderLink/Source/RD/**/*.yml
 src/cpp/RiderLink/Source/RD/**/test
