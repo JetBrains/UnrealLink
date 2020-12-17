@@ -42,17 +42,16 @@ public class RD : ModuleRules
 		}
 
 		// Common dependencies
+		PrivateDefinitions.Add("rd_framework_cpp_EXPORTS");
+		PrivateDefinitions.Add("rd_core_cpp_EXPORTS");
+		PrivateDefinitions.Add("spdlog_EXPORTS");
 		PrivateDefinitions.Add("FMT_EXPORT");
 
 		PublicDefinitions.Add("SPDLOG_NO_EXCEPTIONS");
 		PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
-		PublicDefinitions.Add("nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
-		PublicDefinitions.Add("rd_framework_cpp_EXPORTS");
-		PublicDefinitions.Add("rd_core_cpp_EXPORTS");
-		PublicDefinitions.Add("spdlog_EXPORTS");
-		PublicDefinitions.Add("FMT_SHARED");
 		PublicDefinitions.Add("SPDLOG_SHARED_LIB");
-		PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
+		PublicDefinitions.Add("nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
+		PublicDefinitions.Add("FMT_SHARED");
 
 		string[] Paths = {
 			"src",
