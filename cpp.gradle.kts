@@ -57,7 +57,7 @@ tasks {
 
     val generateChecksum by creating {
         dependsOn(patchUpluginVersion)
-        dependsOn(":protocol:generateModels")
+//        dependsOn(":protocol:generateModels")
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
         val resourcesDir = riderLinkDir.resolve("Resources")
         val sourceDir = riderLinkDir.resolve("Source")
