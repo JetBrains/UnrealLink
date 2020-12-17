@@ -6,7 +6,8 @@ output
 .gradle
 .tmp
 out/*
-*.generated.*
+*.generated.kt
+*.generated.cs
 NuGet.Config
 
 # User-specific files
