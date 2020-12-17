@@ -4,7 +4,7 @@
 
 #include "base/IProtocol.h"
 #include "scheduler/SingleThreadScheduler.h"
-#include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
+#include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 #include "Templates/UniquePtr.h"
 

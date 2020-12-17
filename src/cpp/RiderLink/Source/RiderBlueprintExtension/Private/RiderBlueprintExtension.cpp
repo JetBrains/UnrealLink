@@ -1,6 +1,6 @@
 #include "RiderBlueprintExtension.hpp"
 
-#include "RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
+#include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 #include "BlueprintProvider.hpp"
 #include "RiderLink.hpp"
