@@ -30,7 +30,7 @@
 #define SPDLOG_API __declspec(dllimport)
 #endif
 #else // !defined(_WIN32) || !defined(SPDLOG_SHARED_LIB)
-#define SPDLOG_API
+#define SPDLOG_API __attribute__((visibility("default")))
 #endif
 #define SPDLOG_INLINE
 #else // !defined(SPDLOG_COMPILED_LIB)
