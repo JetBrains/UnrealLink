@@ -4,9 +4,6 @@
 #include "serialization/Polymorphic.h"
 
 
-extern template class rd::Wrapper<std::wstring>;
-
-
 namespace rd {
 }
 

@@ -7,8 +7,6 @@
 #include "Runtime/Core/Public/Containers/Array.h"
 #include "Runtime/Core/Public/Containers/ContainerAllocationPolicies.h"
 
-extern template class rd::Wrapper<std::wstring>;
-
 namespace ELogVerbosity {
 enum Type : uint8;
 }
