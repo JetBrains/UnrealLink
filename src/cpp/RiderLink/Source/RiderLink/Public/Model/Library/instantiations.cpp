@@ -1,7 +1,7 @@
 #include "instantiations.h"
 
 namespace rd {
-teamplate<>
+template<>
 ELogVerbosity::Type Polymorphic<ELogVerbosity::Type, void>::read(SerializationCtx& ctx, Buffer& buffer) {
     int32_t x = buffer.read_integral<int32_t>();
     switch (x) {
@@ -16,7 +16,7 @@ ELogVerbosity::Type Polymorphic<ELogVerbosity::Type, void>::read(SerializationCt
     }
 }
 
-teamplate<>
+template<>
 void Polymorphic<ELogVerbosity::Type, void>::write(SerializationCtx& ctx, Buffer& buffer, ELogVerbosity::Type const& value) {
     switch (value) {
         case ELogVerbosity::Type::VerbosityMask: {
@@ -35,5 +35,4 @@ void Polymorphic<ELogVerbosity::Type, void>::write(SerializationCtx& ctx, Buffer
         buffer.write_integral<int32_t>(static_cast<int32_t>(value));
     }
 }
-template class Polymorphic<ELogVerbosity::Type>;
 }

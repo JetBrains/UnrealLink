@@ -13,13 +13,11 @@ enum Type : uint8;
 
 namespace rd {
 template <>
-class Polymorphic<ELogVerbosity::Type> {
+class RIDERLINK_API Polymorphic<ELogVerbosity::Type> {
     public:
     static ELogVerbosity::Type read(SerializationCtx& ctx, Buffer& buffer);
     static void write(SerializationCtx& ctx, Buffer& buffer, ELogVerbosity::Type const& value);
 };
-
-extern template class Polymorphic<ELogVerbosity::Type>;
 
 }
 
