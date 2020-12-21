@@ -30,15 +30,14 @@ static FString GetPathToPortsFolder()
 #else
     TEXT("HOME");
 #endif
-    if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
-        TCHAR CAppDataLocalPath[4096];
-        FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName, CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
-        const FString FAppDataLocalPath = CAppDataLocalPath;
-    #else
-        const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName);
-    #endif
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
+    TCHAR CAppDataLocalPath[4096];
+    FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName, CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
+    const FString FAppDataLocalPath = CAppDataLocalPath;
+#else
+    const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName);
+#endif
 
-    const FString ProjectName = FApp::GetProjectName();
     const FString PortFullDirectoryPath = FPaths::Combine(
                                                           *FAppDataLocalPath,
 #if defined(PLATFORM_WINDOWS)
@@ -50,13 +49,15 @@ static FString GetPathToPortsFolder()
 #endif
                                                           );
 
-    return FPaths::Combine(PortFullDirectoryPath, *ProjectName);
+    return PortFullDirectoryPath;
 }
 
 
 TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler * Scheduler, rd::Lifetime SocketLifetime)
 {
-    const FString PortFileFullPath = GetPathToPortsFolder();
+    const FString ProjectName = FApp::GetProjectName();
+    const FString PortFullDirectoryPath = GetPathToPortsFolder();
+    const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
 
     spdlog::set_level(spdlog::level::err);
     auto wire = std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
