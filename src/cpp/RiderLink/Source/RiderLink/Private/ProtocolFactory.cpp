@@ -25,7 +25,7 @@
 static FString GetPathToPortsFolder()
 {
     const FString EnvironmentVarName =
-#if defined(PLATFORM_WINDOWS)
+#if PLATFORM_WINDOWS
     TEXT("LOCALAPPDATA");
 #else
     TEXT("HOME");
@@ -39,9 +39,9 @@ static FString GetPathToPortsFolder()
 #endif
 
     const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath,
-#if defined(PLATFORM_WINDOWS)
+#if PLATFORM_WINDOWS
         TEXT("Jetbrains"), TEXT("Rider"), TEXT("Unreal"), TEXT("Ports")
-#elif defined(PLATFORM_MAC)
+#elif PLATFORM_MAC
         TEXT("Library"), TEXT("Logs"), TEXT("Unreal Engine"), TEXT("Ports")
 #else
         TEXT(".config"), TEXT("unrealEngine"), TEXT("Ports")
