@@ -185,7 +185,7 @@ tasks {
     val buildResharperHost by creating {
         group = "RiderBackend"
         description = "Build backend for Rider"
-//        dependsOn(":protocol:generateModels")
+        dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
 
         inputs.file(dotnetSolution)

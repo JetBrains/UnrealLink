@@ -1,6 +1,5 @@
 import com.jetbrains.rd.generator.gradle.RdGenExtension
 import com.jetbrains.rd.generator.gradle.RdGenTask
-import org.jetbrains.intellij.IntelliJPluginExtension
 
 val rdLibDirectory by lazy {
     val intellij = rootProject.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
@@ -50,10 +49,15 @@ tasks {
         val cppLibraryOutput = File(cppOutputRoot, "Library")
         val ktLibraryOutput = File(ktOutputRoot, "Library")
 
-        outputs.dirs(csLibraryOutput, cppLibraryOutput, ktLibraryOutput)
+        outputs.dirs(
+            csLibraryOutput
+//            ,cppLibraryOutput
+            , ktLibraryOutput
+        )
 
         configure<RdGenExtension> {
-            verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
+            verbose =
+                project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
             classpath(riderModelJar)
 
             sources("$modelDir/lib/ue4")
@@ -66,12 +70,12 @@ tasks {
                 directory = "$csLibraryOutput"
             }
 
-            generator {
-                language = "cpp"
-                transform = "reversed"
-                root = "model.lib.ue4.UE4Library"
-                directory = "$cppLibraryOutput"
-            }
+//            generator {
+//                language = "cpp"
+//                transform = "reversed"
+//                root = "model.lib.ue4.UE4Library"
+//                directory = "$cppLibraryOutput"
+//            }
 
             generator {
                 language = "kotlin"
@@ -131,10 +135,14 @@ tasks {
 
         val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
         val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
-        outputs.dirs(csEditorOutput, cppEditorOutput)
+        outputs.dirs(
+            csEditorOutput
+//            ,cppEditorOutput
+        )
 
         configure<RdGenExtension> {
-            verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
+            verbose =
+                project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
             classpath(riderModelJar)
 
             sources("$modelDir")
@@ -148,12 +156,12 @@ tasks {
                 directory = "$csEditorOutput"
             }
 
-            generator {
-                language = "cpp"
-                transform = "reversed"
-                root = "model.editorPlugin.RdEditorRoot"
-                directory = "$cppEditorOutput"
-            }
+//            generator {
+//                language = "cpp"
+//                transform = "reversed"
+//                root = "model.editorPlugin.RdEditorRoot"
+//                directory = "$cppEditorOutput"
+//            }
         }
     }
 

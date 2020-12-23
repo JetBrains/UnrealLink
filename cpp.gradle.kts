@@ -1,8 +1,7 @@
 @file:Suppress("HardCodedStringLiteral")
 
-import java.io.File
-import java.io.ByteArrayOutputStream
 import org.gradle.kotlin.dsl.support.listFilesOrdered
+import java.io.ByteArrayOutputStream
 
 val isWindows:Boolean by extra
 
@@ -57,7 +56,7 @@ tasks {
 
     val generateChecksum by creating {
         dependsOn(patchUpluginVersion)
-//        dependsOn(":protocol:generateModels")
+        dependsOn(":protocol:generateModels")
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
         val resourcesDir = riderLinkDir.resolve("Resources")
         val sourceDir = riderLinkDir.resolve("Source")
