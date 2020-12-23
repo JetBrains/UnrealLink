@@ -23,7 +23,6 @@ object RdEditorRoot : Root() {
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
         signal("unrealLog", UE4Library.UnrealLogEvent).async
-        property("playMode", int)
         source("frameSkip", void)
 
         signal("openBlueprint", UE4Library.BlueprintReference)
@@ -36,5 +35,8 @@ object RdEditorModel : Ext(RdEditorRoot) {
 
         sink("PlayStateFromEditor", UE4Library.PlayState)
         source("PlayStateFromRider", UE4Library.PlayState)
+
+        sink("PlayModeFromEditor", int)
+        source("PlayModeFromRider", int)
     }
 }

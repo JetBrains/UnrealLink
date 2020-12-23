@@ -61,7 +61,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
     init {
         property("editorId", 0).readonly.async
-        property("playMode", int)
         source("frameSkip", void)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)
@@ -85,5 +84,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         sink("PlayStateFromEditor", UE4Library.PlayState)
         source("PlayStateFromRider", UE4Library.PlayState)
+
+        sink("PlayModeFromEditor", int)
+        source("PlayModeFromRider", int)
     }
 }

@@ -317,11 +317,11 @@ void FRiderGameControlExtensionModule::StartupModule()
     JetBrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
 
     const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
-    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel]()
+    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel, this]()
     {
         UnrealToBackendModel.get_playStateFromRider().advise(
             NestedLifetime,
-            [&UnrealToBackendModel](JetBrains::EditorPlugin::PlayState State)
+            [&UnrealToBackendModel, this](JetBrains::EditorPlugin::PlayState State)
             {
                 if (!GUnrealEd) return;
 
@@ -343,8 +343,7 @@ void FRiderGameControlExtensionModule::StartupModule()
                     }
                     else
                     {
-                        const int Mode = UnrealToBackendModel.get_playMode().get();
-                        RequestPlay(Mode);
+                        RequestPlay(playMode);
                     }
                     break;
                 case JetBrains::EditorPlugin::PlayState::Pause:
@@ -371,12 +370,13 @@ void FRiderGameControlExtensionModule::StartupModule()
     });
 
     FEditorDelegates::BeginPIE.AddLambda([this, &RdConnection](const bool)
-    {
-        RdConnection.Scheduler.queue([&RdConnection]()
+    {        
+        playMode = ModeFromSettings();
+        RdConnection.Scheduler.queue([&RdConnection, lambdaPlayMode=playMode]()
         {
             if (!GUnrealEd) return;
 
-            RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
+            RdConnection.UnrealToBackendModel.get_playModeFromEditor().fire(lambdaPlayMode);
             RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
         });
     });
@@ -412,9 +412,17 @@ void FRiderGameControlExtensionModule::StartupModule()
     });
 
     // Initial sync.
-    RdConnection.Scheduler.queue([&RdConnection]()
+    playMode = ModeFromSettings();
+    RdConnection.Scheduler.queue([&RdConnection, lambdaPlayMode=playMode]()
+    {        
+        RdConnection.UnrealToBackendModel.get_playModeFromEditor().fire(lambdaPlayMode);
+    });
+    RdConnection.Scheduler.queue([this, NestedLifetime, &RdConnection]()
     {
-        RdConnection.UnrealToBackendModel.get_playMode().set(ModeFromSettings());
+       RdConnection.UnrealToBackendModel.get_playModeFromRider().advise(NestedLifetime, [this](int inPlayMode)
+       {
+           playMode = inPlayMode;
+       }); 
     });
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
