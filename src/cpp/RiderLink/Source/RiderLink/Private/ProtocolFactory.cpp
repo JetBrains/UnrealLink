@@ -1,4 +1,4 @@
-﻿#include "ProtocolFactory.h"
+#include "ProtocolFactory.h"
 
 #include "scheduler/base/IScheduler.h"
 #include "wire/SocketWire.h"
@@ -22,26 +22,46 @@
 
 #include "Runtime/Launch/Resources/Version.h"
 
-
-TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler * Scheduler, rd::Lifetime SocketLifetime)
+static FString GetPathToPortsFolder()
 {
+    const FString EnvironmentVarName =
+#if PLATFORM_WINDOWS
+    TEXT("LOCALAPPDATA");
+#else
+    TEXT("HOME");
+#endif
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
-	TCHAR CAppDataLocalPath[4096];
-	FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"), CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
+    TCHAR CAppDataLocalPath[4096];
+    FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName, CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
     const FString FAppDataLocalPath = CAppDataLocalPath;
 #else
-    const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA"));
+    const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName);
 #endif
 
+    const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath,
+#if PLATFORM_WINDOWS
+        TEXT("Jetbrains"), TEXT("Rider"), TEXT("Unreal"), TEXT("Ports")
+#elif PLATFORM_MAC
+        TEXT("Library"), TEXT("Logs"), TEXT("Unreal Engine"), TEXT("Ports")
+#else
+        TEXT(".config"), TEXT("unrealEngine"), TEXT("Ports")
+#endif
+    );
+
+    return PortFullDirectoryPath;
+}
+
+
+TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
+{
     const FString ProjectName = FApp::GetProjectName();
-    const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath, TEXT("Jetbrains"), TEXT("Rider"),
-                                                          TEXT("Unreal"), TEXT("Ports"));
-    const FString PortFileFullPath = FPaths::Combine(PortFullDirectoryPath, *ProjectName);
+    const FString PortFullDirectoryPath = GetPathToPortsFolder();
+    const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
 
     spdlog::set_level(spdlog::level::err);
     auto wire = std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
                                                          TCHAR_TO_UTF8(*FString::Printf(TEXT("UnrealEditorServer-%s"),
-                                                                        *ProjectName)));
+                                                             *ProjectName)));
     auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, Scheduler, wire, SocketLifetime);
 
     auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();

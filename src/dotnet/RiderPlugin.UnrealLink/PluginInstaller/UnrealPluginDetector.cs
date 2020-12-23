@@ -94,17 +94,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                 {
                                     uprojectLocations = allProjects.Where(project =>
                                     {
+                                        if (project.IsMiscProjectItem() || project.IsMiscFilesProject()) return false;
+                                        
                                         var location = project.Location;
                                         if (location == null) return false;
 
                                         // TODO: drop this ugly check after updating to net211 where Location == "path/to/game.uproject"
                                         var isUproject = location.ExistsFile && location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
                                                location.NameWithoutExtension == project.Name;
-                                        return isUproject || (project.Location / $"{project.Name}.uproject").ExistsFile;
+                                        return isUproject || (location / $"{location.Name}.uproject").ExistsFile;
                                     }).Select(project =>
                                     {
-                                        if (project.Location.ExistsFile) return project.Location;
-                                        return project.Location / $"{project.Name}.uproject";
+                                        var location = project.Location;
+                                        if (location.ExistsFile) return location;
+                                        return location / $"{location.Name}.uproject";
                                     }).ToSet();
                                 }
                                 else

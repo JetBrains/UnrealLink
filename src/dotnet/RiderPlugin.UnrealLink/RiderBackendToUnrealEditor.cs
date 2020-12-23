@@ -31,6 +31,20 @@ namespace RiderPlugin.UnrealLink
         private readonly IShellLocks myLocks;
         private SequentialLifetimes myConnectionLifetimeProducer;
 
+        private static string GetPathToPortsFolder()
+        {
+            return PlatformUtil.RuntimePlatform switch
+            {
+                PlatformUtil.Platform.Windows => Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..", "Local", "Jetbrains",
+                    "Rider", "Unreal", "Ports"),
+                PlatformUtil.Platform.MacOsX => Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Library",
+                    "Logs", "Unreal Engine", "Ports"),
+                _ => Path.Combine(Environment.GetEnvironmentVariable("HOME") ?? "", ".config",
+                    "unrealEngine", "Ports")
+            };
+        }
+
         public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, IScheduler dispatcher, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator,
             UnrealPluginDetector pluginDetector, ISolution solution)
@@ -50,9 +64,7 @@ namespace RiderPlugin.UnrealLink
             {
                 if (pluginInfo == null) return;
 
-                var portDirectoryFullPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..",
-                    "Local", "Jetbrains", "Rider", "Unreal", "Ports");
+                var portDirectoryFullPath = GetPathToPortsFolder();
 
                 Directory.CreateDirectory(portDirectoryFullPath);
 
@@ -176,7 +188,7 @@ namespace RiderPlugin.UnrealLink
 
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
             myUnrealHost.myModel.PlayStateFromRider.Advise(lf, unrealModel.PlayStateFromRider);
-            
+
             unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
             myUnrealHost.myModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
 

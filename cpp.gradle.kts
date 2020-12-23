@@ -1,8 +1,9 @@
 @file:Suppress("HardCodedStringLiteral")
 
-import java.io.File
-import java.io.ByteArrayOutputStream
 import org.gradle.kotlin.dsl.support.listFilesOrdered
+import java.io.ByteArrayOutputStream
+
+val isWindows:Boolean by extra
 
 tasks {
     val getUnrealEngineProject by creating {
@@ -103,18 +104,25 @@ tasks {
                 val stdOut = ByteArrayOutputStream()
                 // Check if it's Junction
                 val result = exec {
-                    commandLine = listOf("cmd.exe", "/c", "fsutil", "reparsepoint", "query", targetDir.absolutePath, "|", "find", "Print Name:")
+                    commandLine = if(isWindows)
+                        listOf("cmd.exe", "/c", "fsutil", "reparsepoint", "query", targetDir.absolutePath, "|", "find", "Print Name:")
+                    else
+                        listOf("find", targetDir.absolutePath, "-maxdepth", "1", "-type", "l", "-ls")
+
                     isIgnoreExitValue = true
                     standardOutput = stdOut
                 }
 
                 // Check if it's Junction to local RiderLink
                 if(result.exitValue == 0) {
-                    val output = stdOut.toString().trim().split(" ")
+                    val output = stdOut.toString().trim()
                     if(output.isNotEmpty())
                     {
-                        val pathToJunction = output.last()
-                        if(file(pathToJunction) == riderLinkDir) {
+                        val pathToJunction = if(isWindows)
+                            output.substringAfter("Print Name:").trim()
+                        else
+                            output.substringAfter("->").trim()
+                        if(File(pathToJunction) == riderLinkDir) {
                             println("Junction is already correct")
                             throw StopExecutionException()
                         }
@@ -128,7 +136,10 @@ tasks {
             targetDir.parentFile.mkdirs();
             val stdOut = ByteArrayOutputStream()
             val result = exec {
-                    commandLine = listOf("cmd.exe", "/c", "mklink", "/J", targetDir.absolutePath, riderLinkDir.absolutePath)
+                    commandLine = if(isWindows)
+                        listOf("cmd.exe", "/c", "mklink", "/J", targetDir.absolutePath, riderLinkDir.absolutePath)
+                    else
+                        listOf("ln", "-s", riderLinkDir.absolutePath, targetDir.absolutePath)
                     errorOutput = stdOut
                     isIgnoreExitValue = true
                 }
