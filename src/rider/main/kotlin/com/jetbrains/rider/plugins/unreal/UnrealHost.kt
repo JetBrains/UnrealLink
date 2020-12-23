@@ -16,6 +16,7 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     val logger = Logger.getInstance(UnrealHost::class.java)
 
     var playState: PlayState = PlayState.Idle
+    var playMode: Int = 0
 
     internal val model = project.solution.rdRiderModel
     val isUnrealEngineSolution:Boolean

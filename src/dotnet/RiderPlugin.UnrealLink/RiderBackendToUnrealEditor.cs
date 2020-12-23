@@ -28,8 +28,6 @@ namespace RiderPlugin.UnrealLink
         private readonly EditorNavigator myEditorNavigator;
         private readonly ViewableProperty<RdEditorModel> myEditorModel = new ViewableProperty<RdEditorModel>(null);
         
-        private bool PlayModeFromUnreal = false;
-        private bool PlayModeFromRider = false;
         private Lifetime myComponentLifetime;
         private readonly IShellLocks myLocks;
         private SequentialLifetimes myConnectionLifetimeProducer;
@@ -174,6 +172,9 @@ namespace RiderPlugin.UnrealLink
             
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
             myUnrealHost.myModel.PlayStateFromRider.Advise(lf, unrealModel.PlayStateFromRider);
+            
+            unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
+            myUnrealHost.myModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
 
             unrealModel.UnrealLog.Advise(lf,
                 logEvent =>
@@ -184,24 +185,6 @@ namespace RiderPlugin.UnrealLink
             unrealModel.OnBlueprintAdded.Advise(lf, blueprintClass =>
             {
                 //todo
-            });
-            
-            unrealModel.PlayMode.Advise(lf, val =>
-            {
-                myUnrealHost.PerformModelAction(riderModel =>
-                {
-                    if (PlayModeFromRider)
-                        return;
-                    try
-                    {
-                        PlayModeFromUnreal = true;
-                        riderModel.PlayMode.Set(val);
-                    }
-                    finally
-                    {
-                        PlayModeFromUnreal = false;
-                    }
-                });
             });
 
             myUnrealHost.PerformModelAction(riderModel =>
@@ -224,20 +207,6 @@ namespace RiderPlugin.UnrealLink
                 riderModel.NavigateToMethod.Advise(lf,
                     methodReference => myEditorNavigator.NavigateToMethod(methodReference));
 
-                riderModel.PlayMode.Advise(lf, val =>
-                {
-                    if (PlayModeFromUnreal)
-                        return;
-                    try
-                    {
-                        PlayModeFromRider = true;
-                        unrealModel.PlayMode.Set(val);
-                    }
-                    finally
-                    {
-                        PlayModeFromRider = false;
-                    }
-                });
                 riderModel.FrameSkip.Advise(lf, unrealModel.FrameSkip);
             });
 
