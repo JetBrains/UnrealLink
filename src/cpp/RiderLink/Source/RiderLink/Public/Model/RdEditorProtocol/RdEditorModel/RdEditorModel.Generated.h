@@ -90,7 +90,6 @@ public:
 protected:
     // fields
     rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_;
-    rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_;
     rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_;
     rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_;
     rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_;
@@ -99,6 +98,8 @@ protected:
     rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_;
     rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_;
     rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_;
+    rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromEditor_;
+    rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromRider_;
     
 
 private:
@@ -107,7 +108,7 @@ private:
 
 public:
     // primary ctor
-    RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_, rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_);
+    RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_, rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromEditor_, rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromRider_);
     
     // default ctors and dtors
     
@@ -131,7 +132,6 @@ public:
     
     // getters
     rd::ISignal<UnrealLogEvent> const & get_unrealLog() const;
-    rd::IProperty<int32_t> const & get_playMode() const;
     rd::ISource<rd::Void> const & get_frameSkip() const;
     rd::ISignal<BlueprintReference> const & get_openBlueprint() const;
     rd::ISignal<UClass> const & get_onBlueprintAdded() const;
@@ -140,6 +140,8 @@ public:
     rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> const & get_allowSetForegroundWindow() const;
     rd::ISignal<PlayState> const & get_playStateFromEditor() const;
     rd::ISource<PlayState> const & get_playStateFromRider() const;
+    rd::ISignal<int32_t> const & get_playModeFromEditor() const;
+    rd::ISource<int32_t> const & get_playModeFromRider() const;
     
     // intern
 

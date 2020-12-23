@@ -38,15 +38,14 @@ void RdEditorModel::connect(rd::Lifetime lifetime, rd::IProtocol const * protoco
 // initializer
 void RdEditorModel::initialize()
 {
-    playMode_.optimize_nested = true;
     unrealLog_.async = true;
     onBlueprintAdded_.async = true;
-    serializationHash = -1569663499128468552L;
+    serializationHash = -2548788468372113993L;
 }
 // primary ctor
-RdEditorModel::RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdProperty<int32_t, rd::Polymorphic<int32_t>> playMode_, rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_) :
+RdEditorModel::RdEditorModel(rd::RdSignal<UnrealLogEvent, rd::Polymorphic<UnrealLogEvent>> unrealLog_, rd::RdSignal<rd::Void, rd::Polymorphic<rd::Void>> frameSkip_, rd::RdSignal<BlueprintReference, rd::Polymorphic<BlueprintReference>> openBlueprint_, rd::RdSignal<UClass, rd::Polymorphic<UClass>> onBlueprintAdded_, rd::RdEndpoint<FString, bool, rd::Polymorphic<FString>, rd::Polymorphic<bool>> isBlueprintPathName_, rd::RdEndpoint<FString, rd::optional<FString>, rd::Polymorphic<FString>, RdEditorModel::__FStringNullableSerializer> getPathNameByPath_, rd::RdCall<int32_t, bool, rd::Polymorphic<int32_t>, rd::Polymorphic<bool>> allowSetForegroundWindow_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromEditor_, rd::RdSignal<PlayState, rd::Polymorphic<PlayState>> playStateFromRider_, rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromEditor_, rd::RdSignal<int32_t, rd::Polymorphic<int32_t>> playModeFromRider_) :
 rd::RdExtBase()
-,unrealLog_(std::move(unrealLog_)), playMode_(std::move(playMode_)), frameSkip_(std::move(frameSkip_)), openBlueprint_(std::move(openBlueprint_)), onBlueprintAdded_(std::move(onBlueprintAdded_)), isBlueprintPathName_(std::move(isBlueprintPathName_)), getPathNameByPath_(std::move(getPathNameByPath_)), allowSetForegroundWindow_(std::move(allowSetForegroundWindow_)), playStateFromEditor_(std::move(playStateFromEditor_)), playStateFromRider_(std::move(playStateFromRider_))
+,unrealLog_(std::move(unrealLog_)), frameSkip_(std::move(frameSkip_)), openBlueprint_(std::move(openBlueprint_)), onBlueprintAdded_(std::move(onBlueprintAdded_)), isBlueprintPathName_(std::move(isBlueprintPathName_)), getPathNameByPath_(std::move(getPathNameByPath_)), allowSetForegroundWindow_(std::move(allowSetForegroundWindow_)), playStateFromEditor_(std::move(playStateFromEditor_)), playStateFromRider_(std::move(playStateFromRider_)), playModeFromEditor_(std::move(playModeFromEditor_)), playModeFromRider_(std::move(playModeFromRider_))
 {
     initialize();
 }
@@ -63,7 +62,6 @@ void RdEditorModel::init(rd::Lifetime lifetime) const
 {
     rd::RdExtBase::init(lifetime);
     bindPolymorphic(unrealLog_, lifetime, this, "unrealLog");
-    bindPolymorphic(playMode_, lifetime, this, "playMode");
     bindPolymorphic(frameSkip_, lifetime, this, "frameSkip");
     bindPolymorphic(openBlueprint_, lifetime, this, "openBlueprint");
     bindPolymorphic(onBlueprintAdded_, lifetime, this, "onBlueprintAdded");
@@ -72,13 +70,14 @@ void RdEditorModel::init(rd::Lifetime lifetime) const
     bindPolymorphic(allowSetForegroundWindow_, lifetime, this, "allowSetForegroundWindow");
     bindPolymorphic(playStateFromEditor_, lifetime, this, "playStateFromEditor");
     bindPolymorphic(playStateFromRider_, lifetime, this, "playStateFromRider");
+    bindPolymorphic(playModeFromEditor_, lifetime, this, "playModeFromEditor");
+    bindPolymorphic(playModeFromRider_, lifetime, this, "playModeFromRider");
 }
 // identify
 void RdEditorModel::identify(const rd::Identities &identities, rd::RdId const &id) const
 {
     rd::RdBindableBase::identify(identities, id);
     identifyPolymorphic(unrealLog_, identities, id.mix(".unrealLog"));
-    identifyPolymorphic(playMode_, identities, id.mix(".playMode"));
     identifyPolymorphic(frameSkip_, identities, id.mix(".frameSkip"));
     identifyPolymorphic(openBlueprint_, identities, id.mix(".openBlueprint"));
     identifyPolymorphic(onBlueprintAdded_, identities, id.mix(".onBlueprintAdded"));
@@ -87,15 +86,13 @@ void RdEditorModel::identify(const rd::Identities &identities, rd::RdId const &i
     identifyPolymorphic(allowSetForegroundWindow_, identities, id.mix(".allowSetForegroundWindow"));
     identifyPolymorphic(playStateFromEditor_, identities, id.mix(".playStateFromEditor"));
     identifyPolymorphic(playStateFromRider_, identities, id.mix(".playStateFromRider"));
+    identifyPolymorphic(playModeFromEditor_, identities, id.mix(".playModeFromEditor"));
+    identifyPolymorphic(playModeFromRider_, identities, id.mix(".playModeFromRider"));
 }
 // getters
 rd::ISignal<UnrealLogEvent> const & RdEditorModel::get_unrealLog() const
 {
     return unrealLog_;
-}
-rd::IProperty<int32_t> const & RdEditorModel::get_playMode() const
-{
-    return playMode_;
 }
 rd::ISource<rd::Void> const & RdEditorModel::get_frameSkip() const
 {
@@ -129,6 +126,14 @@ rd::ISource<PlayState> const & RdEditorModel::get_playStateFromRider() const
 {
     return playStateFromRider_;
 }
+rd::ISignal<int32_t> const & RdEditorModel::get_playModeFromEditor() const
+{
+    return playModeFromEditor_;
+}
+rd::ISource<int32_t> const & RdEditorModel::get_playModeFromRider() const
+{
+    return playModeFromRider_;
+}
 // intern
 // equals trait
 // equality operators
@@ -147,9 +152,6 @@ std::string RdEditorModel::toString() const
     std::string res = "RdEditorModel\n";
     res += "\tunrealLog = ";
     res += rd::to_string(unrealLog_);
-    res += '\n';
-    res += "\tplayMode = ";
-    res += rd::to_string(playMode_);
     res += '\n';
     res += "\tframeSkip = ";
     res += rd::to_string(frameSkip_);
@@ -174,6 +176,12 @@ std::string RdEditorModel::toString() const
     res += '\n';
     res += "\tplayStateFromRider = ";
     res += rd::to_string(playStateFromRider_);
+    res += '\n';
+    res += "\tplayModeFromEditor = ";
+    res += rd::to_string(playModeFromEditor_);
+    res += '\n';
+    res += "\tplayModeFromRider = ";
+    res += rd::to_string(playModeFromRider_);
     res += '\n';
     return res;
 }
