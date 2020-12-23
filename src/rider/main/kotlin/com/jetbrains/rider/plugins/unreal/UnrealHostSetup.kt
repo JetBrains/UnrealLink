@@ -10,6 +10,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
+import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.actions.*
 import com.jetbrains.rider.plugins.unreal.model.PlayState
@@ -61,22 +62,15 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
 
 //  Update state of Unreal actions on toolbar
         unrealHost.performModelAction {
-            it.playStateFromEditor.advise(project.lifetime) { newState ->
+            it.playStateFromEditor.adviseNotNull(project.lifetime) { newState ->
                 setPlayState(unrealHost, newState)
             }
         }
 
         unrealHost.performModelAction {
-            it.playMode.advise(project.lifetime) { mode ->
-                val numPlayersAction = NumberOfPlayers.getNumPlayersAction(mode)
-                val spawnAtPlayerStartAction = SpawnPlayer.getSpawnLocationAction(mode)
-                val playModeAction = PlayMode.getPlayModeAction(mode)
-                val dedicatedServerAction = ActionManager.getInstance().getAction("RiderLink.DedicatedServer") as ToggleAction
-
-                numPlayersAction.setSelected(AnActionEvent(null, DataManager.getInstance().dataContext, "", numPlayersAction.templatePresentation, ActionManager.getInstance(), 0), true)
-                spawnAtPlayerStartAction.setSelected(AnActionEvent(null, DataManager.getInstance().dataContext, "", spawnAtPlayerStartAction.templatePresentation, ActionManager.getInstance(), 0), true)
-                playModeAction.setSelected(AnActionEvent(null, DataManager.getInstance().dataContext, "", playModeAction.templatePresentation, ActionManager.getInstance(), 0), true)
-                dedicatedServerAction.setSelected(AnActionEvent(null, DataManager.getInstance().dataContext, "", dedicatedServerAction.templatePresentation, ActionManager.getInstance(), 0), DedicatedServer.getDedicatedServer(mode))
+            it.playModeFromEditor.adviseNotNull(project.lifetime) { mode ->
+                unrealHost.playMode = mode
+                ActivityTracker.getInstance().inc()
             }
         }
     }

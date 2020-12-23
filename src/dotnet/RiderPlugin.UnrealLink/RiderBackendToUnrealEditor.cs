@@ -27,9 +27,6 @@ namespace RiderPlugin.UnrealLink
         private readonly UnrealLinkResolver myLinkResolver;
         private readonly EditorNavigator myEditorNavigator;
         private readonly ViewableProperty<RdEditorModel> myEditorModel = new ViewableProperty<RdEditorModel>(null);
-
-        private bool PlayModeFromUnreal = false;
-        private bool PlayModeFromRider = false;
         private Lifetime myComponentLifetime;
         private readonly IShellLocks myLocks;
         private SequentialLifetimes myConnectionLifetimeProducer;
@@ -73,7 +70,7 @@ namespace RiderPlugin.UnrealLink
 
                 var projects = pluginInfo.ProjectPlugins.Select(it => it.UprojectFilePath.NameWithoutExtension)
                     .ToList();
-
+                
                 solution.Locks.Tasks.Queue(myComponentLifetime, () =>
                 {
                     var watcher = new FileSystemWatcher(portDirectoryFullPath)
@@ -86,9 +83,8 @@ namespace RiderPlugin.UnrealLink
                         var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
                         if (projects.Contains(path.NameWithoutExtension) && myComponentLifetime.IsAlive)
                         {
-                            myLogger.Info(
-                                $"FileSystemWatcher event {fileSystemEvent.ChangeType} found \"{path.NameWithoutExtension}\"");
-                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
+                            myLogger.Info($"FileSystemWatcher event {fileSystemEvent.ChangeType} found \"{path.NameWithoutExtension}\"");
+                            myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", 
                                 () => CreateProtocols(path));
                         }
                     };
@@ -104,8 +100,7 @@ namespace RiderPlugin.UnrealLink
                 foreach (var projectName in projects)
                 {
                     var portFileFullPath = FileSystemPath.Parse(portDirectoryFullPath) / projectName;
-                    myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
-                        () => CreateProtocols(portFileFullPath));
+                    myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol", () => CreateProtocols(portFileFullPath));
                 }
             });
 
@@ -126,7 +121,6 @@ namespace RiderPlugin.UnrealLink
             {
                 return;
             }
-
             if (!int.TryParse(text, out var port))
             {
                 myLogger.Error($"[UnrealLink]: Couldn't parse port from file:{portFileFullPath}, text:{text}");
@@ -159,11 +153,9 @@ namespace RiderPlugin.UnrealLink
             }
             catch (Exception exception)
             {
-                myLogger.Warn(
-                    $"[UnrealLink]: Failed to read connection port from {portFileFullPath}, reason: {exception.Message}");
+                myLogger.Warn($"[UnrealLink]: Failed to read connection port from {portFileFullPath}, reason: {exception.Message}");
                 return false;
             }
-
             return true;
         }
 
@@ -188,9 +180,12 @@ namespace RiderPlugin.UnrealLink
                 return myUnrealHost.PerformModelAction(riderModel =>
                     riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
             });
-
+            
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
             myUnrealHost.myModel.PlayStateFromRider.Advise(lf, unrealModel.PlayStateFromRider);
+
+            unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
+            myUnrealHost.myModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
 
             unrealModel.UnrealLog.Advise(lf,
                 logEvent =>
@@ -201,24 +196,6 @@ namespace RiderPlugin.UnrealLink
             unrealModel.OnBlueprintAdded.Advise(lf, blueprintClass =>
             {
                 //todo
-            });
-
-            unrealModel.PlayMode.Advise(lf, val =>
-            {
-                myUnrealHost.PerformModelAction(riderModel =>
-                {
-                    if (PlayModeFromRider)
-                        return;
-                    try
-                    {
-                        PlayModeFromUnreal = true;
-                        riderModel.PlayMode.Set(val);
-                    }
-                    finally
-                    {
-                        PlayModeFromUnreal = false;
-                    }
-                });
             });
 
             myUnrealHost.PerformModelAction(riderModel =>
@@ -241,20 +218,6 @@ namespace RiderPlugin.UnrealLink
                 riderModel.NavigateToMethod.Advise(lf,
                     methodReference => myEditorNavigator.NavigateToMethod(methodReference));
 
-                riderModel.PlayMode.Advise(lf, val =>
-                {
-                    if (PlayModeFromUnreal)
-                        return;
-                    try
-                    {
-                        PlayModeFromRider = true;
-                        unrealModel.PlayMode.Set(val);
-                    }
-                    finally
-                    {
-                        PlayModeFromRider = false;
-                    }
-                });
                 riderModel.FrameSkip.Advise(lf, unrealModel.FrameSkip);
             });
 

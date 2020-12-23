@@ -11,6 +11,7 @@ using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Host.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
+using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
@@ -23,41 +24,36 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     {
         public static readonly string UPLUGIN_FILENAME = "RiderLink.uplugin";
         private static readonly string UPROJECT_FILE_FORMAT = "uproject";
-        private static readonly RelativePath ourPathToProjectPlugin = $"Plugins/Developer/RiderLink/{UPLUGIN_FILENAME}";
+        private readonly RelativePath ourPathToProjectPlugin = $"Plugins/Developer/RiderLink/{UPLUGIN_FILENAME}";
 
-        private static readonly RelativePath ourPathToEnginePlugin =
+        private readonly RelativePath ourPathToEnginePlugin =
             $"Engine/Plugins/Developer/RiderLink/{UPLUGIN_FILENAME}";
 
         public static FileSystemPath GetPathToUpluginFile(FileSystemPath rootFolder) => rootFolder / UPLUGIN_FILENAME;
 
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
-        private readonly UnrealHost myUnrealHost;
         private readonly ISolution mySolution;
-        private readonly PluginPathsProvider myPluginPathsProvider;
         private readonly CppUE4SolutionDetector mySolutionDetector;
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
-        private Version myUnrealVersion = null;
-        public Version UnrealVersion => myUnrealVersion == null ? new Version(0, 0, 0) : myUnrealVersion;
+        private Version myUnrealVersion;
         private readonly Version myMinimalSupportedVersion = new Version(4, 20, 0);
 
 
-        public UnrealPluginDetector(Lifetime lifetime, ILogger logger, UnrealHost unrealHost,
-            CppUE4SolutionDetector solutionDetector, ISolution solution, NotificationsModel notificationsModel,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, PluginPathsProvider pluginPathsProvider)
+        public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
+            CppUE4SolutionDetector solutionDetector, ISolution solution,
+            IShellLocks locks, ISolutionLoadTasksScheduler scheduler)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
                 new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLogger = logger;
-            myUnrealHost = unrealHost;
             mySolution = solution;
-            myPluginPathsProvider = pluginPathsProvider;
             mySolutionDetector = solutionDetector;
 
             mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
-                newValue => newValue == TriBool.True, isUESolution =>
+                newValue => newValue == TriBool.True, _ =>
                 {
                     scheduler.EnqueueTask(new SolutionLoadTask("Find installed RiderLink plugins",
                         SolutionLoadTaskKinds.Done,
@@ -69,18 +65,22 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                             if (myUnrealVersion < myMinimalSupportedVersion)
                             {
-                                var notification = new NotificationModel("Unreal Engine 4.20.0+ is required",
-                                    "<html>UnrealLink supports Unreal Engine versions starting with 4.20.0<br>" +
-                                    "<b>WARNING: Advanced users only</b><br>" +
-                                    "You can manually download the latest version of plugin and build It for your version of Unreal Editor<br>" +
-                                    RiderContextNotificationHelper.MakeLink(
-                                        "https://github.com/JetBrains/UnrealLink/releases",
-                                        "Download latest Unreal Editor plugin") +
-                                    "</html>",
-                                    true,
-                                    RdNotificationEntryType.WARN);
                                 locks.ExecuteOrQueue(myLifetime, "UnrealLink.CheckSupportedVersion",
-                                    () => notificationsModel.Notification(notification));
+                                    () =>
+                                    {
+                                        var notification = new NotificationModel("Unreal Engine 4.20.0+ is required",
+                                            "<html>UnrealLink supports Unreal Engine versions starting with 4.20.0<br>" +
+                                            "<b>WARNING: Advanced users only</b><br>" +
+                                            "You can manually download the latest version of plugin and build It for your version of Unreal Editor<br>" +
+                                            RiderContextNotificationHelper.MakeLink(
+                                                "https://github.com/JetBrains/UnrealLink/releases",
+                                                "Download latest Unreal Editor plugin") +
+                                            "</html>",
+                                            true,
+                                            RdNotificationEntryType.WARN);
+                                        var notificationsModel = Shell.Instance.GetComponent<NotificationsModel>();
+                                        notificationsModel.Notification(notification);
+                                    });
                                 return;
                             }
 
@@ -206,7 +206,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             };
             if (!upluginFilePath.ExistsFile) return installDescription;
 
-            var version = myPluginPathsProvider.GetPluginVersion(upluginFilePath);
+            var pluginPathsProvider = Shell.Instance.GetComponent<PluginPathsProvider>();
+            var version = pluginPathsProvider.GetPluginVersion(upluginFilePath);
             if (version == null) return installDescription;
 
             installDescription.IsPluginAvailable = true;
