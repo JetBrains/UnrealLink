@@ -55,12 +55,16 @@ namespace RiderPlugin.UnrealLink.Settings
 
             var installInEngineButton = AddButton("Install RiderLink plugin in Engine", () =>
             {
-                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Engine, forceInstall:true);
+                unrealPluginInstaller?.HandleManualInstallPlugin(
+                    new InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes)
+                    );
             });
 
             var installInGameButton = AddButton("Install RiderLink plugin in Game", () =>
             {
-                unrealPluginInstaller?.HandleManualInstallPlugin(PluginInstallLocation.Game, forceInstall:true);
+                unrealPluginInstaller?.HandleManualInstallPlugin(
+                    new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
+                    );
             });
 
             var installationInProgressText = AddText("Installation is in progress...");
