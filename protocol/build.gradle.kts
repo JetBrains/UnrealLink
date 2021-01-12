@@ -49,6 +49,7 @@ tasks {
         val cppLibraryOutput = File(cppOutputRoot, "Library")
         val ktLibraryOutput = File(ktOutputRoot, "Library")
 
+        inputs.dir(modelDir.resolve("lib").resolve("ue4"))
         outputs.dirs(
             csLibraryOutput
 //            ,cppLibraryOutput
@@ -96,6 +97,7 @@ tasks {
         val csRiderOutput = File(csOutputRoot, "RdRiderProtocol")
         val ktRiderOutput = File(ktOutputRoot, "RdRiderProtocol")
 
+        inputs.dir(modelDir.resolve("rider"))
         outputs.dirs(csRiderOutput, ktRiderOutput)
 
         configure<RdGenExtension> {
@@ -135,6 +137,7 @@ tasks {
 
         val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
         val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
+        inputs.dir(modelDir.resolve("editorPlugin"))
         outputs.dirs(
             csEditorOutput
 //            ,cppEditorOutput
