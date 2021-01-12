@@ -27,6 +27,4 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
     fun <R> performModelAction(action:(RdRiderModel)->R) {
         action(model)
     }
-
-
 }
