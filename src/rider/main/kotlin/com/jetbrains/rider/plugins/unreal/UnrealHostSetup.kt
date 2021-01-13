@@ -1,10 +1,6 @@
 package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.ide.ActivityTracker
-import com.intellij.ide.DataManager
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
@@ -12,7 +8,6 @@ import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
-import com.jetbrains.rider.plugins.unreal.actions.*
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget
 import com.sun.jna.LastErrorException
@@ -57,6 +52,18 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 if (!connected) {
                     setPlayState(unrealHost, PlayState.Idle)
                 }
+            }
+        }
+
+        unrealHost.performModelAction {
+            it.riderLinkInstallPanelInit.advise(project.lifetime) {
+                val riderLinkInstallContext =
+                    RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
+                riderLinkInstallContext.clear()
+                riderLinkInstallContext.showToolWindowIfHidden()
+            }
+            it.riderLinkInstallMessage.advise(project.lifetime) {
+                RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(it)
             }
         }
 

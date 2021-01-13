@@ -53,10 +53,24 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("status", PluginInstallStatus)
     }
 
-    private val PluginInstallLocation = enum("PluginInstallLocation") {
-        +"Engine"
-        +"Game"
-        +"NotInstalled"
+    private val InstallMessage = structdef("InstallMessage") {
+        field("text", string)
+        field("type", enum("ContentType") {
+            +"Normal"
+            +"Error"
+        })
+    }
+
+    private val InstallPluginDescription = structdef("InstallPluginDescription") {
+        field("location", enum("PluginInstallLocation") {
+            +"Engine"
+            +"Game"
+            +"NotInstalled"
+        })
+        field("forceInstall", enum("ForceInstall") {
+            +"Yes"
+            +"No"
+        })
     }
 
     init {
@@ -79,7 +93,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("isUnrealEngineSolution", false)
 
         sink("onEditorPluginOutOfSync", EditorPluginOutOfSync)
-        source("installEditorPlugin", PluginInstallLocation)
+        source("installEditorPlugin", InstallPluginDescription)
         source("enableAutoupdatePlugin", void)
 
         sink("PlayStateFromEditor", UE4Library.PlayState)
@@ -87,5 +101,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         sink("PlayModeFromEditor", int)
         source("PlayModeFromRider", int)
+
+        sink("RiderLinkInstallPanelInit", void)
+        sink("RiderLinkInstallMessage", InstallMessage).async
     }
 }
