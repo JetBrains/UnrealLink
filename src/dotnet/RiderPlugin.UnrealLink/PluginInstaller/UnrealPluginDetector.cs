@@ -77,7 +77,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                                 "Download latest Unreal Editor plugin") +
                                             "</html>",
                                             true,
-                                            RdNotificationEntryType.WARN);
+                                            RdNotificationEntryType.WARN,
+                                            new List<NotificationHyperlink>());
                                         var notificationsModel = Shell.Instance.GetComponent<NotificationsModel>();
                                         notificationsModel.Notification(notification);
                                     });
@@ -90,18 +91,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             using (solution.Locks.UsingReadLock())
                             {
                                 var allProjects = mySolution.GetAllProjects();
-                                if (solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened)
+                                if (solutionDetector.SupportRiderProjectModel ==
+                                    CppUE4ProjectModelSupportMode.UprojectOpened)
                                 {
                                     uprojectLocations = allProjects.Where(project =>
                                     {
                                         if (project.IsMiscProjectItem() || project.IsMiscFilesProject()) return false;
-                                        
+
                                         var location = project.Location;
                                         if (location == null) return false;
 
                                         // TODO: drop this ugly check after updating to net211 where Location == "path/to/game.uproject"
-                                        var isUproject = location.ExistsFile && location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
-                                               location.NameWithoutExtension == project.Name;
+                                        var isUproject =
+                                            location.ExistsFile && location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
+                                            location.NameWithoutExtension == project.Name;
                                         return isUproject || (location / $"{location.Name}.uproject").ExistsFile;
                                     }).Select(project =>
                                     {
@@ -176,7 +179,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return TryGetEnginePluginFromEngineRoot(installInfo, unrealEngineRoot);
         }
 
-        private bool TryGetEnginePluginFromSolution(CppUE4SolutionDetector solutionDetector, UnrealPluginInstallInfo installInfo)
+        private bool TryGetEnginePluginFromSolution(CppUE4SolutionDetector solutionDetector,
+            UnrealPluginInstallInfo installInfo)
         {
             var engineRootFolder = solutionDetector.UE4SourcesPath.Directory;
             return TryGetEnginePluginFromEngineRoot(installInfo, engineRootFolder);
