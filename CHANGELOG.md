@@ -10,6 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2021.1.1]
+### Added
 - Support MacOS and Linux
 - Installing RiderLink plugin logs show in Build panel
 
