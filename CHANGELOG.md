@@ -10,6 +10,8 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+- Support MacOS and Linux
+- Installing RiderLink plugin logs show in Build panel
 
 ### Changed
 
