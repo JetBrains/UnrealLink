@@ -32,7 +32,7 @@ dependencies {
 }
 
 val repoRoot by extra { project.rootDir }
-val sdkVersion by extra { "2020.3" }
+val sdkVersion by extra { "2021.1" }
 
 val dotNetSdkPath by lazy {
     val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
