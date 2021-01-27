@@ -327,9 +327,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
 
-            var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
-            if (cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
-                RegenerateProjectFiles(uprojectFile);
+            mySolution.Locks.ExecuteOrQueueReadLock(Lifetime, "UnrealLink.RegenerateProjectFiles", () =>
+            {
+                var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
+                if (cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
+                    RegenerateProjectFiles(uprojectFile);
+            });
             return true;
         }
 
