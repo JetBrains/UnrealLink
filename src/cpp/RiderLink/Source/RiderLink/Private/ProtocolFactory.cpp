@@ -54,7 +54,7 @@ static FString GetPathToPortsFolder()
 
 TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
 {
-    const FString ProjectName = FApp::GetProjectName();
+    const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
     const FString PortFullDirectoryPath = GetPathToPortsFolder();
     const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
 
