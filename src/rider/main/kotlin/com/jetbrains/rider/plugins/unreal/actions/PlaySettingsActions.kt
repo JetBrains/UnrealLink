@@ -8,6 +8,7 @@ import com.jetbrains.rider.plugins.unreal.UnrealHost
 
 class PlaySettings : DefaultActionGroup() {
     override fun update(e: AnActionEvent) {
+        super.update(e)
         e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution ?: false
         e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
@@ -15,6 +16,7 @@ class PlaySettings : DefaultActionGroup() {
 
 class PlaySubsettings : DefaultActionGroup() {
     override fun update(e: AnActionEvent) {
+        super.update(e)
         e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
@@ -36,6 +38,11 @@ class NumberOfPlayers : ToggleAction() {
             host.playMode = setNumPlayers(host.playMode, e.presentation.text.toInt(10))
             host.model.playModeFromRider.fire(host.playMode)
         }
+    }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
 
@@ -60,6 +67,11 @@ class SpawnPlayer : ToggleAction() {
             host.model.playModeFromRider.fire(host.playMode)
         }
     }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+    }
 }
 
 class DedicatedServer : ToggleAction() {
@@ -79,6 +91,11 @@ class DedicatedServer : ToggleAction() {
         host.playMode = setDedicatedServer(host.playMode, isSelected)
         host.model.playModeFromRider.fire(host.playMode)
     }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+    }
 }
 
 class CompileBeforeRun : ToggleAction() {
@@ -97,6 +114,11 @@ class CompileBeforeRun : ToggleAction() {
 
         host.playMode = setCompileBeforeRun(host.playMode, isSelected)
         host.model.playModeFromRider.fire(host.playMode)
+    }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
 
@@ -131,5 +153,10 @@ class PlayMode : ToggleAction() {
             host.playMode = setPlayMode(host.playMode, e.presentation.text)
             host.model.playModeFromRider.fire(host.playMode)
         }
+    }
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
