@@ -20,6 +20,20 @@ The plugin is always bundled with Rider.
 ### Fixed
 
 ### Known Issues
+## [2021.1.2]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Exception on generitng project files during installation of RiderLink plugin
+- Rider not being able to connect to Unreal Editor 
+
+### Known Issues
 ## [2021.1.1]
 ### Added
 - Support MacOS and Linux
