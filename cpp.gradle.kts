@@ -114,7 +114,7 @@ tasks {
         inputs.file(zipperSolution)
         val zipperFolder = File("$rootDir/tools/Zipper/bin/Release/net461")
         val zipperBinary = zipperFolder.resolve(if (isWindows) "Zipper.exe" else "Zipper")
-        outputs.file("$rootDir/tools/Zipper/bin/Release/net461/Zipper.exe")
+        outputs.file(zipperBinary)
 
         doLast {
             val dotNetCliPath = findDotNetCliPath()
