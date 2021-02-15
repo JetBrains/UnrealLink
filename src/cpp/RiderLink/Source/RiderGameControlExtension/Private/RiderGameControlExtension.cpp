@@ -402,6 +402,7 @@ void FRiderGameControlExtensionModule::StartupModule()
 
             GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
             GUnrealEd->PlayWorld->bDebugPauseExecution = false;
+            GUnrealEd->PlaySessionSingleStepped();
         });
     });
 
@@ -451,6 +452,18 @@ void FRiderGameControlExtensionModule::StartupModule()
             RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
         });
     });
+
+    FEditorDelegates::SingleStepPIE.AddLambda([this, &RdConnection](const bool)
+    {
+        RdConnection.Scheduler.queue([&RdConnection]()
+        {
+            if (!GUnrealEd) return;
+
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
+            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Pause);
+        });
+    });
+    
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda(
         [this, &RdConnection](UObject* obj, FPropertyChangedEvent& ev)
         {
