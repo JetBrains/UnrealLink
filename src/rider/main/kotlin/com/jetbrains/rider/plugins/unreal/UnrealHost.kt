@@ -2,6 +2,8 @@ package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.jetbrains.rd.util.reactive.IProperty
+import com.jetbrains.rd.util.reactive.Property
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
@@ -15,7 +17,9 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
 
     val logger = Logger.getInstance(UnrealHost::class.java)
 
-    var playState: PlayState = PlayState.Idle
+    internal val playStateModel: IProperty<PlayState> = Property(PlayState.Idle)
+    val playState: PlayState
+        get() = playStateModel.value
     var playMode: Int = 0
 
     internal val model = project.solution.rdRiderModel

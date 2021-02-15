@@ -1,6 +1,5 @@
 package com.jetbrains.rider.plugins.unreal
 
-import com.intellij.ide.ActivityTracker
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
@@ -8,6 +7,7 @@ import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
+import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget
 import com.sun.jna.LastErrorException
@@ -50,7 +50,7 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         unrealHost.performModelAction {
             it.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
                 if (!connected) {
-                    setPlayState(unrealHost, PlayState.Idle)
+                    unrealHost.playStateModel.set(PlayState.Idle)
                 }
             }
         }
@@ -70,22 +70,16 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
 //  Update state of Unreal actions on toolbar
         unrealHost.performModelAction {
             it.playStateFromEditor.adviseNotNull(project.lifetime) { newState ->
-                setPlayState(unrealHost, newState)
+                unrealHost.playStateModel.set(newState)
             }
         }
 
         unrealHost.performModelAction {
             it.playModeFromEditor.adviseNotNull(project.lifetime) { mode ->
                 unrealHost.playMode = mode
-                ActivityTracker.getInstance().inc()
+                forceTriggerUIUpdate()
             }
         }
-    }
-
-    private fun setPlayState(unrealHost: UnrealHost, it: PlayState) {
-        unrealHost.playState = it
-        // This will trigger refresh in actions for `PlayActions.kt`
-        ActivityTracker.getInstance().inc()
     }
 
     private val user32 = if(SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
