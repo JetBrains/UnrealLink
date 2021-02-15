@@ -113,7 +113,7 @@ tasks {
         inputs.file("$rootDir/tools/Zipper/Zipper.csproj")
         inputs.file(zipperSolution)
         val zipperFolder = File("$rootDir/tools/Zipper/bin/Release/net461")
-        val zipperBinary = zipperFolder + if (isWindows) "Zipper.exe" else "Zipper"
+        val zipperBinary = zipperFolder.resolve(if (isWindows) "Zipper.exe" else "Zipper")
         outputs.file("$rootDir/tools/Zipper/bin/Release/net461/Zipper.exe")
 
         doLast {
