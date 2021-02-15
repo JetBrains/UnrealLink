@@ -20,5 +20,5 @@ public:
     virtual bool SupportsDynamicReloading() override { return true; };
 
 private:
-    int playMode;
+    int32_t playMode;
 };
