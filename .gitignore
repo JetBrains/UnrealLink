@@ -46,3 +46,9 @@ UnrealEngineProjectPath.txt
 
 # Tmp release files
 release_notes.md
+
+# Zipper
+tools/Zipper/*
+!tools/Zipper/Program.cs
+!tools/Zipper/Zipper.csproj
+!tools/Zipper/Zipper.sln
