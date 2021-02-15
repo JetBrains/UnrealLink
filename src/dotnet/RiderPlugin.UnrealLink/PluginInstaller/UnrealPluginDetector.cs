@@ -40,6 +40,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private Version myUnrealVersion;
         private readonly Version myMinimalSupportedVersion = new Version(4, 20, 0);
 
+        private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
+
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
             CppUE4SolutionDetector solutionDetector, ISolution solution,
@@ -100,6 +102,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                                         var location = project.Location;
                                         if (location == null) return false;
+
+                                        if (EXCLUDED_PROJECTS.Contains(location.NameWithoutExtension)) return false;
 
                                         // TODO: drop this ugly check after updating to net211 where Location == "path/to/game.uproject"
                                         var isUproject =
