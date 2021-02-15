@@ -258,6 +258,9 @@ static void UpdateSettings(ULevelEditorPlaySettings* PlayInSettings, const FPlay
             ? PlayLocation_DefaultPlayerStart
             : PlayLocation_CurrentCameraLocation;
     PlayInSettings->LastExecutedPlayModeType = settings.PlayMode;
+
+    PlayInSettings->PostEditChange();
+    PlayInSettings->SaveConfig();
 }
 
 static void RequestPlay(int32_t mode)
