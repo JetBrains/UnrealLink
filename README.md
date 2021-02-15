@@ -11,7 +11,7 @@
         <a href="#plugin-structure">Plugin structure</a>
     </li>
     <li>
-        <a href="#setting-up-environment">Setting up the environment</a>
+        <a href="SETUP.md">Setting up the environment</a>
     </li>
     <li>
         <a href="#installation">Installation</a>
@@ -26,20 +26,6 @@
  
 <h2 id="plugin-structure">Plugin structure</h2>
 <p>There are two plugins under the hood, the <strong>UnrealLink</strong> plugin for Rider and the <strong>RiderLink</strong> plugin for Unreal Editor, packed together.</p>
-
-<h2 id="setting-up-environment">Setting up the environment</h2>
-<p>After cloning the repository, you need to perform some actions to set up the environment. Here is the easiest way to do it:</p>
-<ul>
-    <li>
-        Run the console under the folder where you have cloned the repository
-    </li>
-NOTE: Make sure that you have Java installed on your machine and you have environmental variable JAVA_HOME set to the value of the path to your JDK folder. Otherwise, it won't work.
-    <li>
-        Use the following command <code>gradlew buildResharperHost</code> to install all the requirements for proper work
-    </li>
-</ul>
-<p>Here you go! Now you can open UnrealLink.sln and write your code.</p>
-
 
 <h2 id="installation">Installation</h2>
 <p><strong>UnrealLink</strong> is bundled with Rider. Starting with Rider for Unreal Engine 2020.2.1, it’s also distributed via the JetBrains plugin <a href="https://plugins.jetbrains.com/plugin/14989-unreal-link">marketplace</a>.</p>
