@@ -258,7 +258,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
 
     withType<PrepareSandboxTask> {
         dependsOn(buildResharperHost)
-        val packCppSide = getByName<Zip>("packCppSide")
+        val packCppSide = getByName("packCppSide")
         dependsOn(packCppSide)
 
         outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
@@ -282,7 +282,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
             }
             copy {
-                from(packCppSide.archiveFile)
+                from(packCppSide.outputs.files.first())
                 into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/EditorPlugin")
             }
         }

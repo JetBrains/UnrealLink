@@ -3,7 +3,32 @@
 import org.gradle.kotlin.dsl.support.listFilesOrdered
 import java.io.ByteArrayOutputStream
 
-val isWindows:Boolean by extra
+val isWindows: Boolean by extra
+
+fun findDotNetCliPath(): String {
+    if (project.extra.has("dotNetCliPath")) {
+        val dotNetCliPath = project.extra["dotNetCliPath"] as String
+        logger.info("dotNetCliPath (cached): $dotNetCliPath")
+        return dotNetCliPath
+    }
+
+    val pathComponents = System.getenv("PATH").split(File.pathSeparatorChar)
+    for (dir in pathComponents) {
+        val dotNetCliFile = File(
+            dir, if (isWindows) {
+                "dotnet.exe"
+            } else {
+                "dotnet"
+            }
+        )
+        if (dotNetCliFile.exists()) {
+            logger.info("dotNetCliPath: ${dotNetCliFile.canonicalPath}")
+            project.extra["dotNetCliPath"] = dotNetCliFile.canonicalPath
+            return dotNetCliFile.canonicalPath
+        }
+    }
+    error(".NET Core CLI not found. Please add: 'dotnet' in PATH")
+}
 
 tasks {
     val getUnrealEngineProject by creating {
@@ -80,17 +105,52 @@ tasks {
         delete(generateChecksum.outputs.files)
     }
 
-    @Suppress("UNUSED_VARIABLE") val packCppSide by creating(Zip::class) {
+    val buildZipper by creating {
+        description = "Build Zipper utility to pack RiderLink"
+
+        val zipperSolution = File("$rootDir/tools/Zipper/Zipper.sln")
+        inputs.file("$rootDir/tools/Zipper/Program.cs")
+        inputs.file("$rootDir/tools/Zipper/Zipper.csproj")
+        inputs.file(zipperSolution)
+        val zipperFolder = File("$rootDir/tools/Zipper/bin/Release/net461")
+        val zipperBinary = zipperFolder.resolve(if (isWindows) "Zipper.exe" else "Zipper")
+        outputs.file(zipperBinary)
+
+        doLast {
+            val dotNetCliPath = findDotNetCliPath()
+            val slnDir = zipperSolution.parentFile
+            val buildArguments = listOf(
+                "build",
+                zipperSolution.absolutePath,
+                "/p:Configuration=Release",
+                "/nologo"
+            )
+
+            logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
+            project.exec {
+                executable = dotNetCliPath
+                args = buildArguments
+                workingDir = zipperSolution.parentFile
+            }
+        }
+    }
+
+    @Suppress("UNUSED_VARIABLE") val packCppSide by creating {
         dependsOn(patchUpluginVersion)
         dependsOn(":protocol:generateModels")
         dependsOn(generateChecksum)
-        from(riderLinkDir) {
-            include("Resources/**", "Source/**")
-            include(generateChecksum.outputs.files.map { it.relativeTo(riderLinkDir).toString() })
-            include(patchUpluginVersion.outputs.files.map { it.relativeTo(riderLinkDir).toString() })
+        dependsOn(buildZipper)
 
+        inputs.dir("$rootDir/src/cpp/RiderLink")
+        val outputZip = File("$rootDir/build/distributions/RiderLink.zip")
+        outputs.file(outputZip)
+        doLast {
+            project.exec {
+                executable = buildZipper.outputs.files.first().absolutePath
+                args = listOf(riderLinkDir.absolutePath, outputZip.absolutePath)
+                workingDir = rootDir
+            }
         }
-        archiveFileName.set("RiderLink.zip")
     }
 
     @Suppress("UNUSED_VARIABLE") val symlinkPluginToUnrealProject by creating {
