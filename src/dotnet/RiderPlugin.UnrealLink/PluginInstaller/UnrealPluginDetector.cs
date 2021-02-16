@@ -37,8 +37,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly CppUE4SolutionDetector mySolutionDetector;
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
-        private Version myUnrealVersion;
-        private readonly Version myMinimalSupportedVersion = new Version(4, 20, 0);
+        private CppUE4Version myUnrealVersion;
+        private readonly CppUE4Version myMinimalSupportedVersion = new CppUE4Version(4, 20, 0);
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
@@ -62,8 +62,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         () =>
                         {
                             myLogger.Info("[UnrealLink]: Looking for RiderLink plugins");
-                            myUnrealVersion = new Version(4, mySolutionDetector.UE4Version,
-                                mySolutionDetector.UE4PatchVersion);
+                            myUnrealVersion = mySolutionDetector.Version;
 
                             if (myUnrealVersion < myMinimalSupportedVersion)
                             {
