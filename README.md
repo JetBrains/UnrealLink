@@ -11,7 +11,7 @@
         <a href="#plugin-structure">Plugin structure</a>
     </li>
     <li>
-        <a href="SETUP.md">Setting up the environment</a>
+        <a href="#setup-environment">Setting up development environment</a>
     </li>
     <li>
         <a href="#installation">Installation</a>
@@ -26,6 +26,9 @@
  
 <h2 id="plugin-structure">Plugin structure</h2>
 <p>There are two plugins under the hood, the <strong>UnrealLink</strong> plugin for Rider and the <strong>RiderLink</strong> plugin for Unreal Editor, packed together.</p>
+
+<h2 id="setup-environment">Setting up development environment</h2>
+<p>For the instruction on how to setup development environment and contribute to the project, please, refer to <a href="SETUP.md">Setting up the environment</a> page</p>
 
 <h2 id="installation">Installation</h2>
 <p><strong>UnrealLink</strong> is bundled with Rider. Starting with Rider for Unreal Engine 2020.2.1, it’s also distributed via the JetBrains plugin <a href="https://plugins.jetbrains.com/plugin/14989-unreal-link">marketplace</a>.</p>
