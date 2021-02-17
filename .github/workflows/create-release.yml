@@ -74,5 +74,5 @@ jobs:
       continue-on-error: true
       run: |
         git add CHANGELOG.md
-        git commit -m "Update CHANGELOG.md for Release"
+        git commit -m "[skip ci] Update CHANGELOG.md for Release"
         git push origin ${GITHUB_REF##*/}
