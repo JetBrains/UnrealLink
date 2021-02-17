@@ -10,7 +10,8 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
-
+- Disabling Play and Play settings button after press
+  - Rider should reflect state of Unreal Editor. Play buttons should change only when Unreal Editor notifies that they have changed
 ### Changed
 
 ### Deprecated
@@ -18,6 +19,8 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+- Fix: sync state of play buttons and play settings buttns between Rider and Unreal Editor
+- Fix: don't install RiderLink into `UnrealLaunchDaemon` project
 
 ### Known Issues
 ## [2021.1.2]
