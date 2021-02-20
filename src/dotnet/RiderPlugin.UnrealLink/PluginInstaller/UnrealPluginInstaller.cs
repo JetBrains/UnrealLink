@@ -182,6 +182,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     backupAllPlugin.Restore();
                 }
             }
+            myUnrealHost.myModel.InstallPluginFinished(success);
         }
 
         private List<BackupDir> BackupAllPlugins(UnrealPluginInstallInfo unrealPluginInstallInfo)
@@ -234,8 +235,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             progress.Value = 0.0;
-            if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin,
-                unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0))
+            var success = InstallPlugin(unrealPluginInstallInfo.EnginePlugin,
+            unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0);
+            if (!success)
             {
                 foreach (var backupAllPlugin in backupAllPlugins)
                 {
@@ -249,6 +251,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     installDescription.IsPluginAvailable = false;
                 }
             }
+            myUnrealHost.myModel.InstallPluginFinished(success);
         }
 
         private bool InstallPlugin(UnrealPluginInstallInfo.InstallDescription installDescription,

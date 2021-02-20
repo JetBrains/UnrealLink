@@ -109,5 +109,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         sink("RiderLinkInstallPanelInit", void)
         sink("RiderLinkInstallMessage", InstallMessage).async
+        sink("InstallPluginFinished", bool).async
     }
 }
