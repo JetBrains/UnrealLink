@@ -5,12 +5,13 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     kotlin("jvm") version "1.4.0"
 
     id("org.jetbrains.changelog") version "0.4.0"
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") version "0.6.5"
     id("com.jetbrains.rdgen") version "0.203.161"
 }
 
@@ -93,7 +94,12 @@ sourceSets {
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
+    useTestNG()
+    testLogging {
+        showStandardStreams = true
+        showExceptions = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 tasks.withType<KotlinCompile> {
@@ -270,20 +276,18 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
                 File(outputFolder, "$dotNetPluginId.dll"),
                 File(outputFolder, "$dotNetPluginId.pdb")
         )
+
+        dllFiles.forEach {
+            from(it) { into("${intellij.pluginName}/dotnet") }
+        }
+
+        from(packCppSide.outputs.files.first()) {
+            into("${intellij.pluginName}/EditorPlugin")
+        }
+
         doLast {
             dllFiles.forEach { file ->
-                copy {
-                    from(file)
-                    into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/dotnet")
-                }
-            }
-
-            dllFiles.forEach { file ->
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
-            }
-            copy {
-                from(packCppSide.outputs.files.first())
-                into("${intellij.sandboxDirectory}/plugins/${intellij.pluginName}/EditorPlugin")
             }
         }
     }
@@ -297,6 +301,8 @@ changelog {
 intellij {
     type = "RD"
     version = "$sdkVersion-SNAPSHOT"
+
+    setPlugins("com.jetbrains.rider-cpp")
 
     instrumentCode = false
     downloadSources = false
