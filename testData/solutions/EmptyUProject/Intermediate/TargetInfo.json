@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "EmptyUProject",
+			"Path": "C:\\Users\\artem.chuguev\\Documents\\Unreal Projects\\EmptyUProject\\Source\\EmptyUProject.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "EmptyUProjectEditor",
+			"Path": "C:\\Users\\artem.chuguev\\Documents\\Unreal Projects\\EmptyUProject\\Source\\EmptyUProjectEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
