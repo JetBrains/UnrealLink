@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -119,7 +120,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         private void InstallPluginInEngineIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo,
-            IProperty<double> progress, ForceInstall forceInstall)
+            IProperty<double> progress, Property<string> progressDescription, ForceInstall forceInstall)
         {
             if (forceInstall == ForceInstall.No && unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable &&
                 unrealPluginInstallInfo.EnginePlugin.PluginVersion == myPathsProvider.CurrentPluginVersion)
@@ -130,11 +131,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return;
             }
 
-            InstallPluginInEngine(unrealPluginInstallInfo, progress);
+            InstallPluginInEngine(unrealPluginInstallInfo, progress, progressDescription);
         }
 
         private void InstallPluginInGameIfRequired(UnrealPluginInstallInfo unrealPluginInstallInfo,
-            Property<double> progress, ForceInstall forceInstall)
+            Property<double> progress, Property<string> progressDescription, ForceInstall forceInstall)
         {
             if (forceInstall == ForceInstall.No && unrealPluginInstallInfo.ProjectPlugins.All(description =>
                 description.IsPluginAvailable && description.PluginVersion == myPathsProvider.CurrentPluginVersion))
@@ -149,14 +150,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return;
             }
 
-            InstallPluginInGame(unrealPluginInstallInfo, progress);
+            InstallPluginInGame(unrealPluginInstallInfo, progress, progressDescription);
         }
 
-        private void InstallPluginInGame(UnrealPluginInstallInfo unrealPluginInstallInfo, Property<double> progress)
+        private void InstallPluginInGame(UnrealPluginInstallInfo unrealPluginInstallInfo, Property<double> progress, Property<string> progressDescription)
         {
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
-
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             var success = true;
             var size = unrealPluginInstallInfo.ProjectPlugins.Count;
@@ -165,7 +163,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 progress.Value = range * i;
                 var installDescription = unrealPluginInstallInfo.ProjectPlugins[i];
-                if (InstallPlugin(installDescription, installDescription.UprojectFilePath, progress, range)) continue;
+                if (InstallPlugin(installDescription, installDescription.UprojectFilePath, progress, range, progressDescription)) continue;
 
                 success = false;
                 break;
@@ -177,21 +175,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             else
             {
-                foreach (var backupAllPlugin in backupAllPlugins)
-                {
-                    backupAllPlugin.Restore();
-                }
+                backupAllPlugins.ExhaustActions();
             }
         }
 
-        private List<BackupDir> BackupAllPlugins(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private Stack<Action> BackupAllPlugins(UnrealPluginInstallInfo unrealPluginInstallInfo)
         {
-            var result = new List<BackupDir>();
+            var result = new Stack<Action>();
             if (unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable)
             {
                 try
                 {
-                    result.Add(new BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, TMP_PREFIX));
+                    result.Push(FsUtils.BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, TMP_PREFIX));
                 }
                 catch
                 {
@@ -210,7 +205,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 try
                 {
                     if (installDescription.IsPluginAvailable)
-                        result.Add(new BackupDir(installDescription.UnrealPluginRootFolder, TMP_PREFIX));
+                        result.Push(FsUtils.BackupDir(installDescription.UnrealPluginRootFolder, TMP_PREFIX));
                 }
                 catch
                 {
@@ -220,6 +215,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     myUnrealHost.myModel.RiderLinkInstallMessage(
                         new InstallMessage("Failed to backup old RiderLink plugin", ContentType.Error));
                     myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Error));
+                    result.ExhaustActions();
                     throw;
                 }
             }
@@ -227,20 +223,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return result;
         }
 
-        private void InstallPluginInEngine(UnrealPluginInstallInfo unrealPluginInstallInfo, IProperty<double> progress)
+        private void InstallPluginInEngine(UnrealPluginInstallInfo unrealPluginInstallInfo, IProperty<double> progress,
+            Property<string> progressDescription)
         {
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
-
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             progress.Value = 0.0;
             if (!InstallPlugin(unrealPluginInstallInfo.EnginePlugin,
-                unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0))
+                unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0, progressDescription))
             {
-                foreach (var backupAllPlugin in backupAllPlugins)
-                {
-                    backupAllPlugin.Restore();
-                }
+                backupAllPlugins.ExhaustActions();
             }
             else
             {
@@ -252,51 +243,29 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         private bool InstallPlugin(UnrealPluginInstallInfo.InstallDescription installDescription,
-            FileSystemPath uprojectFile, IProperty<double> progressProperty, double range)
+            FileSystemPath uprojectFile, IProperty<double> progressProperty, double range,
+            Property<string> progressDescription)
         {
-            var ZIP_STEP = 0.1 * range;
-            var PATCH_STEP = 0.1 * range;
-            var BUILD_STEP = 0.6 * range;
-            var REFRESH_STEP = 0.1 * range;
+            var actions = new Stack<Action>();
 
-            var pluginRootFolder = installDescription.UnrealPluginRootFolder;
-
-            var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
             var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            try
-            {
-                ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
-                progressProperty.Value += ZIP_STEP;
-            }
-            catch (Exception exception)
-            {
-                myLogger.Error(exception, $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
-
-                const string unzipFailTitle = "Failed to unzip new RiderLink plugin";
-                var unzipFailText =
-                    $"Failed to unzip new version of RiderLink ({editorPluginPathFile.FullPath}) to user folder ({pluginTmpDir.FullPath})\n" +
-                    "Try restarting Rider in administrative mode";
-
-                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailTitle, ContentType.Error));
-                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailText, ContentType.Error));
-                return false;
-            }
+            actions.Push(() => pluginTmpDir.Delete());
+            if (!ExtractSourceCodeFromZip(progressProperty, progressDescription, pluginTmpDir, range, actions)) return false;
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            var buildProgress = progressProperty.Value;
-            if (!BuildPlugin(upluginFile,
-                pluginBuildOutput,
-                uprojectFile, value => progressProperty.SetValue(buildProgress + value * BUILD_STEP)))
+            actions.Push(() => pluginBuildOutput.Delete());
+
+            if (!BuildPlugin(upluginFile, pluginBuildOutput, uprojectFile, progressProperty, progressDescription, range))
             {
-                myLogger.Error($"Failed to build RiderLink for any available project");
+                myLogger.Error($"Failed to build RiderLink for {uprojectFile} available project");
                 const string failedBuildText = "Failed to build RiderLink plugin";
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(failedBuildText, ContentType.Error));
+                actions.ExhaustActions();
                 return false;
             }
 
-            progressProperty.Value = buildProgress + BUILD_STEP;
-
+            progressDescription.SetValue("Patching RiderLink.uplugin file");
             if (!PatchUpluginFileAfterInstallation(pluginBuildOutput))
             {
                 const string failedToPatch = "Failed to patch RiderLink.uplugin";
@@ -306,11 +275,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(failedPatchText, ContentType.Normal));
             }
 
-            progressProperty.Value += PATCH_STEP;
-
-            pluginRootFolder.CreateDirectory().DeleteChildren();
-            pluginBuildOutput.Copy(pluginRootFolder);
-            progressProperty.Value += REFRESH_STEP;
+            var pluginRootFolder = installDescription.UnrealPluginRootFolder;
+            CopyBuiltBinaries(progressProperty, progressDescription, pluginRootFolder, pluginBuildOutput, actions, range);
+            RefreshProjectFiles(uprojectFile, progressProperty, progressDescription, range);
 
             installDescription.IsPluginAvailable = true;
             installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
@@ -326,14 +293,81 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
+            
+            actions.ExhaustActions();
+            return true;
+        }
 
+        private bool ExtractSourceCodeFromZip(IProperty<double> progressProperty, Property<string> progressDescription,
+            FileSystemPath pluginTmpDir, double range, Stack<Action> actions)
+        {
+            var ZIP_STEP = 0.1 * range;
+            var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
+            try
+            {
+                progressDescription.SetValue("Extracting RiderLink source code");
+                ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
+                progressProperty.Value += ZIP_STEP;
+            }
+            catch (Exception exception)
+            {
+                myLogger.Error(exception, $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
+
+                const string unzipFailTitle = "Failed to unzip new RiderLink plugin";
+                var unzipFailText =
+                    $"Failed to unzip new version of RiderLink ({editorPluginPathFile.FullPath}) to user folder ({pluginTmpDir.FullPath})\n" +
+                    "Try restarting Rider in administrative mode";
+
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailTitle, ContentType.Error));
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailText, ContentType.Error));
+                actions.ExhaustActions();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void RefreshProjectFiles(FileSystemPath uprojectFile, IProperty<double> progressProperty,
+            Property<string> progressDescription, double range)
+        {
+            var REFRESH_STEP = 0.1 * range;
+            progressProperty.Value += REFRESH_STEP;
+            progressDescription.SetValue("Refreshing project files");
             mySolution.Locks.ExecuteOrQueueReadLock(Lifetime, "UnrealLink.RegenerateProjectFiles", () =>
             {
                 var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
                 if (cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
                     RegenerateProjectFiles(uprojectFile);
             });
-            return true;
+        }
+
+        private void CopyBuiltBinaries(IProperty<double> progressProperty, IProperty<string> progressDescription,
+            FileSystemPath pluginRootFolder, FileSystemPath pluginBuildOutput, Stack<Action> actions, double range)
+        {
+            var PATCH_STEP = 0.1 * range;
+            progressProperty.Value += PATCH_STEP;
+            progressDescription.SetValue("Patching RiderLink.uplugin file");
+            try
+            {
+                pluginRootFolder.CreateDirectory().DeleteChildren();
+                pluginBuildOutput.Copy(pluginRootFolder);
+            }
+            catch (Exception exception)
+            {
+                myLogger.Error(exception,
+                    $"[UnrealLink]: Couldn't copy built plugin fromm {pluginBuildOutput} to {pluginRootFolder}");
+
+                const string unzipFailTitle = "Failed to copy built RiderLink plugin to {pluginRootFolder}";
+                var unzipFailText =
+                    $"Failed to copy successfully built version of RiderLink from ({pluginBuildOutput}) to ({pluginRootFolder})\n" +
+                    "Try doing it manually";
+
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailTitle, ContentType.Error));
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(unzipFailText, ContentType.Error));
+                // Removing action for deleting built plugin from user folder
+                // User might want to copy it manually
+                actions.Pop();
+            }
         }
 
         private bool PatchUpluginFileAfterInstallation(FileSystemPath pluginBuildOutput)
@@ -392,23 +426,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
                 var header = $"{prefix} RiderLink plugin";
                 var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);
+                var progressDescription = new Property<string>("UnrealLink.InstallPluginProgressDescription");
                 var task = RiderBackgroundTaskBuilder.Create()
                     .AsNonCancelable()
                     .WithHeader(header)
                     .WithProgress(progress)
-                    .WithDescriptionFromProgress();
+                    .WithDescription(progressDescription);
                 myBackgroundTaskHost.AddNewTask(lifetime, task);
                 myUnrealHost.myModel.RiderLinkInstallPanelInit();
                 await lifetime.StartBackground(() =>
                 {
                     if (installPluginDescription.Location == PluginInstallLocation.Engine)
                     {
-                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo, progress,
+                        InstallPluginInEngineIfRequired(unrealPluginInstallInfo, progress, progressDescription,
                             installPluginDescription.ForceInstall);
                     }
                     else
                     {
-                        InstallPluginInGameIfRequired(unrealPluginInstallInfo, progress,
+                        InstallPluginInGameIfRequired(unrealPluginInstallInfo, progress, progressDescription,
                             installPluginDescription.ForceInstall);
                     }
                 });
@@ -595,8 +630,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile,
-            Action<double> progressPump)
+            IProperty<double> progressProperty, IProperty<string> progressDescription, double range)
         {
+            var BUILD_STEP = 0.6 * range;
+            progressDescription.SetValue("Building RiderLink");
+            var buildProgress = progressProperty.Value;
+            Action<double> progressPump = value => progressProperty.SetValue(buildProgress + value * BUILD_STEP);
+
             //engineRoot\Engine\Build\BatchFiles\RunUAT.{extension}" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
             var engineRoot = CppUE4FolderFinder.FindUnrealEngineRoot(uprojectFile);
             if (engineRoot.IsEmpty)
@@ -693,6 +733,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
+            progressProperty.SetValue(buildProgress + BUILD_STEP);
             return true;
         }
 
