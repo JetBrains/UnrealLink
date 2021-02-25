@@ -18,7 +18,7 @@ namespace RiderPlugin.UnrealLink
 		
 		public bool Navigate(FileSystemPath assetPath, UEObjectExport objectExport)
 		{
-			var model = myBackendToUnrealEditor.GetCurrentEditorModel();
+			var model = myBackendToUnrealEditor.EditorModel;
 			if (model == null)
 			{
 				return false;

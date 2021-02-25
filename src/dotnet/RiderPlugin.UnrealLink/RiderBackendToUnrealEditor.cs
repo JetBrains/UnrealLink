@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
 using JetBrains.Lifetimes;
+using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.ProjectModel;
 using JetBrains.Rd;
 using JetBrains.Rd.Base;
@@ -21,12 +22,13 @@ namespace RiderPlugin.UnrealLink
     [SolutionComponent]
     public class RiderBackendToUnrealEditor
     {
-        private readonly IScheduler myDispatcher;
+        public RdEditorModel EditorModel { get; private set; }
+
+        private readonly RdDispatcher myDispatcher;
         private readonly ILogger myLogger;
         private readonly UnrealHost myUnrealHost;
         private readonly UnrealLinkResolver myLinkResolver;
         private readonly EditorNavigator myEditorNavigator;
-        private readonly ViewableProperty<RdEditorModel> myEditorModel = new ViewableProperty<RdEditorModel>(null);
         private Lifetime myComponentLifetime;
         private readonly IShellLocks myLocks;
         private SequentialLifetimes myConnectionLifetimeProducer;
@@ -45,7 +47,7 @@ namespace RiderPlugin.UnrealLink
             };
         }
 
-        public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, IScheduler dispatcher, ILogger logger,
+        public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, RdDispatcher dispatcher, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator,
             UnrealPluginDetector pluginDetector, ISolution solution)
         {
@@ -140,10 +142,21 @@ namespace RiderPlugin.UnrealLink
             var protocol = new Protocol("UnrealEditorPlugin", new Serializers(modelLifetime, null, null),
                 new Identities(IdKind.Client), myDispatcher, wire, modelLifetime);
 
-            wire.Connected.WhenTrue(modelLifetime, lifetime =>
+            wire.Connected.View(modelLifetime, (lf, isConnected) =>
             {
-                myLogger.Info("Wire connected");
-                ResetModel(lifetime, protocol);
+                RdEditorModel model;
+                if (isConnected)
+                {
+                    myLogger.Info("Wire connected");
+                    model = ResetModel(lf, protocol);
+                }
+                else
+                {
+                    myLogger.Info("Wire disconnected");
+                    model = null;
+                }
+                
+                EditorModel = model;
             });
         }
 
@@ -169,7 +182,7 @@ namespace RiderPlugin.UnrealLink
             riderModel.UnrealLog.Fire(message);
         }
 
-        private void ResetModel(Lifetime lf, IProtocol protocol)
+        private RdEditorModel ResetModel(Lifetime lf, IProtocol protocol)
         {
             myUnrealHost.PerformModelAction(riderModel =>
             {
@@ -225,20 +238,13 @@ namespace RiderPlugin.UnrealLink
 
                 riderModel.FrameSkip.Advise(lf, unrealModel.FrameSkip);
             });
-
-            if (myComponentLifetime.IsAlive)
-                myLocks.ExecuteOrQueueEx(myComponentLifetime, "setModel",
-                    () => { myEditorModel.SetValue(unrealModel); });
+            
+            return unrealModel;
         }
 
         private void OnOpenedBlueprint(RdEditorModel unrealModel, BlueprintReference blueprintReference)
         {
             unrealModel.OpenBlueprint.Fire(blueprintReference);
-        }
-
-        public RdEditorModel GetCurrentEditorModel()
-        {
-            return myEditorModel.Value;
         }
     }
 }
