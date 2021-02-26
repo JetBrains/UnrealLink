@@ -6,8 +6,7 @@ output
 .gradle
 .tmp
 out/*
-*.generated.kt
-*.generated.cs
+*.generated.*
 NuGet.Config
 
 # User-specific files
@@ -28,6 +27,7 @@ src/cpp/RiderLink/RiderLink.uplugin
 src/cpp/RiderLink/checksum
 src/cpp/RiderLink/Binaries
 src/cpp/RiderLink/Intermediate
+src/cpp/RiderLink/Source/RiderLink/Public/Model
 # rd-cpp extra files
 CMakeLists.txt
 src/cpp/RiderLink/Source/RD/**/.*

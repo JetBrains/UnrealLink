@@ -52,7 +52,7 @@ tasks {
         inputs.dir(modelDir.resolve("lib").resolve("ue4"))
         outputs.dirs(
             csLibraryOutput
-//            ,cppLibraryOutput
+            ,cppLibraryOutput
             , ktLibraryOutput
         )
 
@@ -71,12 +71,12 @@ tasks {
                 directory = "$csLibraryOutput"
             }
 
-//            generator {
-//                language = "cpp"
-//                transform = "reversed"
-//                root = "model.lib.ue4.UE4Library"
-//                directory = "$cppLibraryOutput"
-//            }
+            generator {
+                language = "cpp"
+                transform = "reversed"
+                root = "model.lib.ue4.UE4Library"
+                directory = "$cppLibraryOutput"
+            }
 
             generator {
                 language = "kotlin"
@@ -140,7 +140,7 @@ tasks {
         inputs.dir(modelDir.resolve("editorPlugin"))
         outputs.dirs(
             csEditorOutput
-//            ,cppEditorOutput
+            ,cppEditorOutput
         )
 
         configure<RdGenExtension> {
@@ -159,12 +159,12 @@ tasks {
                 directory = "$csEditorOutput"
             }
 
-//            generator {
-//                language = "cpp"
-//                transform = "reversed"
-//                root = "model.editorPlugin.RdEditorRoot"
-//                directory = "$cppEditorOutput"
-//            }
+            generator {
+                language = "cpp"
+                transform = "reversed"
+                root = "model.editorPlugin.RdEditorRoot"
+                directory = "$cppEditorOutput"
+            }
         }
     }
 
