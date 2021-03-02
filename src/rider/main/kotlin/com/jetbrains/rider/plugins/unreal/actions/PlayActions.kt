@@ -23,6 +23,11 @@ class PlayStateActionStateService(project: Project) : LifetimedProjectService(pr
 
     init {
         val host = UnrealHost.getInstance(project)
+        host.performModelAction {
+            it.isConnectedToUnrealEditor.change.advise(projectServiceLifetime) {
+                invalidate()
+            }
+        }
         host.playStateModel.change.advise(projectServiceLifetime) {
             invalidate()
         }
