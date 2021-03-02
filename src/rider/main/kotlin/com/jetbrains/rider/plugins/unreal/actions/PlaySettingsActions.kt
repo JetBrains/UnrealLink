@@ -122,8 +122,14 @@ class CompileBeforeRun : ToggleAction() {
     }
 }
 
+const val PLAY_MODE_MASK_OFS = 4
+const val PLAY_MODE_MASK_SIZE = 3
+const val PLAY_MODE_MASK = (1.shl(PLAY_MODE_MASK_SIZE) - 1).shl(PLAY_MODE_MASK_OFS)
+const val PLAY_MODE_MASK_INV = PLAY_MODE_MASK.inv()
+
 class PlayMode : ToggleAction() {
-    private fun getModeIndex(playModeName: String) = when (playModeName) {
+
+    private fun getModeIndex(playModeName: String?) = when (playModeName) {
         UnrealLinkBundle.message("action.RiderLink.SelectedViewport.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.MobilePreview.text") -> 1
         UnrealLinkBundle.message("action.RiderLink.NewEditorWindow.text") -> 2
@@ -131,19 +137,22 @@ class PlayMode : ToggleAction() {
         UnrealLinkBundle.message("action.RiderLink.StandaloneGame.text") -> 4
         UnrealLinkBundle.message("action.RiderLink.Simulate.text") -> 5
         UnrealLinkBundle.message("action.RiderLink.VulkanPreview.text") -> 6
-        else -> 0
+        else -> -1
     }
+
+    private fun getPlayModeIndex(mode : Int) = (mode and PLAY_MODE_MASK).ushr(PLAY_MODE_MASK_OFS)
 
     private fun setPlayMode(mode: Int, playModeName: String): Int {
         val playModeIndex = getModeIndex(playModeName)
-        return mode and (16 + 32 + 64).inv() or playModeIndex.shl(4)
+        return (mode and PLAY_MODE_MASK_INV) or playModeIndex.shl(PLAY_MODE_MASK_OFS)
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
         val host: UnrealHost = e.getHost() ?: return false
 
         val ind = getModeIndex(e.presentation.text)
-        return (host.playMode and (16 + 32 + 64)) == ind.shl(4)
+        if (ind == -1) return false
+        return getPlayModeIndex(host.playMode) == ind
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
