@@ -40,7 +40,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private CppUE4Version myUnrealVersion;
         private readonly CppUE4Version myMinimalSupportedVersion = new CppUE4Version(4, 20, 0);
 
-        private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
+        private readonly JetHashSet<string> EXCLUDED_PROJECTS = new JetHashSet<string>{"UnrealLaunchDaemon"};
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
