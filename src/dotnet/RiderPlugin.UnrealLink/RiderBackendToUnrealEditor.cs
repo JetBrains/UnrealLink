@@ -200,10 +200,12 @@ namespace RiderPlugin.UnrealLink
             });
 
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
-            myUnrealHost.myModel.PlayStateFromRider.Advise(lf, unrealModel.PlayStateFromRider);
 
             unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
-            myUnrealHost.myModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
+            
+            unrealModel.NotificationReplyFromEditor.Advise(lf, myUnrealHost.myModel.NotificationReplyFromEditor);
+            
+            unrealModel.IsGameControlModuleInitialized.Advise(lf, myUnrealHost.myModel.IsGameControlModuleInitialized.Set);
 
             unrealModel.UnrealLog.Advise(lf,
                 logEvent =>
@@ -236,7 +238,12 @@ namespace RiderPlugin.UnrealLink
                 riderModel.NavigateToMethod.Advise(lf,
                     methodReference => myEditorNavigator.NavigateToMethod(methodReference));
 
-                riderModel.FrameSkip.Advise(lf, unrealModel.FrameSkip);
+                riderModel.RequestPlayFromRider.Advise(lf, unrealModel.RequestPlayFromRider);
+                riderModel.RequestPauseFromRider.Advise(lf, unrealModel.RequestPauseFromRider);
+                riderModel.RequestResumeFromRider.Advise(lf, unrealModel.RequestResumeFromRider);
+                riderModel.RequestStopFromRider.Advise(lf, unrealModel.RequestStopFromRider);
+                riderModel.RequestFrameSkipFromRider.Advise(lf, unrealModel.RequestFrameSkipFromRider);
+                riderModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
             });
             
             return unrealModel;

@@ -51,6 +51,21 @@ object UE4Library : Root() {
         +"Pause"
     }
 
+    val RequestResultBase = basestruct("RequestResultBase") {
+        field("requestID", int)
+    }
+
+    val RequestSucceed = structdef("RequestSucceed") extends RequestResultBase {
+    }
+
+    val RequestFailed = structdef("RequestFailed") extends RequestResultBase {
+        field("type", enum("NotificationType") {
+            +"Message"
+            +"Error"
+        })
+        field("message", string)
+    }
+
     val VerbosityType = declare(CppIntrinsicType("ELogVerbosity", "Type", "Logging/LogVerbosity.h"))
     {
         setting(Cpp17Generator.IsNonScoped, "uint8")

@@ -200,7 +200,9 @@ Path to old plugin:</code></pre>
         <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun"/>
       </group>
       <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
+      <action id="RiderLink.ResumeUnreal" class="com.jetbrains.rider.plugins.unreal.actions.ResumeInUnrealAction"/>
       <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
+      <action id="RiderLink.SingleStepUnreal" class="com.jetbrains.rider.plugins.unreal.actions.SingleStepInUnrealAction"/>
       <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
       <add-to-group group-id="ToolbarRunGroup" anchor="first"/>
     </group>
