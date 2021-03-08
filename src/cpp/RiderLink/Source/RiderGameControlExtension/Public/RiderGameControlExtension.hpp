@@ -1,6 +1,6 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #pragma once
+
+#include "lifetime/LifetimeDefinition.h"
 
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
@@ -8,11 +8,14 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderGameControlExtensionModule, Log, All);
 
+class FRiderGameControl;
+class FRiderGameControlActionsCache;
+
 class FRiderGameControlExtensionModule : public IModuleInterface
 {
 public:
     FRiderGameControlExtensionModule() = default;
-    ~FRiderGameControlExtensionModule() = default;
+    virtual ~FRiderGameControlExtensionModule() override = default;
 
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
@@ -20,5 +23,7 @@ public:
     virtual bool SupportsDynamicReloading() override { return true; };
 
 private:
-    int32_t playMode;
+    rd::LifetimeDefinition ModuleLifetimeDefinition;
+    TUniquePtr<FRiderGameControl> GameControl;
+    TUniquePtr<FRiderGameControlActionsCache> ActionsCache;
 };

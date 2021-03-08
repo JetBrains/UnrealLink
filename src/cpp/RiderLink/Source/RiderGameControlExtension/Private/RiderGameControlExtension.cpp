@@ -1,19 +1,21 @@
 #include "RiderGameControlExtension.hpp"
 
+
+#include "DebuggerCommands.h"
 #include "RiderLink.hpp"
 
 #include "Model/Library/UE4Library/PlayState.Generated.h"
+#include "Model/Library/UE4Library/RequestFailed.Generated.h"
+#include "Model/Library/UE4Library/RequestSucceed.Generated.h"
 
-#include "IHeadMountedDisplay.h"
-#include "IXRTrackingSystem.h"
 #include "LevelEditor.h"
+#include "LevelEditorActions.h"
 #include "Async/Async.h"
 #include "Misc/FeedbackContext.h"
 #include "Modules/ModuleManager.h"
 #include "Settings/LevelEditorPlaySettings.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Editor/UnrealEdEngine.h"
-#include "HotReload/Public/IHotReload.h"
 #include "UnrealEd/Public/Editor.h"
 
 #include "Runtime/Launch/Resources/Version.h"
@@ -79,123 +81,6 @@ static int PlayModeToInt(EPlayModeType modeType)
     return 0;
 }
 
-static void CompileIfHotReloadEnabled()
-{
-    check(IsInGameThread());
-    if (!IHotReloadModule::IsAvailable())
-        return;
-
-    IHotReloadModule& HotReloadModule = IHotReloadModule::Get();
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
-    HotReloadModule.RecompileModule(FApp::GetProjectName(), true, *GWarn);
-#else
-    HotReloadModule.RecompileModule(FApp::GetProjectName(), *GWarn,
-                                    ERecompileModuleFlags::ReloadAfterRecompile |
-                                    ERecompileModuleFlags::FailIfGeneratedCodeChanges);
-#endif
-}
-
-// This template has purpose.
-// Before UE 4.24, RequestPlaySession was taking TSharedPtr<ILevelViewport>
-// On UE 4.24, RequestPlaySession takes TSharedPtr<IAssetViewport>
-// Starting from UE 4.25, RequestPlaySession takes FRequestPlaySessionParams and other overrides become obsolete
-template <typename T>
-static void RequestPlaySession(bool bAtPlayerStart, TSharedPtr<T> DestinationViewport, bool bInSimulateInEditor,
-                               const FVector* StartLocation, const FRotator* StartRotation,
-                               int32 DestinationConsole, bool bUseMobilePreview, bool bUseVRPreview,
-                               bool bUseVulkanPreview, Compile NeedCompile)
-{
-    AsyncTask(ENamedThreads::GameThread, [=]()
-    {
-        if (NeedCompile == Compile::Yes)
-            CompileIfHotReloadEnabled();
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
-        GUnrealEd->RequestPlaySession(bAtPlayerStart, DestinationViewport, bInSimulateInEditor, StartLocation,
-                                      StartRotation, DestinationConsole, bUseMobilePreview, bUseVRPreview,
-                                      bUseVulkanPreview);
-#else
-        FRequestPlaySessionParams PlaySessionParams;
-
-        if (StartLocation)
-        {
-            PlaySessionParams.StartLocation = *StartLocation;
-            PlaySessionParams.StartRotation = StartRotation ? *StartRotation : FRotator::ZeroRotator;
-        }
-        if (DestinationViewport != nullptr)
-        {
-            PlaySessionParams.DestinationSlateViewport = DestinationViewport;
-        }
-
-        if (bInSimulateInEditor)
-        {
-            PlaySessionParams.WorldType = EPlaySessionWorldType::SimulateInEditor;
-        }
-
-        if (bUseVRPreview)
-        {
-            check(!bUseMobilePreview && !bUseVulkanPreview);
-            PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VRPreview;
-        }
-
-        if (bUseVulkanPreview)
-        {
-            check(!bUseMobilePreview && !bUseVRPreview);
-            PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VulkanPreview;
-            PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
-        }
-
-        if (bUseMobilePreview)
-        {
-            check(!bUseVRPreview && !bUseVulkanPreview);
-            PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::MobilePreview;
-            PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
-        }
-        GUnrealEd->RequestPlaySession(PlaySessionParams);
-#endif
-    });
-}
-
-void RequestPlaySession(const FVector* StartLocation, const FRotator* StartRotation, bool MobilePreview,
-                        bool VulkanPreview, const FString& MobilePreviewTargetDevice, Compile NeedCompile,
-                        FString AdditionalStandaloneLaunchParameters = TEXT(""))
-{
-    AsyncTask(ENamedThreads::GameThread, [=]()
-    {
-        if (NeedCompile == Compile::Yes)
-            CompileIfHotReloadEnabled();
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
-        GUnrealEd->RequestPlaySession(StartLocation, StartRotation, MobilePreview, VulkanPreview,
-                                      MobilePreviewTargetDevice, AdditionalStandaloneLaunchParameters);
-#else
-        FRequestPlaySessionParams PlaySessionParams;
-
-        if (MobilePreview)
-        {
-            check(!VulkanPreview);
-            PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
-            PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::MobilePreview;
-            PlaySessionParams.MobilePreviewTargetDevice = MobilePreviewTargetDevice;
-            PlaySessionParams.AdditionalStandaloneCommandLineParameters = AdditionalStandaloneLaunchParameters;
-        }
-
-        if (VulkanPreview)
-        {
-            check(!MobilePreview);
-            PlaySessionParams.SessionDestination = EPlaySessionDestinationType::NewProcess;
-            PlaySessionParams.SessionPreviewTypeOverride = EPlaySessionPreviewType::VulkanPreview;
-            PlaySessionParams.AdditionalStandaloneCommandLineParameters = AdditionalStandaloneLaunchParameters;
-        }
-
-        if (StartLocation)
-        {
-            PlaySessionParams.StartLocation = *StartLocation;
-            PlaySessionParams.StartRotation = StartRotation ? *StartRotation : FRotator::ZeroRotator;
-        }
-        GUnrealEd->RequestPlaySession(PlaySessionParams);
-#endif
-    });
-}
-
 FSlateApplication* SlateApplication = nullptr;
 
 struct FPlaySettings
@@ -226,7 +111,7 @@ struct FPlaySettings
 };
 
 
-static FPlaySettings RetrieveSettings(ULevelEditorPlaySettings* PlayInSettings)
+static FPlaySettings RetrieveSettings(const ULevelEditorPlaySettings* PlayInSettings)
 {
     check(PlayInSettings);
 
@@ -263,250 +148,373 @@ static void UpdateSettings(ULevelEditorPlaySettings* PlayInSettings, const FPlay
     PlayInSettings->SaveConfig();
 }
 
-static void RequestPlay(int32_t mode)
+
+struct FCachedCommandInfo
 {
-    FLevelEditorModule& LevelEditorModule =
-        FModuleManager::GetModuleChecked<FLevelEditorModule>(
-            TEXT("LevelEditor"));
-    auto ActiveLevelViewport = LevelEditorModule.GetFirstActiveViewport();
-    ULevelEditorPlaySettings* PlayInSettings =
-        GetMutableDefault<ULevelEditorPlaySettings>();
-    FPlaySettings requestedSettings = FPlaySettings::UnpackFromMode(mode);
-    if (PlayInSettings)
+    FName CommandName;
+    TSharedPtr<FUICommandInfo> Command;
+};
+
+class FRiderGameControlActionsCache
+{
+public:
+    FRiderGameControlActionsCache();
+    ~FRiderGameControlActionsCache();
+
+private:
+    void UpdatePlayWorldCommandsCache();
+
+public:
+    FCachedCommandInfo PlayModeCommands[PlayMode_Count] = {
+        {TEXT("PlayInViewport")},
+        {TEXT("PlayInEditorFloating")},
+        {TEXT("PlayInMobilePreview")},
+        {FName()},
+        {TEXT("PlayInVulkanPreview")},
+        {TEXT("PlayInNewProcess")},
+        {TEXT("PlayInVR")},
+        {TEXT("Simulate")},
+    };
+    FCachedCommandInfo ResumePlaySession = {TEXT("ResumePlaySession")};
+    FCachedCommandInfo PausePlaySession = {TEXT("PausePlaySession")};
+    FCachedCommandInfo StopPlaySession = {TEXT("StopPlaySession")};
+    FCachedCommandInfo SingleFrameAdvance = {TEXT("SingleFrameAdvance")};
+
+private:
+    FDelegateHandle CommandsChangedHandle;
+};
+
+FRiderGameControlActionsCache::FRiderGameControlActionsCache()
+{
+    const FName PlayWorldContextName = FName("PlayWorld");
+    
+    TSharedPtr<FBindingContext> PlayWorldContext = FInputBindingManager::Get().GetContextByName(PlayWorldContextName);
+    if (PlayWorldContext.IsValid())
     {
-        UpdateSettings(PlayInSettings, requestedSettings);
-    }
-    const EPlayModeType PlayMode = requestedSettings.PlayMode;
-    const bool bSpawnAtPlayerStart = requestedSettings.bSpawnAtPlayerStart;
-    const FVector* StartLocation = nullptr;
-    const FRotator* StartRotation = nullptr;
-    if (!bSpawnAtPlayerStart && SlateApplication && ActiveLevelViewport.IsValid() &&
-        SlateApplication->FindWidgetWindow(ActiveLevelViewport->AsWidget()).IsValid())
-    {
-#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
-        StartLocation = &ActiveLevelViewport->GetLevelViewportClient().GetViewLocation();
-        StartRotation = &ActiveLevelViewport->GetLevelViewportClient().GetViewRotation();
-#else
-        StartLocation = &ActiveLevelViewport->GetAssetViewportClient().GetViewLocation();
-        StartRotation = &ActiveLevelViewport->GetAssetViewportClient().GetViewRotation();
-#endif
+        UpdatePlayWorldCommandsCache();
     }
 
-    auto Compile = CompileBeforeRun(mode);
-
-    if (PlayMode == PlayMode_InEditorFloating)
-    {
-        RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false, StartLocation, nullptr, -1, false, false,
-                           false, Compile);
-    }
-    else if (PlayMode == PlayMode_InVR)
-    {
-        const bool bHMDIsReady = GEngine &&
-                                 GEngine->XRSystem.IsValid() &&
-                                 GEngine->XRSystem->GetHMDDevice() &&
-                                 GEngine->XRSystem->GetHMDDevice()->IsHMDConnected();
-
-        RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false, StartLocation, StartRotation, -1, false,
-                           bHMDIsReady, false, Compile);
-    }
-    else if (PlayMode == PlayMode_InMobilePreview ||
-            PlayMode == PlayMode_InVulkanPreview ||
-            PlayMode == PlayMode_InNewProcess)
-    {
-        RequestPlaySession(StartLocation, StartRotation, PlayMode == PlayMode_InMobilePreview,
-                           PlayMode == PlayMode_InVulkanPreview, TEXT(""), Compile);
-    }
-    else if (PlayMode == PlayMode_InViewPort)
-    {
-        RequestPlaySession(bSpawnAtPlayerStart, ActiveLevelViewport, false, StartLocation, StartRotation, -1, false,
-                           false, false, Compile);
-    }
-    else
-    {
-        // PlayMode_Simulate
-        RequestPlaySession(false, ActiveLevelViewport, true, nullptr, nullptr, -1, false, false, false, Compile);
-    }
+    CommandsChangedHandle = FBindingContext::CommandsChanged.AddLambda(
+        [this, PlayWorldContextName](const FBindingContext& Ctx)
+        {
+            if (Ctx.GetContextName() == PlayWorldContextName)
+            {
+                UpdatePlayWorldCommandsCache();
+            }
+        }
+    );
 }
+
+FRiderGameControlActionsCache::~FRiderGameControlActionsCache()
+{
+    FBindingContext::CommandsChanged.Remove(CommandsChangedHandle);
+}
+
+void FRiderGameControlActionsCache::UpdatePlayWorldCommandsCache()
+{
+    FInputBindingManager& BindingManager = FInputBindingManager::Get();
+    auto CacheCommand = [&] (FCachedCommandInfo &Cmd, const FName &ContextName)
+    {
+        Cmd.Command = BindingManager.FindCommandInContext(ContextName, Cmd.CommandName);
+    };
+    
+    const FName PlayWorldContextName = FName("PlayWorld");
+    for (FCachedCommandInfo& PlayModeCommand : PlayModeCommands)
+    {
+        if (PlayModeCommands->CommandName.IsNone()) continue;
+        CacheCommand(PlayModeCommand, PlayWorldContextName);
+    }
+    CacheCommand(ResumePlaySession, PlayWorldContextName);
+    CacheCommand(PausePlaySession, PlayWorldContextName);
+    CacheCommand(StopPlaySession, PlayWorldContextName);
+    CacheCommand(SingleFrameAdvance, PlayWorldContextName);
+}
+
+
+class FRiderGameControl
+{
+public:
+    FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnection& Connection, FRiderGameControlActionsCache& actions);
+    ~FRiderGameControl();
+private:
+    void RequestPlayWorldCommand(const FCachedCommandInfo& CommandInfo, int RequestID);
+
+    void SendRequestSucceed(int requestID);
+    void SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type, const FString& message);
+
+    void ScheduleModelAction(std::function<void(JetBrains::EditorPlugin::RdEditorModel&)> action);
+
+private:
+    rd::LifetimeDefinition LifetimeDefinition;
+    RdConnection& Connection;
+    FRiderGameControlActionsCache& Actions;
+    
+    int32_t playMode;
+
+    FDelegateHandle BeginPIEHandle;
+    FDelegateHandle EndPIEHandle;
+    FDelegateHandle PausePIEHandle;
+    FDelegateHandle ResumePIEHandle;
+    FDelegateHandle SingleStepPIEHandle;
+    FDelegateHandle OnObjectPropertyChangedHandle;
+};
+
+
+void FRiderGameControl::SendRequestSucceed(int requestID)
+{
+    using namespace JetBrains::EditorPlugin;
+    ScheduleModelAction([=](RdEditorModel &Model)
+    {
+        Model.get_notificationReplyFromEditor().fire(RequestSucceed(requestID));
+    });
+}
+
+void FRiderGameControl::SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type, const FString& message)
+{
+    using namespace JetBrains::EditorPlugin;
+    ScheduleModelAction([=](RdEditorModel &Model)
+    {
+        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, ToCStr(message), RequestID));
+    });
+}
+
+void FRiderGameControl::RequestPlayWorldCommand(const FCachedCommandInfo& CommandInfo, int requestID)
+{
+    using namespace JetBrains::EditorPlugin;
+    if (!CommandInfo.Command.IsValid())
+    {
+        const FString Message = FString::Format(TEXT("Command '{0}' was not executed.\nCommand was not registered in Unreal Engine"),
+                                                {CommandInfo.CommandName.ToString()});
+        SendRequestFailed(requestID, NotificationType::Error, Message);
+        return;
+    }
+    AsyncTask(ENamedThreads::GameThread, [=]()
+    {
+        if (FPlayWorldCommands::GlobalPlayWorldActions->TryExecuteAction(CommandInfo.Command.ToSharedRef()))
+        {
+            SendRequestSucceed(requestID);
+        }
+        else
+        {
+            const FString Message = FString::Format(TEXT("Command '{0}' was not executed.\nRejected by Unreal Engine"),
+                                                    {CommandInfo.CommandName.ToString()});
+            SendRequestFailed(requestID, NotificationType::Message, Message);
+        }
+    });
+}
+
+void FRiderGameControl::ScheduleModelAction(std::function<void(JetBrains::EditorPlugin::RdEditorModel&)> action)
+{
+    Connection.Scheduler.queue([_action = std::move(action), this]()
+    {
+        _action(Connection.UnrealToBackendModel);
+    });
+}
+
+FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnection& RdConnection,
+    FRiderGameControlActionsCache &ActionsCache) :
+    LifetimeDefinition(ConnectionLifetime), Connection(RdConnection), Actions(ActionsCache)
+{
+    using namespace JetBrains::EditorPlugin;
+    
+    rd::Lifetime Lifetime = LifetimeDefinition.lifetime;
+    // Subscribe to Editor events
+    Lifetime->bracket(
+        [this]()
+        {
+            BeginPIEHandle = FEditorDelegates::BeginPIE.AddLambda([this](const bool)
+            {
+                ScheduleModelAction([](RdEditorModel& model)
+                {
+                    model.get_playStateFromEditor().fire(PlayState::Play);
+                });
+            });
+            EndPIEHandle = FEditorDelegates::EndPIE.AddLambda([this](const bool)
+            {
+                ScheduleModelAction([](RdEditorModel& model)
+                {
+                    model.get_playStateFromEditor().fire(PlayState::Idle);
+                });
+            });
+            PausePIEHandle = FEditorDelegates::PausePIE.AddLambda([this](const bool)
+            {
+                ScheduleModelAction([](RdEditorModel& model)
+                {
+                    model.get_playStateFromEditor().fire(PlayState::Pause);
+                });
+            });
+            ResumePIEHandle = FEditorDelegates::ResumePIE.AddLambda([this](const bool)
+            {
+                ScheduleModelAction([](RdEditorModel& model)
+                {
+                    model.get_playStateFromEditor().fire(PlayState::Play);
+                });
+            });
+            SingleStepPIEHandle = FEditorDelegates::SingleStepPIE.AddLambda([this](const bool)
+            {
+                ScheduleModelAction([](RdEditorModel& model)
+                {
+                    model.get_playStateFromEditor().fire(PlayState::Play);
+                    model.get_playStateFromEditor().fire(PlayState::Pause);
+                });
+            });
+
+            OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda(
+                [this](UObject* obj, FPropertyChangedEvent& ev)
+                {
+                    ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
+                    if (!PlayInSettings || obj != PlayInSettings) return;
+
+                    const FPlaySettings Settings = RetrieveSettings(PlayInSettings);
+                    int PlayModeNew = FPlaySettings::PackToMode(Settings);
+                    if (PlayModeNew == playMode) return;
+
+                    playMode = PlayModeNew;
+                    ScheduleModelAction([PlayModeNew](RdEditorModel& Model)
+                    {
+                        Model.get_playModeFromEditor().fire(PlayModeNew);
+                    });
+                }
+            );
+        },
+        [this]()
+        {
+            FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnObjectPropertyChangedHandle);
+            FEditorDelegates::SingleStepPIE.Remove(SingleStepPIEHandle);
+            FEditorDelegates::ResumePIE.Remove(ResumePIEHandle);
+            FEditorDelegates::PausePIE.Remove(PausePIEHandle);
+            FEditorDelegates::EndPIE.Remove(EndPIEHandle);
+            FEditorDelegates::BeginPIE.Remove(BeginPIEHandle);
+        }
+    );
+
+    // Subscribe to model
+    ScheduleModelAction([Lifetime, this](RdEditorModel& Model)
+    {
+        Model.get_requestPlayFromRider()
+             .advise(Lifetime, [this](int requestID)
+                     {
+                         const ULevelEditorPlaySettings* PlayInSettings
+                             = GetDefault<ULevelEditorPlaySettings>();
+                         check(PlayInSettings);
+                         const EPlayModeType PlayMode = PlayInSettings->LastExecutedPlayModeType;
+
+                         RequestPlayWorldCommand(Actions.PlayModeCommands[PlayMode], requestID);
+                     }
+             );
+        Model.get_requestPauseFromRider()
+             .advise(Lifetime, [this](int requestID)
+                     {
+                         RequestPlayWorldCommand(Actions.PausePlaySession, requestID);
+                     }
+             );
+        Model.get_requestResumeFromRider()
+             .advise(Lifetime, [this](int requestID)
+                     {
+                         RequestPlayWorldCommand(Actions.ResumePlaySession, requestID);
+                     }
+             );
+        Model.get_requestStopFromRider()
+             .advise(Lifetime, [this](int requestID)
+                     {
+                         RequestPlayWorldCommand(Actions.StopPlaySession, requestID);
+                     }
+             );
+        Model.get_requestFrameSkipFromRider()
+             .advise(Lifetime, [this](int requestID)
+                     {
+                         RequestPlayWorldCommand(Actions.SingleFrameAdvance, requestID);
+                     }
+             );
+
+        Model.get_playModeFromRider()
+             .advise(Lifetime, [this](int32_t mode)
+                     {
+                         ULevelEditorPlaySettings* PlayInSettings
+                             = GetMutableDefault<ULevelEditorPlaySettings>();
+                         check(PlayInSettings);
+                         const FPlaySettings NewSettings = FPlaySettings::UnpackFromMode(mode);
+                         UpdateSettings(PlayInSettings, NewSettings);
+                     }
+             );
+    });
+
+    // Initial sync.
+    const ULevelEditorPlaySettings* PlayInSettings = GetDefault<ULevelEditorPlaySettings>();
+    check(PlayInSettings);
+    const FPlaySettings Settings = RetrieveSettings(PlayInSettings);
+    playMode = FPlaySettings::PackToMode(Settings);
+    
+    ScheduleModelAction([lambdaPlayMode=playMode](RdEditorModel &Model)
+    {
+        Model.get_playModeFromEditor().fire(lambdaPlayMode);
+    });
+
+    // After all initialization finished/scheduled - mark that module was initialized
+    Lifetime->bracket(
+        [this]()
+        {
+            ScheduleModelAction([](RdEditorModel& Model)
+            {
+                Model.get_isGameControlModuleInitialized().set(true);
+            });
+        },
+        [this]()
+        {
+            ScheduleModelAction([](RdEditorModel& Model)
+            {
+                Model.get_isGameControlModuleInitialized().set(false);
+            });
+        }
+    );
+}
+
+FRiderGameControl::~FRiderGameControl()
+{
+    LifetimeDefinition.terminate();
+}
+
 
 void FRiderGameControlExtensionModule::StartupModule()
 {
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP START"));
 
-    if (FSlateApplication::IsInitialized())
-    {
-        SlateApplication = &FSlateApplication::Get();
-    }
-
     FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
-    RdConnection& RdConnection = RiderLinkModule.RdConnection;
-    JetBrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
+    ModuleLifetimeDefinition = rd::LifetimeDefinition(RiderLinkModule.CreateNestedLifetime());
+    rd::Lifetime ModuleLifetime = ModuleLifetimeDefinition.lifetime;
 
-    const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
-    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel, this]()
-    {
-        UnrealToBackendModel.get_playStateFromRider().advise(
-            NestedLifetime,
-            [&UnrealToBackendModel, this](JetBrains::EditorPlugin::PlayState State)
-            {
-                if (!GUnrealEd) return;
-
-                switch (State)
-                {
-                case JetBrains::EditorPlugin::PlayState::Idle:
-                    if (GUnrealEd->PlayWorld)
-                    {
-                        GUnrealEd->RequestEndPlayMap();
-                    }
-                    break;
-                case JetBrains::EditorPlugin::PlayState::Play:
-                    if (GUnrealEd->PlayWorld &&
-                        GUnrealEd->PlayWorld->IsPaused())
-                    {
-                        GUnrealEd->PlayWorld->bDebugPauseExecution = false;
-                        // Simply switching flag doesn't work, `ResumePIE` delegate won't be triggered
-                        GUnrealEd->PlaySessionResumed();
-                    }
-                    else
-                    {
-                        RequestPlay(playMode);
-                    }
-                    break;
-                case JetBrains::EditorPlugin::PlayState::Pause:
-                    if (GUnrealEd->PlayWorld)
-                    {
-                        GUnrealEd->PlayWorld->bDebugPauseExecution = true;
-                        // Simply switching flag doesn't work, `PausePIE` delegate won't be triggered
-                        GUnrealEd->PlaySessionPaused();
-                    }
-                    break;
-                }
-            });
-        UnrealToBackendModel.get_playModeFromRider().advise(
-            NestedLifetime,
-            [&UnrealToBackendModel, this](int32_t mode)
+    ModuleLifetime->bracket(
+        [&]()
         {
-            ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
-            if (PlayInSettings)
-            {
-                const FPlaySettings NewSettings = FPlaySettings::UnpackFromMode(mode);
-                UpdateSettings(PlayInSettings, NewSettings);
-            }
-        });
-    });
-
-    RdConnection.Scheduler.queue([NestedLifetime, &UnrealToBackendModel]()
-    {
-        UnrealToBackendModel.get_frameSkip().advise(NestedLifetime, []()
+            // Actions cache is not related to connection and its lifetimes
+            ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
+        },
+        [&]()
         {
-            if (!GUnrealEd) return;
-
-            GUnrealEd->PlayWorld->bDebugFrameStepExecution = true;
-            GUnrealEd->PlayWorld->bDebugPauseExecution = false;
-            GUnrealEd->PlaySessionSingleStepped();
-        });
-    });
-
-    FEditorDelegates::BeginPIE.AddLambda([this, &RdConnection](const bool)
-    {        
-        ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
-        if (PlayInSettings)
-        {
-            FPlaySettings Settings = RetrieveSettings(PlayInSettings);
-            playMode = FPlaySettings::PackToMode(Settings);
+            ActionsCache.Reset();
         }
-        RdConnection.Scheduler.queue([&RdConnection, _playMode = playMode]()
+    );
+
+    RdConnection& RdConnection = RiderLinkModule.RdConnection;
+    rd::Lifetime ConnectionLifetime = ModuleLifetime.create_nested();
+    ConnectionLifetime->bracket(
+        [&]()
         {
-            if (!GUnrealEd) return;
-
-            RdConnection.UnrealToBackendModel.get_playModeFromEditor().fire(_playMode);
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
-        });
-    });
-
-    FEditorDelegates::EndPIE.AddLambda([this, &RdConnection](const bool)
-    {
-        RdConnection.Scheduler.queue([&RdConnection]()
+            GameControl = MakeUnique<FRiderGameControl>(ConnectionLifetime, RdConnection, *ActionsCache);
+        },
+        [&]()
         {
-            if (!GUnrealEd) return;
-
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Idle);
-        });
-    });
-
-    FEditorDelegates::PausePIE.AddLambda([this, &RdConnection](const bool)
-    {
-        RdConnection.Scheduler.queue([&RdConnection]()
-        {
-            if (!GUnrealEd) return;
-
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Pause);
-        });
-    });
-
-    FEditorDelegates::ResumePIE.AddLambda([this, &RdConnection](const bool)
-    {
-        RdConnection.Scheduler.queue([&RdConnection]()
-        {
-            if (!GUnrealEd) return;
-
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
-        });
-    });
-
-    FEditorDelegates::SingleStepPIE.AddLambda([this, &RdConnection](const bool)
-    {
-        RdConnection.Scheduler.queue([&RdConnection]()
-        {
-            if (!GUnrealEd) return;
-
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Play);
-            RdConnection.UnrealToBackendModel.get_playStateFromEditor().fire(JetBrains::EditorPlugin::PlayState::Pause);
-        });
-    });
+            GameControl.Reset();
+        }
+    );
+            
     
-    FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda(
-        [this, &RdConnection](UObject* obj, FPropertyChangedEvent& ev)
-        {
-            ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
-            if (!PlayInSettings || obj != PlayInSettings) return;
-                
-            const FPlaySettings Settings = RetrieveSettings(PlayInSettings);
-            int PlayModeNew = FPlaySettings::PackToMode(Settings);
-            if (PlayModeNew == playMode) return;
-
-            playMode = PlayModeNew;
-            RdConnection.Scheduler.queue([&RdConnection, PlayModeNew]()
-            {
-                if (!GUnrealEd) return;
-
-                RdConnection.UnrealToBackendModel.get_playModeFromEditor().fire(PlayModeNew);
-            });
-        });
-
-    // Initial sync.
-    ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
-    if (PlayInSettings)
-    {
-        const FPlaySettings Settings = RetrieveSettings(PlayInSettings);
-        playMode = FPlaySettings::PackToMode(Settings);
-    }
-    RdConnection.Scheduler.queue([&RdConnection, lambdaPlayMode=playMode]()
-    {        
-        RdConnection.UnrealToBackendModel.get_playModeFromEditor().fire(lambdaPlayMode);
-    });
-    RdConnection.Scheduler.queue([this, NestedLifetime, &RdConnection]()
-    {
-       RdConnection.UnrealToBackendModel.get_playModeFromRider().advise(NestedLifetime, [this](int32_t inPlayMode)
-       {
-           playMode = inPlayMode;
-       }); 
-    });
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
 void FRiderGameControlExtensionModule::ShutdownModule()
 {
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN START"));
-
+    ModuleLifetimeDefinition.terminate();
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
