@@ -2,7 +2,7 @@
 
 
 #include "DebuggerCommands.h"
-#include "RiderLink.hpp"
+#include "IRiderLink.hpp"
 
 #include "Model/Library/UE4Library/PlayState.Generated.h"
 #include "Model/Library/UE4Library/RequestFailed.Generated.h"
@@ -187,7 +187,7 @@ private:
 FRiderGameControlActionsCache::FRiderGameControlActionsCache()
 {
     const FName PlayWorldContextName = FName("PlayWorld");
-    
+
     TSharedPtr<FBindingContext> PlayWorldContext = FInputBindingManager::Get().GetContextByName(PlayWorldContextName);
     if (PlayWorldContext.IsValid())
     {
@@ -217,7 +217,7 @@ void FRiderGameControlActionsCache::UpdatePlayWorldCommandsCache()
     {
         Cmd.Command = BindingManager.FindCommandInContext(ContextName, Cmd.CommandName);
     };
-    
+
     const FName PlayWorldContextName = FName("PlayWorld");
     for (FCachedCommandInfo& PlayModeCommand : PlayModeCommands)
     {
@@ -234,21 +234,20 @@ void FRiderGameControlActionsCache::UpdatePlayWorldCommandsCache()
 class FRiderGameControl
 {
 public:
-    FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnection& Connection, FRiderGameControlActionsCache& actions);
+    FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const &Model, FRiderGameControlActionsCache& ActionsCache);
     ~FRiderGameControl();
 private:
     void RequestPlayWorldCommand(const FCachedCommandInfo& CommandInfo, int RequestID);
 
-    void SendRequestSucceed(int requestID);
-    void SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type, const FString& message);
+    void SendRequestSucceed(int RequestID);
+    void SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type, const FString& Message);
 
-    void ScheduleModelAction(std::function<void(JetBrains::EditorPlugin::RdEditorModel&)> action);
+    void ScheduleModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Action);
 
 private:
-    rd::LifetimeDefinition LifetimeDefinition;
-    RdConnection& Connection;
     FRiderGameControlActionsCache& Actions;
-    
+    JetBrains::EditorPlugin::RdEditorModel const &Model;
+
     int32_t playMode;
 
     FDelegateHandle BeginPIEHandle;
@@ -260,99 +259,99 @@ private:
 };
 
 
-void FRiderGameControl::SendRequestSucceed(int requestID)
+void FRiderGameControl::SendRequestSucceed(int RequestID)
 {
     using namespace JetBrains::EditorPlugin;
-    ScheduleModelAction([=](RdEditorModel &Model)
+    ScheduleModelAction([=](RdEditorModel const& Model)
     {
-        Model.get_notificationReplyFromEditor().fire(RequestSucceed(requestID));
+        Model.get_notificationReplyFromEditor().fire(RequestSucceed(RequestID));
     });
 }
 
-void FRiderGameControl::SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type, const FString& message)
+void FRiderGameControl::SendRequestFailed(int RequestID, JetBrains::EditorPlugin::NotificationType Type,
+                                          const FString& Message)
 {
     using namespace JetBrains::EditorPlugin;
-    ScheduleModelAction([=](RdEditorModel &Model)
+    ScheduleModelAction([=](RdEditorModel const& Model)
     {
-        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, ToCStr(message), RequestID));
+        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, ToCStr(Message), RequestID));
     });
 }
 
-void FRiderGameControl::RequestPlayWorldCommand(const FCachedCommandInfo& CommandInfo, int requestID)
+void FRiderGameControl::RequestPlayWorldCommand(const FCachedCommandInfo& CommandInfo, int RequestID)
 {
     using namespace JetBrains::EditorPlugin;
     if (!CommandInfo.Command.IsValid())
     {
         const FString Message = FString::Format(TEXT("Command '{0}' was not executed.\nCommand was not registered in Unreal Engine"),
                                                 {CommandInfo.CommandName.ToString()});
-        SendRequestFailed(requestID, NotificationType::Error, Message);
+        SendRequestFailed(RequestID, NotificationType::Error, Message);
         return;
     }
     AsyncTask(ENamedThreads::GameThread, [=]()
     {
         if (FPlayWorldCommands::GlobalPlayWorldActions->TryExecuteAction(CommandInfo.Command.ToSharedRef()))
         {
-            SendRequestSucceed(requestID);
+            SendRequestSucceed(RequestID);
         }
         else
         {
             const FString Message = FString::Format(TEXT("Command '{0}' was not executed.\nRejected by Unreal Engine"),
                                                     {CommandInfo.CommandName.ToString()});
-            SendRequestFailed(requestID, NotificationType::Message, Message);
+            SendRequestFailed(RequestID, NotificationType::Message, Message);
         }
     });
 }
 
-void FRiderGameControl::ScheduleModelAction(std::function<void(JetBrains::EditorPlugin::RdEditorModel&)> action)
+void FRiderGameControl::ScheduleModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Action)
 {
-    Connection.Scheduler.queue([_action = std::move(action), this]()
+    IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
+    RiderLinkModule.QueueAction([Action, this]()
     {
-        _action(Connection.UnrealToBackendModel);
+        Action(Model);
     });
 }
 
-FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnection& RdConnection,
-    FRiderGameControlActionsCache &ActionsCache) :
-    LifetimeDefinition(ConnectionLifetime), Connection(RdConnection), Actions(ActionsCache)
+FRiderGameControl::FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const &Model, FRiderGameControlActionsCache& ActionsCache) :
+    Model(Model), Actions(ActionsCache)
 {
     using namespace JetBrains::EditorPlugin;
     
-    rd::Lifetime Lifetime = LifetimeDefinition.lifetime;
     // Subscribe to Editor events
     Lifetime->bracket(
         [this]()
         {
             BeginPIEHandle = FEditorDelegates::BeginPIE.AddLambda([this](const bool)
             {
-                ScheduleModelAction([](RdEditorModel& model)
+                ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Play);
                 });
             });
             EndPIEHandle = FEditorDelegates::EndPIE.AddLambda([this](const bool)
             {
-                ScheduleModelAction([](RdEditorModel& model)
+                ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Idle);
                 });
             });
             PausePIEHandle = FEditorDelegates::PausePIE.AddLambda([this](const bool)
             {
-                ScheduleModelAction([](RdEditorModel& model)
+                ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Pause);
                 });
             });
             ResumePIEHandle = FEditorDelegates::ResumePIE.AddLambda([this](const bool)
             {
-                ScheduleModelAction([](RdEditorModel& model)
+                ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Play);
                 });
             });
             SingleStepPIEHandle = FEditorDelegates::SingleStepPIE.AddLambda([this](const bool)
             {
-                ScheduleModelAction([](RdEditorModel& model)
+                ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Play);
                     model.get_playStateFromEditor().fire(PlayState::Pause);
@@ -370,7 +369,7 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnecti
                     if (PlayModeNew == playMode) return;
 
                     playMode = PlayModeNew;
-                    ScheduleModelAction([PlayModeNew](RdEditorModel& Model)
+                    ScheduleModelAction([PlayModeNew](RdEditorModel const& Model)
                     {
                         Model.get_playModeFromEditor().fire(PlayModeNew);
                     });
@@ -389,7 +388,7 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnecti
     );
 
     // Subscribe to model
-    ScheduleModelAction([Lifetime, this](RdEditorModel& Model)
+    ScheduleModelAction([Lifetime, this](RdEditorModel const& Model)
     {
         Model.get_requestPlayFromRider()
              .advise(Lifetime, [this](int requestID)
@@ -444,8 +443,8 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnecti
     check(PlayInSettings);
     const FPlaySettings Settings = RetrieveSettings(PlayInSettings);
     playMode = FPlaySettings::PackToMode(Settings);
-    
-    ScheduleModelAction([lambdaPlayMode=playMode](RdEditorModel &Model)
+
+    ScheduleModelAction([lambdaPlayMode=playMode](RdEditorModel const &Model)
     {
         Model.get_playModeFromEditor().fire(lambdaPlayMode);
     });
@@ -454,14 +453,14 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnecti
     Lifetime->bracket(
         [this]()
         {
-            ScheduleModelAction([](RdEditorModel& Model)
+            ScheduleModelAction([](RdEditorModel const& Model)
             {
                 Model.get_isGameControlModuleInitialized().set(true);
             });
         },
         [this]()
         {
-            ScheduleModelAction([](RdEditorModel& Model)
+            ScheduleModelAction([](RdEditorModel const& Model)
             {
                 Model.get_isGameControlModuleInitialized().set(false);
             });
@@ -471,44 +470,31 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime ConnectionLifetime, RdConnecti
 
 FRiderGameControl::~FRiderGameControl()
 {
-    LifetimeDefinition.terminate();
 }
 
 
 void FRiderGameControlExtensionModule::StartupModule()
 {
+    using namespace JetBrains::EditorPlugin;
+    
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP START"));
 
-    FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
-    ModuleLifetimeDefinition = rd::LifetimeDefinition(RiderLinkModule.CreateNestedLifetime());
+    // Actions cache is not related to connection and its lifetimes
+    ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
+
+    IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
+    ModuleLifetimeDefinition = RiderLinkModule.CreateNestedLifetimeDefinition();
     rd::Lifetime ModuleLifetime = ModuleLifetimeDefinition.lifetime;
 
-    ModuleLifetime->bracket(
-        [&]()
+    RiderLinkModule.ViewModel(
+        ModuleLifetime,
+        [&](rd::Lifetime ModelLifetime, RdEditorModel const& Model)
         {
-            // Actions cache is not related to connection and its lifetimes
-            ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
-        },
-        [&]()
-        {
-            ActionsCache.Reset();
+            ModelLifetime->add_action([&]() { GameControl.Reset(); });
+            GameControl = MakeUnique<FRiderGameControl>(ModelLifetime, Model, *ActionsCache);
         }
     );
 
-    RdConnection& RdConnection = RiderLinkModule.RdConnection;
-    rd::Lifetime ConnectionLifetime = ModuleLifetime.create_nested();
-    ConnectionLifetime->bracket(
-        [&]()
-        {
-            GameControl = MakeUnique<FRiderGameControl>(ConnectionLifetime, RdConnection, *ActionsCache);
-        },
-        [&]()
-        {
-            GameControl.Reset();
-        }
-    );
-            
-    
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
@@ -516,5 +502,6 @@ void FRiderGameControlExtensionModule::ShutdownModule()
 {
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN START"));
     ModuleLifetimeDefinition.terminate();
+    ActionsCache.Reset();
     UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }

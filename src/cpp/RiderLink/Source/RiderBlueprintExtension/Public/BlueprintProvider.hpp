@@ -5,12 +5,9 @@
 struct FAssetData;
 class FMessageEndpoint;
 class UBlueprint;
-DECLARE_DELEGATE_OneParam(FOnBlueprintAdded, UBlueprint *);
 
 class RIDERBLUEPRINTEXTENSION_API BluePrintProvider {
-    static void AddBlueprint(UBlueprint* Blueprint);
 public:
-    static FOnBlueprintAdded OnBlueprintAdded;
 
     static void AddAsset(FAssetData const& AssetData);
 

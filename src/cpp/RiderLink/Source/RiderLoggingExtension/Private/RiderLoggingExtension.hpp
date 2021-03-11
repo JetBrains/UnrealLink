@@ -1,8 +1,8 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "RiderOutputDevice.hpp"
+
+#include "lifetime/LifetimeDefinition.h"
 
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
@@ -14,7 +14,7 @@ class FRiderLoggingExtensionModule : public IModuleInterface
 {
 public:
     FRiderLoggingExtensionModule() = default;
-    ~FRiderLoggingExtensionModule() = default;
+    virtual ~FRiderLoggingExtensionModule() override = default;
 
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
@@ -23,4 +23,5 @@ public:
 
 private:
     FRiderOutputDevice outputDevice;
+    rd::LifetimeDefinition ModuleLifetimeDef;
 };
