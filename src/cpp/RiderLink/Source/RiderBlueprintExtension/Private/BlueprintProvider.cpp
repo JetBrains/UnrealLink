@@ -7,15 +7,11 @@
 #include "MessageEndpointBuilder.h"
 #include "MessageEndpoint.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
 #include "Toolkits/AssetEditorManager.h"
+#endif
 
 #include "Runtime/Launch/Resources/Version.h"
-
-FOnBlueprintAdded BluePrintProvider::OnBlueprintAdded{};
-
-void BluePrintProvider::AddBlueprint(UBlueprint* Blueprint) {
-    OnBlueprintAdded.ExecuteIfBound(Blueprint);
-}
 
 void BluePrintProvider::AddAsset(FAssetData const& AssetData) {
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
@@ -26,7 +22,7 @@ void BluePrintProvider::AddAsset(FAssetData const& AssetData) {
     if (cls) {
         UBlueprint* Blueprint = Cast<UBlueprint>(cls);
         if (Blueprint && Blueprint->IsValidLowLevel()) {
-            AddBlueprint(Blueprint);
+
         }
     }
 }

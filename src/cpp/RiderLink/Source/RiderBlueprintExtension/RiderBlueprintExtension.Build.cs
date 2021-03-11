@@ -9,12 +9,13 @@ public class RiderBlueprintExtension : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		bUseRTTI = true;
+		
+		PublicDependencyModuleNames.Add("RD");
 
 		PrivateDependencyModuleNames.AddRange(new []
 		{
 			"Core",
 			"SlateCore",
-			"RD",
 			"RiderLink",
 			"Slate",
 			"AssetRegistry",

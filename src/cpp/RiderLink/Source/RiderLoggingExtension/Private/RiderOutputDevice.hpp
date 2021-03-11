@@ -9,7 +9,7 @@ DECLARE_DELEGATE_FourParams(FOnSerializeMessage, const TCHAR*, ELogVerbosity::Ty
 class FRiderOutputDevice : public FOutputDevice {
 public:
 	FRiderOutputDevice();
-	~FRiderOutputDevice();
+	virtual ~FRiderOutputDevice() override;
 
 	FOnSerializeMessage onSerializeMessage;
 

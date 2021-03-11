@@ -1,16 +1,15 @@
 #include "RiderBlueprintExtension.hpp"
 
+#include "BlueprintProvider.hpp"
+#include "IRiderLink.hpp"
 #include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
-#include "BlueprintProvider.hpp"
-#include "RiderLink.hpp"
-
 #include "AssetRegistryModule.h"
+#include "Engine/Blueprint.h"
+#include "Framework/Docking/TabManager.h"
 #include "HAL/PlatformProcess.h"
 #include "MessageEndpoint.h"
 #include "MessageEndpointBuilder.h"
-#include "Engine/Blueprint.h"
-#include "Framework/Docking/TabManager.h"
 #include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "RiderLink"
@@ -40,9 +39,8 @@ static void AllowSetForeGroundForEditor(JetBrains::EditorPlugin::RdEditorModel c
 void FRiderBlueprintExtensionModule::StartupModule()
 {
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP START"));
-
-    FRiderLinkModule& RiderLinkModule = FRiderLinkModule::Get();
-    RdConnection& RdConnection = RiderLinkModule.RdConnection;
+    IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
+    ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
 
     const FAssetRegistryModule* AssetRegistryModule = &FModuleManager::LoadModuleChecked<FAssetRegistryModule>
         (AssetRegistryConstants::ModuleName);
@@ -54,12 +52,10 @@ void FRiderBlueprintExtensionModule::StartupModule()
         // BluePrintProvider::AddAsset(AssetData);
     });
 
-    const rd::Lifetime NestedLifetime = RiderLinkModule.CreateNestedLifetime();
-    JetBrains::EditorPlugin::RdEditorModel& UnrealToBackendModel = RdConnection.UnrealToBackendModel;
-    RdConnection.Scheduler.queue([this, NestedLifetime, &UnrealToBackendModel]()
+    RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime, [this] (rd::Lifetime ModelLifetime, JetBrains::EditorPlugin::RdEditorModel const& UnrealToBackendModel)
     {
         UnrealToBackendModel.get_openBlueprint().advise(
-            NestedLifetime,
+            ModelLifetime,
             [this, &UnrealToBackendModel](
             JetBrains::EditorPlugin::BlueprintReference const& s)
             {
@@ -93,21 +89,12 @@ void FRiderBlueprintExtensionModule::StartupModule()
             return BluePrintProvider::IsBlueprint(pathName);
         });
     });
-    BluePrintProvider::OnBlueprintAdded.BindLambda([this, &UnrealToBackendModel, &RdConnection](UBlueprint* Blueprint)
-    {
-        RdConnection.Scheduler.queue([this, Blueprint, &UnrealToBackendModel]
-        {
-            UnrealToBackendModel.get_onBlueprintAdded().fire(
-                JetBrains::EditorPlugin::UClass(Blueprint->GetPathName()));
-        });
-    });
-
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
 void FRiderBlueprintExtensionModule::ShutdownModule()
 {
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("SHUTDOWN START"));
-    BluePrintProvider::OnBlueprintAdded.Unbind();
+    ModuleLifetimeDef.terminate();
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
