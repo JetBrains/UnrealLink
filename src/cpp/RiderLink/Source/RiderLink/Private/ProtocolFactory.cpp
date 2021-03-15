@@ -51,22 +51,28 @@ static FString GetPathToPortsFolder()
     return PortFullDirectoryPath;
 }
 
-
-TUniquePtr<rd::Protocol> ProtocolFactory::Create(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
+std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
 {
     const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
-    const FString PortFullDirectoryPath = GetPathToPortsFolder();
-    const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
 
     spdlog::set_level(spdlog::level::err);
-    auto wire = std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
+    return std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
                                                          TCHAR_TO_UTF8(*FString::Printf(TEXT("UnrealEditorServer-%s"),
                                                              *ProjectName)));
+}
+
+
+TUniquePtr<rd::Protocol> ProtocolFactory::CreateProtocol(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime, std::shared_ptr<rd::SocketWire::Server> wire)
+{
+    const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
+    
     auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, Scheduler, wire, SocketLifetime);
 
     auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    const FString PortFullDirectoryPath = GetPathToPortsFolder();
     if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath) && !IsRunningCommandlet())
     {
+        const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
         FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *PortFileFullPath);
     }
     return protocol;

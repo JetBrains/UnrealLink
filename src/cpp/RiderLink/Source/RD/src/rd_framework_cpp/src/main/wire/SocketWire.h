@@ -39,7 +39,6 @@ public:
 		std::thread thread{};
 
 		std::string id;
-		Lifetime lifetime;
 		IScheduler* scheduler = nullptr;
 		std::shared_ptr<CSimpleSocket> socket_provider;
 
@@ -113,7 +112,7 @@ public:
 
 		Base(std::string id, Lifetime lifetime, IScheduler* scheduler);
 
-		~Base() override;
+		virtual ~Base() override;
 
 		// endregion
 
@@ -138,6 +137,9 @@ public:
 		bool send_ack(sequence_number_t seqn) const;
 
 		bool try_shutdown_connection() const;
+		
+	private:		
+		LifetimeDefinition lifetimeDef;
 	};
 
 	class RD_FRAMEWORK_API Client : public Base
@@ -147,12 +149,14 @@ public:
 
 		// region ctor/dtor
 
-		Client(Lifetime lifetime, IScheduler* scheduler, uint16_t port = 0, const std::string& id = "ClientSocket");
+		Client(Lifetime parentLifetime, IScheduler* scheduler, uint16_t port = 0, const std::string& id = "ClientSocket");
 
-		~Client() override;
+		virtual ~Client() override;
 		// endregion
 
 		std::condition_variable_any cv;
+	private:		
+		LifetimeDefinition clientLifetimeDefinition;
 	};
 
 	class RD_FRAMEWORK_API Server : public Base
@@ -166,8 +170,10 @@ public:
 
 		Server(Lifetime lifetime, IScheduler* scheduler, uint16_t port = 0, const std::string& id = "ServerSocket");
 
-		~Server() override;
+		virtual ~Server() override;
 		// endregion
+	private:
+		LifetimeDefinition serverLifetimeDefinition;
 	};
 };
 }	 // namespace rd
