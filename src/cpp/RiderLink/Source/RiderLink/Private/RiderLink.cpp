@@ -21,43 +21,50 @@ void FRiderLinkModule::ShutdownModule()
 void FRiderLinkModule::StartupModule()
 {
   UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP START"));
-  InitProtocol();
+  Scheduler.queue([this]()
+  {
+    InitProtocol();
+  });
   UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP FINISH"));
 }
 
 void FRiderLinkModule::InitProtocol()
 {
-  ProtocolLifetimeDef = MakeUnique<rd::LifetimeDefinition>(ModuleLifetimeDef.lifetime);
-  rd::Lifetime ProtocolLifetime = ProtocolLifetimeDef->lifetime;
-  Protocol = ProtocolFactory::Create(&Scheduler, ProtocolLifetime);
+  WireLifetimeDef = MakeUnique<rd::LifetimeDefinition>(ModuleLifetimeDef.lifetime);
+  rd::Lifetime WireLifetime = WireLifetimeDef->lifetime;
+  std::shared_ptr<rd::SocketWire::Server> Wire = ProtocolFactory::CreateWire(&Scheduler, WireLifetime);  
+  Protocol = ProtocolFactory::CreateProtocol(&Scheduler, WireLifetime.create_nested(), Wire);
   // Exception fired for Server::Base::~Base() when trying to invoke it this way
-  // ProtocolLifetime->add_action([this]()
-  // {
-  //   if(!ModuleLifetimeDef.is_terminated())
-  //   {
-  //     InitProtocol();
-  //   }
-  // });
-  Protocol->wire->connected.view(ProtocolLifetime, [this] (rd::Lifetime ConnectionLifetime, bool const& IsConnected)
+  WireLifetime->add_action([this]()
+  {
+    if(!ModuleLifetimeDef.is_terminated())
+    {
+      Scheduler.queue([this]()
+      {
+        InitProtocol();
+      });
+    }
+  });
+  Protocol->wire->connected.view(WireLifetime, [this] (rd::Lifetime ConnectionLifetime, bool const& IsConnected)
   {
     Scheduler.queue([this, ConnectionLifetime, IsConnected]()
     {
-      if(!IsConnected)
-      {
-        RdIsModelAlive.set(false);
-        EditorModel.Reset();
-        return;
-      }
+      if(!IsConnected) return;
 
       EditorModel = MakeUnique<JetBrains::EditorPlugin::RdEditorModel>();
       EditorModel->connect(ConnectionLifetime, Protocol.Get());
       JetBrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
         EditorModel->get_serialization_context().get_serializers()
       );
-      // ConnectionLifetime->add_action([&]() mutable
-      // {
-      //   ProtocolLifetimeDef->terminate();
-      // });
+      ConnectionLifetime->add_action([&]() mutable
+      {
+        Scheduler.queue([&]()mutable
+        {  
+          RdIsModelAlive.set(false);
+          WireLifetimeDef->terminate();
+          EditorModel.Reset();
+        });
+      });
       RdIsModelAlive.set(true);
     });
   });

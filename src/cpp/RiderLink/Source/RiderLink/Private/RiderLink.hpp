@@ -4,6 +4,7 @@
 #include "impl/RdProperty.h"
 #include "lifetime/LifetimeDefinition.h"
 #include "scheduler/SingleThreadScheduler.h"
+#include "wire/SocketWire.h"
 
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
@@ -44,7 +45,7 @@ private:
 
 	rd::LifetimeDefinition ModuleLifetimeDef{rd::Lifetime::Eternal()};
 	rd::SingleThreadScheduler Scheduler{ModuleLifetimeDef.lifetime, "MainScheduler"};
-	TUniquePtr<rd::LifetimeDefinition> ProtocolLifetimeDef;
+	TUniquePtr<rd::LifetimeDefinition> WireLifetimeDef;
 	TUniquePtr<rd::Protocol> Protocol;
 	rd::RdProperty<bool> RdIsModelAlive;
 	TUniquePtr<JetBrains::EditorPlugin::RdEditorModel> EditorModel;
