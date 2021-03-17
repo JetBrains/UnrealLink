@@ -572,6 +572,7 @@ SocketWire::Server::Server(Lifetime parentLifetime, IScheduler* scheduler, uint1
 			try
 			{
 				logger->info("{}: accepting started", this->id);
+				while(ss->IsSocketValid() && !ss->Select(0, 300)){}
 				CActiveSocket* accepted = ss->Accept();
 				RD_ASSERT_THROW_MSG(
 					accepted != nullptr, fmt::format("{}: accepting failed, reason: {}", this->id, ss->DescribeError()));
