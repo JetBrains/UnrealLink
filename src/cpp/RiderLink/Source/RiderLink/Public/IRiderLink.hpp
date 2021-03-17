@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "RdEditorModel.Generated.h"
+#include "RdEditorModel/RdEditorModel.Generated.h"
 #include "lifetime/LifetimeDefinition.h"
 
-#include "ModuleInterface.h"
-#include "ModuleManager.h"
+#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 
 class RIDERLINK_API IRiderLinkModule : public IModuleInterface
 {

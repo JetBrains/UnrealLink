@@ -1,21 +1,22 @@
 #include "RiderGameControlExtension.hpp"
 
 
-#include "DebuggerCommands.h"
 #include "IRiderLink.hpp"
 
 #include "Model/Library/UE4Library/PlayState.Generated.h"
 #include "Model/Library/UE4Library/RequestFailed.Generated.h"
 #include "Model/Library/UE4Library/RequestSucceed.Generated.h"
+#include "RdEditorModel/RdEditorModel.Generated.h"
 
+#include "Async/Async.h"
+#include "Editor/UnrealEdEngine.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Kismet2/DebuggerCommands.h"
 #include "LevelEditor.h"
 #include "LevelEditorActions.h"
-#include "Async/Async.h"
 #include "Misc/FeedbackContext.h"
 #include "Modules/ModuleManager.h"
 #include "Settings/LevelEditorPlaySettings.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Editor/UnrealEdEngine.h"
 #include "UnrealEd/Public/Editor.h"
 
 #include "Runtime/Launch/Resources/Version.h"
