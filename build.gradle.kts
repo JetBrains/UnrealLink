@@ -64,6 +64,7 @@ java {
 val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
 
 project.version = (ext.properties.getOrPut("pluginVersion") { "${properties["productVersion"]}.${properties["BuildCounter"]}" } as String)
+val dotnetVerbosity = (ext.properties.getOrPut("dotnetVerbosity") { "quiet" } as String)
 
 tasks {
     withType<PublishTask> {
@@ -146,14 +147,14 @@ tasks {
         val buildDir = File("${project.projectDir}/build/")
         val outputFile = buildDir.resolve("DotNetSdkPath.generated.props")
 
+        inputs.property("dotNetSdkFile", {dotNetSdkPath.canonicalPath})
         outputs.file(outputFile)
         doLast {
             buildDir.mkdirs()
 
-            val dotNetSdkFile = dotNetSdkPath
             project.file(outputFile).writeText("""<Project>
             |  <PropertyGroup>
-            |    <DotNetSdkPath>${dotNetSdkFile.canonicalPath}</DotNetSdkPath>
+            |    <DotNetSdkPath>${dotNetSdkPath.canonicalPath}</DotNetSdkPath>
             |  </PropertyGroup>
             |</Project>""".trimMargin())
         }
@@ -165,6 +166,7 @@ tasks {
         dependsOn(prepareRiderBuildProps)
 
         val outputFile = project.projectDir.resolve("NuGet.Config")
+        inputs.property("dotNetSdkFile", {dotNetSdkPath.canonicalPath})
         outputs.file(outputFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
@@ -194,23 +196,22 @@ tasks {
         dependsOn(":protocol:generateModels")
         dependsOn(prepareNuGetConfig)
 
-        inputs.file(dotnetSolution)
-        inputs.dir("$repoRoot/src/dotnet")
+        inputs.file(file(dotnetSolution))
+        inputs.dir(file("$repoRoot/src/dotnet"))
+        outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.UnrealLink/bin/RiderPlugin.UnrealLink/$buildConfiguration"))
 
         doLast {
             val warningsAsErrors: String by project.extra
 
             val dotNetCliPath = findDotNetCliPath()
             val slnDir = dotnetSolution.parentFile
-            // TODO: Pass verbosity as settings
-            val verbosity = "normal"
             val buildArguments = listOf(
                     "build",
                     dotnetSolution.canonicalPath,
                     "/p:Configuration=$buildConfiguration",
                     "/p:Version=${project.version}",
                     "/p:TreatWarningsAsErrors=$warningsAsErrors",
-                    "/v:$verbosity",
+                    "/v:$dotnetVerbosity",
                     "/bl:${dotnetSolution.name}.binlog",
                     "/nologo")
 
