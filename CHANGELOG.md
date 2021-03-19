@@ -18,6 +18,18 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+
+### Known Issues
+## [2021.1.4]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Fixed potential issues with inconsistent protocol state on disconnects
   - Reinitialize protocol each time
 - Fixed bunch of issues with game control actions
