@@ -18,8 +18,16 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
-
+- Fixed potential issues with inconsistent protocol state on disconnects
+  - Reinitialize protocol each time
+- Fixed bunch of issues with game control actions
+  - Use PIE actions logic from UE4 instead of reimplementing it
+  - Actions are no more stuck in disabled state after engine unexpected shutdowns
+  
 ### Known Issues
+- "Compile before play" option is not properly supported
+- Actions visibility and availability states are not synchronized with editor
+
 ## [2021.1.3]
 ### Added
 - Disabling Play and Play settings button after press
