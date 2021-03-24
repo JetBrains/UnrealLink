@@ -113,7 +113,7 @@ tasks {
         inputs.file("$rootDir/tools/Zipper/Zipper.csproj")
         inputs.file(zipperSolution)
         val zipperFolder = File("$rootDir/tools/Zipper/bin/Release/net461")
-        val zipperBinary = zipperFolder.resolve(if (isWindows) "Zipper.exe" else "Zipper")
+        val zipperBinary = zipperFolder.resolve("Zipper.exe")
         outputs.file(zipperBinary)
 
         doLast {
@@ -145,10 +145,17 @@ tasks {
         val outputZip = File("$rootDir/build/distributions/RiderLink.zip")
         outputs.file(outputZip)
         doLast {
-            project.exec {
-                executable = buildZipper.outputs.files.first().absolutePath
-                args = listOf(riderLinkDir.absolutePath, outputZip.absolutePath)
-                workingDir = rootDir
+            if(isWindows){
+                project.exec {
+                    executable = buildZipper.outputs.files.first().absolutePath
+                    args = listOf(riderLinkDir.absolutePath, outputZip.absolutePath)
+                    workingDir = rootDir
+                }
+            } else {
+                project.exec {
+                    executable = "zsh"
+                    args = listOf("-c", "eval",  "`/usr/libexec/path_helper -s`", "&&", "mono", buildZipper.outputs.files.first().absolutePath, riderLinkDir.absolutePath, outputZip.absolutePath)
+                }
             }
         }
     }
