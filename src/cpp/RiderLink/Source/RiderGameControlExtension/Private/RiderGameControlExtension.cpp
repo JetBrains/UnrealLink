@@ -263,9 +263,9 @@ private:
 void FRiderGameControl::SendRequestSucceed(int RequestID)
 {
     using namespace JetBrains::EditorPlugin;
-    ScheduleModelAction([=](RdEditorModel const& Model)
+    ScheduleModelAction([=](RdEditorModel const& EditorModel)
     {
-        Model.get_notificationReplyFromEditor().fire(RequestSucceed(RequestID));
+        EditorModel.get_notificationReplyFromEditor().fire(RequestSucceed(RequestID));
     });
 }
 
@@ -273,9 +273,9 @@ void FRiderGameControl::SendRequestFailed(int RequestID, JetBrains::EditorPlugin
                                           const FString& Message)
 {
     using namespace JetBrains::EditorPlugin;
-    ScheduleModelAction([=](RdEditorModel const& Model)
+    ScheduleModelAction([=](RdEditorModel const& EditorModel)
     {
-        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, Message, RequestID));
+        EditorModel.get_notificationReplyFromEditor().fire(RequestFailed(Type, Message, RequestID));
     });
 }
 
@@ -314,7 +314,7 @@ void FRiderGameControl::ScheduleModelAction(TFunction<void(JetBrains::EditorPlug
 }
 
 FRiderGameControl::FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const &Model, FRiderGameControlActionsCache& ActionsCache) :
-    Model(Model), Actions(ActionsCache)
+    Actions(ActionsCache), Model(Model)
 {
     using namespace JetBrains::EditorPlugin;
     
