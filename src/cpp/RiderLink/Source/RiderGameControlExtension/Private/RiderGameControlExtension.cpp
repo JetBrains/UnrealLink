@@ -275,7 +275,8 @@ void FRiderGameControl::SendRequestFailed(int RequestID, JetBrains::EditorPlugin
     using namespace JetBrains::EditorPlugin;
     ScheduleModelAction([=](RdEditorModel const& Model)
     {
-        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, ToCStr(Message), RequestID));
+        const rd::Wrapper<std::wstring> TmpMessage {ToCStr(Message)};
+        Model.get_notificationReplyFromEditor().fire(RequestFailed(Type, TmpMessage, RequestID));
     });
 }
 
