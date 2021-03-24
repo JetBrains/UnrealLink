@@ -48,7 +48,7 @@ class PlayStateActionStateService(project: Project) : LifetimedProjectService(pr
                         invalidate()
 
                         val title = UnrealLinkBundle.message("notification.RiderLink.ReplyFromEditor.title")
-                        val message = it.message
+                        val message = it.message.data
                         val type = when (it.type){
                             ReplyNotificationType.Message -> NotificationType.INFORMATION
                             ReplyNotificationType.Error -> NotificationType.ERROR

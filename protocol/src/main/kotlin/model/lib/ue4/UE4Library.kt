@@ -63,7 +63,7 @@ object UE4Library : Root() {
             +"Message"
             +"Error"
         })
-        field("message", string)
+        field("message", FString)
     }
 
     val VerbosityType = declare(CppIntrinsicType("ELogVerbosity", "Type", "Logging/LogVerbosity.h"))
