@@ -152,17 +152,9 @@ tasks {
                     workingDir = rootDir
                 }
             } else {
-                if(!isWindows){
-                    project.exec {
-                        executable = "zsh"
-                        args = listOf("-c", "eval",  "`/usr/libexec/path_helper -s`", "&&", "mono", buildZipper.outputs.files.first().absolutePath, riderLinkDir.absolutePath, outputZip.absolutePath)
-                    }
-                } else {
-                    project.exec {
-                        executable = "mono"
-                        args = listOf(buildZipper.outputs.files.first().absolutePath, riderLinkDir.absolutePath, outputZip.absolutePath)
-                        workingDir = rootDir
-                    }
+                project.exec {
+                    executable = "zsh"
+                    args = listOf("-c", "eval",  "`/usr/libexec/path_helper -s`", "&&", "mono", buildZipper.outputs.files.first().absolutePath, riderLinkDir.absolutePath, outputZip.absolutePath)
                 }
             }
         }
