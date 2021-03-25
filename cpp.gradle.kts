@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream
 
 val isWindows: Boolean by extra
 
-fun findDotNetCliPath(): String {
+fun findDotNetCliPath(): String? {
     if (project.extra.has("dotNetCliPath")) {
         val dotNetCliPath = project.extra["dotNetCliPath"] as String
         logger.info("dotNetCliPath (cached): $dotNetCliPath")
@@ -27,7 +27,8 @@ fun findDotNetCliPath(): String {
             return dotNetCliFile.canonicalPath
         }
     }
-    error(".NET Core CLI not found. Please add: 'dotnet' in PATH")
+    logger.warn(".NET Core CLI not found. dotnet.cmd will be used")
+    return null
 }
 
 tasks {
@@ -117,7 +118,7 @@ tasks {
         outputs.file(zipperBinary)
 
         doLast {
-            val dotNetCliPath = findDotNetCliPath()
+            val dotNetCliPath = null
             val slnDir = zipperSolution.parentFile
             val buildArguments = listOf(
                 "build",
@@ -126,11 +127,20 @@ tasks {
                 "/nologo"
             )
 
-            logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
-            project.exec {
-                executable = dotNetCliPath
-                args = buildArguments
-                workingDir = zipperSolution.parentFile
+            if (dotNetCliPath != null) {
+                logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
+                project.exec {
+                    executable = dotNetCliPath
+                    args = buildArguments
+                    workingDir = zipperSolution.parentFile
+                }
+            } else {
+                logger.info("call dotnet.cmd with '$buildArguments'")
+                project.exec {
+                    executable = "$rootDir/tools/dotnet.cmd"
+                    args = buildArguments
+                    workingDir = zipperSolution.parentFile
+                }
             }
         }
     }
