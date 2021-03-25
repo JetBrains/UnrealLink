@@ -5,20 +5,19 @@ on:
     paths-ignore:
     - README.md
     - CHANGELOG.md
-    - .github/workflows/create-release.yml
-    branches: [ net211 ]
+    branches: [ net212 ]
   pull_request:
     paths-ignore:
     - README.md
     - CHANGELOG.md
-    - .github/workflows/create-release.yml
-    branches: [ net211 ]
+    branches: [ net212 ]
 
 jobs:
   build:
     env:
       working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
-      major-version: 2021.1
+      major-version: 2021.2
+      minor-version: 0
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -42,11 +41,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PproductVersion=${{ env.major-version }} -PBuildCounter=${{ github.run_number }} -PConfiguration=Release
+      run: gradlew.bat buildPlugin -PmajorVersion=${{ env.major-version }} -PminorVersion=${{ env.minor-version }} -PbuildCounter=${{ github.run_number }} -PbuildConfiguration=Release
       shell: cmd
     - name: Upload built plugin
       if: success()
       uses: actions/upload-artifact@v2
       with:
         path: output/**
-        name: ${{ matrix.config.artifact-prefix }}${{ env.major-version }}.${{ github.run_number}}
+        name: ${{ matrix.config.artifact-prefix }}${{ env.major-version }}.${{ env.minor-version }}.${{ github.run_number}}

@@ -8,12 +8,18 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.io.ByteArrayOutputStream
 
-plugins {
-    kotlin("jvm") version "1.4.0"
 
-    id("org.jetbrains.changelog") version "0.4.0"
+plugins {
+    kotlin("jvm") version "1.4.32"
+
+    id("org.jetbrains.changelog") version "1.1.2"
     id("org.jetbrains.intellij") version "0.7.2"
-    id("com.jetbrains.rdgen") version "0.203.161"
+    id("com.jetbrains.rdgen") version "0.211.234"
+}
+
+dependencies {
+    // only for suppress warning lib\kotlin-stdlib-jdk8.jar: Library has Kotlin runtime bundled into it
+    implementation(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version = "1.4.32")
 }
 
 repositories {
@@ -23,61 +29,6 @@ repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 }
 
-tasks.named<Wrapper>("wrapper") {
-    gradleVersion = "6.6.1"
-    distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
-}
-
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
-}
-
-val repoRoot by extra { project.rootDir }
-val sdkVersion by extra { "2021.1" }
-
-val dotNetSdkPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
-    assert(sdkPath.isDirectory)
-    println(".NETSDK path: $sdkPath")
-
-    return@lazy sdkPath
-}
-
-
-val dotNetDir by extra { File(repoRoot, "src/dotnet") }
-val dotNetSolutionId by extra { "UnrealLink" }
-val idePluginId by extra { "RiderPlugin" }
-val dotNetRiderProjectId by extra {"$idePluginId.$dotNetSolutionId"}
-val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
-val dotNetPluginId by extra { "$idePluginId.${project.name}" }
-val pluginPropsFile by extra { File(repoRoot, "build/generated/DotNetSdkPath.props") }
-val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
-
-val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
-
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-val buildConfiguration = (ext.properties.getOrPut("BuildConfiguration") { "Release" } as String)
-
-project.version = (ext.properties.getOrPut("pluginVersion") { "${properties["productVersion"]}.${properties["BuildCounter"]}" } as String)
-val dotnetVerbosity = (ext.properties.getOrPut("dotnetVerbosity") { "quiet" } as String)
-
-tasks {
-    withType<PublishTask> {
-        if (project.extra.has("username"))
-            setUsername(ext["username"] as String)
-        if (project.extra.has("password"))
-            setPassword(ext["password"] as String)
-    }
-    withType<RunIdeTask> {
-        maxHeapSize = "4096m"
-    }
-}
 kotlin {
     sourceSets {
         main {
@@ -95,24 +46,69 @@ sourceSets {
     }
 }
 
-tasks.withType<Test> {
-    useTestNG()
-    testLogging {
-        showStandardStreams = true
-        showExceptions = true
-        exceptionFormat = TestExceptionFormat.FULL
-    }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-
 apply(from = "cpp.gradle.kts")
 
-fun findDotNetCliPath(): String {
+project.version = "${property("majorVersion")}." +
+        "${property("minorVersion")}." +
+        "${property("buildCounter")}"
+
+if (System.getenv("TEAMCITY_VERSION") != null) {
+    logger.lifecycle("##teamcity[buildNumber '${project.version}']")
+} else {
+    logger.lifecycle("Plugin version: ${project.version}")
+}
+
+val buildConfigurationProp = project.property("buildConfiguration").toString()
+
+val repoRoot by extra { project.rootDir }
+val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
+val idePluginId by extra { "RiderPlugin" }
+val dotNetSolutionId by extra { "UnrealLink" }
+val dotNetDir by extra { File(repoRoot, "src/dotnet") }
+val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
+val dotNetPluginId by extra { "$idePluginId.${project.name}" }
+val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
+val dotNetSdkPath by lazy {
+    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
+    assert(sdkPath.isDirectory)
+    println(".NETSDK path: $sdkPath")
+
+    return@lazy sdkPath
+}
+
+tasks {
+    withType<PublishTask> {
+        if (project.extra.has("username"))
+            setUsername(ext["username"] as String)
+        if (project.extra.has("password"))
+            setPassword(ext["password"] as String)
+    }
+
+    withType<RunIdeTask> {
+        maxHeapSize = "4096m"
+    }
+
+    withType<Test> {
+        useTestNG()
+        testLogging {
+            showStandardStreams = true
+            showExceptions = true
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "11"
+        }
+    }
+
+    withType<Delete> {
+        delete("${dotnetSolution}.binlog")
+    }
+}
+
+fun findDotNetCliPath(): String? {
     if (project.extra.has("dotNetCliPath")) {
         val dotNetCliPath = project.extra["dotNetCliPath"] as String
         logger.info("dotNetCliPath (cached): $dotNetCliPath")
@@ -121,21 +117,18 @@ fun findDotNetCliPath(): String {
 
     val pathComponents = System.getenv("PATH").split(File.pathSeparatorChar)
     for (dir in pathComponents) {
-        val dotNetCliFile = File(dir, if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            "dotnet.exe"
-        } else {
-            "dotnet"
-        })
+        val dotNetCliFile = File(dir, if (isWindows) "dotnet.exe" else "dotnet")
         if (dotNetCliFile.exists()) {
             logger.info("dotNetCliPath: ${dotNetCliFile.canonicalPath}")
             project.extra["dotNetCliPath"] = dotNetCliFile.canonicalPath
             return dotNetCliFile.canonicalPath
         }
     }
-    error(".NET Core CLI not found. Please add: 'dotnet' in PATH")
+    logger.warn(".NET Core CLI not found. dotnet.cmd will be used")
+    return null
 }
 
-fun TaskContainerScope.setupCleanup(task:Task) {
+fun TaskContainerScope.setupCleanup(task: Task) {
     withType<Delete> {
         delete(task.outputs.files)
     }
@@ -166,16 +159,18 @@ tasks {
         val buildDir = File("${project.projectDir}/build/")
         val outputFile = buildDir.resolve("DotNetSdkPath.generated.props")
 
-        inputs.property("dotNetSdkFile", {dotNetSdkPath.canonicalPath})
+        inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
         outputs.file(outputFile)
         doLast {
             buildDir.mkdirs()
 
-            project.file(outputFile).writeText("""<Project>
+            project.file(outputFile).writeText(
+                """<Project>
             |  <PropertyGroup>
             |    <DotNetSdkPath>${dotNetSdkPath.canonicalPath}</DotNetSdkPath>
             |  </PropertyGroup>
-            |</Project>""".trimMargin())
+            |</Project>""".trimMargin()
+            )
         }
     }
     setupCleanup(prepareRiderBuildProps)
@@ -185,7 +180,7 @@ tasks {
         dependsOn(prepareRiderBuildProps)
 
         val outputFile = project.projectDir.resolve("NuGet.Config")
-        inputs.property("dotNetSdkFile", {dotNetSdkPath.canonicalPath})
+        inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
         outputs.file(outputFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
@@ -212,38 +207,42 @@ tasks {
     val buildResharperHost by creating {
         group = "RiderBackend"
         description = "Build backend for Rider"
-        dependsOn(":protocol:generateModels")
-        dependsOn(prepareNuGetConfig)
+        dependsOn(":protocol:generateModels", prepareNuGetConfig)
 
         inputs.file(file(dotnetSolution))
         inputs.dir(file("$repoRoot/src/dotnet"))
-        outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.UnrealLink/bin/RiderPlugin.UnrealLink/$buildConfiguration"))
-
+        outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.UnrealLink/bin/RiderPlugin.UnrealLink/$buildConfigurationProp"))
         doLast {
             val warningsAsErrors: String by project.extra
 
             val dotNetCliPath = findDotNetCliPath()
             val slnDir = dotnetSolution.parentFile
             val buildArguments = listOf(
-                    "build",
-                    dotnetSolution.canonicalPath,
-                    "/p:Configuration=$buildConfiguration",
-                    "/p:Version=${project.version}",
-                    "/p:TreatWarningsAsErrors=$warningsAsErrors",
-                    "/v:$dotnetVerbosity",
-                    "/bl:${dotnetSolution.name}.binlog",
-                    "/nologo")
-
-            logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
-            project.exec {
-                executable = dotNetCliPath
-                args = buildArguments
-                workingDir = dotnetSolution.parentFile
+                "build",
+                dotnetSolution.canonicalPath,
+                "/p:Configuration=$buildConfigurationProp",
+                "/p:Version=${project.version}",
+                "/p:TreatWarningsAsErrors=$warningsAsErrors",
+                "/v:${project.properties.getOrDefault("dotnetVerbosity", "minimal")}",
+                "/bl:${dotnetSolution.name}.binlog",
+                "/nologo"
+            )
+            if (dotNetCliPath != null) {
+                logger.info("dotnet call: '$dotNetCliPath' '$buildArguments' in '$slnDir'")
+                project.exec {
+                    executable = dotNetCliPath
+                    args = buildArguments
+                    workingDir = dotnetSolution.parentFile
+                }
+            } else {
+                logger.info("call dotnet.cmd with '$buildArguments'")
+                project.exec {
+                    executable = "$rootDir/tools/dotnet.cmd"
+                    args = buildArguments
+                    workingDir = dotnetSolution.parentFile
+                }
             }
         }
-    }
-    withType<Delete> {
-        delete("${dotnetSolution}.binlog")
     }
 
     @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
@@ -253,20 +252,21 @@ tasks {
         doLast {
             val branchName = getBranchName()
             outputFile.writeText(
-"""## New in ${project.version}
+                """## New in ${project.version}
 ${changelog.get(project.version as String)}
 
 See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$branchName/CHANGELOG.md) for more details and history.
 """.trimIndent())
         }
     }
+
     setupCleanup(dumpChangelogResult)
 
     @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(buildResharperHost)
         outputs.upToDateWhen { false }
         buildSearchableOptions {
-            enabled = buildConfiguration == "Release"
+            enabled = buildConfigurationProp == "Release"
         }
         val outputDir = File("$rootDir/output")
         outputs.dir(outputDir)
@@ -277,6 +277,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$branchName/CHA
             }
         }
     }
+
     withType<Delete> {
         delete("$rootDir/output")
     }
@@ -291,11 +292,11 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$branchName/CHA
         outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
 
         val outputFolder = dotNetBinDir
-                .resolve(dotNetPluginId)
-                .resolve(buildConfiguration)
+            .resolve(dotNetPluginId)
+            .resolve(buildConfigurationProp)
         val dllFiles = listOf(
-                File(outputFolder, "$dotNetPluginId.dll"),
-                File(outputFolder, "$dotNetPluginId.pdb")
+            File(outputFolder, "$dotNetPluginId.dll"),
+            File(outputFolder, "$dotNetPluginId.pdb")
         )
 
         dllFiles.forEach {
@@ -322,33 +323,36 @@ changelog {
 
 intellij {
     type = "RD"
-    version = "$sdkVersion-SNAPSHOT"
+    instrumentCode = false
+    downloadSources = false
 
     setPlugins("com.jetbrains.rider-cpp")
 
-    instrumentCode = false
-    downloadSources = false
-    tasks.withType<PatchPluginXmlTask> {
-        val isReleaseBuild = buildConfiguration == "Release"
+    val riderSdkVersion = project.property("majorVersion").toString()
 
-        if(isReleaseBuild) {
-            val riderSdkVersion = properties["riderSdkVersion"] as String?
-            if(!riderSdkVersion.isNullOrEmpty()) {
-                sinceBuild(riderSdkVersion)
-                untilBuild("$riderSdkVersion.*")
-            } else {
-                updateSinceUntilBuild = true
-            }
+    val dependencyPath = File(projectDir, "dependencies")
+    if (dependencyPath.exists()) {
+        localPath = dependencyPath.canonicalPath
+        println("Will use ${File(localPath, "build.txt").readText()} from $localPath as RiderSDK")
+    } else {
+        version = "$riderSdkVersion-SNAPSHOT"
+        println("Will download and use '$version' as RiderSDK")
+    }
+
+    tasks.withType<PatchPluginXmlTask> {
+        val isReleaseBuild = buildConfigurationProp == "Release"
+        var changelogProject = changelog.getUnreleased()
+
+        if (isReleaseBuild) {
+            sinceBuild(riderSdkVersion)
+            untilBuild("$riderSdkVersion.*")
+
+            changelogProject = changelog.getLatest()
         }
 
         val branchName = getBranchName()
-
-        val changelogProject = if (isReleaseBuild)
-            changelog.get(project.version as String)
-        else
-            changelog.getUnreleased()
         changeNotes(closure {
-        """
+            """
             <body>
             <p><b>New in "${project.version}"</b></p>
             <p>
@@ -360,5 +364,3 @@ intellij {
         })
     }
 }
-
-
