@@ -1,5 +1,3 @@
-#pragma once
-
 #include "UE4TypesMarshallers.h"
 
 #include "Containers/StringConv.h"
