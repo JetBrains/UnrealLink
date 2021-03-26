@@ -11,7 +11,7 @@ plugins {
     kotlin("jvm") version "1.4.0"
 
     id("org.jetbrains.changelog") version "0.4.0"
-    id("org.jetbrains.intellij") version "0.6.5"
+    id("org.jetbrains.intellij") version "0.7.2"
     id("com.jetbrains.rdgen") version "0.203.161"
 }
 
