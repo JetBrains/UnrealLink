@@ -47,6 +47,7 @@ namespace Zipper
                     foreach (var filePath in Directory.EnumerateFiles(subfolderFullPath, "*", SearchOption.AllDirectories))
                     {
                         var entryName = filePath.Replace(Source + Path.DirectorySeparatorChar, "");
+                        entryName = entryName.Replace('\\', '/');
                         zip.CreateEntryFromFile(filePath, entryName);
                     }
                 }
