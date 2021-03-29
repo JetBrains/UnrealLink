@@ -18,7 +18,7 @@ jobs:
   build:
     env:
       working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
-      major-version: 2020.3
+      major-version: 2021.1
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
