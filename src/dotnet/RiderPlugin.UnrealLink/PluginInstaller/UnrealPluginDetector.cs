@@ -38,7 +38,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
 
         private CppUE4Version myUnrealVersion;
-        private readonly CppUE4Version myMinimalSupportedVersion = new CppUE4Version(4, 20, 0);
+        private readonly CppUE4Version myMinimalSupportedVersion = new CppUE4Version(4, 23, 0);
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new JetHashSet<string>{"UnrealLaunchDaemon"};
 
@@ -69,12 +69,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                 locks.ExecuteOrQueue(myLifetime, "UnrealLink.CheckSupportedVersion",
                                     () =>
                                     {
-                                        var notification = new NotificationModel("Unreal Engine 4.20.0+ is required",
-                                            "<html>UnrealLink supports Unreal Engine versions starting with 4.20.0<br>" +
+                                        var notification = new NotificationModel($"Unreal Engine {myMinimalSupportedVersion}+ is required",
+                                            "<html>UnrealLink supports Unreal Engine versions starting with {myMinimalSupportedVersion}<br>" +
                                             "<b>WARNING: Advanced users only</b><br>" +
                                             "You can manually download the latest version of plugin and build It for your version of Unreal Editor<br>" +
                                             RiderContextNotificationHelper.MakeLink(
-                                                "https://github.com/JetBrains/UnrealLink/releases",
+                                                "https://github.com/JetBrains/UnrealLink/releases/latest",
                                                 "Download latest Unreal Editor plugin") +
                                             "</html>",
                                             true,
