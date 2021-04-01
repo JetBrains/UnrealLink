@@ -69,8 +69,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                 locks.ExecuteOrQueue(myLifetime, "UnrealLink.CheckSupportedVersion",
                                     () =>
                                     {
-                                        var notification = new NotificationModel($"Unreal Engine {myMinimalSupportedVersion}+ is required",
-                                            "<html>UnrealLink supports Unreal Engine versions starting with {myMinimalSupportedVersion}<br>" +
+                                        var notification =
+                                                new NotificationModel(
+                                                    $"Unreal Engine {myMinimalSupportedVersion}+ is required", 
+                                            $"<html>UnrealLink supports Unreal Engine versions starting with {myMinimalSupportedVersion}<br>" +
                                             "<b>WARNING: Advanced users only</b><br>" +
                                             "You can manually download the latest version of plugin and build It for your version of Unreal Editor<br>" +
                                             RiderContextNotificationHelper.MakeLink(
