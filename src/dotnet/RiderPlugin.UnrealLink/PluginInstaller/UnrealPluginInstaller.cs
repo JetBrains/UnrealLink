@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
@@ -499,15 +500,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 var command = GetPlatformCommand(generateProjectFilesCmd);
                 var commandLine = GetPlatformCommandLine(generateProjectFilesCmd);
 
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
+                lock (HACK_getMutexForUBT())
+                {
+                    myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
 
-                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(command,
-                    commandLine,
-                    LoggingLevel.INFO,
-                    TimeSpan.FromMinutes(1),
-                    InvokeChildProcess.TreatStderr.AsOutput,
-                    generateProjectFilesCmd.Directory
-                ));
+                    ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(command,
+                        commandLine,
+                        LoggingLevel.INFO,
+                        TimeSpan.FromMinutes(1),
+                        InvokeChildProcess.TreatStderr.AsOutput,
+                        generateProjectFilesCmd.Directory
+                    ));
+                }
             }
             catch (ErrorLevelException errorLevelException)
             {
@@ -536,15 +540,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
-                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
-                    BatchUtils.GetPathToCmd(),
-                    commandLine,
-                    LoggingLevel.INFO,
-                    TimeSpan.FromMinutes(1),
-                    InvokeChildProcess.TreatStderr.AsOutput,
-                    pathToUnrealVersionSelector.Directory
-                ));
+                lock (HACK_getMutexForUBT())
+                {
+                    myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
+                    ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
+                        BatchUtils.GetPathToCmd(),
+                        commandLine,
+                        LoggingLevel.INFO,
+                        TimeSpan.FromMinutes(1),
+                        InvokeChildProcess.TreatStderr.AsOutput,
+                        pathToUnrealVersionSelector.Directory
+                    ));
+                }
             }
             catch (ErrorLevelException errorLevelException)
             {
@@ -570,15 +577,19 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
-                myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
-                ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
-                    pathToUnrealBuildToolBin,
-                    commandLine,
-                    LoggingLevel.INFO,
-                    TimeSpan.FromMinutes(1),
-                    InvokeChildProcess.TreatStderr.AsOutput,
-                    pathToUnrealBuildToolBin.Directory
-                ));
+                lock (HACK_getMutexForUBT())
+                {
+                    myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
+                    ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
+                        pathToUnrealBuildToolBin,
+                        commandLine,
+                        LoggingLevel.INFO,
+                        TimeSpan.FromMinutes(1),
+                        InvokeChildProcess.TreatStderr.AsOutput,
+                        pathToUnrealBuildToolBin.Directory
+                    ));
+                }
+                
             }
             catch (Exception errorLevelException)
             {
@@ -596,6 +607,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var isInstalledBuild = installedBuildTxt.ExistsFile;
             return isInstalledBuild;
         }
+        
+        
+        private object HACK_getMutexForUBT()
+        {
+            var field =
+                typeof(CppUE4UbtRunner).GetField("ourLocker", BindingFlags.Static | BindingFlags.NonPublic);
+            return field.GetValue(null);
+        }
+
 
         private bool BuildPlugin(FileSystemPath upluginPath, FileSystemPath outputDir, FileSystemPath uprojectFile,
             Action<double> progressPump)
@@ -666,8 +686,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Info($"[UnrealLink]: Building UnrealLink plugin with: {commandLine}");
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
-                var result = InvokeChildProcess.InvokeSync(command, commandLine,
-                    pipeStreams, TimeSpan.FromMinutes(30), null, null, null, myLogger);
+                uint result = 0;
+                lock (HACK_getMutexForUBT())
+                {
+                    result = InvokeChildProcess.InvokeSync(command, commandLine,
+                        pipeStreams, TimeSpan.FromMinutes(30), null, null, null, myLogger);    
+                }
+                
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
                 myLogger.Verbose("[UnrealLink]: Build logs:");
                 myLogger.Verbose(stdOut.Join("\n"));
