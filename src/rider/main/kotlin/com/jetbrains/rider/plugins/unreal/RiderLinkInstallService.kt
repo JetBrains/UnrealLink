@@ -4,6 +4,8 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.service
@@ -17,8 +19,10 @@ import com.jetbrains.rd.platform.util.idea.LifetimedProjectService
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.lifetime.onTermination
 import com.jetbrains.rider.build.BuildToolWindowFactory
+import com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ContentType
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallMessage
+import java.awt.BorderLayout
 import java.awt.CardLayout
 import javax.swing.JPanel
 
@@ -46,6 +50,7 @@ class RiderLinkInstallService(
         val toolWindowContent = contentManager.factory.createContent(null, "RiderLink Install Progress", true).apply {
             StatusBarUtil.setStatusBarInfo(project, "Install")
             component = panel
+            panel.toolbar = createToolbarPanel()
             isCloseable = false
             icon = AllIcons.Actions.Install
         }
@@ -53,6 +58,18 @@ class RiderLinkInstallService(
         val ctx = RiderLinkInstallContext(toolWindow, toolWindowContent, panel)
         context = ctx
         return ctx
+    }
+
+    private fun createToolbarPanel(): JPanel {
+        val buildActionGroup = DefaultActionGroup().apply {
+            add(CancelRiderLinkInstallAction())
+        }
+        return JPanel(BorderLayout()).apply {
+            add(
+                    ActionManager.getInstance().createActionToolbar("UnrealLink.BuildRiderLinkToolbar", buildActionGroup, false).component,
+                    BorderLayout.WEST
+            )
+        }
     }
 }
 
@@ -67,13 +84,12 @@ class RiderLinkInstallPanel(
     lifetime: Lifetime
 ) : SimpleToolWindowPanel(false) {
     private val console = TextConsoleBuilderFactory.getInstance().createBuilder(project).console as ConsoleViewImpl
-    private val layout = CardLayout()
     private val container: JPanel
 
     init {
         Disposer.register(project, console)
         setProvideQuickActions(true)
-        container = JPanel(layout).apply {
+        container = JPanel(CardLayout()).apply {
             add(console.component, "console")
         }
         setContent(container)
@@ -117,6 +133,4 @@ class RiderLinkInstallContext(
     fun clear() {
         panel.clear()
     }
-
-    var isActive = false
 }
