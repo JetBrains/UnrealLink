@@ -43,13 +43,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private UnrealPluginDetector myPluginDetector;
         private const string TMP_PREFIX = "UnrealLink";
 
-        public IProperty<bool> InstallationIsInProgress { get; private set; }
-
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
             PluginPathsProvider pathsProvider, ISolution solution, ISettingsStore settingsStore, UnrealHost unrealHost,
             NotificationsModel notificationsModel, RiderBackgroundTaskHost backgroundTaskHost)
         {
-            InstallationIsInProgress = new Property<bool>(lifetime, "UnrealLink.InstallationIsInProgress", false);
             Lifetime = lifetime;
             myLogger = logger;
             myPathsProvider = pathsProvider;
@@ -271,19 +268,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private async Task<bool> InstallPlugin(Lifetime lifetime, UnrealPluginInstallInfo.InstallDescription installDescription,
             FileSystemPath uprojectFile, IProperty<double> progressProperty, double range)
         {
-            var stack = new Stack<Action>();
-            void CleanupStack(){
-                while (!stack.IsEmpty())
-                {
-                    stack.Pop().Invoke();
-                }
-            }
-            bool HandleTaskCancel() {
-                if (lifetime.IsAlive) return true;
-
-                CleanupStack();
-                return false;
-            }
+            using var def = new LifetimeDefinition();
             var ZIP_STEP = 0.1 * range;
             var PATCH_STEP = 0.1 * range;
             var BUILD_STEP = 0.6 * range;
@@ -293,7 +278,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
             var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            stack.Push(()=>{pluginTmpDir.Delete();});
+            def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
                 ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
@@ -301,7 +286,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             catch (Exception exception)
             {
-                CleanupStack();
                 myLogger.Warn(exception, $"[UnrealLink]: Couldn't extract {editorPluginPathFile} to {pluginTmpDir}");
 
                 const string unzipFailTitle = "Failed to unzip new RiderLink plugin";
@@ -314,11 +298,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
-            if (!HandleTaskCancel()) return false;
+            if (lifetime.IsNotAlive) return false;
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
-            stack.Push(()=>{pluginBuildOutput.Delete();});
+            def.Lifetime.OnTermination(() => { pluginBuildOutput.Delete(); });
             var buildProgress = progressProperty.Value;
             var isPluginBuilt = await BuildPlugin(lifetime, upluginFile,
                 pluginBuildOutput,
@@ -326,14 +310,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (!isPluginBuilt)
             {
                 myLogger.Warn($"Failed to build RiderLink for any available project");
-                CleanupStack();;
                 const string failedBuildText = "Failed to build RiderLink plugin";
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(failedBuildText, ContentType.Error));
                 return false;
             }
             progressProperty.Value = buildProgress + BUILD_STEP;
 
-            if (!HandleTaskCancel()) return false;
+            if (lifetime.IsNotAlive) return false;
 
             if (!PatchUpluginFileAfterInstallation(pluginBuildOutput))
             {
@@ -345,7 +328,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             progressProperty.Value += PATCH_STEP;
 
-            if (!HandleTaskCancel()) return false;
+            if (lifetime.IsNotAlive) return false;
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
             pluginBuildOutput.Copy(pluginRootFolder);
@@ -372,7 +355,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 if (cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
                     RegenerateProjectFiles(uprojectFile);
             });
-            CleanupStack();
             return true;
         }
 
@@ -429,8 +411,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 var lifetimeDefinition = lt.CreateNested();
                 var lifetime = lifetimeDefinition.Lifetime;
-                lifetime.Bracket(() => InstallationIsInProgress.Value = true,
-                    () => InstallationIsInProgress.Value = false);
+                
+                lifetime.Bracket(
+                    () => myUnrealHost.myModel.RiderLinkInstallationInProgress.Value = true,
+                    () => myUnrealHost.myModel.RiderLinkInstallationInProgress.Value = false
+                    );
                 var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
                 var header = $"{prefix} RiderLink plugin";
                 var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);

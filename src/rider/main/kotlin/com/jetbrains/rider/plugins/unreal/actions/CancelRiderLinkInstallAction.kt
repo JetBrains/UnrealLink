@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction
 import com.intellij.openapi.actionSystem.impl.ActionButton
 import com.intellij.openapi.project.DumbAware
+import com.jetbrains.rider.plugins.unreal.UnrealHost
 import icons.RiderIcons
 import javax.swing.JComponent
 
@@ -22,7 +23,7 @@ class CancelRiderLinkInstallAction : AnAction(), CustomComponentAction, DumbAwar
             return
         }
         e.presentation.icon = RiderIcons.Actions.CancelCompile
-        e.presentation.isEnabled = true
+        e.presentation.isEnabled = UnrealHost.getInstance(project).isRiderLinkInstallationInProgress
     }
 
     override fun actionPerformed(e: AnActionEvent) {
