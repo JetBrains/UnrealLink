@@ -166,15 +166,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var range = 1.0 / size;
             for (int i = 0; i < unrealPluginInstallInfo.ProjectPlugins.Count; i++)
             {
-                if (lifetime.IsNotAlive)
-                {
-                    success = false;
-                    break;
-                }
                 progress.Value = range * i;
                 var installDescription = unrealPluginInstallInfo.ProjectPlugins[i];
-                if (await InstallPlugin(lifetime, installDescription, installDescription.UprojectFilePath, progress,
-                    range)) continue;
+                try
+                {
+                    if (await InstallPlugin(lifetime, installDescription, installDescription.UprojectFilePath, progress,
+                        range)) continue;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Operation was cancelled, don't need to do anything, fallback to break case
+                }
 
                 success = false;
                 break;
@@ -245,9 +247,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             progress.Value = 0.0;
-            var success = await InstallPlugin(lifetime, unrealPluginInstallInfo.EnginePlugin,
-            unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0);
-            success &= lifetime.IsAlive;
+            bool success;
+            try
+            {
+                success = await InstallPlugin(lifetime, unrealPluginInstallInfo.EnginePlugin,
+                    unrealPluginInstallInfo.ProjectPlugins.First().UprojectFilePath, progress, 1.0);
+            }
+            catch (OperationCanceledException)
+            {
+                success = false;
+            }
             if (!success)
             {
                 foreach (var backupAllPlugin in backupAllPlugins)
@@ -298,7 +307,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
-            if (lifetime.IsNotAlive) return false;
+            lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
@@ -316,7 +325,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             progressProperty.Value = buildProgress + BUILD_STEP;
 
-            if (lifetime.IsNotAlive) return false;
+            lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             if (!PatchUpluginFileAfterInstallation(pluginBuildOutput))
             {
@@ -328,7 +337,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             progressProperty.Value += PATCH_STEP;
 
-            if (lifetime.IsNotAlive) return false;
+            lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             pluginRootFolder.CreateDirectory().DeleteChildren();
             pluginBuildOutput.Copy(pluginRootFolder);
@@ -725,18 +734,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 {
                     if (result == ANOTHER_INSTANCE_OF_UBT_RUNNING)
                     {
-                        myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage("Another instance of UnrealBuildTool is running, retrying installation",
-                        ContentType.Normal));
+                        myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(
+                            "Another instance of UnrealBuildTool is running, retrying installation",
+                            ContentType.Normal));
                         await Task.Delay(new TimeSpan(0, 0, 5), lifetime.ToCancellationToken());
                     }
+
                     result = await StartUBTBuildPluginAsync(lifetime, command, commandLine, pipeStreams);
                 } while (result == ANOTHER_INSTANCE_OF_UBT_RUNNING);
 
-                if (lifetime.IsNotAlive)
-                {
-                    return false;
-                }
-                
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
                 myLogger.Verbose("[UnrealLink]: Build logs:");
                 myLogger.Verbose(stdOut.Join("\n"));
@@ -749,6 +755,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         ContentType.Error));
                     return false;
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception exception)
             {
