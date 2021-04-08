@@ -69,21 +69,22 @@ namespace RiderPlugin.UnrealLink.Settings
 
             var installationInProgressText = AddText("Installation is in progress...");
             installationInProgressText.Visible.Value = ControlVisibility.Hidden;
-            
-            unrealPluginInstaller?.InstallationIsInProgress.Change.Advise_HasNew(unrealPluginInstaller.Lifetime,
+
+            var unrealHost = solution?.GetComponent<UnrealHost>();
+            unrealHost?.myModel.RiderLinkInstallationInProgress.Advise(unrealPluginInstaller.Lifetime,
                 installationInProgress =>
                 {
-                    installInEngineButton.Enabled.Value = !installationInProgress.New;
+                    installInEngineButton.Enabled.Value = !installationInProgress;
                     foreach (var beControl in installInEngineButton.Descendants<BeControl>())
                     {
-                        beControl.Enabled.Value = !installationInProgress.New;
+                        beControl.Enabled.Value = !installationInProgress;
                     }
-                    installInGameButton.Enabled.Value = !installationInProgress.New;
+                    installInGameButton.Enabled.Value = !installationInProgress;
                     foreach (var beControl in installInGameButton.Descendants<BeControl>())
                     {
-                        beControl.Enabled.Value = !installationInProgress.New;
+                        beControl.Enabled.Value = !installationInProgress;
                     }
-                    installationInProgressText.Visible.Value = installationInProgress.New ?
+                    installationInProgressText.Visible.Value = installationInProgress ?
                         ControlVisibility.Visible :
                         ControlVisibility.Hidden;
                 }

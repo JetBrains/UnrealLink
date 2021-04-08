@@ -213,5 +213,7 @@ Path to old plugin:</code></pre>
             class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"/>
     <action id="UnrealLink.EnableAutoUpdatePlugin"
             class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
+    <action id="UnrealLink.CancelRiderLinkInstallAction"
+            class="com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction"/>
   </actions>
 </idea-plugin>
