@@ -10,14 +10,19 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+- Option to cancell installation of RiderLink
 
 ### Changed
 
 ### Deprecated
+- Dropped support for versions of UE 4.22 and older
 
 ### Removed
 
 ### Fixed
+- Fixed [Rider-51111](https://youtrack.jetbrains.com/issue/RIDER-51111)
+- Fixed installation on macOS
+- Failing to install RiderLink due to other UBT processes running
 
 ### Known Issues
 ## [2021.1.6]
