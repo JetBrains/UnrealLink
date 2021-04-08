@@ -10,6 +10,18 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Known Issues
+## [2021.1.7]
+### Added
 - Option to cancell installation of RiderLink
 
 ### Changed
