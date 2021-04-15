@@ -39,7 +39,7 @@ class RiderLinkInstallService(
     }
 
     private var context: RiderLinkInstallContext? = null
-    private val buildToolWindowFactory = ServiceManager.getService(project, BuildToolWindowFactory::class.java)
+    private val buildToolWindowFactory = project.getService(BuildToolWindowFactory::class.java)
 
 
     fun getOrCreateRiderLinkInstallContext(): RiderLinkInstallContext {
