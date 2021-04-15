@@ -1,12 +1,12 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.changelog.closure
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
+gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     kotlin("jvm") version "1.4.32"
@@ -75,38 +75,6 @@ val dotNetSdkPath by lazy {
     return@lazy sdkPath
 }
 
-tasks {
-    withType<PublishTask> {
-        if (project.extra.has("username"))
-            setUsername(ext["username"] as String)
-        if (project.extra.has("password"))
-            setPassword(ext["password"] as String)
-    }
-
-    withType<RunIdeTask> {
-        maxHeapSize = "4096m"
-    }
-
-    withType<Test> {
-        useTestNG()
-        testLogging {
-            showStandardStreams = true
-            showExceptions = true
-            exceptionFormat = TestExceptionFormat.FULL
-        }
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-
-    withType<Delete> {
-        delete("${dotnetSolution}.binlog")
-    }
-}
-
 fun findDotNetCliPath(): String? {
     if (project.extra.has("dotNetCliPath")) {
         val dotNetCliPath = project.extra["dotNetCliPath"] as String
@@ -127,24 +95,36 @@ fun findDotNetCliPath(): String? {
     return null
 }
 
-fun TaskContainerScope.setupCleanup(task: Task) {
-    withType<Delete> {
-        delete(task.outputs.files)
-    }
-}
-
 tasks {
-    val prepareRiderBuildProps by creating {
-        group = "RiderBackend"
+    jar { dependsOn(":protocol:generateModels") }
 
-        val buildDir = File("${project.projectDir}/build/")
-        val outputFile = buildDir.resolve("DotNetSdkPath.generated.props")
+    withType<RunIdeTask> {
+        maxHeapSize = "4096m"
+    }
+
+    withType<Test> {
+        useTestNG()
+        testLogging {
+            showStandardStreams = true
+            showExceptions = true
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "11"
+        }
+    }
+
+    val prepareRiderBuildProps by registering {
+        group = "RiderBackend"
+        val outputFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
 
         inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
         outputs.file(outputFile)
-        doLast {
-            buildDir.mkdirs()
 
+        doLast {
             project.file(outputFile).writeText(
                 """<Project>
             |  <PropertyGroup>
@@ -154,9 +134,8 @@ tasks {
             )
         }
     }
-    setupCleanup(prepareRiderBuildProps)
 
-    val prepareNuGetConfig by creating {
+    val prepareNuGetConfig by registering {
         group = "RiderBackend"
         dependsOn(prepareRiderBuildProps)
 
@@ -183,9 +162,7 @@ tasks {
         }
     }
 
-    setupCleanup(prepareNuGetConfig)
-
-    val buildResharperHost by creating {
+    val buildResharperHost by registering {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(":protocol:generateModels", prepareNuGetConfig)
@@ -193,6 +170,7 @@ tasks {
         inputs.file(file(dotnetSolution))
         inputs.dir(file("$repoRoot/src/dotnet"))
         outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.UnrealLink/bin/RiderPlugin.UnrealLink/$buildConfigurationProp"))
+
         doLast {
             val warningsAsErrors: String by project.extra
 
@@ -226,23 +204,6 @@ tasks {
         }
     }
 
-    @Suppress("UNUSED_VARIABLE") val dumpChangelogResult by creating() {
-        group = "CI Release"
-        val outputFile = File("release_notes.md")
-        outputs.file(outputFile)
-        doLast {
-            outputFile.writeText(
-                """## New in ${project.version}
-${changelog.get(project.version as String)}
-
-See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELOG.md) for more details and history.
-""".trimIndent()
-            )
-        }
-    }
-
-    setupCleanup(dumpChangelogResult)
-
     @Suppress("UNUSED_VARIABLE") val buildPlugin by getting(Zip::class) {
         dependsOn(buildResharperHost)
         outputs.upToDateWhen { false }
@@ -259,22 +220,16 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELO
         }
     }
 
-    withType<Delete> {
-        delete("$rootDir/output")
-    }
-
-    jar.get().dependsOn(":protocol:generateModels")
-
-    withType<PrepareSandboxTask> {
-        dependsOn(buildResharperHost)
+    prepareSandbox {
         val packCppSide = getByName("packCppSide")
-        dependsOn(packCppSide)
+        dependsOn(buildResharperHost, packCppSide)
 
         outputs.upToDateWhen { false } //need to dotnet artifacts be included when only dotnet sources were changed
 
         val outputFolder = dotNetBinDir
             .resolve(dotNetPluginId)
             .resolve(buildConfigurationProp)
+
         val dllFiles = listOf(
             File(outputFolder, "$dotNetPluginId.dll"),
             File(outputFolder, "$dotNetPluginId.pdb")
@@ -297,8 +252,14 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELO
 }
 
 changelog {
+    version = project.version.toString()
+    // https://github.com/JetBrains/gradle-changelog-plugin/blob/main/src/main/kotlin/org/jetbrains/changelog/Changelog.kt#L23
+    // This is just common semVerRegex with the addition of a forth optional group (number) ( x.x.x[.x][-alpha43] )
+    headerParserRegex =
+        """^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.?(0|[1-9]\d*)?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)
+            (?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?${'$'}"""
+            .trimMargin().toRegex()
     groups = listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues")
-    keepUnreleasedSection = true
 }
 
 intellij {
@@ -308,38 +269,58 @@ intellij {
 
     setPlugins("com.jetbrains.rider-cpp")
 
-    val riderSdkVersion = project.property("majorVersion").toString()
-
     val dependencyPath = File(projectDir, "dependencies")
     if (dependencyPath.exists()) {
         localPath = dependencyPath.canonicalPath
         println("Will use ${File(localPath, "build.txt").readText()} from $localPath as RiderSDK")
     } else {
-        version = "$riderSdkVersion-SNAPSHOT"
-        println("Will download and use '$version' as RiderSDK")
+        version = "${project.property("majorVersion")}-SNAPSHOT"
+        println("Will download and use build/riderRD-$version as RiderSDK")
     }
 
-    tasks.withType<PatchPluginXmlTask> {
-        val isReleaseBuild = project.property("isReleaseBuild").toString().toBoolean()
-        var changelogProject = changelog.getUnreleased()
-
-        if (isReleaseBuild) {
-            sinceBuild(riderSdkVersion)
-            untilBuild("$riderSdkVersion.*")
-
-            changelogProject = changelog.getLatest()
+    tasks {
+        val dumpCurrentChangelog by registering {
+            val outputFile = File("${project.buildDir}/release_notes.md")
+            outputs.file(outputFile)
+            doLast { outputFile.writeText(currentReleaseNotesAsMarkdown) }
         }
 
-        changeNotes(closure {
-            """
+        // PatchPluginXml gets latest (always Unreleased) section from current changelog and write it into plugin.xml
+        // dumpCurrentChangelog dumps the same section to file (for Marketplace changelog)
+        // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
+        // So order is important!
+        patchPluginXml { changeNotes( closure { currentReleaseNotesAsHtml }) }
+        patchChangelog{ mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
+
+        publishPlugin {
+            dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
+            token(System.getenv("UNREALLINK_intellijPublishToken"))
+
+            val pubChannels = project.findProperty("publishChannels")
+            if ( pubChannels != null) {
+                val chan = pubChannels.toString().split(',')
+                println("Channels for publish $chan")
+                channels(chan)
+            } else {
+                channels(listOf("alpha"))
+            }
+//            distributionFile("${project.buildDir}/output/UnrealLink.zip")  // TODO need this?
+        }
+    }
+}
+
+    val currentReleaseNotesAsHtml =
+        """
             <body>
             <p><b>New in "${project.version}"</b></p>
-            <p>
-            ${changelogProject.toHTML()}
-            </p>
+            <p>${changelog.getLatest().toHTML()}</p>
             <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net212/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
-        })
-    }
-}
+
+    val currentReleaseNotesAsMarkdown =
+        """
+            ## New in ${project.version}
+            ${changelog.getLatest().toText()}
+            See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELOG.md) for more details and history.
+        """.trimIndent()
