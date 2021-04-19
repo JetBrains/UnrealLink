@@ -9,7 +9,7 @@ using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
-using JetBrains.ReSharper.Host.Features.BackgroundTasks;
+using JetBrains.ReSharper.Host.Core.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
