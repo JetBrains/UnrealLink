@@ -70,10 +70,9 @@ void FRiderBlueprintExtensionModule::StartupModule()
                     {
                         Window->Restore();
                     }
-                    else
-                    {
-                        Window->HACK_ForceToFront();
-                    }
+                    Window->HACK_ForceToFront();
+                    Window->BringToFront(true);
+                    
                     BluePrintProvider::OpenBlueprint(
                         s.get_pathName(), MessageEndpoint);
                 }
