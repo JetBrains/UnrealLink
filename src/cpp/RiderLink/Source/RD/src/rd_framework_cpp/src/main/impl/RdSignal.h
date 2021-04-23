@@ -130,7 +130,7 @@ public:
 		return wire_scheduler;
 	}
 
-	friend std::string to_string(RdSignal const& value)
+	friend std::string to_string(RdSignal const&)
 	{
 		return "";
 	}
