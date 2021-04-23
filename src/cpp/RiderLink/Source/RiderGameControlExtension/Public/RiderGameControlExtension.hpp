@@ -5,6 +5,7 @@
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
+#include "Templates/UniquePtr.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderGameControlExtensionModule, Log, All);
 
@@ -20,7 +21,7 @@ public:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-    virtual bool SupportsDynamicReloading() override { return true; };
+    virtual bool SupportsDynamicReloading() override { return true; }
 
 private:
     rd::LifetimeDefinition ModuleLifetimeDefinition;

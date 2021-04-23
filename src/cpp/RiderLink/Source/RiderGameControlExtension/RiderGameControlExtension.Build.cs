@@ -10,9 +10,10 @@ public class RiderGameControlExtension : ModuleRules
 		
 		bUseRTTI = true;
 
+		PublicDependencyModuleNames.Add("Core");
+
 		PrivateDependencyModuleNames.AddRange(new []
 		{
-			"Core",
 			"RD",
 			"RiderLink",
 			"HeadMountedDisplay",
