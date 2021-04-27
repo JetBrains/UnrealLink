@@ -251,7 +251,7 @@ tasks {
         }
     }
 
-    prepareSandbox {
+    withType<PrepareSandboxTask> {
         val packCppSide = getByName("packCppSide")
         dependsOn(buildResharperHost, packCppSide)
 
@@ -323,7 +323,7 @@ intellij {
         // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
         // So order is important!
         patchPluginXml { changeNotes( closure { currentReleaseNotesAsHtml }) }
-        patchChangelog{ mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
+        patchChangelog { mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
 
         publishPlugin {
             dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
@@ -337,7 +337,6 @@ intellij {
             } else {
                 channels(listOf("alpha"))
             }
-//            distributionFile("${project.buildDir}/output/UnrealLink.zip")  // TODO need this?
         }
     }
 }
