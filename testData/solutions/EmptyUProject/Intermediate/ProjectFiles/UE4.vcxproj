@@ -59,8 +59,8 @@
     <AdditionalOptions>/std:c++14</AdditionalOptions>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\..\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject\ObjectMacros.h"/>
-    <ClInclude Include="..\..\..\..\..\..\..\UE_4.26\Engine\Source\Runtime\Launch\Resources\Version.h"/>  
+    <ClInclude Include="C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject\ObjectMacros.h"/>
+    <ClInclude Include="C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Launch\Resources\Version.h"/>
   </ItemGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

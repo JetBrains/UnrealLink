@@ -31,14 +31,15 @@ class Connection : BaseTestWithSolution() {
     @Test
     @TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
     fun connection() {
+        waitAndPump(Duration.ofSeconds(15), { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
+
         // TODO move plugin installation to suite level
         var riderLinkInstalled = false
         project.solution.rdRiderModel.installPluginFinished.advise(Lifetime.Eternal) { riderLinkInstalled = true }
-        project.solution.rdRiderModel.installEditorPlugin.fire(InstallPluginDescription(PluginInstallLocation.Game,
-            ForceInstall.Yes))
+        project.solution.rdRiderModel.installEditorPlugin.fire(
+            InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes))
 
         waitAndPump(Duration.ofSeconds(90), { riderLinkInstalled })
-        waitAndPump(Duration.ofSeconds(15), { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 
