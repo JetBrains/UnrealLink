@@ -1,51 +1,53 @@
-name: build-riderlink
-
+name: Build UnrealLink
 on:
   push:
+    branches: [ 'net212**' ]
     paths-ignore:
-    - README.md
-    - CHANGELOG.md
-    branches: [ net212 ]
+      - src/rider/test
+      - testData
+      - README.md
+      - CHANGELOG.md
   pull_request:
+    branches: [ 'net212**' ]
     paths-ignore:
-    - README.md
-    - CHANGELOG.md
-    branches: [ net212 ]
-
+      - src/rider/test
+      - testData
+      - README.md
+      - CHANGELOG.md
+  workflow_dispatch:
+    inputs:
+      arguments:
+        description: 'Additional attributes to gradle buildPlugin'
+        required: false
+        default: ''
 jobs:
   build:
-    env:
-      working-dir: ${{ github.workspace}}${{ matrix.config.SEP }}rd-cpp
-      major-version: 2021.2
-      minor-version: 0
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
-        - {
-            name: "Windows Latest", artifact-prefix: "UnrealLink-",
+        - { name: "Windows Latest", artifact-prefix: "UnrealLink-",
             os: windows-latest,
-            SEP: \
-          }
+            SEP: \ }
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    - name: Build Plugin
-      run: gradlew.bat buildPlugin -PmajorVersion=${{ env.major-version }} -PminorVersion=${{ env.minor-version }} -PbuildCounter=${{ github.run_number }} -PbuildConfiguration=Release
-      shell: cmd
-    - name: Upload built plugin
-      if: success()
-      uses: actions/upload-artifact@v2
-      with:
-        path: output/**
-        name: ${{ matrix.config.artifact-prefix }}${{ env.major-version }}.${{ env.minor-version }}.${{ github.run_number}}
+      - uses: actions/checkout@v2 # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build Plugin
+        run: gradlew.bat buildPlugin -PbuildCounter=${{ github.run_number }} -PbuildConfiguration=Release ${{ github.event.inputs.arguments }}
+        shell: cmd
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.config.artifact-prefix }}artifacts
+          path: output/**
