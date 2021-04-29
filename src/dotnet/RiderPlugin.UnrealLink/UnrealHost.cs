@@ -4,8 +4,8 @@ using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Base;
+using JetBrains.RdBackend.Common.Features;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
-using JetBrains.ReSharper.Host.Core.Features;
 using JetBrains.ReSharper.Psi.Cpp;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 

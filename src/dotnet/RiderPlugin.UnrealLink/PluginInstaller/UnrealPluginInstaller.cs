@@ -14,9 +14,9 @@ using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
+using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
-using JetBrains.ReSharper.Host.Core.Features.BackgroundTasks;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model.Notifications;
@@ -384,6 +384,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
+        /// <param name="installPluginDescription">
+        ///     Optionally, provide a type which will be used rather than searching for a <c>Type</c> key.
+        ///     Using this will cause <paramref name="installPluginDescription"/> to not be used. </param>
+        /// <summary>Some text about function with <code>print("WTF")</code> snippet</summary>
         public void HandleManualInstallPlugin(InstallPluginDescription installPluginDescription)
         {
             var unrealPluginInstallInfo = myPluginDetector.InstallInfoProperty.Value;
