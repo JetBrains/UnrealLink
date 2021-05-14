@@ -6,10 +6,9 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.withRunProgram
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestWithSolution
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.base.BaseTestWithSolution
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.scriptingApi.buildSolution
@@ -19,7 +18,7 @@ import org.testng.annotations.Test
 import java.time.Duration
 
 
-class Connection : BaseTestWithSolution() {
+class Connection : UnrealTestWithSolution() {
 
     override val waitForCaches = true
 
