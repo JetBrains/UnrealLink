@@ -15,7 +15,7 @@ import java.time.Duration
 
 
 @TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
-class Connection : UnrealTestWithSolution() {
+class AddUnrealItem : UnrealTestWithSolution() {
     init {
         solutionName = "EmptyUProject"
         installRiderLink = true
@@ -26,15 +26,6 @@ class Connection : UnrealTestWithSolution() {
 
     @Test
     fun connection() {
-        setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 
-        val result = buildSolution(project, timeout = Duration.ofSeconds(120))
-        checkBuildResult(result.buildResult, result.errorMessages)
-//        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
-
-        withRunProgram {
-            waitAndPump(Duration.ofSeconds(60),
-                { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
-        }
     }
 }

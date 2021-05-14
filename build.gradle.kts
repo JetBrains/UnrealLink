@@ -9,6 +9,7 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     kotlin("jvm") version "1.4.32"
+    kotlin("plugin.serialization") version "1.4.32"
 
     id("org.jetbrains.changelog") version "1.1.2"
     id("org.jetbrains.intellij") version "1.0"
@@ -18,6 +19,9 @@ plugins {
 dependencies {
     // only for suppress warning lib\kotlin-stdlib-jdk8.jar: Library has Kotlin runtime bundled into it
     implementation(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version = "1.4.32")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
+
+    testImplementation(kotlin("test"))
 }
 
 repositories {
@@ -259,11 +263,11 @@ tasks {
         )
 
         dllFiles.forEach {
-            from(it) { into("${intellij.pluginName}/dotnet") }
+            from(it) { into("${intellij.pluginName.get()}/dotnet") }
         }
 
         from(packCppSide.outputs.files.first()) {
-            into("${intellij.pluginName}/EditorPlugin")
+            into("${intellij.pluginName.get()}/EditorPlugin")
         }
 
         doLast {
