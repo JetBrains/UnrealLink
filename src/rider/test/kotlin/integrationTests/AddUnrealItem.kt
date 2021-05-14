@@ -7,13 +7,15 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
-import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.scriptingApi.buildSolution
+import com.jetbrains.rider.test.scriptingApi.checkBuildResult
+import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import org.testng.annotations.Test
 import java.time.Duration
 
 
 @TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
-class Connection : UnrealTestWithSolution() {
+class AddUnrealItem : UnrealTestWithSolution() {
     init {
         solutionName = "EmptyUProject"
         installRiderLink = true
@@ -24,14 +26,6 @@ class Connection : UnrealTestWithSolution() {
 
     @Test
     fun connection() {
-        setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 
-        buildSolutionWithReSharperBuild()
-//        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
-
-        withRunProgram {
-            waitAndPump(Duration.ofSeconds(60),
-                { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
-        }
     }
 }
