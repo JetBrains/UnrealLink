@@ -54,6 +54,9 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
 
     protected open fun getCustomSolutionFileName(): String? = null
 
+    override val testCaseNameToTempDir: String
+        get() = getSolutionDirectoryName()
+
     override val clearCaches: Boolean
         get() = false
 
@@ -97,6 +100,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
                 FileUtil.copyDir(sourceDirectory, workDirectory, filter)
 
                 workDirectory.isDirectory.shouldBeTrue("Expected '${workDirectory.absolutePath}' to be a directory")
+                generateSolutionFromUProject()
                 File(workDirectory, solutionFileName ?: getDefaultSolutionFileName(workDirectory) ?: "")
             }
 
@@ -116,7 +120,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
 
         val params = OpenSolutionParams()
         params.customSolutionName = getCustomSolutionFileName()
-        params.preprocessTempDirectory = { generateSolutionFromUProject() }
+        params.preprocessTempDirectory = { }
         params.persistCaches = persistCaches
         params.waitForCaches = waitForCaches
         params.restoreNuGetPackages = restoreNuGetPackages
@@ -164,7 +168,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         @Serializable
         data class InstallationInfoList(val InstallationList: List<InstallInfo>)
 
-        val uprojectFile = File(activeSolutionDirectory, "${getSolutionDirectoryName()}.uproject")
+        val uprojectFile = activeSolutionDirectory.combine(getSolutionDirectoryName(), "${getSolutionDirectoryName()}.uproject")
         val uprojectData = myJson.decodeFromString<UprojectData>(uprojectFile.readText())
         println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         println(uprojectData.EngineAssociation)
