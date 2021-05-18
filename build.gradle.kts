@@ -1,9 +1,8 @@
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.changelog.closure
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.io.ByteArrayOutputStream
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
@@ -12,7 +11,7 @@ plugins {
     kotlin("jvm") version "1.4.32"
 
     id("org.jetbrains.changelog") version "1.1.2"
-    id("org.jetbrains.intellij") version "0.7.2"
+    id("org.jetbrains.intellij") version "1.0"
     id("com.jetbrains.rdgen") version "0.211.234"
 }
 
@@ -68,7 +67,7 @@ val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").
 val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 val dotNetSdkPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
+    val sdkPath = intellij.getIdeaDependency(project).classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
     assert(sdkPath.isDirectory)
     println(".NETSDK path: $sdkPath")
 
@@ -289,18 +288,18 @@ changelog {
 }
 
 intellij {
-    type = "RD"
-    instrumentCode = false
-    downloadSources = false
+    type.set("RD")
+    instrumentCode.set(false)
+    downloadSources.set(false)
 
-    setPlugins("com.jetbrains.rider-cpp")
+    plugins.set(listOf("com.jetbrains.rider-cpp"))
 
     val dependencyPath = File(projectDir, "dependencies")
     if (dependencyPath.exists()) {
-        localPath = dependencyPath.canonicalPath
-        println("Will use ${File(localPath, "build.txt").readText()} from $localPath as RiderSDK")
+        localPath.set(dependencyPath.canonicalPath)
+        println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
     } else {
-        version = "${project.property("majorVersion")}-SNAPSHOT"
+        version.set("${project.property("majorVersion")}-SNAPSHOT")
         println("Will download and use build/riderRD-$version as RiderSDK")
     }
 
@@ -315,20 +314,20 @@ intellij {
         // dumpCurrentChangelog dumps the same section to file (for Marketplace changelog)
         // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
         // So order is important!
-        patchPluginXml { changeNotes( closure { currentReleaseNotesAsHtml }) }
+        patchPluginXml { changeNotes.set( provider { currentReleaseNotesAsHtml }) }
         patchChangelog { mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
 
         publishPlugin {
             dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
-            token(System.getenv("UNREALLINK_intellijPublishToken"))
+            token.set(System.getenv("UNREALLINK_intellijPublishToken"))
 
             val pubChannels = project.findProperty("publishChannels")
             if ( pubChannels != null) {
                 val chan = pubChannels.toString().split(',')
                 println("Channels for publish $chan")
-                channels(chan)
+                channels.set(chan)
             } else {
-                channels(listOf("alpha"))
+                channels.set(listOf("alpha"))
             }
         }
     }

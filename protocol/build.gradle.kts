@@ -3,7 +3,7 @@ import com.jetbrains.rd.generator.gradle.RdGenTask
 
 val rdLibDirectory by lazy {
     val intellij = rootProject.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
-    val rdLib = intellij.ideaDependency.classes.resolve("lib").resolve("rd")
+    val rdLib = intellij.getIdeaDependency(rootProject).classes.resolve("lib").resolve("rd")
     assert(rdLib.isDirectory)
     return@lazy rdLib
 }
