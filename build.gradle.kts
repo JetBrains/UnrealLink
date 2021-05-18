@@ -12,13 +12,14 @@ plugins {
     kotlin("jvm") version "1.4.32"
 
     id("org.jetbrains.changelog") version "1.1.2"
-    id("org.jetbrains.intellij") version "0.7.2"
+    id("org.jetbrains.intellij") version "0.7.3"
     id("com.jetbrains.rdgen") version "0.211.234"
 }
 
 dependencies {
     // only for suppress warning lib\kotlin-stdlib-jdk8.jar: Library has Kotlin runtime bundled into it
     implementation(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version = "1.4.32")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
 }
 
 repositories {
