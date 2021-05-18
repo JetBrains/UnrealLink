@@ -6,6 +6,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestWithSolution
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.withRunProgram
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
@@ -19,19 +20,18 @@ import org.testng.annotations.Test
 import java.time.Duration
 
 
-class Connection : BaseTestWithSolution() {
-
-    override val waitForCaches = true
-
-    override val backendLoadedTimeout: Duration
-        get() = Duration.ofSeconds(60)
-
-    override fun getSolutionDirectoryName(): String = "EmptyUProject"
+@TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
+class Connection : UnrealTestWithSolution() {
+    init {
+        solutionName = "EmptyUProject"
+        openSolutionParams.waitForCaches = true
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(90)
+    }
 
     @Test
-    @TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
     fun connection() {
-        waitAndPump(Duration.ofSeconds(15), { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
+        waitAndPump(Duration.ofSeconds(15),
+            { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
 
         // TODO move plugin installation to suite level
         var riderLinkInstalled = false
@@ -39,7 +39,7 @@ class Connection : BaseTestWithSolution() {
         project.solution.rdRiderModel.installEditorPlugin.fire(
             InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes))
 
-        waitAndPump(Duration.ofSeconds(90), { riderLinkInstalled })
+        waitAndPump(Duration.ofSeconds(90), { riderLinkInstalled }, { "RiderLink did not install" })
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 

@@ -16,14 +16,11 @@ import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.prepareSolutionFromZip
 import com.jetbrains.rider.test.scriptingApi.startRunConfigurationProcess
 import com.jetbrains.rider.test.scriptingApi.stop
-import com.jetbrains.rider.test.scriptingApi.useCachedTemplates
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.testng.annotations.AfterClass
-import org.testng.annotations.AfterTest
 import org.testng.annotations.BeforeClass
-import org.testng.annotations.BeforeTest
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -38,41 +35,24 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
             this.myProject = value
         }
 
-    protected open val waitForCaches: Boolean
-        get() = false
-
-    protected open val persistCaches: Boolean
-        get() = false
-
-    protected open val restoreNuGetPackages: Boolean
-        get() = false
-
-    protected open val backendLoadedTimeout: Duration
-        get() = Duration.ofSeconds(60)
-
-    protected abstract fun getSolutionDirectoryName(): String
-
-    protected open fun getCustomSolutionFileName(): String? = null
+    lateinit var solutionName: String
+    val openSolutionParams: OpenSolutionParams = OpenSolutionParams()
 
     override val testCaseNameToTempDir: String
-        get() = getSolutionDirectoryName()
+        get() = this.javaClass.simpleName
 
     override val clearCaches: Boolean
         get() = false
 
     @BeforeClass(alwaysRun = true)
     fun setUpClassSolution() {
-        println("BeforeClass ${this.javaClass.name}")
+        GeneralSettings.getInstance().isConfirmExit = false
         PrepareTestEnvironment.setBuildToolPath(ToolsetVersion.TOOLSET_16_CPP)
-        openSolution(getSolutionDirectoryName())
-
-        val encodingProjectManager = EncodingProjectManagerImpl.getInstance(project) as EncodingProjectManagerImpl
-        encodingProjectManager.setBOMForNewUtf8Files(EncodingProjectManagerImpl.BOMForNewUTF8Files.ALWAYS)
+        myProject = openSolution(solutionName, openSolutionParams)
     }
 
     @AfterClass(alwaysRun = true)
     fun closeSolution() {
-        println("AfterClass ${this.javaClass.name}")
         try {
             closeSolutionAndResetSettings(myProject)
         } finally {
@@ -115,27 +95,6 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
             ?: path.listFiles().orEmpty().singleOrNull { a -> a.isFile && a.extension == "sln" }?.name
     }
 
-    private fun openSolution(solutionDirName: String) {
-        GeneralSettings.getInstance().isConfirmExit = false
-
-        val params = OpenSolutionParams()
-        params.customSolutionName = getCustomSolutionFileName()
-        params.preprocessTempDirectory = { }
-        params.persistCaches = persistCaches
-        params.waitForCaches = waitForCaches
-        params.restoreNuGetPackages = restoreNuGetPackages
-        params.backendLoadedTimeout = backendLoadedTimeout
-
-        useCachedTemplates = false
-
-        try {
-            myProject = openSolution(solutionDirName, params)
-        } catch (ex: Throwable) {
-            logger.error(ex)
-            throw ex
-        }
-    }
-
     fun withRunProgram(
         timeout: Duration = Duration.ofSeconds(30),
         action : (Project) -> Unit
@@ -152,12 +111,6 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         }
     }
 
-//    override fun putSolutionToTempTestDir(solutionDirectoryName: String,
-//                                          solutionFileName: String?,
-//                                          filter: ((File) -> Boolean)? = null) : File {
-//
-//    }
-
     private fun generateSolutionFromUProject(){
         val myJson = Json { ignoreUnknownKeys = true }
 
@@ -168,32 +121,26 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         @Serializable
         data class InstallationInfoList(val InstallationList: List<InstallInfo>)
 
-        val uprojectFile = activeSolutionDirectory.combine(getSolutionDirectoryName(), "${getSolutionDirectoryName()}.uproject")
+        val uprojectFile = activeSolutionDirectory.combine(solutionName, "$solutionName.uproject")
         val uprojectData = myJson.decodeFromString<UprojectData>(uprojectFile.readText())
-        println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        println(uprojectData.EngineAssociation)
 
         val launcherInstallDatPath = File(System.getenv("ProgramData")).combine("Epic", "UnrealEngineLauncher", "LauncherInstalled.dat")
         if (launcherInstallDatPath.exists()) {
             val installationInfoList = myJson.decodeFromString<InstallationInfoList>(launcherInstallDatPath.readText())
             installationInfoList.InstallationList.forEach {
                 if (it.AppName.equals("UE_${uprojectData.EngineAssociation}", ignoreCase = true)) {
-                    generateProjectFiles(it.InstallLocation, uprojectFile)
-//                    executeCommand(
-//                        "${it.InstallLocation}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -ProjectFiles -UsePrecompiled -Game \"${uprojectFile.absolutePath}\"")
-
+                    val ubtCommand = "${it.InstallLocation}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe " +
+                            "-ProjectFiles -UsePrecompiled -Game \"${uprojectFile.absolutePath}\""
+                    ProcessBuilder(*(ubtCommand).split(" ").toTypedArray())
+                        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                        .redirectError(ProcessBuilder.Redirect.INHERIT)
+                        .start()
+                        .waitFor(90, TimeUnit.SECONDS)
+                    return
                 }
             }
+            throw Exception("Not found UnrealEngine!\nInstallationInfoList: $installationInfoList")
         }
-    }
-
-    private fun generateProjectFiles(UEroot: String, uprojectFile: File){
-        ProcessBuilder(
-            *"${UEroot}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe -ProjectFiles -UsePrecompiled -Game \"${uprojectFile.absolutePath}\""
-                .split(" ").toTypedArray()
-        ).redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor(60, TimeUnit.MINUTES)
+        throw Exception("Not found $launcherInstallDatPath!")
     }
 }
