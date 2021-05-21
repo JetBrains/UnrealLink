@@ -6,6 +6,13 @@ import com.intellij.ide.GeneralSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.encoding.EncodingProjectManagerImpl
+import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rdclient.util.idea.waitAndPump
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
@@ -44,11 +51,26 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
     override val clearCaches: Boolean
         get() = false
 
+    var installRiderLink = false
+
     @BeforeClass(alwaysRun = true)
     fun setUpClassSolution() {
         GeneralSettings.getInstance().isConfirmExit = false
         PrepareTestEnvironment.setBuildToolPath(ToolsetVersion.TOOLSET_16_CPP)
         myProject = openSolution(solutionName, openSolutionParams)
+
+        waitAndPump(Duration.ofSeconds(15),
+            { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
+
+        if (installRiderLink) {
+            var riderLinkInstalled = false
+            project.solution.rdRiderModel.installPluginFinished.advise(Lifetime.Eternal) { riderLinkInstalled = true }
+            project.solution.rdRiderModel.installEditorPlugin.fire(
+                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
+            )
+
+            waitAndPump(Duration.ofSeconds(90), { riderLinkInstalled }, { "RiderLink did not install" })
+        }
     }
 
     @AfterClass(alwaysRun = true)
@@ -58,41 +80,6 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         } finally {
             myProject = null
         }
-    }
-
-    override fun putSolutionToTempTestDir(solutionDirectoryName: String,
-                                                solutionFileName: String?,
-                                                filter: ((File) -> Boolean)?) : File {
-        val workDirectory = File(tempTestDirectory, solutionDirectoryName)
-        val sourceDirectory = File(solutionSourceRootDirectory, solutionDirectoryName)
-
-        val solutionFile =
-            if (workDirectory.exists() && !solutionFileName.isNullOrEmpty()) {
-                // Solution folder already exists
-                workDirectory.walk().find { it.name == solutionFileName }
-                    .shouldNotBeNull("Cannot find *.sln file in the directory: '$workDirectory'")
-            } else if (File(sourceDirectory, "testdata.config").exists()) {
-                // ZIP from repo
-                prepareSolutionFromZip(solutionSourceRootDirectory, tempTestDirectory, solutionDirectoryName)
-                tempTestDirectory.walk().filter { file -> file.extension == "sln" }.single()
-            } else {
-                // Copy solution from sources
-                FileUtil.copyDir(sourceDirectory, workDirectory, filter)
-
-                workDirectory.isDirectory.shouldBeTrue("Expected '${workDirectory.absolutePath}' to be a directory")
-                generateSolutionFromUProject()
-                File(workDirectory, solutionFileName ?: getDefaultSolutionFileName(workDirectory) ?: "")
-            }
-
-        activeSolution = solutionDirectoryName
-        frameworkLogger.info("Active solution: '$activeSolution'")
-
-        return solutionFile
-    }
-
-    private fun getDefaultSolutionFileName(path: File) : String? {
-        return path.listFiles().orEmpty().singleOrNull { a -> a.isFile && a.extension == "slnf" }?.name
-            ?: path.listFiles().orEmpty().singleOrNull { a -> a.isFile && a.extension == "sln" }?.name
     }
 
     fun withRunProgram(
@@ -111,7 +98,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         }
     }
 
-    private fun generateSolutionFromUProject(){
+    protected fun generateSolutionFromUProject(solutionFile: File): File {
         val myJson = Json { ignoreUnknownKeys = true }
 
         @Serializable
@@ -121,7 +108,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
         @Serializable
         data class InstallationInfoList(val InstallationList: List<InstallInfo>)
 
-        val uprojectFile = activeSolutionDirectory.combine(solutionName, "$solutionName.uproject")
+        val uprojectFile = File(activeSolutionDirectory, "$solutionName.uproject")
         val uprojectData = myJson.decodeFromString<UprojectData>(uprojectFile.readText())
 
         val launcherInstallDatPath = File(System.getenv("ProgramData")).combine("Epic", "UnrealEngineLauncher", "LauncherInstalled.dat")
@@ -136,7 +123,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
                         .redirectError(ProcessBuilder.Redirect.INHERIT)
                         .start()
                         .waitFor(90, TimeUnit.SECONDS)
-                    return
+                    return File(solutionFile,"$solutionName.sln")
                 }
             }
             throw Exception("Not found UnrealEngine!\nInstallationInfoList: $installationInfoList")
