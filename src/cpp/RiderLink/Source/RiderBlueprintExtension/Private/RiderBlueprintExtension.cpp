@@ -40,7 +40,7 @@ void FRiderBlueprintExtensionModule::StartupModule()
 {
     UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP START"));
     IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-    ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
+    ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition("BlueprintExtension");
 
     const FAssetRegistryModule* AssetRegistryModule = &FModuleManager::LoadModuleChecked<FAssetRegistryModule>
         (AssetRegistryConstants::ModuleName);

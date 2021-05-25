@@ -24,7 +24,7 @@ constexpr int32_t SocketWire::Base::PING_MESSAGE_LENGTH;
 constexpr int32_t SocketWire::Base::PACKAGE_HEADER_LENGTH;
 
 SocketWire::Base::Base(std::string id, Lifetime parentLifetime, IScheduler* scheduler)
-	: WireBase(scheduler), id(std::move(id)), scheduler(scheduler), local_send_buffer(SEND_BUFFER_SIZE), lifetimeDef(parentLifetime)
+	: WireBase(scheduler), id(std::move(id)), scheduler(scheduler), local_send_buffer(SEND_BUFFER_SIZE), lifetimeDef(parentLifetime, "SocketWire")
 {
 	async_send_buffer.pause("initial");
 	async_send_buffer.start();
@@ -151,7 +151,7 @@ void SocketWire::Base::set_socket_provider(std::shared_ptr<CActiveSocket> new_so
 		async_send_buffer.pause("Disconnected");
 
 		return heartbeat;
-	});
+	}, "Heartbeat");
 	const auto status = heartbeat.wait_for(timeout);
 
 	logger->debug("{}: waited for heartbeat to stop with status: {}", this->id, status);
@@ -549,7 +549,7 @@ SocketWire::Client::~Client()
 }
 
 SocketWire::Server::Server(Lifetime parentLifetime, IScheduler* scheduler, uint16_t port, const std::string& id)
-	: Base(id, parentLifetime, scheduler), ss(std::make_unique<CPassiveSocket>()), serverLifetimeDefinition(parentLifetime)
+	: Base(id, parentLifetime, scheduler), ss(std::make_unique<CPassiveSocket>()), serverLifetimeDefinition(parentLifetime, "ServerLifetime")
 {
 #ifdef SIGPIPE
 	signal(SIGPIPE, SIG_IGN);

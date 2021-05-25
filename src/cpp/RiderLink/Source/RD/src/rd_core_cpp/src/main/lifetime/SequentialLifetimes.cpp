@@ -9,7 +9,7 @@ SequentialLifetimes::SequentialLifetimes(Lifetime parent_lifetime) : parent_life
 
 Lifetime SequentialLifetimes::next()
 {
-	std::shared_ptr<LifetimeDefinition> new_def = std::make_shared<LifetimeDefinition>(parent_lifetime);
+	std::shared_ptr<LifetimeDefinition> new_def = std::make_shared<LifetimeDefinition>(parent_lifetime, "next");
 	set_current_lifetime(new_def);
 	return current_def->lifetime;
 }

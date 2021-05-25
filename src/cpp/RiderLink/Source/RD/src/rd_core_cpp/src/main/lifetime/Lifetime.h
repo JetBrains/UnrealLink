@@ -56,11 +56,11 @@ public:
 	friend bool RD_CORE_API operator==(Lifetime const& lw1, Lifetime const& lw2);
 	friend bool RD_CORE_API operator!=(Lifetime const& lw1, Lifetime const& lw2);
 
-	explicit Lifetime(bool is_eternal = false);
+	explicit Lifetime(bool is_eternal = false, const std::string& name = "");
 
 	LifetimeImpl* operator->() const;
 
-	Lifetime create_nested() const;
+	Lifetime create_nested(const std::string& name = "") const;
 };
 
 inline size_t hash<Lifetime>::operator()(const Lifetime& value) const noexcept

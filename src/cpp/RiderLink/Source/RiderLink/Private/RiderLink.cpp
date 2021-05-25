@@ -31,10 +31,10 @@ void FRiderLinkModule::StartupModule()
 
 void FRiderLinkModule::InitProtocol()
 {
-	WireLifetimeDef = MakeUnique<rd::LifetimeDefinition>(ModuleLifetimeDef.lifetime);
-	rd::Lifetime WireLifetime = WireLifetimeDef->lifetime;
-	std::shared_ptr<rd::SocketWire::Server> Wire = ProtocolFactory::CreateWire(&Scheduler, WireLifetime);
-	Protocol = ProtocolFactory::CreateProtocol(&Scheduler, WireLifetime.create_nested(), Wire);
+	WireLifetimeDef = CreateNestedLifetimeDefinition("Wire");
+	rd::Lifetime WireLifetime = WireLifetimeDef.lifetime;
+	const std::shared_ptr<rd::SocketWire::Server> Wire = ProtocolFactory::CreateWire(&Scheduler, WireLifetime);
+	Protocol = ProtocolFactory::CreateProtocol(&Scheduler, WireLifetime.create_nested("Protocol"), Wire);
 	// Exception fired for Server::Base::~Base() when trying to invoke it this way
 	WireLifetime->add_action([this]()
 	{
@@ -63,7 +63,7 @@ void FRiderLinkModule::InitProtocol()
 				{
 					RdIsModelAlive.set(false);
 					EditorModel.Reset();
-					WireLifetimeDef->terminate();
+					WireLifetimeDef.terminate();
 				});
 			});
 			RdIsModelAlive.set(true);

@@ -30,6 +30,8 @@ public:
 
 	using counter_t = int32_t;
 
+	std::string GetName() { return lf_name; }
+
 private:
 	bool eternaled = false;
 	std::atomic<bool> terminated{false};
@@ -37,6 +39,7 @@ private:
 	counter_t id = 0;
 
 	counter_t action_id_in_map = 0;
+	std::string lf_name;
 	using actions_t = ordered_map<int, std::function<void()>, rd::hash<int>>;
 	actions_t actions;
 
@@ -46,7 +49,7 @@ private:
 
 public:
 	// region ctor/dtor
-	explicit LifetimeImpl(bool is_eternal = false);
+	explicit LifetimeImpl(bool is_eternal = false, const std::string& name = "");
 
 	LifetimeImpl(LifetimeImpl const& other) = delete;
 

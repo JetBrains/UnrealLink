@@ -50,7 +50,7 @@ public:
 		if (lifetime->is_terminated())
 			return;
 
-		Lifetime lf = lifetime.create_nested();
+		Lifetime lf = lifetime.create_nested("view");
 		std::shared_ptr<SequentialLifetimes> seq = std::make_shared<SequentialLifetimes>(lf);
 
 		this->advise_before(lf, [lf, seq](T const& /*v*/) {

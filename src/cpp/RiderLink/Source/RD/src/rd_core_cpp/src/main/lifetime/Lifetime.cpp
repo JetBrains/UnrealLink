@@ -17,23 +17,23 @@ LifetimeImpl* Lifetime::operator->() const
 
 std::once_flag onceFlag;
 
-Lifetime::Lifetime(bool is_eternal) : ptr(std::allocate_shared<LifetimeImpl, Allocator>(allocator, is_eternal))
+Lifetime::Lifetime(bool is_eternal, const std::string& name) : ptr(std::allocate_shared<LifetimeImpl, Allocator>(allocator, is_eternal, name))
 {
 	std::call_once(onceFlag, [] {
 		spdlog::set_default_logger(spdlog::stderr_color_mt<spdlog::synchronous_factory>("default", spdlog::color_mode::automatic));
 	});
 }
 
-Lifetime Lifetime::create_nested() const
+Lifetime Lifetime::create_nested(const std::string& name) const
 {
-	Lifetime lw(false);
+	Lifetime lw(false, name + " :> " + ptr->GetName());
 	ptr->attach_nested(lw.ptr);
 	return lw;
 }
 
 Lifetime const& Lifetime::Eternal()
 {
-	static Lifetime ETERNAL(true);
+	static Lifetime ETERNAL(true, "Eternal");
 	return ETERNAL;
 }
 

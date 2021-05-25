@@ -17,13 +17,14 @@ private:
 	friend class SequentialLifetimes;
 
 	bool eternaled = false;
+	std::string lifetimeName;
 
 public:
 	Lifetime lifetime;
 
-	explicit LifetimeDefinition(bool is_eternal = false);
+	explicit LifetimeDefinition(bool is_eternal = false, const std::string& name="");
 
-	explicit LifetimeDefinition(const Lifetime& parent);
+	explicit LifetimeDefinition(const Lifetime& parent, const std::string& name="");
 
 	LifetimeDefinition(LifetimeDefinition const& other) = delete;
 
@@ -45,10 +46,10 @@ public:
 	void terminate();
 
 	template <typename F>
-	static auto use(F&& block) -> typename std::result_of_t<F(Lifetime)>
+	static auto use(F&& block, const std::string & name) -> typename std::result_of_t<F(Lifetime)>
 	{
-		LifetimeDefinition definition(false);
-		Lifetime lw = definition.lifetime.create_nested();
+		LifetimeDefinition definition(false, name);
+		Lifetime lw = definition.lifetime.create_nested("use");
 		return block(lw);
 	}
 };

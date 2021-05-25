@@ -2,18 +2,22 @@
 
 #include <utility>
 
+#include "spdlog/spdlog.h"
+
 namespace rd
 {
 #if __cplusplus < 201703L
 LifetimeImpl::counter_t LifetimeImpl::get_id = 0;
 #endif
 
-LifetimeImpl::LifetimeImpl(bool is_eternal) : eternaled(is_eternal), id(LifetimeImpl::get_id++)
+LifetimeImpl::LifetimeImpl(bool is_eternal, const std::string& name) : eternaled(is_eternal), id(LifetimeImpl::get_id++), lf_name(name)
 {
+	spdlog::log(spdlog::level::info, "lifetime created :{}", lf_name);
 }
 
 void LifetimeImpl::terminate()
 {
+	spdlog::log(spdlog::level::info, "lifetime terminated :{}", lf_name);
 	if (is_eternal())
 		return;
 
@@ -58,6 +62,8 @@ void LifetimeImpl::attach_nested(std::shared_ptr<LifetimeImpl> nested)
 
 LifetimeImpl::~LifetimeImpl()
 {
+	
+	spdlog::log(spdlog::level::info, "lifetime destroyed :{}", lf_name);
 	/*if (!is_eternal() && !is_terminated()) {
 		spdlog::error("forget to terminate lifetime with id: {}", to_string(id));
 		terminate();

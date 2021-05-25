@@ -30,9 +30,9 @@ public:
 	virtual void ShutdownModule() override;
 	virtual bool SupportsDynamicReloading() override;
 
-	virtual rd::LifetimeDefinition CreateNestedLifetimeDefinition() const override
+	virtual rd::LifetimeDefinition CreateNestedLifetimeDefinition(const std::string& name) const override
 	{
-		return rd::LifetimeDefinition{ModuleLifetimeDef.lifetime};
+		return rd::LifetimeDefinition{ModuleLifetimeDef.lifetime, name};
 	}
 
 	virtual void ViewModel(rd::Lifetime Lifetime,
@@ -43,9 +43,9 @@ public:
 private:
 	void InitProtocol();
 
-	rd::LifetimeDefinition ModuleLifetimeDef{rd::Lifetime::Eternal()};
+	rd::LifetimeDefinition ModuleLifetimeDef{false, "RiderLink"};
 	rd::SingleThreadScheduler Scheduler{ModuleLifetimeDef.lifetime, "MainScheduler"};
-	TUniquePtr<rd::LifetimeDefinition> WireLifetimeDef;
+	rd::LifetimeDefinition WireLifetimeDef{ModuleLifetimeDef.lifetime, "Wire"};
 	TUniquePtr<rd::Protocol> Protocol;
 	rd::RdProperty<bool> RdIsModelAlive;
 	TUniquePtr<JetBrains::EditorPlugin::RdEditorModel> EditorModel;

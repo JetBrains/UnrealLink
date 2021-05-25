@@ -58,7 +58,7 @@ void FRiderLoggingExtensionModule::StartupModule()
 	};
 
 	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-	ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
+	ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition("LoggingExtension");
 	RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime,
 	[this](rd::Lifetime ModelLifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
     {

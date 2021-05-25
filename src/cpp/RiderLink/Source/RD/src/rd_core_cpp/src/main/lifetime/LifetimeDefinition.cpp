@@ -4,11 +4,13 @@
 
 namespace rd
 {
-LifetimeDefinition::LifetimeDefinition(bool eternaled) : eternaled(eternaled), lifetime(eternaled)
+LifetimeDefinition::LifetimeDefinition(bool eternaled, const std::string& name) : eternaled(eternaled), lifetime(eternaled, name), lifetimeName(name)
 {
+	spdlog::log(spdlog::level::info, "lfd created: {}", lifetimeName);
 }
 
-LifetimeDefinition::LifetimeDefinition(const Lifetime& parent) : LifetimeDefinition(false)
+LifetimeDefinition::LifetimeDefinition(const Lifetime& parent, const std::string& name) :
+	LifetimeDefinition(false, name + " :> " + parent.ptr->GetName())
 {
 	parent->attach_nested(lifetime.ptr);
 }
@@ -20,6 +22,7 @@ bool LifetimeDefinition::is_terminated() const
 
 void LifetimeDefinition::terminate()
 {
+	spdlog::log(spdlog::level::info, "lfd terminated: {}", lifetimeName);
 	lifetime->terminate();
 }
 
@@ -30,7 +33,7 @@ bool LifetimeDefinition::is_eternal() const
 
 namespace
 {
-LifetimeDefinition ETERNAL(true);
+LifetimeDefinition ETERNAL(true, "Eternal Definition");
 }
 
 std::shared_ptr<LifetimeDefinition> LifetimeDefinition::get_shared_eternal()
@@ -39,7 +42,8 @@ std::shared_ptr<LifetimeDefinition> LifetimeDefinition::get_shared_eternal()
 }
 
 LifetimeDefinition::~LifetimeDefinition()
-{
+{	
+	spdlog::log(spdlog::level::info, "lfd destroyed: {}", lifetimeName);
 	if (lifetime.ptr != nullptr)
 	{	 // wasn't moved
 		if (!is_eternal())

@@ -55,7 +55,7 @@ std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::ISchedul
 {
     const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
 
-    spdlog::set_level(spdlog::level::err);
+    spdlog::set_level(spdlog::level::info);
     return std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
                                                          TCHAR_TO_UTF8(*FString::Printf(TEXT("UnrealEditorServer-%s"),
                                                              *ProjectName)));

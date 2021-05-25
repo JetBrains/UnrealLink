@@ -484,7 +484,7 @@ void FRiderGameControlExtensionModule::StartupModule()
     ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
 
     IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-    ModuleLifetimeDefinition = RiderLinkModule.CreateNestedLifetimeDefinition();
+    ModuleLifetimeDefinition = RiderLinkModule.CreateNestedLifetimeDefinition("GameControl");
     rd::Lifetime ModuleLifetime = ModuleLifetimeDefinition.lifetime;
 
     RiderLinkModule.ViewModel(
