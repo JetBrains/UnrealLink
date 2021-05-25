@@ -18,6 +18,7 @@ using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
+using JetBrains.Rider.Backend.Features.BackgroundTasks;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
