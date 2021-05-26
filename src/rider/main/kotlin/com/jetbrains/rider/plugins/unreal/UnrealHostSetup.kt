@@ -80,6 +80,12 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 forceTriggerUIUpdate()
             }
         }
+
+        unrealHost.performModelAction {
+            it.isGameControlModuleInitialized.adviseNotNull(project.lifetime) {
+                forceTriggerUIUpdate()
+            }
+        }
     }
 
     private val user32 = if(SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
