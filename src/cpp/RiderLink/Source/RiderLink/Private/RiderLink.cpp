@@ -36,16 +36,16 @@ void FRiderLinkModule::InitProtocol()
 	std::shared_ptr<rd::SocketWire::Server> Wire = ProtocolFactory::CreateWire(&Scheduler, WireLifetime);
 	Protocol = ProtocolFactory::CreateProtocol(&Scheduler, WireLifetime.create_nested(), Wire);
 	// Exception fired for Server::Base::~Base() when trying to invoke it this way
-	WireLifetime->add_action([this]()
-	{
-		if (!ModuleLifetimeDef.is_terminated())
-		{
-			Scheduler.queue([this]()
-			{
-				InitProtocol();
-			});
-		}
-	});
+//	WireLifetime->add_action([this]()
+//	{
+//		if (!ModuleLifetimeDef.is_terminated())
+//		{
+//			Scheduler.queue([this]()
+//			{
+//				InitProtocol();
+//			});
+//		}
+//	});
 	Protocol->wire->connected.view(WireLifetime, [this](rd::Lifetime ConnectionLifetime, bool const& IsConnected)
 	{
 		Scheduler.queue([this, ConnectionLifetime, IsConnected]()
@@ -63,7 +63,7 @@ void FRiderLinkModule::InitProtocol()
 				{
 					RdIsModelAlive.set(false);
 					EditorModel.Reset();
-					WireLifetimeDef->terminate();
+					// WireLifetimeDef->terminate();
 				});
 			});
 			RdIsModelAlive.set(true);
