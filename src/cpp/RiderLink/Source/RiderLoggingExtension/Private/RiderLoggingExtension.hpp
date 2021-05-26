@@ -23,5 +23,5 @@ public:
 
 private:
     FRiderOutputDevice outputDevice;
-    rd::LifetimeDefinition ModuleLifetimeDef;
+    rd::LifetimeDefinition ModuleLifetimeDef{false, "LoggingExtension"};
 };

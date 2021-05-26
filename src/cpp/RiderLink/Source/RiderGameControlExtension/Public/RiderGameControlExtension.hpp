@@ -24,7 +24,7 @@ public:
     virtual bool SupportsDynamicReloading() override { return true; }
 
 private:
-    rd::LifetimeDefinition ModuleLifetimeDefinition;
+    rd::LifetimeDefinition ModuleLifetimeDefinition{false, "GameControl"};
     TUniquePtr<FRiderGameControl> GameControl;
     TUniquePtr<FRiderGameControlActionsCache> ActionsCache;
 };

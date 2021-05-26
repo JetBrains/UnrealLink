@@ -22,5 +22,5 @@ public:
     virtual bool SupportsDynamicReloading() override { return true; };
 private:
     TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> MessageEndpoint;
-    rd::LifetimeDefinition ModuleLifetimeDef;
+    rd::LifetimeDefinition ModuleLifetimeDef{false, "BlueprintExtension"};
 };

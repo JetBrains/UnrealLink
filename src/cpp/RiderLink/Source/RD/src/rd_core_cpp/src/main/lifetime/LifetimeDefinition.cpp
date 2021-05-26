@@ -4,7 +4,7 @@
 
 namespace rd
 {
-LifetimeDefinition::LifetimeDefinition(bool eternaled, const std::string& name) : eternaled(eternaled), lifetime(eternaled, name), lifetimeName(name)
+LifetimeDefinition::LifetimeDefinition(bool eternaled, const std::string& name) : eternaled(eternaled), lifetimeName(name), lifetime(eternaled, name)
 {
 	spdlog::log(spdlog::level::info, "lfd created: {}", lifetimeName);
 }
