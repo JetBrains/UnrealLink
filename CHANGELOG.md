@@ -18,6 +18,18 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+
+### Known Issues
+## [2021.1.8]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
 - Possible fix for https://youtrack.jetbrains.com/issue/RIDER-62012
   - UE crashing on exit in RiderLink
 - Fix building RiderLink on UE5
