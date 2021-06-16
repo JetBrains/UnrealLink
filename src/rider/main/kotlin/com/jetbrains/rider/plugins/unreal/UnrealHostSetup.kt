@@ -62,8 +62,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 riderLinkInstallContext.clear()
                 riderLinkInstallContext.showToolWindowIfHidden()
             }
-            it.riderLinkInstallMessage.advise(project.lifetime) {
-                RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(it)
+            it.riderLinkInstallMessage.advise(project.lifetime) { message ->
+                RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(message)
             }
         }
 

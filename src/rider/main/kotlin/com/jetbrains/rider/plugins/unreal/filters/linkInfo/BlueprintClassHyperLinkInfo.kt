@@ -13,7 +13,7 @@ class BlueprintClassHyperLinkInfo(private val navigation: ISignal<BlueprintRefer
     }
 
     override fun navigate(project: Project) {
-        logger.info { "navigate by $struct" }
+        logger.info { "[UnrealLink]: navigate by $struct" }
 
         navigation.fire(struct)
     }

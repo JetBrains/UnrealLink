@@ -4,6 +4,8 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.icons.AllIcons
+import com.jetbrains.rd.util.getLogger
+import com.jetbrains.rd.util.info
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.Service
@@ -33,6 +35,7 @@ class RiderLinkInstallService(
 
     companion object {
         fun getInstance(project: Project): RiderLinkInstallService = project.service()
+        val logger = getLogger<RiderLinkInstallService>()
     }
 
     private var context: RiderLinkInstallContext? = null
@@ -40,6 +43,7 @@ class RiderLinkInstallService(
 
 
     fun getOrCreateRiderLinkInstallContext(): RiderLinkInstallContext {
+        logger.info { "[UnrealLink]: ${::getOrCreateRiderLinkInstallContext.name}" }
         val currentContext = context
         if (currentContext != null)
             return currentContext
@@ -61,6 +65,7 @@ class RiderLinkInstallService(
     }
 
     private fun createToolbarPanel(): JPanel {
+        logger.info { "[UnrealLink]: ${::createToolbarPanel.name}" }
         val buildActionGroup = DefaultActionGroup().apply {
             add(CancelRiderLinkInstallAction())
         }
@@ -83,10 +88,15 @@ class RiderLinkInstallPanel(
     project: Project,
     lifetime: Lifetime
 ) : SimpleToolWindowPanel(false) {
+    companion object {
+        val logger = getLogger<RiderLinkInstallPanel>()
+    }
     private val console = TextConsoleBuilderFactory.getInstance().createBuilder(project).console as ConsoleViewImpl
     private val container: JPanel
 
     init {
+        logger.info { "[UnrealLink]: init" }
+
         Disposer.register(project, console)
         setProvideQuickActions(true)
         container = JPanel(CardLayout()).apply {
@@ -99,6 +109,7 @@ class RiderLinkInstallPanel(
     }
 
     fun writeMessage(message: InstallMessage) {
+        logger.info { "[UnrealLink]: ${::writeMessage.name} $message" }
         when (message.type) {
             ContentType.Normal -> console.println(message.text, ConsoleViewContentType.NORMAL_OUTPUT)
             ContentType.Error -> console.println(message.text, ConsoleViewContentType.ERROR_OUTPUT)
@@ -106,6 +117,7 @@ class RiderLinkInstallPanel(
     }
 
     fun clear() {
+        logger.info { "[UnrealLink]: ${::clear.name}" }
         console.clear()
     }
 }
@@ -115,22 +127,28 @@ class RiderLinkInstallContext(
     private val content: Content,
     private val panel: RiderLinkInstallPanel
 ) {
-
+    companion object {
+        val logger = getLogger<RiderLinkInstallContext>()
+    }
     private fun makeActive() {
+        logger.info { "[UnrealLink]: ${::makeActive.name}" }
         toolWindow.contentManager.setSelectedContent(content)
     }
 
     fun showToolWindowIfHidden() {
+        logger.info { "[UnrealLink]: ${::showToolWindowIfHidden.name} toolWindow.isActive ${toolWindow.isActive}" }
         if (!toolWindow.isActive)
             toolWindow.activate {}
         makeActive()
     }
 
     fun writeMessage(message: InstallMessage) {
+        logger.info { "[UnrealLink]: ${::writeMessage.name} $message" }
         panel.writeMessage(message)
     }
 
     fun clear() {
+        logger.info { "[UnrealLink]: ${::clear.name}" }
         panel.clear()
     }
 }
