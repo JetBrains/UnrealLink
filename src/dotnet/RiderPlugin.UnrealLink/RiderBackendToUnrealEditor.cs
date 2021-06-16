@@ -70,7 +70,7 @@ namespace RiderPlugin.UnrealLink
 
                 Directory.CreateDirectory(portDirectoryFullPath);
 
-                var projects = pluginInfo.ProjectPlugins.Select(it => it.UprojectFilePath.Name)
+                var projects = pluginInfo.ProjectPlugins.Select(it => it.ProjectName)
                     .ToList();
 
                 solution.Locks.Tasks.Queue(myComponentLifetime, () =>

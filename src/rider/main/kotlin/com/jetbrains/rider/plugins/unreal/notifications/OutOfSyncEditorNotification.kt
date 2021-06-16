@@ -43,7 +43,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
                                 InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
                             )
                         })
-                        addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text")) {
+                        if(it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text")) {
                             expire()
                             project.solution.rdRiderModel.installEditorPlugin.fire(
                                 InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)
@@ -59,7 +59,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
                                 InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
                             )
                         })
-                        addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.move")) {
+                        if(it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.move")) {
                             expire()
                             project.solution.rdRiderModel.installEditorPlugin.fire(
                                 InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)
@@ -75,7 +75,7 @@ class OutOfSyncEditorNotification(project: Project): ProtocolSubscribedProjectCo
                                 InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
                             )
                         })
-                        addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.update")) {
+                        if(it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.update")) {
                             expire()
                             project.solution.rdRiderModel.installEditorPlugin.fire(
                                 InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)

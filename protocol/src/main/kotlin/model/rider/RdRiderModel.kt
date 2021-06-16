@@ -51,6 +51,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("installedVersion", string)
         field("requiredVersion", string)
         field("status", PluginInstallStatus)
+        field("IsGameAvailable", bool)
     }
 
     private val InstallMessage = structdef("InstallMessage") {
