@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Rider.Model;
 using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
@@ -14,6 +13,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             public Version PluginVersion = new Version(0, 0, 0, 0);
             public FileSystemPath UnrealPluginRootFolder = FileSystemPath.Empty;
             public String ProjectName = String.Empty;
+            public FileSystemPath UprojectPath = FileSystemPath.Empty;
         }
 
         public FileSystemPath EngineRoot = null;
