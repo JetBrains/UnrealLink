@@ -77,12 +77,17 @@ namespace RiderPlugin.UnrealLink
                 {
                     var watcher = new FileSystemWatcher(portDirectoryFullPath)
                     {
-                        NotifyFilter = NotifyFilters.LastWrite
+                        NotifyFilter = NotifyFilters.FileName,
+                        Filter = "*.uproject",
+                        IncludeSubdirectories = false
                     };
 
-                    FileSystemEventHandler handler = (obj, fileSystemEvent) =>
+                    RenamedEventHandler handler = (obj, fileSystemEvent) =>
                     {
                         var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
+                        // Skip changes to temp files
+                        if (path.Name.StartsWith("~")) return;
+
                         if (projects.Contains(path.Name) && myComponentLifetime.IsAlive)
                         {
                             myLogger.Info(
@@ -92,8 +97,7 @@ namespace RiderPlugin.UnrealLink
                         }
                     };
 
-                    watcher.Changed += handler;
-                    watcher.Created += handler;
+                    watcher.Renamed += handler;
 
                     lt.Bracket(() => { }, () => { watcher.Dispose(); });
 

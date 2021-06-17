@@ -51,9 +51,17 @@ static FString GetPathToPortsFolder()
     return PortFullDirectoryPath;
 }
 
+FString GetProjectName()
+{
+    FString ProjectNameNoExtension = FApp::GetProjectName();
+    if(ProjectNameNoExtension.IsEmpty())
+        ProjectNameNoExtension = TEXT("<ENGINE>");
+    return ProjectNameNoExtension + TEXT(".uproject");
+}
+
 std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
 {
-    const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
+    const FString ProjectName = GetProjectName();
 
     spdlog::set_level(spdlog::level::err);
     return std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
@@ -64,16 +72,19 @@ std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::ISchedul
 
 TUniquePtr<rd::Protocol> ProtocolFactory::CreateProtocol(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime, std::shared_ptr<rd::SocketWire::Server> wire)
 {
-    const FString ProjectName = FString(FApp::GetProjectName()) + TEXT(".uproject");
-    
+    const FString ProjectName = GetProjectName();
+
     auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, Scheduler, wire, SocketLifetime);
 
     auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
     const FString PortFullDirectoryPath = GetPathToPortsFolder();
     if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath) && !IsRunningCommandlet())
     {
+        const FString TmpPortFile = TEXT("~") + ProjectName;
+        const FString TmpPortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *TmpPortFile);
+        FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *TmpPortFileFullPath);
         const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
-        FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *PortFileFullPath);
+        IFileManager::Get().Move(*PortFileFullPath, *TmpPortFileFullPath, true, true);
     }
     return protocol;
 }
