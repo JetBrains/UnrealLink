@@ -487,7 +487,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private bool GenerateProjectFilesCmd(FileSystemPath UprojectFile, FileSystemPath EngineRoot)
         {
-            var isProjectUnderEngine = UprojectFile.StartsWith(EngineRoot);
+            var isProjectUnderEngine = UprojectFile.StartsWith(EngineRoot) || UprojectFile.IsNullOrEmpty();
             if (!isProjectUnderEngine)
             {
                 myLogger.Info($"[UnrealLink]: {mySolution.SolutionFilePath} is not in {EngineRoot} ");
