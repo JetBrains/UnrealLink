@@ -110,12 +110,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                         var isUproject =
                                             location.ExistsFile && location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
                                             location.NameWithoutExtension == project.Name;
-                                        return isUproject || (location / $"{location.Name}.uproject").ExistsFile;
+                                        return isUproject || (location / $"{solution.Name}.uproject").ExistsFile;
                                     }).Select(project =>
                                     {
                                         var location = project.Location;
                                         if (location.ExistsFile) return location;
-                                        return location / $"{location.Name}.uproject";
+                                        return location / $"{solution.Name}.uproject";
                                     }).ToSet();
                                 }
                                 else
