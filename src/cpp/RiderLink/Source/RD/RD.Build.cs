@@ -26,6 +26,8 @@ public class RD : ModuleRules
 		bFasterWithoutUnity = true;
 #endif
 
+        PublicDefinitions.Add("_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS");
+
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
 			PublicDefinitions.Add("_WINSOCK_DEPRECATED_NO_WARNINGS");
