@@ -344,7 +344,7 @@ intellij {
         val branchName = getBranchName()
 
         val changelogProject = if (isReleaseBuild)
-            changelog.getLatest()
+            changelog.get(project.version.toString())
         else
             changelog.getUnreleased()
         changeNotes(closure {
