@@ -236,7 +236,7 @@ tasks {
 """## New in ${project.version}
 ${changelog.get(project.version as String)}
 
-See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md) for more details and history.
+See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELOG.md) for more details and history.
 """.trimIndent())
         }
     }
@@ -331,7 +331,7 @@ intellij {
             <p>
             ${changelogProject.toHTML()}
             </p>
-            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
+            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net211/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
         })
