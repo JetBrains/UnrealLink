@@ -6,6 +6,7 @@ import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import java.io.ByteArrayOutputStream
 
 plugins {
     kotlin("jvm") version "1.4.0"
@@ -140,6 +141,24 @@ fun TaskContainerScope.setupCleanup(task:Task) {
     }
 }
 
+fun getBranchName(): String {
+    var branchName = "net211"
+
+    val stdOut = ByteArrayOutputStream()
+    val result = project.exec {
+        executable = "git"
+        args = listOf("rev-parse", "--abbrev-ref", "HEAD")
+        workingDir = projectDir
+        standardOutput = stdOut
+    }
+    if(result.exitValue == 0) {
+        val output = stdOut.toString().trim()
+        if (output.isNotEmpty())
+            return output
+    }
+    return branchName
+}
+
 tasks {
     val prepareRiderBuildProps by creating {
         group = "RiderBackend"
@@ -232,11 +251,12 @@ tasks {
         val outputFile = File("release_notes.md")
         outputs.file(outputFile)
         doLast {
+            val branchName = getBranchName()
             outputFile.writeText(
 """## New in ${project.version}
 ${changelog.get(project.version as String)}
 
-See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md) for more details and history.
+See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$branchName/CHANGELOG.md) for more details and history.
 """.trimIndent())
         }
     }
@@ -297,6 +317,7 @@ See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELO
 changelog {
     groups = listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues")
     keepUnreleasedSection = true
+    itemPrefix = "-"
 }
 
 intellij {
@@ -320,6 +341,8 @@ intellij {
             }
         }
 
+        val branchName = getBranchName()
+
         val changelogProject = if (isReleaseBuild)
             changelog.getLatest()
         else
@@ -331,7 +354,7 @@ intellij {
             <p>
             ${changelogProject.toHTML()}
             </p>
-            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/net202/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
+            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/$branchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
         })
