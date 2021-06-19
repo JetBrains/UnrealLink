@@ -329,7 +329,7 @@ intellij {
     instrumentCode = false
     downloadSources = false
     tasks.withType<PatchPluginXmlTask> {
-        val isReleaseBuild = properties["isReleaseBuild"].toString().toBoolean()
+        val isReleaseBuild = buildConfiguration == "Release"
 
         if(isReleaseBuild) {
             val riderSdkVersion = properties["riderSdkVersion"] as String?
@@ -344,7 +344,7 @@ intellij {
         val branchName = getBranchName()
 
         val changelogProject = if (isReleaseBuild)
-            changelog.get(project.version.toString())
+            changelog.get(project.version as String)
         else
             changelog.getUnreleased()
         changeNotes(closure {

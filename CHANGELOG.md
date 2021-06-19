@@ -18,6 +18,11 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+- [RIDER-63716](https://youtrack.jetbrains.com/issue/RIDER-63716)
+- [RIDER-63584](https://youtrack.jetbrains.com/issue/RIDER-63584)
+- [GITHUB-109](https://github.com/JetBrains/UnrealLink/issues/109)
+- Possible fix for [GITHUB-99](https://github.com/JetBrains/UnrealLink/issues/99)
+- Fix build RiderLink for UE5 main branch
 
 ### Known Issues
 ## [2021.1.9]

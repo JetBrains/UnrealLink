@@ -38,7 +38,7 @@ jobs:
       run: gradlew.bat patchChangelog -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
       shell: cmd
     - name: Build Plugin
-      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PConfiguration=Release -PisReleaseBuild=true -PriderSdkVersion=${{ github.event.inputs.rider-sdk-version }}
+      run: gradlew.bat buildPlugin -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }} -PBuildConfiguration=Release -PriderSdkVersion=${{ github.event.inputs.rider-sdk-version }}
       shell: cmd
     - name: Create Release Notes file
       run: gradlew.bat dumpChangelogResult -PproductVersion=${{ github.event.inputs.release-major-version }} -PBuildCounter=${{ github.event.inputs.release-minor-version }}
