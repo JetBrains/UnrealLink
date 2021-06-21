@@ -93,25 +93,22 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 });
             }
 
-            if (!myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin) ||
-                status == PluginInstallStatus.NoPlugin)
-            {
-                if (outOfSync)
-                {
-                    myLogger.Warn("[UnrealLink]: Plugin is out of sync");
-                    myUnrealHost.PerformModelAction(model =>
-                    {
-                        var isGameAvailable = !unrealPluginInstallInfo.ProjectPlugins.IsEmpty();
-                        model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(
-                            installedVersion.ToString(), myPathsProvider.CurrentPluginVersion.ToString(), status,
-                            isGameAvailable));
-                    });
-                }
+            if (!outOfSync) return;
 
+            if(myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin))
+            {
+                QueueAutoUpdate(unrealPluginInstallInfo);
                 return;
             }
 
-            QueueAutoUpdate(unrealPluginInstallInfo);
+            myLogger.Warn("[UnrealLink]: Plugin is out of sync");
+            myUnrealHost.PerformModelAction(model =>
+            {
+                var isGameAvailable = !unrealPluginInstallInfo.ProjectPlugins.IsEmpty();
+                model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(
+                    installedVersion.ToString(), myPathsProvider.CurrentPluginVersion.ToString(), status,
+                    isGameAvailable));
+            });
         }
 
         private void QueueAutoUpdate(UnrealPluginInstallInfo unrealPluginInstallInfo)
