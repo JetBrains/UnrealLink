@@ -637,7 +637,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var command = GetPlatformCommand(pathToUat);
             var commandLine = GetPlatformCommandLine(pathToUat, "BuildPlugin", "-Unversioned", $"-Plugin=\"{upluginPath.FullPath}\"",
-                $"-Package=\"{outputDir.FullPath}\"", "-Rocket", "-WaitMutex");
+                $"-Package=\"{outputDir.FullPath}\"");
 
             List<string> stdOut = new List<string>();
             List<string> stdErr = new List<string>();
@@ -677,7 +677,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
 
-                var result = await StartUBTBuildPluginAsync(lifetime, command, commandLine, pipeStreams);
+                var result = await StartUATBuildPluginAsync(lifetime, command, commandLine, pipeStreams);
                 lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
@@ -716,7 +716,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private Task<uint> StartUBTBuildPluginAsync(Lifetime lifetime, FileSystemPath command,
+        private Task<uint> StartUATBuildPluginAsync(Lifetime lifetime, FileSystemPath command,
             CommandLineBuilderJet commandLine, InvokeChildProcess.PipeStreams pipeStreams)
         {
             InvokeChildProcess.StartInfo startinfo = new InvokeChildProcess.StartInfo(command)
