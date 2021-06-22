@@ -636,7 +636,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             var command = GetPlatformCommand(pathToUat);
-            var commandLine = GetPlatformCommandLine(pathToUat, "BuildPlugin", $"-Plugin=\"{upluginPath.FullPath}\"",
+            var commandLine = GetPlatformCommandLine(pathToUat, "BuildPlugin", "-Unversioned", $"-Plugin=\"{upluginPath.FullPath}\"",
                 $"-Package=\"{outputDir.FullPath}\"", "-Rocket", "-WaitMutex");
 
             List<string> stdOut = new List<string>();
