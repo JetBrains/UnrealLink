@@ -22,6 +22,7 @@ The plugin is always bundled with Rider.
 - [RIDER-63584](https://youtrack.jetbrains.com/issue/RIDER-63584)
 - [RIDER-64422](https://youtrack.jetbrains.com/issue/RIDER-64422)
 - [GITHUB-109](https://github.com/JetBrains/UnrealLink/issues/109)
+- [GITHUB-112](https://github.com/JetBrains/UnrealLink/issues/112)
 - Possible fix for [GITHUB-99](https://github.com/JetBrains/UnrealLink/issues/99)
 - Fix build RiderLink for UE5 main branch
 
