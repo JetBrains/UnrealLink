@@ -11,7 +11,7 @@ public class RD : ModuleRules
 		bUseRTTI = true;
 		bEnforceIWYU = false;
 
-if UE_4_22_OR_LATER
+#if UE_4_22_OR_LATER
 		CppStandard = CppStandardVersion.Cpp17;
 #endif
 
