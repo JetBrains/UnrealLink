@@ -9,7 +9,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.jetbrains.rd.platform.util.idea.LifetimedProjectService
+import com.jetbrains.rd.platform.util.idea.LifetimedService
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.PlayState
@@ -19,8 +19,8 @@ import icons.UnrealIcons
 import javax.swing.Icon
 import com.jetbrains.rider.plugins.unreal.model.NotificationType as ReplyNotificationType
 
-@Service
-class PlayStateActionStateService(project: Project) : LifetimedProjectService(project) {
+@Service(Service.Level.PROJECT)
+class PlayStateActionStateService(val project: Project) : LifetimedService() {
     companion object {
         fun getInstance(project: Project): PlayStateActionStateService = project.service()
         private const val NOTIFICATION_GROUP_DISPLAY_ID = "RiderLink"
@@ -37,11 +37,11 @@ class PlayStateActionStateService(project: Project) : LifetimedProjectService(pr
     init {
         val host = UnrealHost.getInstance(project)
         host.performModelAction { model ->
-            model.isConnectedToUnrealEditor.change.advise(projectServiceLifetime) {
+            model.isConnectedToUnrealEditor.change.advise(serviceLifetime) {
                 invalidate()
             }
-            model.notificationReplyFromEditor.advise(projectServiceLifetime) {
-                if (it.requestID != currentRequestID) return@advise;
+            model.notificationReplyFromEditor.advise(serviceLifetime) {
+                if (it.requestID != currentRequestID) return@advise
                 when (it) {
                     is RequestSucceed -> invalidate()
                     is RequestFailed -> {
@@ -59,7 +59,7 @@ class PlayStateActionStateService(project: Project) : LifetimedProjectService(pr
                 }
             }
         }
-        host.playStateModel.change.advise(projectServiceLifetime) {
+        host.playStateModel.change.advise(serviceLifetime) {
             invalidate()
         }
     }
