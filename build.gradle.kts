@@ -133,8 +133,8 @@ tasks {
         }
     }
 
-        val buildDir = File("${project.projectDir}/build/")
     withType<KotlinCompile> {
+        dependsOn(":protocol:generateModels")
         kotlinOptions {
             jvmTarget = "11"
         }
@@ -236,6 +236,7 @@ tasks {
         val outputDir = File("$rootDir/output")
         outputs.dir(outputDir)
         doLast {
+            val buildDir = File("${project.projectDir}/build/")
             copy {
                 from("$buildDir/distributions/${rootProject.name}-${project.version}.zip")
                 into(outputDir)
