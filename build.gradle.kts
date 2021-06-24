@@ -1,7 +1,6 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -99,14 +98,10 @@ fun findDotNetCliPath(): String? {
 fun TaskContainerScope.setupCleanup(task: Task) {
     withType<Delete> {
         delete(task.outputs.files)
-
-
     }
 }
 
 fun getBranchName(): String {
-    var branchName = "net211"
-
     val stdOut = ByteArrayOutputStream()
     val result = project.exec {
         executable = "git"
@@ -114,12 +109,12 @@ fun getBranchName(): String {
         workingDir = projectDir
         standardOutput = stdOut
     }
-    if(result.exitValue == 0) {
+    if (result.exitValue == 0) {
         val output = stdOut.toString().trim()
         if (output.isNotEmpty())
             return output
     }
-    return branchName
+    return "net212"
 }
 
 tasks {
@@ -139,7 +134,6 @@ tasks {
     }
 
         val buildDir = File("${project.projectDir}/build/")
-        val outputFile = buildDir.resolve("DotNetSdkPath.generated.props")
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "11"
@@ -148,13 +142,13 @@ tasks {
 
     val prepareRiderBuildProps by registering {
         group = "RiderBackend"
-        val outputFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
+        val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
 
         inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
-        outputs.file(outputFile)
+        outputs.file(generatedFile)
 
         doLast {
-            project.file(outputFile).writeText(
+            project.file(generatedFile).writeText(
                 """<Project>
             |  <PropertyGroup>
             |    <DotNetSdkPath>${dotNetSdkPath.canonicalPath}</DotNetSdkPath>
@@ -163,15 +157,14 @@ tasks {
             )
         }
     }
-    setupCleanup(prepareRiderBuildProps)
 
     val prepareNuGetConfig by registering {
         group = "RiderBackend"
         dependsOn(prepareRiderBuildProps)
 
-        val outputFile = project.projectDir.resolve("NuGet.Config")
+        val generatedFile = project.projectDir.resolve("NuGet.Config")
         inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
-        outputs.file(outputFile)
+        outputs.file(generatedFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
             logger.info("dotNetSdk location: '$dotNetSdkFile'")
@@ -186,12 +179,11 @@ tasks {
         |  </packageSources>
         |</configuration>
         """.trimMargin()
-            outputFile.writeText(nugetConfigText)
+            generatedFile.writeText(nugetConfigText)
 
             logger.info("Generated content:\n$nugetConfigText")
         }
     }
-    setupCleanup(prepareNuGetConfig)
 
     val buildResharperHost by registering {
         group = "RiderBackend"
@@ -341,13 +333,13 @@ intellij {
     }
 }
 
-	val branchName = getBranchName()
+	val currentBranchName = getBranchName()
     val currentReleaseNotesAsHtml =
         """
             <body>
             <p><b>New in "${project.version}"</b></p>
             <p>${changelog.getLatest().toHTML()}</p>
-            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/$branchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
+            <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/$currentBranchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
 
@@ -355,5 +347,5 @@ intellij {
         """
             ## New in ${project.version}
             ${changelog.getLatest().toText()}
-            See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$branchName/CHANGELOG.md) for more details and history.
+            See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$currentBranchName/CHANGELOG.md) for more details and history.
         """.trimIndent()
