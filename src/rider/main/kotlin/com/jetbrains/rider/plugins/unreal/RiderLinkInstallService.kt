@@ -4,12 +4,9 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.icons.AllIcons
-import com.jetbrains.rd.util.getLogger
-import com.jetbrains.rd.util.info
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -17,7 +14,9 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.impl.status.StatusBarUtil
 import com.intellij.ui.content.Content
-import com.jetbrains.rd.platform.util.idea.LifetimedProjectService
+import com.jetbrains.rd.platform.util.idea.LifetimedService
+import com.jetbrains.rd.util.getLogger
+import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.lifetime.onTermination
 import com.jetbrains.rider.build.BuildToolWindowFactory
@@ -28,11 +27,10 @@ import java.awt.BorderLayout
 import java.awt.CardLayout
 import javax.swing.JPanel
 
-@Service
+@Service(Service.Level.PROJECT)
 class RiderLinkInstallService(
-    project: Project
-) : LifetimedProjectService(project) {
-
+    val project: Project
+) : LifetimedService() {
     companion object {
         fun getInstance(project: Project): RiderLinkInstallService = project.service()
         val logger = getLogger<RiderLinkInstallService>()
@@ -50,7 +48,7 @@ class RiderLinkInstallService(
         val toolWindow = buildToolWindowFactory.getOrRegisterToolWindow()
         val contentManager = toolWindow.contentManager
 
-        val panel = RiderLinkInstallPanel(project, projectServiceLifetime)
+        val panel = RiderLinkInstallPanel(project, serviceLifetime)
         val toolWindowContent = contentManager.factory.createContent(null, "RiderLink Install Progress", true).apply {
             StatusBarUtil.setStatusBarInfo(project, "Install")
             component = panel
