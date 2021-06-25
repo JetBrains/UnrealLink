@@ -146,7 +146,7 @@ public:
 	void write_array(C<T, A> const& container)
 	{
 		using rd::size;
-		const int32_t& len = size(container);
+		const int32_t& len = rd::size(container);
 		write_integral<int32_t>(static_cast<int32_t>(len));
 		if (len > 0)
 		{
