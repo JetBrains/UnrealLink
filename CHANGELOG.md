@@ -18,6 +18,7 @@ The plugin is always bundled with Rider.
 ### Removed
 
 ### Fixed
+- HOTFIX building RideLink on MacOS
 
 ### Known Issues
 ## [2021.1.11]
