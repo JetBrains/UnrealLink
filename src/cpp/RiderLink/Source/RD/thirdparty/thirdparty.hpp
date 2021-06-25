@@ -18,9 +18,6 @@ namespace rd {
 	using std::variant;
 	using std::get;
 	using std::visit;
-	using std::string_view;
-	using std::wstring_view;
-	using namespace std::literals;
 }
 
 #else
@@ -32,7 +29,6 @@ namespace rd {
 #endif
 #include "optional.hpp"
 #include "mpark/variant.hpp"
-#include "nonstd/string_view.hpp"
 #if defined (_MSC_VER)
   #pragma warning(pop)
 #endif
@@ -45,13 +41,18 @@ namespace rd {
 	using mpark::variant;
 	using mpark::get;
 	using mpark::visit;
+}
+
+#endif
+
+#include "nonstd/string_view.hpp"
+namespace rd
+{
 	using nonstd::string_view;
 	using nonstd::wstring_view;
 	using namespace std::literals;
 	using namespace nonstd::literals;
 }
-
-#endif
 
 
 namespace rd {
