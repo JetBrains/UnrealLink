@@ -3,7 +3,7 @@
 #include "scheduler/base/IScheduler.h"
 #include "wire/SocketWire.h"
 
-#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFileManager.h"
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
