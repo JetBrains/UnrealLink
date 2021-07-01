@@ -3,16 +3,25 @@ package com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions
 import com.intellij.execution.RunManagerEx
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.ide.GeneralSettings
+import com.intellij.openapi.application.Application
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.encoding.EncodingProjectManagerImpl
+import com.jetbrains.rd.platform.util.application
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rdclient.protocol.IProtocolHost
+import com.jetbrains.rdclient.protocol.getComponent
 import com.jetbrains.rdclient.util.idea.waitAndPump
+import com.jetbrains.rider.cpp.unreal.UnrealShellHost
+import com.jetbrains.rider.inTests.TestHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.protocol.components.ShellHost
+import com.jetbrains.rider.protocol.protocolHost
+import com.jetbrains.rider.protocol.protocolManager
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
@@ -21,6 +30,7 @@ import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.prepareSolutionFromZip
+import com.jetbrains.rider.test.protocol.testProtocolHost
 import com.jetbrains.rider.test.scriptingApi.startRunConfigurationProcess
 import com.jetbrains.rider.test.scriptingApi.stop
 import kotlinx.serialization.Serializable
@@ -42,6 +52,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
             this.myProject = value
         }
 
+//    lateinit var engineList: ArrayList<>
     lateinit var solutionName: String
     val openSolutionParams: OpenSolutionParams = OpenSolutionParams()
 
@@ -55,6 +66,8 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
 
     @BeforeClass(alwaysRun = true)
     fun setUpClassSolution() {
+        val engineList = application.testProtocolHost.getComponent<UnrealShellHost>().model.getListOfEngines.sync(Unit)
+
         GeneralSettings.getInstance().isConfirmExit = false
         PrepareTestEnvironment.setBuildToolPath(ToolsetVersion.TOOLSET_16_CPP)
         myProject = openSolution(solutionName, openSolutionParams)
@@ -69,7 +82,7 @@ abstract class UnrealTestWithSolution : BaseTestWithSolutionBase() {
                 InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
             )
 
-            waitAndPump(Duration.ofSeconds(90), { riderLinkInstalled }, { "RiderLink did not install" })
+            waitAndPump(Duration.ofSeconds(120), { riderLinkInstalled }, { "RiderLink did not install" })
         }
     }
 
