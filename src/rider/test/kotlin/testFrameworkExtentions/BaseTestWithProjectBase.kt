@@ -157,7 +157,6 @@ abstract class BaseTestWithProjectBase : BaseTestWithShell() {
         if (clearCaches) {
             testCaseNameToTempDirCache.clear()
         }
-        WorkspaceModelImpl.forceEnableCaching = false
     }
 
     fun withSolution(

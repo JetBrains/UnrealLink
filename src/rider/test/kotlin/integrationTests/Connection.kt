@@ -1,9 +1,13 @@
 package integrationTests
 
+import com.jetbrains.rd.platform.util.application
+import com.jetbrains.rdclient.protocol.getComponent
 import com.jetbrains.rdclient.util.idea.waitAndPump
+import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestWithSolution
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.protocol.protocolHost
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion

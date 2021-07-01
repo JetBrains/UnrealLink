@@ -304,7 +304,7 @@ intellij {
         println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
     } else {
         version.set("${project.property("majorVersion")}-SNAPSHOT")
-        println("Will download and use build/riderRD-$version as RiderSDK")
+        println("Will download and use build/riderRD-${version.get()} as RiderSDK")
     }
 
     tasks {
