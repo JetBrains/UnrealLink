@@ -5,9 +5,9 @@ namespace RiderPlugin.UnrealLink.Utils
 {
     public class DeleteTempFolders : IDisposable
     {
-        private readonly FileSystemPath myTempFolder;
+        private readonly VirtualFileSystemPath myTempFolder;
 
-        public DeleteTempFolders(FileSystemPath tempFolder)
+        public DeleteTempFolders(VirtualFileSystemPath tempFolder)
         {
             myTempFolder = tempFolder;
         }
@@ -20,13 +20,13 @@ namespace RiderPlugin.UnrealLink.Utils
     
     public class BackupDir
     {
-        private readonly FileSystemPath myOldDir;
-        private readonly FileSystemPath myBackupDir;
+        private readonly VirtualFileSystemPath myOldDir;
+        private readonly VirtualFileSystemPath myBackupDir;
 
-        public BackupDir(FileSystemPath oldDir, string backupFolderPrefix)
+        public BackupDir(VirtualFileSystemPath oldDir, string backupFolderPrefix)
         {
             myOldDir = oldDir;
-            myBackupDir = FileSystemDefinition.CreateTemporaryDirectory(null, backupFolderPrefix);
+            myBackupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, backupFolderPrefix);
             myOldDir.CopyDirectory(myBackupDir);
             myOldDir.Delete();
         }
