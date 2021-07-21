@@ -157,7 +157,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private async Task InstallPluginInGame(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             Property<double> progress)
         {
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -243,7 +243,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private async Task InstallPluginInEngine(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             IProperty<double> progress)
         {
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -279,7 +279,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private async Task<bool> InstallPlugin(Lifetime lifetime,
             UnrealPluginInstallInfo.InstallDescription installDescription,
-            FileSystemPath uprojectFile, IProperty<double> progressProperty, double range)
+            VirtualFileSystemPath uprojectFile, IProperty<double> progressProperty, double range)
         {
             using var def = new LifetimeDefinition();
             var ZIP_STEP = 0.1 * range;
@@ -290,7 +290,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pluginRootFolder = installDescription.UnrealPluginRootFolder;
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
-            var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var pluginTmpDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
@@ -314,7 +314,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
-            var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var pluginBuildOutput = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             def.Lifetime.OnTermination(() => { pluginBuildOutput.Delete(); });
             var buildProgress = progressProperty.Value;
             var isPluginBuilt = await BuildPlugin(lifetime, upluginFile,
@@ -373,7 +373,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private bool PatchUpluginFileAfterInstallation(FileSystemPath pluginBuildOutput)
+        private bool PatchUpluginFileAfterInstallation(VirtualFileSystemPath pluginBuildOutput)
         {
             var upluginFile = pluginBuildOutput / "RiderLink.uplugin";
             if (!upluginFile.ExistsFile) return false;
@@ -486,7 +486,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             });
         }
 
-        private void RegenerateProjectFiles(FileSystemPath uprojectFilePath)
+        private void RegenerateProjectFiles(VirtualFileSystemPath uprojectFilePath)
         {
             void LogFailedRefreshProjectFiles()
             {
@@ -532,7 +532,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             LogFailedRefreshProjectFiles();
         }
 
-        private bool GenerateProjectFilesCmd(FileSystemPath engineRoot)
+        private bool GenerateProjectFilesCmd(VirtualFileSystemPath engineRoot)
         {
             var isProjectUnderEngine = mySolution.SolutionFilePath.Directory == engineRoot;
             if (!isProjectUnderEngine)
@@ -557,12 +557,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 {
                     myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
 
-                    ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(command,
+                    ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(command.ToNativeFileSystemPath(),
                         commandLine,
                         LoggingLevel.INFO,
                         TimeSpan.FromMinutes(1),
                         InvokeChildProcess.TreatStderr.AsOutput,
-                        generateProjectFilesCmd.Directory
+                        generateProjectFilesCmd.Directory.ToNativeFileSystemPath()
                     ));
                 }
             }
@@ -576,7 +576,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private bool RegenerateProjectUsingUVS(FileSystemPath uprojectFilePath, FileSystemPath engineRoot)
+        private bool RegenerateProjectUsingUVS(VirtualFileSystemPath uprojectFilePath, VirtualFileSystemPath engineRoot)
         {
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return false;
 
@@ -597,12 +597,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 {
                     myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
                     ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
-                        BatchUtils.GetPathToCmd(),
+                        BatchUtils.GetPathToCmd().ToNativeFileSystemPath(),
                         commandLine,
                         LoggingLevel.INFO,
                         TimeSpan.FromMinutes(1),
                         InvokeChildProcess.TreatStderr.AsOutput,
-                        pathToUnrealVersionSelector.Directory
+                        pathToUnrealVersionSelector.Directory.ToNativeFileSystemPath()
                     ));
                 }
             }
@@ -616,8 +616,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private bool RegenerateProjectUsingUBT(FileSystemPath uprojectFilePath, FileSystemPath pathToUnrealBuildToolBin,
-            FileSystemPath engineRoot)
+        private bool RegenerateProjectUsingUBT(VirtualFileSystemPath uprojectFilePath, VirtualFileSystemPath pathToUnrealBuildToolBin,
+            VirtualFileSystemPath engineRoot)
         {
             bool isInstalledBuild = IsInstalledBuild(engineRoot);
 
@@ -634,12 +634,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 {
                     myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
                     ErrorLevelException.ThrowIfNonZero(InvokeChildProcess.InvokeChildProcessIntoLogger(
-                        pathToUnrealBuildToolBin,
+                        pathToUnrealBuildToolBin.ToNativeFileSystemPath(),
                         commandLine,
                         LoggingLevel.INFO,
                         TimeSpan.FromMinutes(1),
                         InvokeChildProcess.TreatStderr.AsOutput,
-                        pathToUnrealBuildToolBin.Directory
+                        pathToUnrealBuildToolBin.Directory.ToNativeFileSystemPath()
                     ));
                 }
             }
@@ -653,7 +653,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private static bool IsInstalledBuild(FileSystemPath engineRoot)
+        private static bool IsInstalledBuild(VirtualFileSystemPath engineRoot)
         {
             var installedBuildTxt = engineRoot / "Engine" / "Build" / "InstalledBuild.txt";
             var isInstalledBuild = installedBuildTxt.ExistsFile;
@@ -669,8 +669,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
 
-        private async Task<bool> BuildPlugin(Lifetime lifetime, FileSystemPath upluginPath,
-            FileSystemPath outputDir, FileSystemPath uprojectFile,
+        private async Task<bool> BuildPlugin(Lifetime lifetime, VirtualFileSystemPath upluginPath,
+            VirtualFileSystemPath outputDir, VirtualFileSystemPath uprojectFile,
             Action<double> progressPump)
         {
             //engineRoot\Engine\Build\BatchFiles\RunUAT.{extension}" BuildPlugin -Plugin="D:\tmp\RiderLink\RiderLink.uplugin" -Package="D:\PROJECTS\UE\FPS_D_TEST\Plugins\Developer\RiderLink" -Rocket
@@ -779,10 +779,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private Task<uint> StartUBTBuildPluginAsync(Lifetime lifetime, FileSystemPath command,
+        private Task<uint> StartUBTBuildPluginAsync(Lifetime lifetime, VirtualFileSystemPath command,
             CommandLineBuilderJet commandLine, InvokeChildProcess.PipeStreams pipeStreams)
         {
-            InvokeChildProcess.StartInfo startinfo = new InvokeChildProcess.StartInfo(command)
+            InvokeChildProcess.StartInfo startinfo = new InvokeChildProcess.StartInfo(command.ToNativeFileSystemPath())
             {
                 Arguments = commandLine,
                 Pipe = pipeStreams
@@ -794,12 +794,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private CommandLineBuilderJet GetPlatformCommandLine(FileSystemPath command, params string[] args)
+        private CommandLineBuilderJet GetPlatformCommandLine(VirtualFileSystemPath command, params string[] args)
         {
             var commandLine = new CommandLineBuilderJet();
             if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
             {
-                commandLine.AppendFileName(command);
+                commandLine.AppendFileName(command.ToNativeFileSystemPath());
             }
 
             foreach (var arg in args)
@@ -816,7 +816,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return commandLine;
         }
 
-        private FileSystemPath GetPlatformCommand(FileSystemPath command)
+        private VirtualFileSystemPath GetPlatformCommand(VirtualFileSystemPath command)
         {
             return PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows ? BatchUtils.GetPathToCmd() : command;
         }

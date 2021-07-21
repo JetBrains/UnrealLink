@@ -20,8 +20,8 @@ namespace RiderPlugin.UnrealLink
         private readonly ILogger _logger;
         private readonly ICppUE4SolutionDetector _unrealEngineSolutionDetector;
         private static readonly CompactMap<char, char> PairSymbol = new CompactMap<char, char>();
-        private readonly Lazy<FileSystemPath> _ue4SourcesPath;
-        private readonly Lazy<List<FileSystemPath>> _possiblePaths;
+        private readonly Lazy<VirtualFileSystemPath> _ue4SourcesPath;
+        private readonly Lazy<List<VirtualFileSystemPath>> _possiblePaths;
 
         static UnrealLinkResolver()
         {
@@ -38,7 +38,7 @@ namespace RiderPlugin.UnrealLink
             _logger = logger;
             _unrealEngineSolutionDetector = unrealEngineSolutionDetector;
             var solutionDirectory = _solution.SolutionDirectory;
-            _ue4SourcesPath = new Lazy<FileSystemPath>(() =>
+            _ue4SourcesPath = new Lazy<VirtualFileSystemPath>(() =>
             {
                 using (ReadLockCookie.Create())
                 {
@@ -46,8 +46,8 @@ namespace RiderPlugin.UnrealLink
                 }
             });
 
-            _possiblePaths = new Lazy<List<FileSystemPath>>(() =>
-                new List<FileSystemPath>
+            _possiblePaths = new Lazy<List<VirtualFileSystemPath>>(() =>
+                new List<VirtualFileSystemPath>
                 {
                     _ue4SourcesPath.Value,
                     _ue4SourcesPath.Value.Parent,
@@ -63,7 +63,7 @@ namespace RiderPlugin.UnrealLink
         }
 
         [CanBeNull]
-        private FileSystemPath ConvertToAbsolutePath(FileSystemPath path)
+        private VirtualFileSystemPath ConvertToAbsolutePath(VirtualFileSystemPath path)
         {
             if (path.IsAbsolute)
             {
@@ -90,7 +90,7 @@ namespace RiderPlugin.UnrealLink
         {
             try
             {
-                var path = ConvertToAbsolutePath(FileSystemPath.Parse(input));
+                var path = ConvertToAbsolutePath(VirtualFileSystemPath.Parse(input, InteractionContext.SolutionContext));
                 if (path == null)
                 {
                     return null;

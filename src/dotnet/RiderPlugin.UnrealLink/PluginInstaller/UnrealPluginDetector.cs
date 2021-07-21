@@ -29,7 +29,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly RelativePath ourPathToEnginePlugin =
             $"Engine/Plugins/Developer/RiderLink/{UPLUGIN_FILENAME}";
 
-        public static FileSystemPath GetPathToUpluginFile(FileSystemPath rootFolder) => rootFolder / UPLUGIN_FILENAME;
+        public static VirtualFileSystemPath GetPathToUpluginFile(VirtualFileSystemPath rootFolder) => rootFolder / UPLUGIN_FILENAME;
 
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
@@ -90,7 +90,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                             var installInfo = new UnrealPluginInstallInfo();
                             var foundEnginePlugin = TryGetEnginePluginFromSolution(solutionDetector, installInfo);
-                            ISet<FileSystemPath> uprojectLocations;
+                            ISet<VirtualFileSystemPath> uprojectLocations;
                             using (solution.Locks.UsingReadLock())
                             {
                                 var allProjects = mySolution.GetAllProjects();
@@ -167,14 +167,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 });
         }
 
-        private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(FileSystemPath uprojectLocation)
+        private UnrealPluginInstallInfo.InstallDescription GetProjectPluginForUproject(VirtualFileSystemPath uprojectLocation)
         {
             var projectRoot = uprojectLocation.Directory;
             var upluginLocation = projectRoot / ourPathToProjectPlugin;
             return GetPluginInfo(upluginLocation, uprojectLocation);
         }
 
-        private bool TryGetEnginePluginFromUproject(FileSystemPath uprojectPath, UnrealPluginInstallInfo installInfo)
+        private bool TryGetEnginePluginFromUproject(VirtualFileSystemPath uprojectPath, UnrealPluginInstallInfo installInfo)
         {
             if (!uprojectPath.ExistsFile) return false;
 
@@ -192,7 +192,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
         private bool TryGetEnginePluginFromEngineRoot(UnrealPluginInstallInfo installInfo,
-            FileSystemPath engineRootFolder)
+            VirtualFileSystemPath engineRootFolder)
         {
             var upluginFilePath = engineRootFolder / ourPathToEnginePlugin;
             installInfo.EnginePlugin = GetPluginInfo(upluginFilePath);
@@ -206,12 +206,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         [NotNull]
         private UnrealPluginInstallInfo.InstallDescription GetPluginInfo(
-            [NotNull] FileSystemPath upluginFilePath, [CanBeNull] FileSystemPath uprojectFilePath = null)
+            [NotNull] VirtualFileSystemPath upluginFilePath, [CanBeNull] VirtualFileSystemPath uprojectFilePath = null)
         {
             var installDescription = new UnrealPluginInstallInfo.InstallDescription()
             {
                 UnrealPluginRootFolder = upluginFilePath.Directory,
-                UprojectFilePath = uprojectFilePath != null ? uprojectFilePath : FileSystemPath.Empty
+                UprojectFilePath = uprojectFilePath != null ? uprojectFilePath : VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext)
             };
             if (!upluginFilePath.ExistsFile) return installDescription;
 

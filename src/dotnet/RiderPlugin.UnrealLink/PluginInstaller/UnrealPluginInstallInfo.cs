@@ -12,8 +12,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             public bool IsPluginAvailable = false;
             public Version PluginVersion = new Version(0, 0, 0, 0);
-            public FileSystemPath UnrealPluginRootFolder = FileSystemPath.Empty;
-            public FileSystemPath UprojectFilePath = FileSystemPath.Empty;
+            public VirtualFileSystemPath UnrealPluginRootFolder = VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext);
+            public VirtualFileSystemPath UprojectFilePath = VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext);
         }
 
         public InstallDescription EnginePlugin = new InstallDescription();

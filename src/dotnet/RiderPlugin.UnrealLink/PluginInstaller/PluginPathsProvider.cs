@@ -67,7 +67,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return result;
         }
 
-        public Version GetPluginVersion(FileSystemPath upluginFilePath)
+        public Version GetPluginVersion(VirtualFileSystemPath upluginFilePath)
         {
             try
             {

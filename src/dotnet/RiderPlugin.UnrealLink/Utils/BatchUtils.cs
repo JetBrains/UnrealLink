@@ -5,10 +5,10 @@ namespace RiderPlugin.UnrealLink.Utils
 {
     public static class BatchUtils
     {
-        public static FileSystemPath GetPathToCmd()
+        public static VirtualFileSystemPath GetPathToCmd()
         {
-            var comspec = Environment.GetEnvironmentVariable("COMSPEC");
-            var pathToCmd = FileSystemPath.Parse(comspec);
+            var comspec = InteractionContext.SolutionContext.EnvironmentInteraction.GetEnvironmentVariable("COMSPEC");
+            var pathToCmd = VirtualFileSystemPath.Parse(comspec, InteractionContext.SolutionContext);
             return pathToCmd;
         }
     }
