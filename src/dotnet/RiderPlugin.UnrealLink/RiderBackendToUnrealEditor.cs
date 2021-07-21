@@ -84,7 +84,7 @@ namespace RiderPlugin.UnrealLink
 
                     RenamedEventHandler handler = (obj, fileSystemEvent) =>
                     {
-                        var path = FileSystemPath.Parse(fileSystemEvent.FullPath);
+                        var path = VirtualFileSystemPath.Parse(fileSystemEvent.FullPath, solution.GetInteractionContext());
                         // Skip changes to temp files
                         if (path.Name.StartsWith("~")) return;
 
@@ -106,7 +106,7 @@ namespace RiderPlugin.UnrealLink
 
                 foreach (var projectName in projects)
                 {
-                    var portFileFullPath = FileSystemPath.Parse(portDirectoryFullPath) / projectName;
+                    var portFileFullPath = VirtualFileSystemPath.Parse(portDirectoryFullPath, InteractionContext.SolutionContext) / projectName;
                     myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
                         () => CreateProtocols(portFileFullPath));
                 }
@@ -120,7 +120,7 @@ namespace RiderPlugin.UnrealLink
             watcher.EnableRaisingEvents = true;
         }
 
-        private void CreateProtocols(FileSystemPath portFileFullPath)
+        private void CreateProtocols(VirtualFileSystemPath portFileFullPath)
         {
             myLogger.Info($"Trying to read port file {portFileFullPath}");
             if (!portFileFullPath.ExistsFile) return;
@@ -164,12 +164,12 @@ namespace RiderPlugin.UnrealLink
             });
         }
 
-        private bool ReadPortFile(FileSystemPath portFileFullPath, out string text)
+        private bool ReadPortFile(VirtualFileSystemPath portFileFullPath, out string text)
         {
             text = "";
             try
             {
-                text = FileSystemPath.Parse(portFileFullPath.FullPath).ReadAllText2().Text;
+                text = VirtualFileSystemPath.Parse(portFileFullPath.FullPath, InteractionContext.SolutionContext).ReadAllText2().Text;
             }
             catch (Exception exception)
             {

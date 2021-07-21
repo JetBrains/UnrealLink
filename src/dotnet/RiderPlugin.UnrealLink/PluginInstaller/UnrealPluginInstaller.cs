@@ -125,7 +125,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             Property<double> progress)
         {
             myLogger.Verbose("[UnrealLink]: Installing plugin in Game");
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -212,7 +212,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private void InstallPluginInEngine(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             IProperty<double> progress)
         {
-            var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -248,7 +248,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private bool InstallPlugin(Lifetime lifetime,
             UnrealPluginInstallInfo.InstallDescription installDescription,
-            FileSystemPath engineRoot, IProperty<double> progressProperty, double range)
+            VirtualFileSystemPath engineRoot, IProperty<double> progressProperty, double range)
         {
             using var def = new LifetimeDefinition();
             var ZIP_STEP = 0.1 * range;
@@ -259,7 +259,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pluginRootFolder = installDescription.UnrealPluginRootFolder;
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
-            var pluginTmpDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var pluginTmpDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
@@ -283,7 +283,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
-            var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
+            var pluginBuildOutput = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
             def.Lifetime.OnTermination(() => { pluginBuildOutput.Delete(); });
             var buildProgress = progressProperty.Value;
             var isPluginBuilt = BuildPlugin(lifetime, upluginFile, pluginBuildOutput,
@@ -350,7 +350,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private bool PatchUpluginFileAfterInstallation(FileSystemPath pluginBuildOutput)
+        private bool PatchUpluginFileAfterInstallation(VirtualFileSystemPath pluginBuildOutput)
         {
             var upluginFile = pluginBuildOutput / "RiderLink.uplugin";
             if (!upluginFile.ExistsFile) return false;
@@ -457,7 +457,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             });
         }
 
-        private void RegenerateProjectFiles(Lifetime lifetime, [NotNull] FileSystemPath EngineRoot, FileSystemPath UprojectFile)
+        private void RegenerateProjectFiles(Lifetime lifetime, [NotNull] VirtualFileSystemPath EngineRoot, VirtualFileSystemPath UprojectFile)
         {
             void LogFailedRefreshProjectFiles()
             {
@@ -493,7 +493,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             LogFailedRefreshProjectFiles();
         }
 
-        private bool GenerateProjectFilesCmd(Lifetime lifetime, FileSystemPath UprojectFile, FileSystemPath EngineRoot)
+        private bool GenerateProjectFilesCmd(Lifetime lifetime, VirtualFileSystemPath UprojectFile, VirtualFileSystemPath EngineRoot)
         {
             // Invalid uproject file means we couldn't get uproject file from solution detector and the project might be
             // under Engine source
@@ -518,11 +518,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myLogger.Info($"[UnrealLink]: Regenerating project files: {commandLine}");
             
             var pipeStreams = CreatePipeStreams("[GenerateProjectFiles]:");
-            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command)
+            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command.ToNativeFileSystemPath())
             {
                 Arguments = commandLine,
                 Pipe = pipeStreams,
-                CurrentDirectory = generateProjectFilesCmd.Directory
+                CurrentDirectory = generateProjectFilesCmd.Directory.ToNativeFileSystemPath()
             };
             try
             {
@@ -542,14 +542,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private bool RegenerateProjectUsingSystemUVS(Lifetime lifetime, FileSystemPath uprojectFilePath)
+        private bool RegenerateProjectUsingSystemUVS(Lifetime lifetime, VirtualFileSystemPath uprojectFilePath)
         {
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows || uprojectFilePath.IsNullOrEmpty()) return false;
 
             var programFiles = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             if (programFiles.IsNullOrEmpty()) return false;
             
-            var programFilesPath = FileSystemPath.Parse(programFiles);
+            var programFilesPath = VirtualFileSystemPath.Parse(programFiles, mySolution.GetInteractionContext());
             if (!programFilesPath.ExistsDirectory) return false;
             
             var pathToUnrealVersionSelector =
@@ -557,8 +557,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return RegenerateProjectUsingUVS(lifetime, uprojectFilePath, pathToUnrealVersionSelector);
         }
         
-        private bool RegenerateProjectUsingBundledUVS(Lifetime lifetime, FileSystemPath uprojectFilePath,
-            FileSystemPath engineRoot)
+        private bool RegenerateProjectUsingBundledUVS(Lifetime lifetime, VirtualFileSystemPath uprojectFilePath,
+            VirtualFileSystemPath engineRoot)
         {
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return false;
 
@@ -567,8 +567,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return RegenerateProjectUsingUVS(lifetime, uprojectFilePath, pathToUnrealVersionSelector);
         }
 
-        private bool RegenerateProjectUsingUVS(Lifetime lifetime, FileSystemPath uprojectFilePath,
-            FileSystemPath pathToUnrealVersionSelector)
+        private bool RegenerateProjectUsingUVS(Lifetime lifetime, VirtualFileSystemPath uprojectFilePath,
+            VirtualFileSystemPath pathToUnrealVersionSelector)
         {
             if (!uprojectFilePath.IsValidAndExistFile()) return false;
             if (!pathToUnrealVersionSelector.ExistsFile)
@@ -582,11 +582,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 GetPlatformCommandLine(pathToUnrealVersionSelector, "-projectFiles", $"\"{uprojectFilePath}\"");
 
             var pipeStreams = CreatePipeStreams("[UVS]:");
-            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command)
+            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command.ToNativeFileSystemPath())
             {
                 Arguments = commandLine,
                 Pipe = pipeStreams,
-                CurrentDirectory = pathToUnrealVersionSelector.Directory
+                CurrentDirectory = pathToUnrealVersionSelector.Directory.ToNativeFileSystemPath()
             };
 
             try
@@ -608,9 +608,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private bool RegenerateProjectUsingUBT(Lifetime lifetime, FileSystemPath uprojectFilePath,
-            FileSystemPath pathToUnrealBuildToolBin,
-            FileSystemPath engineRoot)
+        private bool RegenerateProjectUsingUBT(Lifetime lifetime, VirtualFileSystemPath uprojectFilePath,
+            VirtualFileSystemPath pathToUnrealBuildToolBin,
+            VirtualFileSystemPath engineRoot)
         {
             if (uprojectFilePath.IsNullOrEmpty()) return false;
             
@@ -621,11 +621,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 $"-project=\"{uprojectFilePath.FullPath}\"", "-game", isInstalledBuild ? "-rocket" : "-engine");
             
             var pipeStreams = CreatePipeStreams("[UBT]:");
-            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command)
+            InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command.ToNativeFileSystemPath())
             {
                 Arguments = commandLine,
                 Pipe = pipeStreams,
-                CurrentDirectory = pathToUnrealBuildToolBin.Directory
+                CurrentDirectory = pathToUnrealBuildToolBin.Directory.ToNativeFileSystemPath()
             };
             try
             {
@@ -645,7 +645,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private static bool IsInstalledBuild(FileSystemPath engineRoot)
+        private static bool IsInstalledBuild(VirtualFileSystemPath engineRoot)
         {
             var installedBuildTxt = engineRoot / "Engine" / "Build" / "InstalledBuild.txt";
             var isInstalledBuild = installedBuildTxt.ExistsFile;
@@ -661,8 +661,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
 
-        private bool BuildPlugin(Lifetime lifetime, FileSystemPath upluginPath,
-            FileSystemPath outputDir, FileSystemPath engineRoot,
+        private bool BuildPlugin(Lifetime lifetime, VirtualFileSystemPath upluginPath,
+            VirtualFileSystemPath outputDir, VirtualFileSystemPath engineRoot,
             Action<double> progressPump)
         {
             var runUatName = $"RunUAT.{GetPlatformCmdExtension()}";
@@ -687,7 +687,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
 
                 var pipeStreams = CreatePipeStreams("[UAT]:", progressPump);
-                InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command)
+                InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command.ToNativeFileSystemPath())
                 {
                     Arguments = commandLine,
                     Pipe = pipeStreams
@@ -761,12 +761,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
         }
 
-        private CommandLineBuilderJet GetPlatformCommandLine(FileSystemPath command, params string[] args)
+        private CommandLineBuilderJet GetPlatformCommandLine(VirtualFileSystemPath command, params string[] args)
         {
             var commandLine = new CommandLineBuilderJet();
             if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
             {
-                commandLine.AppendFileName(command);
+                commandLine.AppendFileName(command.ToNativeFileSystemPath());
             }
 
             foreach (var arg in args)
@@ -783,7 +783,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return commandLine;
         }
 
-        private FileSystemPath GetPlatformCommand(FileSystemPath command)
+        private VirtualFileSystemPath GetPlatformCommand(VirtualFileSystemPath command)
         {
             return PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows ? BatchUtils.GetPathToCmd() : command;
         }
