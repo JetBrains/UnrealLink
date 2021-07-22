@@ -45,6 +45,13 @@ object UE4Library : Root() {
         }
     }
 
+    val MethodReference = structdef("MethodReference") {
+        field("class", UClassName)
+        field("method", FString)
+
+        const("separator", string, "::")
+    }
+
     val PlayState = enum("PlayState") {
         +"Idle"
         +"Play"
@@ -129,12 +136,12 @@ object UE4Library : Root() {
         field("message", FString)
     }*/
 
-    val UClass = structdef("UClass") {
+    val UClassName = structdef("UClassName") {
         field("name", FString)
     }
 
     val BlueprintFunction = structdef("BlueprintFunction") {
-        field("class", UClass)
+        field("class", UClassName)
         field("name", FString)
 
         const("separator", string, ":")
