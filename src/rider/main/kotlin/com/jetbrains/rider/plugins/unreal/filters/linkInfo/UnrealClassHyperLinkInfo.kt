@@ -5,13 +5,13 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
-import com.jetbrains.rider.plugins.unreal.model.UClass
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
+import com.jetbrains.rider.plugins.unreal.model.MethodReference
+import com.jetbrains.rider.plugins.unreal.model.UClassName
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 
 class UnrealClassHyperLinkInfo(private val model: RdRiderModel,
                                private val methodReference: MethodReference,
-                               private val uClass: UClass) : HyperlinkInfo {
+                               private val uClass: UClassName) : HyperlinkInfo {
     companion object {
         val logger = getLogger<UnrealClassHyperLinkInfo>()
     }

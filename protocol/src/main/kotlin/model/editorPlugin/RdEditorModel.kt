@@ -23,10 +23,11 @@ object RdEditorRoot : Root() {
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
         signal("unrealLog", UE4Library.UnrealLogEvent).async
+        signal("navigateToMethod", UE4Library.MethodReference).async
 
         signal("openBlueprint", UE4Library.BlueprintReference)
 
-        signal("onBlueprintAdded", UE4Library.UClass).async
+        signal("onBlueprintAdded", UE4Library.UClassName).async
         call("isBlueprintPathName", UE4Library.FString, bool)
         call("getPathNameByPath", UE4Library.FString, UE4Library.FString.nullable)
 

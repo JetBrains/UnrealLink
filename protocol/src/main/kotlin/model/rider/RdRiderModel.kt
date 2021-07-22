@@ -32,20 +32,12 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
     val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends  ILinkResponse {}
 
-    private val MethodReference = structdef("MethodReference") {
-        field("class", UE4Library.UClass)
-        field("method", UE4Library.FString)
-
-        const("separator", string, "::")
-    }
-
     private val PluginInstallStatus = enum("PluginInstallStatus") {
         +"NoPlugin"
         +"UpToDate"
         +"InEngine"
         +"InGame"
     }
-
 
     private val EditorPluginOutOfSync = structdef("EditorPluginOutOfSync") {
         field("installedVersion", string)
@@ -80,10 +72,10 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         signal("unrealLog", UE4Library.UnrealLogEvent)
 
         call("filterLinkCandidates", immutableList(LinkRequest), array(ILinkResponse)).async
-        call("isMethodReference", MethodReference, bool).async
+        call("isMethodReference", UE4Library.MethodReference, bool).async
 
-        signal("navigateToMethod", MethodReference)
-        signal("navigateToClass", UE4Library.UClass)
+        signal("navigateToMethod", UE4Library.MethodReference)
+        signal("navigateToClass", UE4Library.UClassName)
 
         signal("openBlueprint", UE4Library.BlueprintReference)
 

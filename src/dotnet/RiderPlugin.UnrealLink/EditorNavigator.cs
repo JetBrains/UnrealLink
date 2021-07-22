@@ -45,7 +45,7 @@ namespace RiderPlugin.UnrealLink
                     .Where(symbol => s == symbol.Name.Name.ToString()).SingleOrNull();
             });
 
-        public void NavigateToClass(UClass uClass)
+        public void NavigateToClass(UClassName uClass)
         {
             var classSymbol = GetClassSymbol(uClass.Name.Data);
             if (classSymbol == null)

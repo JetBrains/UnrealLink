@@ -19,7 +19,6 @@ import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLi
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.model.*
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.ui.components.ComponentFactories
@@ -249,9 +248,9 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
                 consoleView.printHyperlink(match, hyperLinkInfo)
             } else {
                 val (`class`, method) = match.split(MethodReference.separator)
-                val methodReference = MethodReference(UClass(FString(`class`)), FString(method))
+                val methodReference = MethodReference(UClassName(FString(`class`)), FString(method))
 
-                val classHyperLinkInfo = UnrealClassHyperLinkInfo(model, methodReference, UClass(FString(`class`)))
+                val classHyperLinkInfo = UnrealClassHyperLinkInfo(model, methodReference, UClassName(FString(`class`)))
                 consoleView.printHyperlink(`class`, classHyperLinkInfo)
 
                 consoleView.print(MethodReference.separator, NORMAL_OUTPUT)

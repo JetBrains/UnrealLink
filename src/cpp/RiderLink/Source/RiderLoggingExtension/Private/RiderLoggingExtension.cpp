@@ -62,68 +62,69 @@ void FRiderLoggingExtensionModule::StartupModule()
 	RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime,
 	[this](rd::Lifetime ModelLifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
     {
-        ModelLifetime->bracket(
-        [this, &RdEditorModel]()
-       {
-           outputDevice.onSerializeMessage.BindLambda(
-               [this, &RdEditorModel](
-               const TCHAR* msg, ELogVerbosity::Type Type,
-               const class FName& Name, TOptional<double> Time)
-               {
-                   if (Type > ELogVerbosity::All) return;
+        ModelLifetime->bracket([this, &RdEditorModel]()
+		{
+			outputDevice.onSerializeMessage.BindLambda([this, &RdEditorModel](
+				const TCHAR* msg, ELogVerbosity::Type Type,
+				const class FName& Name, TOptional<double> Time)
+				{
+					if (Type > ELogVerbosity::All) return;
 
-                   rd::ISignal<
-                           JetBrains::EditorPlugin::UnrealLogEvent>
-                       const& UnrealLog = RdEditorModel.
-                           get_unrealLog();
-                   rd::optional<rd::DateTime> DateTime;
-                   if (Time)
-                   {
-                       DateTime = GetTimeNow(Time.GetValue());
-                   }
-                   const FString Msg = FString(msg);
-                   const FString PlainName = Name.
-                       GetPlainNameString();
+					rd::ISignal<JetBrains::EditorPlugin::UnrealLogEvent> const& UnrealLog =
+						RdEditorModel.get_unrealLog();
+					rd::ISignal<JetBrains::EditorPlugin::MethodReference> const& NavigateToMethod =
+						RdEditorModel.get_navigateToMethod();
+					rd::optional<rd::DateTime> DateTime;
+					if (Time)
+					{
+						DateTime = GetTimeNow(Time.GetValue());
+					}
+					const FString Msg = FString(msg);
+					const FString PlainName = Name.GetPlainNameString();
 
-                   JetBrains::EditorPlugin::LogMessageInfo
-                       MessageInfo{Type, PlainName, DateTime};
+                   JetBrains::EditorPlugin::LogMessageInfo MessageInfo{Type, PlainName, DateTime};
 
-                   // [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
-                   // while we won't change BP hyperlink parsing
-                   FString Tail = Msg.Left(4096);
+					// [HACK]: fix https://github.com/JetBrains/UnrealLink/issues/17
+					// while we won't change BP hyperlink parsing
+					FString Tail = Msg.Left(4096);
 
-                   const FRegexPattern PathPattern = FRegexPattern(
-                       TEXT("[^\\s]*/[^\\s]+"));
-                   const FRegexPattern MethodPattern =
-                       FRegexPattern(
-                           TEXT("[0-9a-z_A-Z]+::~?[0-9a-z_A-Z]+"));
-                   FString ToSend;
-                   while (Tail.Split("\n", &ToSend, &Tail))
-                   {
-                       ToSend.TrimEndInline();
-                       UnrealLog.fire(
-                           JetBrains::EditorPlugin::UnrealLogEvent{
-                               MessageInfo, ToSend,
-                               GetPathRanges(PathPattern, ToSend),
-                               GetMethodRanges(
-                                   MethodPattern, ToSend)
-                           });
-                   }
-                   Tail.TrimEndInline();
-                   UnrealLog.fire(
-                       JetBrains::EditorPlugin::UnrealLogEvent{
-                           MessageInfo, Tail,
-                           GetPathRanges(PathPattern, Tail),
-                           GetMethodRanges(MethodPattern, Tail)
-                       });
-               });
-       },
-       [this]()
-       {
+					const FRegexPattern PathPattern = FRegexPattern(TEXT("[^\\s]*/[^\\s]+"));
+					const FRegexPattern MethodPattern = FRegexPattern(TEXT("([0-9a-z_A-Z]+)::(~?[0-9a-z_A-Z]+)"));
+					FString ToSend;
+					while (Tail.Split("\n", &ToSend, &Tail))
+					{
+						ToSend.TrimEndInline();
+						TArray<rd::Wrapper<JetBrains::EditorPlugin::StringRange>> Methods =
+							GetMethodRanges(MethodPattern, ToSend);
+						UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
+							MessageInfo, ToSend, GetPathRanges(PathPattern, ToSend), Methods
+						});
+					}
+					Tail.TrimEndInline();
+					UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
+						MessageInfo, Tail, GetPathRanges(PathPattern, Tail), GetMethodRanges(MethodPattern, Tail)
+					});
+					if(Tail.StartsWith(TEXT("NavigateToFunctionSource:  Unable to find symbols for ")))
+					{
+						FRegexMatcher Matcher{MethodPattern, Tail};
+						if(Matcher.FindNext())
+						{
+							const FString ClassName = Matcher.GetCaptureGroup(1);
+							const FString MethodName = Matcher.GetCaptureGroup(2);
+							NavigateToMethod.fire(JetBrains::EditorPlugin::MethodReference{
+								JetBrains::EditorPlugin::UClassName{ClassName},
+								MethodName
+							});
+						}
+					}
+				});
+		},
+		[this]()
+		{
 			if (outputDevice.onSerializeMessage.IsBound())
-			    outputDevice.onSerializeMessage.Unbind();
-       });
-    });
+				outputDevice.onSerializeMessage.Unbind();
+		});
+	});
 
 	UE_LOG(FLogRiderLoggingExtensionModule, Verbose, TEXT("STARTUP FINISH"));
 }

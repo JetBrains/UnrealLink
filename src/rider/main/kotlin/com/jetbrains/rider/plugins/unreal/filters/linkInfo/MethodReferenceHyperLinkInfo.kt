@@ -5,11 +5,12 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.framework.impl.startAndAdviseSuccess
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
+import com.jetbrains.rider.plugins.unreal.model.MethodReference
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 
 class MethodReferenceHyperLinkInfo(private val model: RdRiderModel,
-                                   private val methodReference: MethodReference) : HyperlinkInfo {
+                                   private val methodReference: MethodReference
+) : HyperlinkInfo {
     companion object {
         val logger = getLogger<BlueprintFunctionHyperLinkInfo>()
     }
