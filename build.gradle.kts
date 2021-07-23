@@ -301,7 +301,7 @@ intellij {
     val dependencyPath = File(projectDir, "dependencies")
     if (dependencyPath.exists()) {
         localPath.set(dependencyPath.canonicalPath)
-        println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
+        println("Will use ${File(localPath.get(), "build.txt").readText()} from ${localPath.get()} as RiderSDK")
     } else {
         version.set("${project.property("majorVersion")}-SNAPSHOT")
         println("Will download and use build/riderRD-${version.get()} as RiderSDK")
