@@ -39,9 +39,11 @@ public:
 	                       TFunction<void(rd::Lifetime,
 	                                      JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 	virtual void QueueAction(TFunction<void()> Handler) override;
+	virtual bool IsModelAlive() override { return RdIsModelAlive.get(); }
 
 private:
 	void InitProtocol();
+
 
 	rd::LifetimeDefinition ModuleLifetimeDef{rd::Lifetime::Eternal()};
 	rd::SingleThreadScheduler Scheduler{ModuleLifetimeDef.lifetime, "MainScheduler"};

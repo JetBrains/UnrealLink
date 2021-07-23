@@ -2,6 +2,7 @@
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
+#include "ScopeRWLock.h"
 #include "Model/Library/UE4Library/LogMessageInfo.Generated.h"
 #include "Model/Library/UE4Library/StringRange.Generated.h"
 #include "Model/Library/UE4Library/UnrealLogEvent.Generated.h"
@@ -94,28 +95,33 @@ void FRiderLoggingExtensionModule::StartupModule()
 					while (Tail.Split("\n", &ToSend, &Tail))
 					{
 						ToSend.TrimEndInline();
-						TArray<rd::Wrapper<JetBrains::EditorPlugin::StringRange>> Methods =
-							GetMethodRanges(MethodPattern, ToSend);
-						UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
-							MessageInfo, ToSend, GetPathRanges(PathPattern, ToSend), Methods
-						});
-					}
-					Tail.TrimEndInline();
-					UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
-						MessageInfo, Tail, GetPathRanges(PathPattern, Tail), GetMethodRanges(MethodPattern, Tail)
-					});
-					if(Tail.StartsWith(TEXT("NavigateToFunctionSource:  Unable to find symbols for ")))
-					{
-						FRegexMatcher Matcher{MethodPattern, Tail};
-						if(Matcher.FindNext())
 						{
-							const FString ClassName = Matcher.GetCaptureGroup(1);
-							const FString MethodName = Matcher.GetCaptureGroup(2);
-							NavigateToMethod.fire(JetBrains::EditorPlugin::MethodReference{
-								JetBrains::EditorPlugin::UClassName{ClassName},
-								MethodName
+							IRiderLinkModule& Module = IRiderLinkModule::Get();
+							FRWScopeLock Lock{Module.ModelRWLock, SLT_ReadOnly};
+
+							if(!Module.IsModelAlive()) return;
+
+							UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
+								MessageInfo,
+								Tail,
+								GetPathRanges(PathPattern, Tail),
+								GetMethodRanges(MethodPattern, Tail)
 							});
 						}
+					}
+					Tail.TrimEndInline();
+					{
+						IRiderLinkModule& Module = IRiderLinkModule::Get();
+						FRWScopeLock Lock{Module.ModelRWLock, SLT_ReadOnly};
+
+						if(!Module.IsModelAlive()) return;
+
+						UnrealLog.fire(JetBrains::EditorPlugin::UnrealLogEvent{
+							MessageInfo,
+							Tail,
+							GetPathRanges(PathPattern, Tail),
+							GetMethodRanges(MethodPattern, Tail)
+						});
 					}
 				});
 		},

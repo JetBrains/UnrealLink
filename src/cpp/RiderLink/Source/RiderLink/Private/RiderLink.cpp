@@ -1,6 +1,7 @@
 #include "RiderLink.hpp"
 
 #include "ProtocolFactory.h"
+#include "ScopeRWLock.h"
 #include "UE4Library/UE4Library.Generated.h"
 
 #include "Modules/ModuleManager.h"
@@ -52,6 +53,7 @@ void FRiderLinkModule::InitProtocol()
 		{
 			if (!IsConnected) return;
 
+			FRWScopeLock CreateModelLock{ModelRWLock, SLT_Write};
 			EditorModel = MakeUnique<JetBrains::EditorPlugin::RdEditorModel>();
 			EditorModel->connect(ConnectionLifetime, Protocol.Get());
 			JetBrains::EditorPlugin::UE4Library::serializersOwner.registerSerializersCore(
@@ -61,6 +63,7 @@ void FRiderLinkModule::InitProtocol()
 			{
 				Scheduler.queue([&]()mutable
 				{
+					FRWScopeLock ReleaseModelLock{ModelRWLock, SLT_Write};
 					RdIsModelAlive.set(false);
 					EditorModel.Reset();
 					// WireLifetimeDef->terminate();
