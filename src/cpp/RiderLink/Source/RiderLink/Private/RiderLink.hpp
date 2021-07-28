@@ -39,6 +39,7 @@ public:
 	                       TFunction<void(rd::Lifetime,
 	                                      JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 	virtual void QueueAction(TFunction<void()> Handler) override;
+	virtual bool FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 
 private:
 	void InitProtocol();
@@ -49,4 +50,5 @@ private:
 	TUniquePtr<rd::Protocol> Protocol;
 	rd::RdProperty<bool> RdIsModelAlive;
 	TUniquePtr<JetBrains::EditorPlugin::RdEditorModel> EditorModel;
+	FRWLock ModelLock;
 };
