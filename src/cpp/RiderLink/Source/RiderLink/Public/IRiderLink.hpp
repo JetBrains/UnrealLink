@@ -24,4 +24,5 @@ public:
 	virtual rd::LifetimeDefinition CreateNestedLifetimeDefinition() const = 0;
 	virtual void ViewModel(rd::Lifetime Lifetime, TFunction<void(rd::Lifetime, JetBrains::EditorPlugin::RdEditorModel const&)> Handler) = 0;
 	virtual void QueueAction(TFunction<void()> Handler) = 0;
+	virtual bool FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) = 0;
 };
