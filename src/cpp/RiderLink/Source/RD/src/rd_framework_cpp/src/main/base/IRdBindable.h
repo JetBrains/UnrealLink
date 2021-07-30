@@ -43,7 +43,7 @@ public:
 	 * \param parent to whom bind.
 	 * \param name specified name of node.
 	 */
-	virtual void bind(Lifetime lf, IRdDynamic const* parent, string_view name) const = 0;
+	virtual void bind(Lifetime lf, IRdDynamic const* parent, const std::string& name) const = 0;
 
 	/**
 	 * \brief Assigns IDs to this node and its child nodes in the graph.
@@ -78,18 +78,19 @@ typename std::enable_if_t<util::is_base_of_v<IRdBindable, T>> inline identifyPol
 
 template <typename T>
 typename std::enable_if_t<!util::is_base_of_v<IRdBindable, typename std::decay_t<T>>> inline bindPolymorphic(
-	T&&, Lifetime /*lf*/, const IRdDynamic* /*parent*/, string_view /*name*/)
+	T&&, Lifetime /*lf*/, const IRdDynamic* /*parent*/, const std::string
+	/*name*/&)
 {
 }
 
-inline void bindPolymorphic(IRdBindable const& that, Lifetime lf, const IRdDynamic* parent, string_view name)
+inline void bindPolymorphic(IRdBindable const& that, Lifetime lf, const IRdDynamic* parent, const std::string& name)
 {
 	that.bind(lf, parent, name);
 }
 
 template <typename T>
 typename std::enable_if_t<util::is_base_of_v<IRdBindable, T>> inline bindPolymorphic(
-	std::vector<T> const& that, Lifetime lf, IRdDynamic const* parent, string_view name)
+	std::vector<T> const& that, Lifetime lf, IRdDynamic const* parent, const std::string& name)
 {
 	for (auto& obj : that)
 	{

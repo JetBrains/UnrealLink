@@ -44,7 +44,7 @@ public:
 	// need to implement in subclasses
 	virtual void init(Lifetime lifetime) const;
 
-	void bind(Lifetime lf, IRdDynamic const* parent, string_view name) const override;
+	void bind(Lifetime lf, IRdDynamic const* parent, const std::string& name) const override;
 
 	void identify(const Identities& identities, RdId const& id) const override;
 

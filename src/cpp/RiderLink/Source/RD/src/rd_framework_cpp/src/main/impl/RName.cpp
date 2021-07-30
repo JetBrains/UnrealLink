@@ -4,64 +4,23 @@
 
 namespace rd
 {
-class RNameImpl
-{
-public:
-	// region ctor/dtor
-	RNameImpl(RName parent, string_view localName, string_view separator);
 
-	RNameImpl(const RName& other) = delete;
-	RNameImpl(RName&& other) noexcept = delete;
-	RNameImpl& operator=(const RNameImpl& other) = delete;
-	RNameImpl& operator=(RNameImpl&& other) noexcept = delete;
-	// endregion
-
-	friend std::string to_string(RNameImpl const& value);
-
-private:
-	RName parent;
-	std::string local_name, separator;
-};
-
-RNameImpl::RNameImpl(RName parent, string_view localName, string_view separator)
-	: parent(parent), local_name(localName), separator(separator)
+RName::RName(const RName& Parent, const std::string& LocalName, const std::string& Separator) :
+	name(to_string(Parent) + Separator + LocalName)
 {
 }
 
-RName::RName(RName parent, string_view localName, string_view separator)
-	: impl(std::make_shared<RNameImpl>(std::move(parent), localName, separator))
+RName RName::sub(const std::string&  LocalName, const std::string&  Separator) const
 {
+	return RName(*this, LocalName, Separator);
 }
 
-RName RName::sub(string_view localName, string_view separator)
+std::string to_string(RName const& Value)
 {
-	return RName(*this, localName, separator);
+	return Value.name;
 }
 
-std::string to_string(RName const& value)
-{
-	std::string res;
-	if (value.impl)
-	{
-		res = to_string(*value.impl);
-	}
-	return res;
-}
-
-std::string to_string(RNameImpl const& value)
-{
-	if (value.parent)
-	{
-		std::string res;
-		res = to_string(value.parent);
-		res += value.separator;
-		res += value.local_name;
-		return res;
-	}
-	return value.local_name;
-}
-
-RName::RName(string_view local_name) : RName(RName(), local_name, "")
+RName::RName(const std::string&  LocalName) : name(LocalName)
 {
 }
 

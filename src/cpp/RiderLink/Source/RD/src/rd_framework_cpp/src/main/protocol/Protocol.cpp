@@ -12,7 +12,7 @@ namespace rd
 std::shared_ptr<spdlog::logger> Protocol::initializationLogger =
 	spdlog::stderr_color_mt<spdlog::synchronous_factory>("initializationLogger", spdlog::color_mode::automatic);
 
-constexpr string_view Protocol::InternRootName;
+const std::string Protocol::InternRootName{"ProtocolInternRoot"};
 
 void Protocol::initialize() const
 {

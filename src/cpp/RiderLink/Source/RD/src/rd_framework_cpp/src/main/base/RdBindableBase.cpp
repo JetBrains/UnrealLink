@@ -6,7 +6,7 @@ namespace rd
 {
 std::string RdBindableBase::toString() const
 {
-	return "location=" + to_string(location) + ",rdid=" + to_string(rdid);
+	return "location=" + to_string(location) + ", rdid=" + to_string(rdid);
 }
 
 bool RdBindableBase::is_bound() const
@@ -14,7 +14,7 @@ bool RdBindableBase::is_bound() const
 	return parent != nullptr;
 }
 
-void RdBindableBase::bind(Lifetime lf, IRdDynamic const* parent, string_view name) const
+void RdBindableBase::bind(Lifetime lf, IRdDynamic const* parent, const std::string& name) const
 {
 	RD_ASSERT_MSG(!is_bound(), ("Trying to bound already bound this to " + to_string(parent->location)));
 	lf->bracket(

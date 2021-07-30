@@ -27,7 +27,7 @@ void InternRoot::on_wire_received(Buffer buffer) const
 	RD_ASSERT_MSG(((remote_id & 1) == 0), "Remote sent ID marked as our own, bug?");
 }
 
-void InternRoot::bind(Lifetime lf, IRdDynamic const* parent, string_view name) const
+void InternRoot::bind(Lifetime lf, IRdDynamic const* parent, const std::string& name) const
 {
 	RD_ASSERT_MSG(!is_bound(), "Trying to bound already bound "s + to_string(this->location) + " to " + to_string(parent->location))
 

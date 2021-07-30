@@ -28,7 +28,7 @@ class InternRoot;
  */
 class RD_FRAMEWORK_API Protocol : /*IRdDynamic, */ public IProtocol
 {
-	constexpr static string_view InternRootName{"ProtocolInternRoot"};
+	static const std::string InternRootName;
 
 	Lifetime lifetime;
 

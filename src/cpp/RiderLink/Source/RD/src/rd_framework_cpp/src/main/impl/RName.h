@@ -25,30 +25,30 @@ public:
 
 	RName() = default;
 
-	RName(const RName& other) = default;
+	RName(const RName& Other) = default;
 
-	RName(RName&& other) noexcept = default;
+	RName(RName&& Other) noexcept = default;
 
-	RName& operator=(const RName& other) = default;
+	RName& operator=(const RName& Other) = default;
 
-	RName& operator=(RName&& other) noexcept = default;
+	RName& operator=(RName&& Other) noexcept = default;
 
-	RName(RName parent, string_view localName, string_view separator);
+	RName(const RName& Parent, const std::string& LocalName, const std::string& Separator);
 
-	explicit RName(string_view local_name);
+	explicit RName(const std::string&  LocalName);
 	// endregion
 
-	RName sub(string_view localName, string_view separator);
+	RName sub( const std::string& LocalName, const std::string& Separator) const;
 
 	explicit operator bool() const
 	{
-		return impl != nullptr;
+		return !name.empty();
 	}
 
-	friend std::string RD_FRAMEWORK_API to_string(RName const& value);
-
-private:
-	std::shared_ptr<RNameImpl> impl;
+	friend std::string RD_FRAMEWORK_API to_string(RName const& Value);
+private:	
+	std::string name;
+	
 };
 }	 // namespace rd
 #if defined(_MSC_VER)
