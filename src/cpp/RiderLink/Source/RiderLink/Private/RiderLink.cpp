@@ -102,6 +102,8 @@ void FRiderLinkModule::QueueAction(TFunction<void()> Handler)
 bool FRiderLinkModule::FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler)
 {
 	FRWScopeLock Lock(ModelLock, SLT_ReadOnly);
+	if(!RdIsModelAlive.has_value()) return false;
+	
 	if(RdIsModelAlive.get())
 	{
 		Handler(*EditorModel.Get());
