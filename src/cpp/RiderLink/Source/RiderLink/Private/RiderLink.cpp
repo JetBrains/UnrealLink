@@ -63,10 +63,8 @@ void FRiderLinkModule::InitProtocol()
 			{
 				Scheduler.queue([&]()mutable
 				{
-					FRWScopeLock LockOnDisconnect(ModelLock, SLT_Write);
-					RdIsModelAlive.set(false);
-					EditorModel.Reset();
-					// WireLifetimeDef->terminate();
+                    FRWScopeLock LockOnDisconnect(ModelLock, SLT_Write);
+                    RdIsModelAlive.set(false);
 				});
 			});
 			RdIsModelAlive.set(true);
