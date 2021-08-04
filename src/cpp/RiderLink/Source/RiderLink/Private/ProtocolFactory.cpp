@@ -3,7 +3,13 @@
 #include "scheduler/base/IScheduler.h"
 #include "wire/SocketWire.h"
 
+#include "Runtime/Launch/Resources/Version.h"
+
+#if ENGINE_MAJOR_VERSION >= 5
 #include "HAL/PlatformFileManager.h"
+#else
+#include "HAL/PlatformFilemanager.h"
+#endif
 #include "Misc/App.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -19,8 +25,6 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/HideWindowsPlatformTypes.h"
 #endif
-
-#include "Runtime/Launch/Resources/Version.h"
 
 static FString GetPathToPortsFolder()
 {
