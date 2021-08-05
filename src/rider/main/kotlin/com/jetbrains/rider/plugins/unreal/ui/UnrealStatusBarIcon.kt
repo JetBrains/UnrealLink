@@ -10,10 +10,11 @@ import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import icons.UnrealIcons
+import java.awt.Color
 import java.awt.event.MouseEvent
 import javax.swing.Icon
 
-class UnrealStatusBarIcon(project: Project): StatusBarWidget, StatusBarWidget.IconPresentation {
+class UnrealStatusBarIcon(project: Project) : StatusBarWidget, StatusBarWidget.IconPresentation {
     companion object {
         @Suppress("HardCodedStringLiteral")
         const val StatusBarIconId = "UnrealStatusIcon"
@@ -29,14 +30,14 @@ class UnrealStatusBarIcon(project: Project): StatusBarWidget, StatusBarWidget.Ic
     }
 
     private val connectedIcon = ExecutionUtil.getLiveIndicator(UnrealIcons.Status.Connected)
-    private val disconnectedIcon = ExecutionUtil.getLiveIndicator(UnrealIcons.Status.Disconnected)
+    private val disconnectedIcon = ExecutionUtil.getIndicator(UnrealIcons.Status.Disconnected, 13, 13, Color.RED)
     private var myStatusBar: StatusBar? = null
 
     override fun ID(): String {
         return StatusBarIconId
     }
 
-    override fun getPresentation(): StatusBarWidget.WidgetPresentation? {
+    override fun getPresentation(): StatusBarWidget.WidgetPresentation {
         return this
     }
 
@@ -48,8 +49,8 @@ class UnrealStatusBarIcon(project: Project): StatusBarWidget, StatusBarWidget.Ic
         myStatusBar = null
     }
 
-    override fun getTooltipText(): String? {
-        return if(host.model.isConnectedToUnrealEditor.value)
+    override fun getTooltipText(): String {
+        return if (host.model.isConnectedToUnrealEditor.value)
             UnrealLinkBundle.message("tooltip.ConnectionsToUnrealEditorStatus.text.connected")
         else
             UnrealLinkBundle.message("tooltip.ConnectionsToUnrealEditorStatus.text.notConnected")
