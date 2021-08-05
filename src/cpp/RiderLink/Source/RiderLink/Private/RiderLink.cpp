@@ -1,9 +1,9 @@
 #include "RiderLink.hpp"
 
 #include "ProtocolFactory.h"
-#include "ScopeRWLock.h"
 #include "UE4Library/UE4Library.Generated.h"
 
+#include "Misc/ScopeRWLock.h"
 #include "Modules/ModuleManager.h"
 #include "HAL/Platform.h"
 
