@@ -121,7 +121,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 ));
         }
 
-        private async Task InstallPluginInGame(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
+        private void InstallPluginInGame(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             Property<double> progress)
         {
             myLogger.Verbose("[UnrealLink]: Installing plugin in Game");
@@ -139,7 +139,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Verbose($"[UnrealLink]: Installing plugin for {installDescription.ProjectName}");
                 try
                 {
-                    if (await InstallPlugin(lifetime, installDescription, unrealPluginInstallInfo.EngineRoot, progress,
+                    if (InstallPlugin(lifetime, installDescription, unrealPluginInstallInfo.EngineRoot, progress,
                         range)) continue;
                 }
                 catch (OperationCanceledException)
@@ -209,7 +209,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return result;
         }
 
-        private async Task InstallPluginInEngine(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
+        private void InstallPluginInEngine(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             IProperty<double> progress)
         {
             var backupDir = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
@@ -220,7 +220,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             bool success;
             try
             {
-                success = await InstallPlugin(lifetime, unrealPluginInstallInfo.EnginePlugin,
+                success = InstallPlugin(lifetime, unrealPluginInstallInfo.EnginePlugin,
                    unrealPluginInstallInfo.EngineRoot, progress, 1.0);
             }
             catch (OperationCanceledException)
@@ -246,7 +246,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost.myModel.InstallPluginFinished(success);
         }
 
-        private async Task<bool> InstallPlugin(Lifetime lifetime,
+        private bool InstallPlugin(Lifetime lifetime,
             UnrealPluginInstallInfo.InstallDescription installDescription,
             FileSystemPath engineRoot, IProperty<double> progressProperty, double range)
         {
@@ -286,7 +286,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pluginBuildOutput = FileSystemDefinition.CreateTemporaryDirectory(null, TMP_PREFIX);
             def.Lifetime.OnTermination(() => { pluginBuildOutput.Delete(); });
             var buildProgress = progressProperty.Value;
-            var isPluginBuilt = await BuildPlugin(lifetime, upluginFile, pluginBuildOutput,
+            var isPluginBuilt = BuildPlugin(lifetime, upluginFile, pluginBuildOutput,
                 engineRoot, value => progressProperty.SetValue(buildProgress + value * BUILD_STEP));
             if (!isPluginBuilt)
             {
@@ -424,15 +424,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     lifetimeDefinition.Terminate();
                 });
                 myUnrealHost.myModel.RiderLinkInstallPanelInit();
-                await lifetime.StartBackgroundAsync(async () =>
+                await lifetime.StartBackground(() =>
                 {
                     if (installPluginDescription.Location == PluginInstallLocation.Engine)
                     {
-                        await InstallPluginInEngine(lifetime, unrealPluginInstallInfo, progress);
+                        InstallPluginInEngine(lifetime, unrealPluginInstallInfo, progress);
                     }
                     else
                     {
-                        await InstallPluginInGame(lifetime, unrealPluginInstallInfo, progress);
+                        InstallPluginInGame(lifetime, unrealPluginInstallInfo, progress);
                     }
                 });
             });
@@ -624,7 +624,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
 
 
-        private async Task<bool> BuildPlugin(Lifetime lifetime, FileSystemPath upluginPath,
+        private bool BuildPlugin(Lifetime lifetime, FileSystemPath upluginPath,
             FileSystemPath outputDir, FileSystemPath engineRoot,
             Action<double> progressPump)
         {
@@ -682,7 +682,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                 myLogger.Verbose("[UnrealLink]: Start building UnrealLink");
 
-                var result = await StartUATBuildPluginAsync(lifetime, command, commandLine, pipeStreams);
+                var result = StartUATBuildPluginWithLock(lifetime, command, commandLine, pipeStreams);
                 lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
                 myLogger.Verbose("[UnrealLink]: Stop building UnrealLink");
@@ -721,7 +721,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return true;
         }
 
-        private Task<uint> StartUATBuildPluginAsync(Lifetime lifetime, FileSystemPath command,
+        private uint StartUATBuildPluginWithLock(Lifetime lifetime, FileSystemPath command,
             CommandLineBuilderJet commandLine, InvokeChildProcess.PipeStreams pipeStreams)
         {
             InvokeChildProcess.StartInfo startinfo = new InvokeChildProcess.StartInfo(command)
@@ -732,7 +732,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lock (HACK_getMutexForUBT())
             {
                 return InvokeChildProcess.InvokeCore(lifetime, startinfo,
-                    InvokeChildProcess.SyncAsync.Async, myLogger);
+                    InvokeChildProcess.SyncAsync.Sync, myLogger).Result;
             }
         }
 
