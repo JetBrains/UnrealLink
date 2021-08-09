@@ -9,15 +9,13 @@ This plugin contains a plugin for the Unreal Editor (RiderLink) that is used to 
 The plugin is always bundled with Rider.
 
 ## [Unreleased]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
+- Finally fix for [GITHUB-99](https://github.com/JetBrains/UnrealLink/issues/99)
+- as well as [GITHUB-97](https://github.com/JetBrains/UnrealLink/issues/97)
+- Number of fixes for clashing "Project Model Generation" with "Building RiderLink" actions blocking UnrealBuildTool.
+They don't have dedicated issues in YT or GH, but has producing annoying results like:
+  - "can't generate project model, because UBT is running" message;
+  - Building RiderLink and failing would leave a hanging UBT process.
 
 ### Known Issues
 ## [2021.1.12]
