@@ -8,6 +8,8 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestInfo
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestProject
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rd.util.reactive.adviseUntil
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
@@ -26,6 +28,8 @@ class Connection : UnrealTestProject() {
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
         openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
+        openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
+
     }
 
 //    /**
@@ -45,7 +49,7 @@ class Connection : UnrealTestProject() {
     fun enginesAndOthers(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
         unrealInfo.testingEngines.forEach { en ->
-            arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { il ->
+            arrayOf(PluginInstallLocation.Game).forEach { il ->
                 arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject).forEach { op ->
                     result.add(arrayOf(op, il, en))
                 }
@@ -82,6 +86,13 @@ class Connection : UnrealTestProject() {
 
         waitAndPump(Duration.ofSeconds(15),
             { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
+
+//        var isUnrealSolution = false
+//        project.solution.rdRiderModel.isUnrealEngineSolution.adviseUntil(Lifetime.Eternal)
+//            { isUnrealSolution = it
+//                it }
+//        waitAndPump(Duration.ofSeconds(15),
+//            { isUnrealSolution }, { "Fuck!" })
 
         if (unrealInfo.needInstallRiderLink) {
             installRiderLink(unrealInfo.placeToInstallRiderLink)

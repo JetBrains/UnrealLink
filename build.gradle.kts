@@ -121,6 +121,8 @@ fun getBranchName(): String {
 }
 
 tasks {
+    test { dependsOn("prepareTestingSandbox") }
+
     jar { dependsOn(":protocol:generateModels") }
 
     withType<RunIdeTask> {
