@@ -26,6 +26,10 @@
 			"LoadingPhase": "PreDefault"
 		},
 		{
+			"Name": "RiderCodeNavigationExtension",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "PreDefault"
+		},{
 			"Name": "RiderLoggingExtension",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PreDefault"
