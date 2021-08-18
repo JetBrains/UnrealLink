@@ -12,9 +12,7 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.base.BaseTestWithSolution
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
-import com.jetbrains.rider.test.scriptingApi.buildSolution
-import com.jetbrains.rider.test.scriptingApi.checkBuildResult
-import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
+import com.jetbrains.rider.test.scriptingApi.*
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -43,8 +41,7 @@ class Connection : BaseTestWithSolution() {
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 
-        val result = buildSolution(project, timeout = Duration.ofSeconds(120))
-        checkBuildResult(result.buildResult, result.errorMessages)
+        buildSolutionWithReSharperBuild()
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {
