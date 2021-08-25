@@ -1,7 +1,8 @@
 package model.editorPlugin
 
 import com.jetbrains.rd.generator.nova.*
-import com.jetbrains.rd.generator.nova.PredefinedType.*
+import com.jetbrains.rd.generator.nova.PredefinedType.bool
+import com.jetbrains.rd.generator.nova.PredefinedType.int
 import com.jetbrains.rd.generator.nova.cpp.Cpp17Generator
 import com.jetbrains.rd.generator.nova.csharp.CSharp50Generator
 import model.lib.ue4.UE4Library
@@ -23,7 +24,8 @@ object RdEditorRoot : Root() {
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
         signal("unrealLog", UE4Library.UnrealLogEvent).async
-        signal("navigateToMethod", UE4Library.MethodReference).async
+        callback("navigateToMethod", UE4Library.MethodReference, bool).async
+        callback("navigateToClass", UE4Library.UClassName, bool).async
 
         signal("openBlueprint", UE4Library.BlueprintReference)
 

@@ -109,4 +109,23 @@ bool FRiderLinkModule::FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::R
 	return RdIsModelAlive.get();
 }
 
+TOptional<bool> FRiderLinkModule::CallAsyncAction(
+	TFunction<bool(JetBrains::EditorPlugin::RdEditorModel const&)> Handler)
+{
+	FRWScopeLock Lock(ModelLock, SLT_ReadOnly);
+	if(!RdIsModelAlive.has_value()) return {};
+	
+	if(RdIsModelAlive.get())
+	{
+		return {Handler(*EditorModel.Get())};
+	}
+	return {};
+}
+
+bool FRiderLinkModule::IsConnected()
+{
+	FRWScopeLock Lock(ModelLock, SLT_ReadOnly);
+	return RdIsModelAlive.has_value() && RdIsModelAlive.get();
+}
+
 #undef LOCTEXT_NAMESPACE

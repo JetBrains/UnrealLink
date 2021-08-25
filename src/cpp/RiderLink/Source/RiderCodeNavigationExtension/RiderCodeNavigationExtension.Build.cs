@@ -15,7 +15,8 @@ public class RiderCodeNavigationExtension : ModuleRules
 			"Core",
 			"RD",
 			"RiderLink",
-			"UnrealEd"
+			"UnrealEd",
+			"CoreUObject"
 		});
 	}
 }

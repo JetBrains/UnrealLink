@@ -217,7 +217,8 @@ namespace RiderPlugin.UnrealLink
                     myUnrealHost.PerformModelAction(riderModel => { OnMessageReceived(riderModel, logEvent); });
                 });
             
-            unrealModel.NavigateToMethod.Advise(lf, reference => myEditorNavigator.NavigateToMethod(reference));
+            unrealModel.NavigateToMethod.Set(methodReference => myEditorNavigator.NavigateToMethod(methodReference));
+            unrealModel.NavigateToClass.Set(className => myEditorNavigator.NavigateToClass(className));
 
             unrealModel.OnBlueprintAdded.Advise(lf, blueprintClass =>
             {

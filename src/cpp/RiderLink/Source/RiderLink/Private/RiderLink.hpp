@@ -40,6 +40,8 @@ public:
 	                                      JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 	virtual void QueueAction(TFunction<void()> Handler) override;
 	virtual bool FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
+	virtual TOptional<bool> CallAsyncAction(TFunction<bool(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
+	virtual bool IsConnected() override;
 
 private:
 	void InitProtocol();

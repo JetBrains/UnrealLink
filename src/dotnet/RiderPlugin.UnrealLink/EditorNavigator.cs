@@ -45,11 +45,10 @@ namespace RiderPlugin.UnrealLink
                     .Where(symbol => s == symbol.Name.Name.ToString()).SingleOrNull();
             });
 
-        public void NavigateToClass(UClassName uClass)
+        public bool NavigateToClass(UClassName uClass)
         {
             var classSymbol = GetClassSymbol(uClass.Name.Data);
-            if (classSymbol == null)
-                return;
+            if (classSymbol == null) return false;
             var declaredElement = new CppParserSymbolDeclaredElement(_psiServices, classSymbol);
 
             using (ReadLockCookie.Create())
@@ -59,11 +58,14 @@ namespace RiderPlugin.UnrealLink
                     declaredElement.Navigate(true);
                 }
             }
+
+            return true;
         }
 
-        public void NavigateToMethod(MethodReference methodReference)
+        public bool NavigateToMethod(MethodReference methodReference)
         {
             var declaredElement = MethodDeclaredElement(methodReference);
+            if (declaredElement == null) return false;
             using (ReadLockCookie.Create())
             {
                 using (CompilationContextCookie.GetOrCreate(UniversalModuleReferenceContext.Instance))
@@ -71,6 +73,8 @@ namespace RiderPlugin.UnrealLink
                     declaredElement.Navigate(true);
                 }
             }
+
+            return true;
         }
 
         private CppParserSymbolDeclaredElement MethodDeclaredElement(MethodReference methodReference)
