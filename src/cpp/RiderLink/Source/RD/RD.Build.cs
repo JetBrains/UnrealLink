@@ -36,6 +36,8 @@ public class RD : ModuleRules
 			PublicDefinitions.Add("_WINSOCK_DEPRECATED_NO_WARNINGS");
 			PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
 			PublicDefinitions.Add("_CRT_NONSTDC_NO_DEPRECATE");
+			PublicDefinitions.Add("SPDLOG_WCHAR_FILENAMES");
+			PublicDefinitions.Add("SPDLOG_WCHAR_TO_UTF8_SUPPORT");
 			PrivateDefinitions.Add("WIN32_LEAN_AND_MEAN");
 		}
 

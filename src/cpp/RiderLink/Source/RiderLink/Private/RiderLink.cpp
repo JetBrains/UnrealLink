@@ -23,6 +23,7 @@ void FRiderLinkModule::ShutdownModule()
 void FRiderLinkModule::StartupModule()
 {
 	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP START"));
+	ProtocolFactory::InitRdLogging();
 	Scheduler.queue([this]()
 	{
 		InitProtocol();

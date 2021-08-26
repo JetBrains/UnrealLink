@@ -18,6 +18,8 @@ public class RiderLink : ModuleRules
 			"Public/Model/RdEditorProtocol",
 		};
 		
+		PrivateDefinitions.Add("ENABLE_LOG_FILE=0");
+
 		foreach(var Item in Paths)
 		{
 			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));

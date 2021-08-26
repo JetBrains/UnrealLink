@@ -21,37 +21,46 @@
 #endif
 
 #include "Runtime/Launch/Resources/Version.h"
+#include "spdlog/sinks/daily_file_sink.h"
 
-static FString GetPathToPortsFolder()
+static FString GetLocalAppdataFolder()
 {
     const FString EnvironmentVarName =
 #if PLATFORM_WINDOWS
-    TEXT("LOCALAPPDATA");
+TEXT("LOCALAPPDATA");
 #else
     TEXT("HOME");
 #endif
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 20
     TCHAR CAppDataLocalPath[4096];
     FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName, CAppDataLocalPath, ARRAY_COUNT(CAppDataLocalPath));
-    const FString FAppDataLocalPath = CAppDataLocalPath;
+    return CAppDataLocalPath;
 #else
-    const FString FAppDataLocalPath = FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName);
+    return FPlatformMisc::GetEnvironmentVariable(*EnvironmentVarName);
 #endif
-
-    const FString PortFullDirectoryPath = FPaths::Combine(*FAppDataLocalPath,
-#if PLATFORM_WINDOWS
-        TEXT("Jetbrains"), TEXT("Rider"), TEXT("Unreal"), TEXT("Ports")
-#elif PLATFORM_MAC
-        TEXT("Library"), TEXT("Logs"), TEXT("Unreal Engine"), TEXT("Ports")
-#else
-        TEXT(".config"), TEXT("unrealEngine"), TEXT("Ports")
-#endif
-    );
-
-    return PortFullDirectoryPath;
 }
 
-FString GetProjectName()
+static FString GetMiscFilesFolder()
+{    
+    const FString FAppDataLocalPath = GetLocalAppdataFolder();
+    return FPaths::Combine(*FAppDataLocalPath,
+#if PLATFORM_WINDOWS
+        TEXT("Jetbrains"), TEXT("Rider"), TEXT("Unreal")
+#elif PLATFORM_MAC
+        TEXT("Library"), TEXT("Logs"), TEXT("Unreal Engine")
+#else
+        TEXT(".config"), TEXT("unrealEngine")
+#endif
+    );
+}
+
+static FString GetPathToPortsFolder()
+{
+    const FString MiscFilesFolder = GetMiscFilesFolder();
+    return FPaths::Combine(*MiscFilesFolder, TEXT("Ports"));
+}
+
+static FString GetProjectName()
 {
     FString ProjectNameNoExtension = FApp::GetProjectName();
     if(ProjectNameNoExtension.IsEmpty())
@@ -59,11 +68,31 @@ FString GetProjectName()
     return ProjectNameNoExtension + TEXT(".uproject");
 }
 
+static FString GetLogFile()
+{
+    const FString MiscFilesFolder = GetMiscFilesFolder();
+    return FPaths::Combine(*MiscFilesFolder, TEXT("Logs"), GetProjectName());
+}
+
+
+void ProtocolFactory::InitRdLogging()
+{
+#if ENABLE_LOG_FILE == 1
+    const FString LogFile = GetLogFile();
+    const FString Msg = TEXT("[RiderLink] Path to log file: ") + LogFile;
+    auto FileLogger = std::make_shared<spdlog::sinks::daily_file_sink_mt>(*LogFile, 23, 59);
+    FileLogger->set_level(spdlog::level::trace);
+    spdlog::apply_all([FileLogger](std::shared_ptr<spdlog::logger> Logger)
+    {
+        Logger->sinks().push_back(FileLogger);
+    });
+#endif
+    spdlog::set_level(spdlog::level::err);
+}
+
 std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
 {
     const FString ProjectName = GetProjectName();
-
-    spdlog::set_level(spdlog::level::err);
     return std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
                                                          TCHAR_TO_UTF8(*FString::Printf(TEXT("UnrealEditorServer-%s"),
                                                              *ProjectName)));
