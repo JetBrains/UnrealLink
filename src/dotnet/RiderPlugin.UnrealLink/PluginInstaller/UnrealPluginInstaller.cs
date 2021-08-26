@@ -333,8 +333,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 () => { myNotificationsModel.Notification(notification); });
 
             var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
-            if (cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened)
-                RegenerateProjectFiles(lifetime, engineRoot, installDescription.UprojectPath);
+            bool isSln;
+            using (mySolution.Locks.UsingReadLock())
+            {
+                isSln = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
+            }
+
+            if (isSln)
+            {
+                var uprojectPath = installDescription.UprojectPath.IsNullOrEmpty()
+                    ? cppUe4SolutionDetector.GetUProjectPath()
+                    : installDescription.UprojectPath;
+            
+                RegenerateProjectFiles(lifetime, engineRoot, uprojectPath);   
+            }
             return true;
         }
 
@@ -457,7 +469,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     "Need to refresh project files in Unreal Editor or in File Explorer with context action for .uproject file 'Refresh Project files'",
                     ContentType.Normal));
             }
-            if (EngineRoot.IsNullOrEmpty())
+            if (!EngineRoot.IsValidAndExistDirectory())
             {
                 myLogger.Warn($"[UnrealLink]: Couldn't find Unreal Engine root");
 
@@ -483,7 +495,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private bool GenerateProjectFilesCmd(Lifetime lifetime, FileSystemPath UprojectFile, FileSystemPath EngineRoot)
         {
-            var isProjectUnderEngine = UprojectFile.StartsWith(EngineRoot) || UprojectFile.IsNullOrEmpty();
+            // Invalid uproject file means we couldn't get uproject file from solution detector and the project might be
+            // under Engine source
+            var invalidUprojectFile = !UprojectFile.IsValidAndExistFile();
+            var isProjectUnderEngine = UprojectFile.StartsWith(EngineRoot) || invalidUprojectFile;
             if (!isProjectUnderEngine)
             {
                 myLogger.Info($"[UnrealLink]: {mySolution.SolutionFilePath} is not in {EngineRoot} ");
@@ -555,6 +570,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private bool RegenerateProjectUsingUVS(Lifetime lifetime, FileSystemPath uprojectFilePath,
             FileSystemPath pathToUnrealVersionSelector)
         {
+            if (!uprojectFilePath.IsValidAndExistFile()) return false;
             if (!pathToUnrealVersionSelector.ExistsFile)
             {
                 myLogger.Info($"[UnrealLink]: {pathToUnrealVersionSelector} is not available");
@@ -563,7 +579,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var command = GetPlatformCommand(pathToUnrealVersionSelector);
             var commandLine =
-                GetPlatformCommandLine(pathToUnrealVersionSelector, "/projectFiles", $"\"{uprojectFilePath}\"");
+                GetPlatformCommandLine(pathToUnrealVersionSelector, "-projectFiles", $"\"{uprojectFilePath}\"");
 
             var pipeStreams = CreatePipeStreams("[UVS]:");
             InvokeChildProcess.StartInfo startInfo = new InvokeChildProcess.StartInfo(command)
@@ -596,6 +612,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             FileSystemPath pathToUnrealBuildToolBin,
             FileSystemPath engineRoot)
         {
+            if (uprojectFilePath.IsNullOrEmpty()) return false;
+            
             bool isInstalledBuild = IsInstalledBuild(engineRoot);
 
             var command = GetPlatformCommand(pathToUnrealBuildToolBin);
