@@ -42,7 +42,8 @@ TEXT("LOCALAPPDATA");
 
 static FString GetMiscFilesFolder()
 {    
-    const FString FAppDataLocalPath = GetLocalAppdataFolder();
+    FString FAppDataLocalPath = GetLocalAppdataFolder();
+    FPaths::NormalizeFilename(FAppDataLocalPath);
     return FPaths::Combine(*FAppDataLocalPath,
 #if PLATFORM_WINDOWS
         TEXT("Jetbrains"), TEXT("Rider"), TEXT("Unreal")
@@ -77,6 +78,7 @@ static FString GetLogFile()
 
 void ProtocolFactory::InitRdLogging()
 {
+    spdlog::set_level(spdlog::level::err);
 #if ENABLE_LOG_FILE == 1
     const FString LogFile = GetLogFile();
     const FString Msg = TEXT("[RiderLink] Path to log file: ") + LogFile;
@@ -87,7 +89,6 @@ void ProtocolFactory::InitRdLogging()
         Logger->sinks().push_back(FileLogger);
     });
 #endif
-    spdlog::set_level(spdlog::level::err);
 }
 
 std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
