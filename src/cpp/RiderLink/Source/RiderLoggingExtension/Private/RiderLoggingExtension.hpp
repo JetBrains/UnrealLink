@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
+#include "scheduler/SingleThreadScheduler.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderLoggingExtensionModule, Log, All);
 
@@ -22,6 +23,7 @@ public:
     virtual bool SupportsDynamicReloading() override { return true; };
 
 private:
-    FRiderOutputDevice outputDevice;
+    TUniquePtr<rd::SingleThreadScheduler> LoggingScheduler;
+    FRiderOutputDevice OutputDevice;
     rd::LifetimeDefinition ModuleLifetimeDef;
 };
