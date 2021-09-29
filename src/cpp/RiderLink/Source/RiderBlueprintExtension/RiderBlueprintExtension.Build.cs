@@ -6,7 +6,11 @@ public class RiderBlueprintExtension : ModuleRules
 {
 	public RiderBlueprintExtension(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+#if UE_4_22_OR_LATER
+		PCHUsage = PCHUsageMode.NoPCHs;
+#else
+		PCHUsage = PCHUsageMode.NoSharedPCHs;
+#endif
 		
 		bUseRTTI = true;
 		
