@@ -35,12 +35,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly ILogger myLogger;
         private readonly ISolution mySolution;
         private readonly CppUE4SolutionDetector mySolutionDetector;
-        public readonly Property<UnrealPluginInstallInfo> InstallInfoProperty;
+        public readonly IProperty<UnrealPluginInstallInfo> InstallInfoProperty;
 
         private CppUE4Version myUnrealVersion;
-        private readonly CppUE4Version myMinimalSupportedVersion = new CppUE4Version(4, 23, 0);
+        private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
 
-        private readonly JetHashSet<string> EXCLUDED_PROJECTS = new JetHashSet<string>{"UnrealLaunchDaemon"};
+        private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger,

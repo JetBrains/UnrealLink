@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
+using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.ProjectModel;
@@ -10,7 +11,6 @@ using JetBrains.Rd;
 using JetBrains.Rd.Base;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
-using JetBrains.ReSharper.Features.XamlRendererHost.Preview;
 using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model;
 using RiderPlugin.UnrealLink.Model.BackendUnreal;
@@ -62,10 +62,8 @@ namespace RiderPlugin.UnrealLink
 
             myLogger.Info("RiderBackendToUnrealEditor building started");
 
-            pluginDetector.InstallInfoProperty.View(myComponentLifetime, (lt, pluginInfo) =>
+            pluginDetector.InstallInfoProperty.ForEachValue_NotNull(myComponentLifetime, (lt, pluginInfo) =>
             {
-                if (pluginInfo == null) return;
-
                 var portDirectoryFullPath = GetPathToPortsFolder();
 
                 Directory.CreateDirectory(portDirectoryFullPath);
