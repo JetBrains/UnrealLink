@@ -79,7 +79,7 @@ static FString GetLogFile()
 void ProtocolFactory::InitRdLogging()
 {
     spdlog::set_level(spdlog::level::err);
-#if ENABLE_LOG_FILE == 1
+#if defined(ENABLE_LOG_FILE) && ENABLE_LOG_FILE == 1
     const FString LogFile = GetLogFile();
     const FString Msg = TEXT("[RiderLink] Path to log file: ") + LogFile;
     auto FileLogger = std::make_shared<spdlog::sinks::daily_file_sink_mt>(*LogFile, 23, 59);
