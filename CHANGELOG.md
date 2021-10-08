@@ -2,22 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0). Note that this project does not follow semantic versioning but uses version numbers based on JetBrains [Rider](https://www.jetbrains.com/rider/) releases.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0). Note that this project does not follow
+semantic versioning but uses version numbers based on JetBrains [Rider](https://www.jetbrains.com/rider/) releases.
 
-This plugin contains a plugin for the Unreal Editor (RiderLink) that is used to communicate with Rider. Changes marked with a "Rider:" prefix are specific to Rider, while changes for the Unreal Editor plugin are marked with a "Unreal Editor:" prefix. No prefix means that the change is common to both Rider and ReSharper.
+This plugin contains a plugin for the Unreal Editor (RiderLink) that is used to communicate with Rider. Changes marked
+with a "Rider:" prefix are specific to Rider, while changes for the Unreal Editor plugin are marked with a "Unreal
+Editor:" prefix. No prefix means that the change is common to both Rider and ReSharper.
 
 The plugin is always bundled with Rider.
 
 ## [Unreleased]
+
+### Changed
+
+- Sending logs from Unreal Editor to Rider moved to separate thread, less load on UE UI thread
+
 ### Fixed
+
+- [RIDER-68865](https://youtrack.jetbrains.com/issue/RIDER-68865)
+- Unreal log messages are not limited anymore with 4KB size
+
+## [2021.2.0.659]
+
+### Fixed
+
 - Finally fix for [GITHUB-99](https://github.com/JetBrains/UnrealLink/issues/99)
 - as well as [GITHUB-97](https://github.com/JetBrains/UnrealLink/issues/97)
 - Number of fixes for clashing "Project Model Generation" with "Building RiderLink" actions blocking UnrealBuildTool.
-They don't have dedicated issues in YT or GH, but has producing annoying results like:
+  They don't have dedicated issues in YT or GH, but has producing annoying results like:
   - "can't generate project model, because UBT is running" message;
   - Building RiderLink and failing would leave a hanging UBT process.
 
 ### Known Issues
+
 ## [2021.1.12]
 ### Added
 
