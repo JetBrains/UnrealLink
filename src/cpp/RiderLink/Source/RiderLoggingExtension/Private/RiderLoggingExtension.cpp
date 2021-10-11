@@ -74,7 +74,7 @@ void SendMessageInChunks(FString* Msg, const JetBrains::EditorPlugin::LogMessage
 	while (!Msg->IsEmpty())
 	{
 		SendMessageToRider(MessageInfo, Msg->Left(NUMBER_OF_CHUNKS));
-		Msg->RightChopInline(NUMBER_OF_CHUNKS);
+		*Msg = Msg->RightChop(NUMBER_OF_CHUNKS);
 	}
 }
 

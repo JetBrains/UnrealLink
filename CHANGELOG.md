@@ -13,6 +13,12 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 
+### Fixed
+
+- [GITHUB-135](https://github.com/JetBrains/UnrealLink/issues/135)
+
+## [2021.2.1.1]
+
 ### Changed
 
 - Sending logs from Unreal Editor to Rider moved to separate thread, less load on UE UI thread
