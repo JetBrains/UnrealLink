@@ -2,7 +2,7 @@
 
 #include "RiderOutputDevice.hpp"
 
-#include "UniquePtr.h"
+#include "Templates/UniquePtr.h"
 
 #include "lifetime/LifetimeDefinition.h"
 
