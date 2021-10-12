@@ -6,7 +6,7 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestInfo
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestProject
+import testFrameworkExtentions.UnrealTestProject
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseUntil
@@ -32,26 +32,13 @@ class Connection : UnrealTestProject() {
 
     }
 
-//    /**
-//     * @return [[]]
-//     */
-//    @DataProvider
-//    fun enginesAndOthers() = Array(unrealInfo.testingEngines.size*4)
-//        { i ->
-//            arrayOf(
-//                arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)[i%2],
-//                arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject)[i%2],
-//                unrealInfo.testingEngines[i % unrealInfo.testingEngines.size]
-//            )
-//        }
-
     @DataProvider
     fun enginesAndOthers(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
-        unrealInfo.testingEngines.forEach { en ->
-            arrayOf(PluginInstallLocation.Game).forEach { il ->
-                arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject).forEach { op ->
-                    result.add(arrayOf(op, il, en))
+        unrealInfo.testingEngines.forEach { engine ->
+            arrayOf(PluginInstallLocation.Game).forEach { location ->
+                arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject).forEach { type ->
+                    result.add(arrayOf(type, location, engine))
                 }
             }
         }
