@@ -107,6 +107,7 @@ void SocketWire::Base::send(RdId const& rd_id, std::function<void(Buffer& buffer
 {
 	RD_ASSERT_MSG(!rd_id.isNull(), "{}: id mustn't be null");
 
+	std::lock_guard<decltype(wire_send_lock)> lock(wire_send_lock);
 	local_send_buffer.write_integral<int32_t>(0);	 // placeholder for length
 
 	rd_id.write(local_send_buffer);					 // write id
