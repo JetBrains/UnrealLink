@@ -24,7 +24,7 @@ constexpr int32_t SocketWire::Base::PING_MESSAGE_LENGTH;
 constexpr int32_t SocketWire::Base::PACKAGE_HEADER_LENGTH;
 
 SocketWire::Base::Base(std::string id, Lifetime parentLifetime, IScheduler* scheduler)
-	: WireBase(scheduler), id(std::move(id)), scheduler(scheduler), local_send_buffer(SEND_BUFFER_SIZE), lifetimeDef(parentLifetime)
+	: WireBase(scheduler), id(std::move(id)), scheduler(scheduler), lifetimeDef(parentLifetime)
 {
 	async_send_buffer.pause("initial");
 	async_send_buffer.start();
@@ -107,20 +107,18 @@ void SocketWire::Base::send(RdId const& rd_id, std::function<void(Buffer& buffer
 {
 	RD_ASSERT_MSG(!rd_id.isNull(), "{}: id mustn't be null");
 
-	std::lock_guard<decltype(wire_send_lock)> lock(wire_send_lock);
+	Buffer local_send_buffer;
 	local_send_buffer.write_integral<int32_t>(0);	 // placeholder for length
-
 	rd_id.write(local_send_buffer);					 // write id
 	local_send_buffer.write_integral<int16_t>(0);	 // placeholder for context
 	writer(local_send_buffer);						 // write rest
 
-	int32_t len = static_cast<int32_t>(local_send_buffer.get_position());
+	size_t len = static_cast<int32_t>(local_send_buffer.get_position());
 
 	local_send_buffer.rewind();
 	local_send_buffer.write_integral<int32_t>(len - 4);
-	local_send_buffer.set_position(static_cast<size_t>(len));
+	local_send_buffer.set_position(len);
 	async_send_buffer.put(std::move(local_send_buffer).getRealArray());
-	local_send_buffer.rewind();
 }
 
 void SocketWire::Base::set_socket_provider(std::shared_ptr<CActiveSocket> new_socket)

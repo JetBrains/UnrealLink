@@ -11,9 +11,8 @@ Buffer::Buffer() : Buffer(16)
 {
 }
 
-Buffer::Buffer(size_t initialSize)
+Buffer::Buffer(size_t initialSize):data_(initialSize)
 {
-	data_.resize(initialSize);
 }
 
 Buffer::Buffer(ByteArray array, size_t offset) : data_(std::move(array)), offset(offset)
