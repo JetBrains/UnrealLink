@@ -13,8 +13,6 @@ import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.UnrealLinkBundle
-import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
-import com.jetbrains.rider.plugins.unreal.actions.FilterComboAction
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
@@ -40,11 +38,11 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     val console: ConsoleViewImpl get() = consoleView
 
-    private val verbosityFilterActionGroup: FilterComboAction = FilterComboAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbositySelection.label"))
-    private val categoryFilterActionGroup: FilterComboAction = FilterComboAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categoriesSelection.label"))
+    private val logFilter: UnrealLogFilter = UnrealLogFilter()
+    private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(logFilter)
+    private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(logFilter)
     private val timestampCheckBox: JBCheckBox = JBCheckBox(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), false)
 
-    var allCategoriesSelected: Boolean = true
     var timeIsShown: Boolean = false
 
     init {
@@ -55,10 +53,6 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
         val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component
 
-        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Errors", true))
-        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Warnings", true))
-        verbosityFilterActionGroup.addItem(FilterCheckboxAction("Messages", true))
-        categoryFilterActionGroup.addItem(FilterCheckboxAction("All", true))
         val topGroup = DefaultActionGroup().apply {
             add(verbosityFilterActionGroup)
             add(categoryFilterActionGroup)
@@ -74,41 +68,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         consoleView.add(topPanel, BorderLayout.NORTH)
         setToolbar(toolbar)
 
-        categoryFilterActionGroup.addItemListener {
-            val selected = categoryFilterActionGroup.selected()
-            if (allCategoriesSelected) {
-                if ("All" !in selected) {
-                    categoryFilterActionGroup.selectAll(false)
-                    allCategoriesSelected = false
-                } else if (selected.size != categoryFilterActionGroup.items().size) {
-                    allCategoriesSelected = false
-                    for (item in categoryFilterActionGroup.items()) {
-                        if (item.getName() == "All") {
-                            item.setSelected(false)
-                            break
-                        }
-                    }
-                }
-            } else {
-                if ("All" in selected) {
-                    categoryFilterActionGroup.selectAll(true)
-                    allCategoriesSelected = true
-                } else if (selected.size == categoryFilterActionGroup.items().size - 1) {
-                    allCategoriesSelected = true
-                    for (item in categoryFilterActionGroup.items()) {
-                        if (item.getName() == "All") {
-                            item.setSelected(true)
-                            break
-                        }
-                    }
-                }
-            }
-            filter()
-        }
-
-        verbosityFilterActionGroup.addItemListener {
-            filter()
-        }
+        logFilter.addFilterChangedListener { filter(); }
 
         timestampCheckBox.addChangeListener {
             if (timeIsShown != timestampCheckBox.isSelected) {
@@ -130,22 +90,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     private fun print(unrealLogEvent: UnrealLogEvent) {
         addLogDataItem(unrealLogEvent)
-        if (printImpl(unrealLogEvent)) {
-            println()
-        }
-    }
-
-    private fun isMatchingVerbosity(valueToCheck: VerbosityType, currentList: List<String>): Boolean {
-        if (currentList.isEmpty()) {
-            return false
-        }
-
-        if (valueToCheck <= VerbosityType.Error)
-            return "Errors" in currentList
-        if (valueToCheck == VerbosityType.Warning)
-            return "Warnings" in currentList
-
-        return "Messages" in currentList
+        printImpl(unrealLogEvent)
     }
 
     private fun filter() {
@@ -155,89 +100,69 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         // so schedule filtered content printing on next UI update after clear had been already performed
         invokeLater {
             for (logEvent in logData) {
-                if (printImpl(logEvent)) {
-                    println()
-                }
+                printImpl(logEvent)
             }
             consoleView.editor.scrollingModel.scrollVertically(currentScroll)
         }
     }
 
-    private fun printSpaces(n: Int = 1) {
-        consoleView.print(" ".repeat(n), NORMAL_OUTPUT)
+    private fun printSpaces(n: Int = 1, style: ConsoleViewContentType) {
+        consoleView.print(" ".repeat(n), style)
     }
 
-    private fun print(s: LogMessageInfo) {
+    private fun printInfo(s: LogMessageInfo, style: ConsoleViewContentType) {
         if (timestampCheckBox.isSelected) {
             var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
             if (timeString.length < TIME_WIDTH)
                 timeString += " ".repeat(TIME_WIDTH - timeString.length)
-            consoleView.print(timeString, ConsoleViewContentType.SYSTEM_OUTPUT)
-            printSpaces()
+            consoleView.print(timeString, style)
+            printSpaces(1, style)
         }
 
-        val verbosityContentType = when (s.type) {
+        val verbosityString = s.type.toString().take(VERBOSITY_WIDTH)
+        consoleView.print(verbosityString, style)
+        printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1, style)
+
+        val category = s.category.data.take(CATEGORY_WIDTH)
+        consoleView.print(category, style)
+        printSpaces(CATEGORY_WIDTH - category.length + 1, style)
+    }
+
+    private fun getMessageStyle(type: VerbosityType): ConsoleViewContentType {
+        return when (type) {
             VerbosityType.Fatal -> ConsoleViewContentType.ERROR_OUTPUT
             VerbosityType.Error -> ConsoleViewContentType.ERROR_OUTPUT
             VerbosityType.Warning -> ConsoleViewContentType.LOG_WARNING_OUTPUT
             VerbosityType.Display -> ConsoleViewContentType.LOG_INFO_OUTPUT
             VerbosityType.Log -> ConsoleViewContentType.LOG_INFO_OUTPUT
-            VerbosityType.Verbose -> ConsoleViewContentType.LOG_VERBOSE_OUTPUT
+            VerbosityType.Verbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
             VerbosityType.VeryVerbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
             else -> NORMAL_OUTPUT
-        }
-
-        val verbosityString = s.type.toString().take(VERBOSITY_WIDTH)
-        consoleView.print(verbosityString, verbosityContentType)
-        printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1)
-
-        val category = s.category.data.take(CATEGORY_WIDTH)
-        consoleView.print(category, ConsoleViewContentType.SYSTEM_OUTPUT)
-        printSpaces(CATEGORY_WIDTH - category.length + 1)
-    }
-
-    private fun print(message: FString) {
-        with(consoleView) {
-            print(message.data, NORMAL_OUTPUT)
         }
     }
 
     private fun printImpl(unrealLogEvent: UnrealLogEvent): Boolean {
-        val category = unrealLogEvent.info.category.data.take(CATEGORY_WIDTH)
-        var exists = false
-        var allSelected = true
-        for (item in categoryFilterActionGroup.items()) {
-            if (item.getName() == "All") {
-                allSelected = item.isSelected()
-            }
-            if (item.getName() == category) {
-                exists = true
-                break
-            }
-        }
-        if (!exists) {
-            categoryFilterActionGroup.addItem(FilterCheckboxAction(category, allSelected))
-        }
-
-        val selectedCategories = categoryFilterActionGroup.selected()
-        val selectedVerbosities = verbosityFilterActionGroup.selected()
-        if (!isMatchingVerbosity(unrealLogEvent.info.type, selectedVerbosities) ||
-                unrealLogEvent.info.category.data !in selectedCategories) {
-            // skip printing this line
+        logFilter.addCategory(unrealLogEvent.info.category.data)
+        if (!logFilter.isMessageAllowed(unrealLogEvent.info)) {
             return false
         }
 
-        print(unrealLogEvent.info)
+        val style = getMessageStyle(unrealLogEvent.info.type)
+
+        printInfo(unrealLogEvent.info, style)
 
         if (unrealLogEvent.bpPathRanges.isEmpty() && unrealLogEvent.methodRanges.isEmpty()) {
-            print(unrealLogEvent.text)
+            with(consoleView) {
+                print(unrealLogEvent.text.data, style)
+            }
+            consoleView.print(eol, style)
             return true
         }
 
         val allRanges = (unrealLogEvent.bpPathRanges + unrealLogEvent.methodRanges).sortedBy { it.first }
         val line = unrealLogEvent.text.data
         if (allRanges.first().first > 0) {
-            consoleView.print(line.substring(0, allRanges[0].first), NORMAL_OUTPUT)
+            consoleView.print(line.substring(0, allRanges[0].first), style)
         }
 
         val model = project.solution.rdRiderModel
@@ -254,7 +179,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
                 val classHyperLinkInfo = UnrealClassHyperLinkInfo(model, methodReference, UClass(FString(`class`)))
                 consoleView.printHyperlink(`class`, classHyperLinkInfo)
 
-                consoleView.print(MethodReference.separator, NORMAL_OUTPUT)
+                consoleView.print(MethodReference.separator, style)
 
                 val methodHyperLinkInfo = MethodReferenceHyperLinkInfo(model, methodReference)
                 consoleView.printHyperlink(method, methodHyperLinkInfo)
@@ -262,19 +187,14 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             if (rangeWithIndex.index < allRanges.size - 1 &&
                     allRanges[rangeWithIndex.index + 1].first != rangeWithIndex.value.last) {
                 consoleView.print(line.substring(rangeWithIndex.value.last,
-                        allRanges[rangeWithIndex.index + 1].first), NORMAL_OUTPUT)
+                        allRanges[rangeWithIndex.index + 1].first), style)
             }
         }
         if (allRanges.last().last < line.length) {
-            consoleView.print(line.substring(allRanges.last().last), NORMAL_OUTPUT)
+            consoleView.print(line.substring(allRanges.last().last), style)
         }
+        consoleView.print(eol, style)
         return true
-    }
-
-    private fun println() {
-        with(consoleView) {
-            print(eol, NORMAL_OUTPUT)
-        }
     }
 
     private fun addLogDataItem(item: UnrealLogEvent) {
@@ -282,5 +202,4 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             logData.removeFirst()
         logData.add(item)
     }
-
 }
