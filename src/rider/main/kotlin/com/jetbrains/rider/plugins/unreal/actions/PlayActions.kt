@@ -4,10 +4,10 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.platform.util.idea.LifetimedService
 import com.jetbrains.rider.UnrealLinkBundle
@@ -81,7 +81,7 @@ class PlayStateActionStateService(val project: Project) : LifetimedService() {
     }
 }
 
-abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : AnAction(text, description, icon) {
+abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : DumbAwareAction(text, description, icon) {
     override fun update(e: AnActionEvent) {
         val project = e.project
         if (project == null) {
