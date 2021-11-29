@@ -14,12 +14,14 @@ using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
+using JetBrains.RdBackend.Common.Features;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Backend.Features.BackgroundTasks;
+using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
@@ -33,7 +35,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     [SolutionComponent]
     public class UnrealPluginInstaller
     {
-        public Lifetime Lifetime { get; private set; }
+        public Lifetime Lifetime { get; }
         private readonly ILogger myLogger;
         private readonly PluginPathsProvider myPathsProvider;
         private readonly ISolution mySolution;
@@ -346,6 +348,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     : installDescription.UprojectPath;
             
                 RegenerateProjectFiles(lifetime, engineRoot, uprojectPath);   
+            } else {
+                var actionTitle = "Update VirtualFileSystem after RiderLink installation";
+                mySolution.Locks.Queue(Lifetime, actionTitle, () =>
+                {
+                    myLogger.Verbose(actionTitle);
+                    var fileSystemModel = mySolution.GetProtocolSolution().GetFileSystemModel();
+                    fileSystemModel.RefreshPaths.Start(lifetime,
+                        new RdFsRefreshRequest(new List<string>() { pluginRootFolder.FullPath }, true));
+                });
             }
             return true;
         }

@@ -15,6 +15,12 @@ The plugin is always bundled with Rider.
 
 ### Fixed
 
+- Fix [RIDER-69165](https://youtrack.jetbrains.com/issue/RIDER-69165)
+
+## [2021.2.1.4]
+
+### Fixed
+
 - Fix [RIDER-66784](https://youtrack.jetbrains.com/issue/RIDER-66784)
 - Possibly fix [RIDER-67192](https://youtrack.jetbrains.com/issue/RIDER-67192)
 
