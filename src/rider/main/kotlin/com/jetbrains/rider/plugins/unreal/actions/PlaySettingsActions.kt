@@ -2,11 +2,12 @@ package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.actionSystem.ToggleAction
+import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.DumbAwareToggleAction
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 
-class PlaySettings : DefaultActionGroup() {
+class PlaySettings : DefaultActionGroup(), DumbAware {
     override fun update(e: AnActionEvent) {
         super.update(e)
         e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution ?: false
@@ -14,14 +15,14 @@ class PlaySettings : DefaultActionGroup() {
     }
 }
 
-class PlaySubsettings : DefaultActionGroup() {
+class PlaySubsettings : DefaultActionGroup(), DumbAware {
     override fun update(e: AnActionEvent) {
         super.update(e)
         e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
     }
 }
 
-class NumberOfPlayers : ToggleAction() {
+class NumberOfPlayers : DumbAwareToggleAction() {
     private fun setNumPlayers(mode: Int, num: Int): Int {
         return mode and 3.inv() or (num - 1)
     }
@@ -46,7 +47,7 @@ class NumberOfPlayers : ToggleAction() {
     }
 }
 
-class SpawnPlayer : ToggleAction() {
+class SpawnPlayer : DumbAwareToggleAction() {
     private fun getSpawnPlayerMode(text: String) = when (text) {
         UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.DefaultPlayerStart.text") -> 1
@@ -74,7 +75,7 @@ class SpawnPlayer : ToggleAction() {
     }
 }
 
-class DedicatedServer : ToggleAction() {
+class DedicatedServer : DumbAwareToggleAction() {
     private fun setDedicatedServer(mode: Int, enabled: Boolean): Int {
         return mode and 8.inv() or (if (enabled) 8 else 0)
     }
@@ -98,7 +99,7 @@ class DedicatedServer : ToggleAction() {
     }
 }
 
-class CompileBeforeRun : ToggleAction() {
+class CompileBeforeRun : DumbAwareToggleAction() {
     private fun setCompileBeforeRun(mode: Int, enabled: Boolean): Int {
         return mode and 128.inv() or (if (enabled) 128 else 0)
     }
@@ -127,8 +128,7 @@ const val PLAY_MODE_MASK_SIZE = 3
 const val PLAY_MODE_MASK = (1.shl(PLAY_MODE_MASK_SIZE) - 1).shl(PLAY_MODE_MASK_OFS)
 const val PLAY_MODE_MASK_INV = PLAY_MODE_MASK.inv()
 
-class PlayMode : ToggleAction() {
-
+class PlayMode : DumbAwareToggleAction() {
     private fun getModeIndex(playModeName: String?) = when (playModeName) {
         UnrealLinkBundle.message("action.RiderLink.SelectedViewport.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.MobilePreview.text") -> 1
