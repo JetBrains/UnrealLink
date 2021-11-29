@@ -4,6 +4,7 @@ import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.ConsoleViewContentType.NORMAL_OUTPUT
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.project.Project
@@ -51,22 +52,24 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             addAll(consoleView.createConsoleActions().toList())
         }
 
-        val toolbar = ActionManager.getInstance().createActionToolbar("", actionGroup, myVertical).component
+        val toolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, actionGroup, myVertical)
 
         val topGroup = DefaultActionGroup().apply {
             add(verbosityFilterActionGroup)
             add(categoryFilterActionGroup)
         }
-        val topToolbar = ActionManager.getInstance().createActionToolbar("", topGroup, true).component
+        val topToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, topGroup, true)
 
         val topPanel = JPanel(HorizontalLayout(0))
-        topPanel.add(topToolbar)
+        topToolbar.targetComponent = topPanel
+        topPanel.add(topToolbar.component)
         topPanel.add(timestampCheckBox)
 
         consoleView.scrollTo(0)
 
         consoleView.add(topPanel, BorderLayout.NORTH)
-        setToolbar(toolbar)
+        toolbar.targetComponent = this
+        setToolbar(toolbar.component)
 
         logFilter.addFilterChangedListener { filter(); }
 
@@ -112,11 +115,13 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     private fun printInfo(s: LogMessageInfo, style: ConsoleViewContentType) {
         if (timestampCheckBox.isSelected) {
-            var timeString = s.time?.toString() ?: " ".repeat(TIME_WIDTH)
-            if (timeString.length < TIME_WIDTH)
-                timeString += " ".repeat(TIME_WIDTH - timeString.length)
-            consoleView.print(timeString, style)
-            printSpaces(1, style)
+            val timeString = s.time?.toString()
+            if (timeString != null) {
+                consoleView.print(timeString, style)
+                printSpaces(TIME_WIDTH + 1 - timeString.length, style)
+            } else {
+                printSpaces(TIME_WIDTH + 1, style)
+            }
         }
 
         val verbosityString = s.type.toString().take(VERBOSITY_WIDTH)
