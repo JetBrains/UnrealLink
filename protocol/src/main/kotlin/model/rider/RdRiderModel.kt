@@ -30,7 +30,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("range", UE4Library.StringRange)
     }
 
-    val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends  ILinkResponse {}
+    val LinkResponseUnresolved = structdef("LinkResponseUnresolved") extends ILinkResponse {}
 
     private val MethodReference = structdef("MethodReference") {
         field("class", UE4Library.UClass)
@@ -52,6 +52,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("requiredVersion", string)
         field("status", PluginInstallStatus)
         field("IsGameAvailable", bool)
+        field("IsEngineAvailable", bool)
     }
 
     private val InstallMessage = structdef("InstallMessage") {

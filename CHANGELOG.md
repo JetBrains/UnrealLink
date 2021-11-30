@@ -13,6 +13,11 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 
+### Changed
+
+- Disable installation to Engine for UE 5 Preview
+    - [RIDER-71374](https://youtrack.jetbrains.com/issue/RIDER-71374)
+
 ### Fixed
 
 - Fix [RIDER-69165](https://youtrack.jetbrains.com/issue/RIDER-69165)

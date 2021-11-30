@@ -39,6 +39,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private CppUE4Version myUnrealVersion;
         private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
+        private readonly CppUE4Version myNotWorkingInEngineVersion = new(5, 0, 0);
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
@@ -194,6 +195,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private bool TryGetEnginePluginFromEngineRoot(UnrealPluginInstallInfo installInfo,
             VirtualFileSystemPath engineRootFolder)
         {
+            // HACK: currently UE5 Preview doesn't support thirdparty plugins installed into the Engine 
+            if (mySolutionDetector.Version == myNotWorkingInEngineVersion &&
+                !mySolutionDetector.BuiltFromSources) return false;
+            
             var upluginFilePath = engineRootFolder / ourPathToEnginePlugin;
             installInfo.EnginePlugin = GetPluginInfo(upluginFilePath, VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext));
             if (installInfo.EnginePlugin.IsPluginAvailable)

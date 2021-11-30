@@ -108,9 +108,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost.PerformModelAction(model =>
             {
                 var isGameAvailable = !unrealPluginInstallInfo.ProjectPlugins.IsEmpty();
+                var isEngineAvailable = unrealPluginInstallInfo.EnginePlugin != null;
                 model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(
                     installedVersion.ToString(), myPathsProvider.CurrentPluginVersion.ToString(), status,
-                    isGameAvailable));
+                    isGameAvailable, isEngineAvailable));
             });
         }
 
