@@ -48,23 +48,29 @@ class NumberOfPlayers : DumbAwareToggleAction() {
 }
 
 class SpawnPlayer : DumbAwareToggleAction() {
-    private fun getSpawnPlayerMode(text: String) = when (text) {
+    private fun getSpawnPlayerMode(text: String?) = when (text) {
         UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.DefaultPlayerStart.text") -> 1
-        else -> 0
+        else -> -1
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
         val host: UnrealHost = e.getHost() ?: return false
 
-        return (host.playMode and 4).shr(2) == getSpawnPlayerMode(e.presentation.text)
+        val actionID = getSpawnPlayerMode(e.presentation.text)
+        if (actionID == -1) return false
+
+        return (host.playMode and 4).shr(2) == actionID
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
         val host: UnrealHost = e.getHost() ?: return
 
         if (isSelected) {
-            host.playMode = (host.playMode and 4.inv()) or getSpawnPlayerMode(e.presentation.text).shl(2)
+            val actionID = getSpawnPlayerMode(e.presentation.text)
+            if (actionID != -1) return
+
+            host.playMode = (host.playMode and 4.inv()) or actionID.shl(2)
             host.model.playModeFromRider.fire(host.playMode)
         }
     }
@@ -142,8 +148,7 @@ class PlayMode : DumbAwareToggleAction() {
 
     private fun getPlayModeIndex(mode : Int) = (mode and PLAY_MODE_MASK).ushr(PLAY_MODE_MASK_OFS)
 
-    private fun setPlayMode(mode: Int, playModeName: String): Int {
-        val playModeIndex = getModeIndex(playModeName)
+    private fun setPlayMode(mode: Int, playModeIndex: Int): Int {
         return (mode and PLAY_MODE_MASK_INV) or playModeIndex.shl(PLAY_MODE_MASK_OFS)
     }
 
@@ -159,7 +164,10 @@ class PlayMode : DumbAwareToggleAction() {
         val host: UnrealHost = e.getHost() ?: return
 
         if (isSelected) {
-            host.playMode = setPlayMode(host.playMode, e.presentation.text)
+            val playModeIndex = getModeIndex(e.presentation.text)
+            if (playModeIndex == -1) return
+
+            host.playMode = setPlayMode(host.playMode, playModeIndex)
             host.model.playModeFromRider.fire(host.playMode)
         }
     }
