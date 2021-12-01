@@ -1,5 +1,6 @@
 package integrationTests
 
+import com.intellij.testFramework.Parameterized
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.platform.util.application
 import com.jetbrains.rdclient.util.idea.waitAndPump
@@ -10,14 +11,17 @@ import testFrameworkExtentions.UnrealTestProject
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseUntil
+import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.getLoadedProjects
 import com.jetbrains.rider.test.scriptingApi.buildSolution
+import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.checkBuildResult
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import org.testng.annotations.DataProvider
+import org.testng.annotations.Parameters
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -29,7 +33,6 @@ class Connection : UnrealTestProject() {
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
         openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
-
     }
 
     @DataProvider
@@ -37,7 +40,7 @@ class Connection : UnrealTestProject() {
         val result: ArrayList<Array<Any>> = arrayListOf()
         unrealInfo.testingEngines.forEach { engine ->
             arrayOf(PluginInstallLocation.Game).forEach { location ->
-                arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject).forEach { type ->
+                arrayOf(/*UnrealTestInfo.UnrealOpenType.Sln, */UnrealTestInfo.UnrealOpenType.Uproject).forEach { type ->
                     result.add(arrayOf(type, location, engine))
                 }
             }
@@ -45,13 +48,13 @@ class Connection : UnrealTestProject() {
         return result.iterator()
     }
 
-    @Test (dataProvider = "enginesAndOthers")
-    fun connection(openWith: UnrealTestInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
-//    fun connection() {
-//
-//        val location = PluginInstallLocation.Game
-//        val openWith = UnrealTestInfo.UnrealOpenType.Sln
-//        val engine = unrealInfo.testingEngines.find { it.id == "5.0EA" && it.isInstalledBuild }!!
+    @Test//(dataProvider = "enginesAndOthers")
+//    fun connectionXX(openWith: UnrealTestInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
+    fun connection() {
+
+        val location = PluginInstallLocation.Game
+        val openWith = UnrealTestInfo.UnrealOpenType.Uproject
+        val engine = unrealInfo.testingEngines.find { it.id == "4.26" && it.isInstalledBuild }!!
 
         unrealInfo.currentEngine = engine
         unrealInfo.placeToInstallRiderLink = location
@@ -87,8 +90,9 @@ class Connection : UnrealTestProject() {
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
 
-        val result = buildSolution(project, timeout = Duration.ofSeconds(120), useIncrementalBuild = false)
-        checkBuildResult(result.buildResult, result.errorMessages)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution")
+//            timeout = Duration.ofSeconds(120), useIncrementalBuild = false)
+//        checkBuildResult(result.buildResult, result.errorMessages)
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {

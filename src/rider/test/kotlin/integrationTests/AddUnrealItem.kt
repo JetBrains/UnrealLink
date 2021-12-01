@@ -1,6 +1,6 @@
 //package integrationTests
 //
-//import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealSuiteProject
+//import testFrameworkExtentions.UnrealSuiteProject
 //import com.jetbrains.rider.test.annotations.TestEnvironment
 //import com.jetbrains.rider.test.enums.PlatformType
 //import com.jetbrains.rider.test.enums.ToolsetVersion

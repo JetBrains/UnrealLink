@@ -1,31 +1,22 @@
-//package com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions
+//package testFrameworkExtentions
 //
 //import com.intellij.execution.RunManagerEx
 //import com.intellij.execution.process.ProcessHandler
 //import com.intellij.ide.GeneralSettings
 //import com.intellij.openapi.project.Project
-//import com.jetbrains.rd.ide.model.UnrealEngine
-//import com.jetbrains.rd.ide.model.UnrealShellModel
 //import com.jetbrains.rd.ide.model.UnrealVersion
-//import com.jetbrains.rd.platform.util.application
 //import com.jetbrains.rd.util.lifetime.Lifetime
 //import com.jetbrains.rdclient.util.idea.waitAndPump
-//import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 //import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 //import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
-//import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 //import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+//import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestInfo
 //import com.jetbrains.rider.projectView.solution
 //import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
 //import com.jetbrains.rider.test.base.PrepareTestEnvironment
 //import com.jetbrains.rider.test.enums.ToolsetVersion
-//import com.jetbrains.rider.test.framework.combine
-//import com.jetbrains.rider.test.protocol.testProtocolHost
 //import com.jetbrains.rider.test.scriptingApi.startRunConfigurationProcess
 //import com.jetbrains.rider.test.scriptingApi.stop
-//import kotlinx.serialization.Serializable
-//import kotlinx.serialization.decodeFromString
-//import kotlinx.serialization.json.Json
 //import org.testng.annotations.AfterClass
 //import org.testng.annotations.BeforeClass
 //import java.io.File
@@ -61,6 +52,7 @@
 //     */
 //    protected val testingVersions = arrayOf(
 //        UnrealVersion(4, 26, 2),
+//        UnrealVersion(4, 27, 0),
 //        UnrealVersion(5, 0, 0)
 //    )
 //
