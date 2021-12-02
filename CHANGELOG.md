@@ -16,11 +16,17 @@ The plugin is always bundled with Rider.
 ### Changed
 
 - Disable installation to Engine for UE 5 Preview
-    - [RIDER-71374](https://youtrack.jetbrains.com/issue/RIDER-71374)
+  - [RIDER-71374](https://youtrack.jetbrains.com/issue/RIDER-71374)
+
+- Unreal log panel was made more consistent with output log window in Unreal Editor
+  - Log categories are now sorted in popup ([RIDER-61132](https://youtrack.jetbrains.com/issue/RIDER-61132))
+  - Log verbosity and category popups do not hide on item toggling
+  - Full log messages are colorized, not only category name
 
 ### Fixed
 
 - Fix [RIDER-69165](https://youtrack.jetbrains.com/issue/RIDER-69165)
+- Fix [DEXP-642989](https://youtrack.jetbrains.com/issue/DEXP-642989)
 
 ## [2021.2.1.4]
 
