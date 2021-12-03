@@ -39,6 +39,11 @@
 			"Name": "RiderGameControlExtension",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "RiderShaderInfoDump",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "PostEngineInit"
 		}
 	]
 }
