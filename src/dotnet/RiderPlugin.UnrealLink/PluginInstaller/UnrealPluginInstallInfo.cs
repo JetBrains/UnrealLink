@@ -18,7 +18,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         public VirtualFileSystemPath EngineRoot = null;
 
-        public InstallDescription EnginePlugin = null;
+        public InstallDescription EnginePlugin = new InstallDescription();
         public List<InstallDescription> ProjectPlugins = new List<InstallDescription>();
 
         public PluginInstallLocation Location;
