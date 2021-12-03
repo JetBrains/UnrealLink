@@ -1,32 +1,36 @@
 package integrationTests
 
-import com.intellij.testFramework.Parameterized
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rd.platform.util.application
+import com.jetbrains.rd.platform.diagnostics.LogTraceScenario
+import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.UnrealTestInfo
 import testFrameworkExtentions.UnrealTestProject
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rd.util.reactive.adviseUntil
 import com.jetbrains.rider.build.actions.BuildSolutionAction
+import com.jetbrains.rider.diagnostics.LogTraceScenarios
+import com.jetbrains.rider.model.rdUnitTestHost
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
-import com.jetbrains.rider.test.scriptingApi.buildSolution
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
-import com.jetbrains.rider.test.scriptingApi.checkBuildResult
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
+import com.jetbrains.rider.unitTesting.diagnostics.RiderUnitTestProtocolWatcher
 import org.testng.annotations.DataProvider
-import org.testng.annotations.Parameters
 import org.testng.annotations.Test
 import java.time.Duration
 
 @TestEnvironment(platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP)
 class Connection : UnrealTestProject() {
+
+    override val traceScenarios: Set<LogTraceScenario>
+        get() = setOf(LogTraceScenarios.UnitTestingUI, LogTraceScenarios.UnitTestingBackend)
+
+
     init {
         projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
@@ -39,8 +43,8 @@ class Connection : UnrealTestProject() {
     fun enginesAndOthers(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
         unrealInfo.testingEngines.forEach { engine ->
-            arrayOf(PluginInstallLocation.Game).forEach { location ->
-                arrayOf(/*UnrealTestInfo.UnrealOpenType.Sln, */UnrealTestInfo.UnrealOpenType.Uproject).forEach { type ->
+            arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
+                arrayOf(UnrealTestInfo.UnrealOpenType.Sln, UnrealTestInfo.UnrealOpenType.Uproject).forEach { type ->
                     result.add(arrayOf(type, location, engine))
                 }
             }
@@ -48,14 +52,16 @@ class Connection : UnrealTestProject() {
         return result.iterator()
     }
 
-    @Test//(dataProvider = "enginesAndOthers")
-//    fun connectionXX(openWith: UnrealTestInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
-    fun connection() {
-
+    @Test
+    fun connection_s() {
         val location = PluginInstallLocation.Game
         val openWith = UnrealTestInfo.UnrealOpenType.Uproject
-        val engine = unrealInfo.testingEngines.find { it.id == "4.26" && it.isInstalledBuild }!!
+        val engine = unrealInfo.testingEngines.find { it.id == "5.0EA" && it.isInstalledBuild }!!
+        connection(openWith, location, engine)
+    }
 
+    @Test(dataProvider = "enginesAndOthers")
+    fun connection(openWith: UnrealTestInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
         unrealInfo.currentEngine = engine
         unrealInfo.placeToInstallRiderLink = location
 
@@ -72,27 +78,17 @@ class Connection : UnrealTestProject() {
         }
 
         project = openProject(openWith)
-        getLoadedProjects(project)
 
+        getLoadedProjects(project)
         waitAndPump(Duration.ofSeconds(15),
             { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
-
-//        var isUnrealSolution = false
-//        project.solution.rdRiderModel.isUnrealEngineSolution.adviseUntil(Lifetime.Eternal)
-//            { isUnrealSolution = it
-//                it }
-//        waitAndPump(Duration.ofSeconds(15),
-//            { isUnrealSolution }, { "Fuck!" })
 
         if (unrealInfo.needInstallRiderLink) {
             installRiderLink(unrealInfo.placeToInstallRiderLink)
         }
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-
-        buildWithChecks(project, BuildSolutionAction(), "Build solution")
-//            timeout = Duration.ofSeconds(120), useIncrementalBuild = false)
-//        checkBuildResult(result.buildResult, result.errorMessages)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false)
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {

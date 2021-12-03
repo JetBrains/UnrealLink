@@ -72,7 +72,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
      */
     protected val testingVersions = arrayOf(
         UnrealVersion(4, 26, 2),
-        UnrealVersion(4, 27, 0),
+        UnrealVersion(4, 27, 1),
         UnrealVersion(5, 0, 0)
     )
 
