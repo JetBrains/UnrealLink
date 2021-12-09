@@ -41,7 +41,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
         private readonly CppUE4Version myNotWorkingInEngineVersion = new(5, 0, 0);
 
-        public bool IsValidEngine() => myUnrealVersion != myNotWorkingInEngineVersion;
+        public bool IsValidEngine() => myUnrealVersion != myNotWorkingInEngineVersion || mySolutionDetector.BuiltFromSources;
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
