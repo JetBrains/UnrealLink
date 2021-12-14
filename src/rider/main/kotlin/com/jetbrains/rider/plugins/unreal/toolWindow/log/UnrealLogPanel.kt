@@ -34,17 +34,17 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         private const val CATEGORY_WIDTH = 20
     }
 
+    private val settings: UnrealLogPanelSettings = UnrealLogPanelSettings.getInstance(project)
+
     private val logData: ArrayDeque<UnrealLogEvent> = ArrayDeque()
     private val consoleView: ConsoleViewImpl = ComponentFactories.getConsoleView(project, lifetime)
 
     val console: ConsoleViewImpl get() = consoleView
 
-    private val logFilter: UnrealLogFilter = UnrealLogFilter()
+    private val logFilter: UnrealLogFilter = UnrealLogFilter(settings)
     private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(logFilter)
     private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(logFilter)
-    private val timestampCheckBox: JBCheckBox = JBCheckBox(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), false)
-
-    var timeIsShown: Boolean = false
+    private val timestampCheckBox: JBCheckBox = JBCheckBox(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), settings.showTimestamps)
 
     init {
         setContent(consoleView)
@@ -74,9 +74,9 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         logFilter.addFilterChangedListener { filter(); }
 
         timestampCheckBox.addChangeListener {
-            if (timeIsShown != timestampCheckBox.isSelected) {
+            if (settings.showTimestamps != timestampCheckBox.isSelected) {
+                settings.showTimestamps = !settings.showTimestamps
                 filter()
-                timeIsShown = !timeIsShown
             }
         }
 
