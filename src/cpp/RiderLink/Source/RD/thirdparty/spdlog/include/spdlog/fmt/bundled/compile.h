@@ -359,7 +359,7 @@ template <typename Char> struct text {
 
   template <typename OutputIt, typename... Args>
   OutputIt format(OutputIt out, const Args&...) const {
-    // TODO: reserve
+    // TO-DO: reserve
     return copy_str<Char>(data.begin(), data.end(), out);
   }
 };
@@ -376,7 +376,7 @@ constexpr text<Char> make_text(basic_string_view<Char> s, size_t pos,
 template <typename Char, typename OutputIt, typename T,
           std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OutputIt format_default(OutputIt out, T value) {
-  // TODO: reserve
+  // TO-DO: reserve
   format_int fi(value);
   return std::copy(fi.data(), fi.data() + fi.size(), out);
 }

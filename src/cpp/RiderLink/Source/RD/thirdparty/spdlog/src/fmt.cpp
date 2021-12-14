@@ -148,7 +148,7 @@ template FMT_API char *internal::sprintf_format(long double, internal::buffer<ch
 
 template struct FMT_INSTANTIATION_DEF_API internal::basic_data<void>;
 
-// Workaround a bug in MSVC2013 that prevents instantiation of format_float.
+// Workaround a issue in MSVC2013 that prevents instantiation of format_float.
 int (*instantiate_format_float)(double, int, internal::float_specs, internal::buffer<char> &) = internal::format_float;
 
 #ifndef FMT_STATIC_THOUSANDS_SEPARATOR

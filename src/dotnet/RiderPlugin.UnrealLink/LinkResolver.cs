@@ -98,7 +98,7 @@ namespace RiderPlugin.UnrealLink
 
                 if (path.ExtensionNoDot == "umap")
                 {
-                    //todo
+                    //TO-DO
                     return null;
                 }
 

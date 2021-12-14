@@ -1021,7 +1021,7 @@ template <typename Char> struct fill_t {
 };
 }  // namespace internal
 
-// We cannot use enum classes as bit fields because of a gcc bug
+// We cannot use enum classes as bit fields because of a gcc issue
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61414.
 namespace align {
 enum type { none, left, right, center, numeric };
@@ -2542,7 +2542,7 @@ FMT_CONSTEXPR const Char* parse_format_specs(const Char* begin, const Char* end,
   return begin;
 }
 
-// Return the result via the out param to workaround gcc bug 77539.
+// Return the result via the out param to workaround gcc issue 77539.
 template <bool IS_CONSTEXPR, typename T, typename Ptr = const T*>
 FMT_CONSTEXPR bool find(Ptr first, Ptr last, T value, Ptr& out) {
   for (out = first; out != last; ++out) {
@@ -2860,7 +2860,7 @@ class format_int {
 
   // Formats value in reverse and returns a pointer to the beginning.
   char* format_decimal(unsigned long long value) {
-    char* ptr = buffer_ + (buffer_size - 1);  // Parens to workaround MSVC bug.
+    char* ptr = buffer_ + (buffer_size - 1);  // Parens to workaround MSVC issue.
     while (value >= 100) {
       // Integer division is slow so do it for a group of two digits instead
       // of for every digit. The idea comes from the talk by Alexandrescu
