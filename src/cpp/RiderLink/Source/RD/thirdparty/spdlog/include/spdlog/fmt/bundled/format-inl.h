@@ -970,7 +970,7 @@ void fallback_format(Double d, buffer<char>& buf, int& exp10) {
   // Shift numerator and denominator by an extra bit or two (if lower boundary
   // is closer) to make lower and upper integers. This eliminates multiplication
   // by 2 during later computations.
-  // TODO: handle float
+  // TO-DO: handle float
   int shift = value.assign(d) ? 2 : 1;
   uint64_t significand = value.f << shift;
   if (value.e >= 0) {
@@ -1151,7 +1151,7 @@ int snprintf_float(T value, int precision, float_specs specs,
           "fuzz mode - avoid large allocation inside snprintf");
 #endif
     // Suppress the warning about a nonliteral format string.
-    // Cannot use auto becase of a bug in MinGW (#1532).
+    // Cannot use auto becase of a issue in MinGW (#1532).
     int (*snprintf_ptr)(char*, size_t, const char*, ...) = FMT_SNPRINTF;
     int result = precision >= 0
                      ? snprintf_ptr(begin, capacity, format, precision, value)

@@ -109,7 +109,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                                         if (EXCLUDED_PROJECTS.Contains(location.NameWithoutExtension)) return false;
 
-                                        // TODO: drop this ugly check after updating to net211 where Location == "path/to/game.uproject"
+                                        // TO-DO: drop this ugly check after updating to net211 where Location == "path/to/game.uproject"
                                         var isUproject =
                                             location.ExistsFile && location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
                                             location.NameWithoutExtension == project.Name;

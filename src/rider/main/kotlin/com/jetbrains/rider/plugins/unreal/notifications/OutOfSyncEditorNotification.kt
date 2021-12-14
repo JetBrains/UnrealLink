@@ -9,7 +9,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.*
 import com.jetbrains.rider.projectView.solution
 
 class OutOfSyncEditorNotification(project: Project) : ProtocolSubscribedProjectComponent(project) {
-    // TODO: move all public strings to resource bundle
+    // TO-DO: move all public strings to resource bundle
     companion object {
         private val notificationGroupId =
             NotificationGroup.createIdWithTitle(

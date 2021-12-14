@@ -16,7 +16,7 @@ namespace RiderPlugin.UnrealLink
     {
         private readonly Lifetime myLifetime;
 
-        // TODO: frontend isn't up in backend tests
+        // TO-DO: frontend isn't up in backend tests
         private readonly bool myIsInTests;
 
         public readonly RdRiderModel myModel;
