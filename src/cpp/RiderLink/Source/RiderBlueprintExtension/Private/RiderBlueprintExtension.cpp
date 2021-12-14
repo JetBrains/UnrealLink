@@ -48,7 +48,7 @@ void FRiderBlueprintExtensionModule::StartupModule()
     MessageEndpoint = FMessageEndpoint::Builder(FName("FAssetEditorManager")).Build();
 
     AssetRegistryModule->Get().OnAssetAdded().AddLambda([](const FAssetData& AssetData) {
-        // TODO: Fix loading uasset's on 4.23-
+        // TO-DO: Fix loading uasset's on 4.23-
         // BluePrintProvider::AddAsset(AssetData);
     });
 

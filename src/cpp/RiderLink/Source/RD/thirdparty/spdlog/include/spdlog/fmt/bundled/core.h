@@ -76,7 +76,7 @@
 #endif
 
 // Check if relaxed C++14 constexpr is supported.
-// GCC doesn't allow throw in constexpr until version 6 (bug 67371).
+// GCC doesn't allow throw in constexpr until version 6 (issue 67371).
 #ifndef FMT_USE_CONSTEXPR
 #  define FMT_USE_CONSTEXPR                                           \
     (FMT_HAS_FEATURE(cxx_relaxed_constexpr) || FMT_MSC_VER >= 1910 || \
@@ -267,7 +267,7 @@ struct monostate {};
 
 // An enable_if helper to be used in template parameters which results in much
 // shorter symbols: https://godbolt.org/z/sWw4vP. Extra parentheses are needed
-// to workaround a bug in MSVC 2019 (see #1140 and #1186).
+// to workaround an issue in MSVC 2019 (see #1140 and #1186).
 #define FMT_ENABLE_IF(...) enable_if_t<(__VA_ARGS__), int> = 0
 
 namespace internal {
@@ -1320,7 +1320,7 @@ using wformat_context = buffer_context<wchar_t>;
 template <typename Context, typename... Args>
 class format_arg_store
 #if FMT_GCC_VERSION && FMT_GCC_VERSION < 409
-    // Workaround a GCC template argument substitution bug.
+    // Workaround a GCC template argument substitution issue.
     : public basic_format_args<Context>
 #endif
 {
@@ -1377,7 +1377,7 @@ inline format_arg_store<Context, Args...> make_format_args(
 template <typename Context>
 class dynamic_format_arg_store
 #if FMT_GCC_VERSION && FMT_GCC_VERSION < 409
-    // Workaround a GCC template argument substitution bug.
+    // Workaround a GCC template argument substitution issue.
     : public basic_format_args<Context>
 #endif
 {

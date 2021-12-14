@@ -56,7 +56,7 @@
 // This one will be different for GCC 5.7 if it's ever supported
 #define TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
 
-// GCC 5 < v < 8 has a bug in is_trivially_copy_constructible which breaks std::vector
+// GCC 5 < v < 8 has an issue in is_trivially_copy_constructible which breaks std::vector
 // for non-copyable types
 #elif (defined(__GNUC__) && __GNUC__ < 8 &&                                                \
      !defined(__clang__))
@@ -279,7 +279,7 @@ using enable_assign_from_other = detail::enable_if_t<
     !std::is_assignable<T &, const optional<U> &&>::value>;
 
 #ifdef _MSC_VER
-// TODO make a version which works with MSVC
+// TO-DO make a version which works with MSVC
 template <class T, class U = T> struct is_swappable : std::true_type {};
 
 template <class T, class U = T> struct is_nothrow_swappable : std::true_type {};
@@ -1290,7 +1290,7 @@ public:
     return *this;
   }
 
-  // TODO check exception guarantee
+  // TO-DO check exception guarantee
   /// Converting move assignment operator.
   ///
   /// Moves the value from `rhs` if there is one. Otherwise resets the stored
@@ -2346,7 +2346,7 @@ private:
 } // namespace tl
 
 namespace std {
-// TODO SFINAE
+// TO-DO SFINAE
 template <class T> struct hash<tl::optional<T>> {
   ::std::size_t operator()(const tl::optional<T> &o) const {
     if (!o.has_value())

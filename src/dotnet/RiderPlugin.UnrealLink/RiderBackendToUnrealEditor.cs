@@ -217,7 +217,7 @@ namespace RiderPlugin.UnrealLink
 
             unrealModel.OnBlueprintAdded.Advise(lf, blueprintClass =>
             {
-                //todo
+                //TO-DO
             });
 
             myUnrealHost.PerformModelAction(riderModel =>
