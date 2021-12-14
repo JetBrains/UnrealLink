@@ -3,34 +3,38 @@ package com.jetbrains.rider.plugins.unreal.toolWindow.log
 import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
 import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 
-class UnrealLogFilter {
-    var showMessages: Boolean = true
+class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
+    var showMessages: Boolean
+        get() = settings.showMessages
         set(value) {
-            if (field != value) {
-                field = value
+            if (settings.showMessages != value) {
+                settings.showMessages = value
                 onFilterChanged()
             }
         }
-    var showWarnings: Boolean = true
+    var showWarnings: Boolean
+        get() = settings.showWarnings
         set(value) {
-            if (field != value) {
-                field = value
+            if (settings.showWarnings != value) {
+                settings.showWarnings = value
                 onFilterChanged()
             }
         }
-    var showErrors: Boolean = true
+    var showErrors: Boolean
+        get() = settings.showErrors
         set(value) {
-            if (field != value) {
-                field = value
+            if (settings.showErrors != value) {
+                settings.showErrors = value
                 onFilterChanged()
             }
         }
 
-    var showAllCategories: Boolean = true
+    var showAllCategories: Boolean
+        get() = settings.showAllCategories
         set(value) {
-            if (field != value) {
-                field = value
-                toggleAllCategories(field)
+            if (settings.showAllCategories != value) {
+                settings.showAllCategories = value
+                toggleAllCategories(value)
             }
         }
 

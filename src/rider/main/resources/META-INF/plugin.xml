@@ -169,6 +169,7 @@ Path to old plugin:</code></pre>
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
+    <projectService serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
     <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
     <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor" />
