@@ -29,6 +29,10 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.isConnectedToUnrealEditor.value
     val isRiderLinkInstallationInProgress:Boolean
         get() = model.riderLinkInstallationInProgress.value
+    val isRefreshProjectsInProgress:Boolean
+        get() = model.refreshInProgress.value
+    val isUproject:Boolean
+        get() = model.isUproject.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
         action(model)

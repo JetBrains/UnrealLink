@@ -178,6 +178,8 @@ Path to old plugin:</code></pre>
 
   <actions resource-bundle="messages.UnrealLinkBundle">
     <group id="UnrealInteractionToolbar">
+      <action id="RiderLink.RefreshProjects" class="com.jetbrains.rider.plugins.unreal.actions.RefreshProjects"/>
+      <separator/>
       <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain" class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
         <group id="RiderLink.NumberOfPlayers" popup="true" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
           <action id="RiderLink.OnePlayer" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="1"/>

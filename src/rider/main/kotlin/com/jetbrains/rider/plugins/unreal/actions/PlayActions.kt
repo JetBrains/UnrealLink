@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
+import com.intellij.icons.AllIcons
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationGroup
 import com.intellij.notification.NotificationType
@@ -10,11 +11,14 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.platform.util.idea.LifetimedService
+import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.RequestFailed
 import com.jetbrains.rider.plugins.unreal.model.RequestSucceed
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.projectView.solution
 import icons.UnrealIcons
 import javax.swing.Icon
 import com.jetbrains.rider.plugins.unreal.model.NotificationType as ReplyNotificationType
@@ -197,5 +201,23 @@ class SingleStepInUnrealAction : PlayStateAction(
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestFrameSkipFromRider.fire(state.nextRequestID())
+    }
+}
+
+class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        val host = e.getHost()
+        e.presentation.isVisible = host?.isUnrealEngineSolution ?: false
+        e.presentation.isEnabled = false
+        if (host == null) return;
+
+        e.presentation.isEnabled = !host.isUproject &&
+                !host.isRefreshProjectsInProgress && !host.isRiderLinkInstallationInProgress
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        project.solution.rdRiderModel.refreshProjects.fire()
     }
 }
