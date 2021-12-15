@@ -95,6 +95,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         sink("onEditorPluginOutOfSync", EditorPluginOutOfSync)
         source("installEditorPlugin", InstallPluginDescription)
+        source("refreshProjects", void)
         source("enableAutoupdatePlugin", void)
 
         property("isGameControlModuleInitialized", false).readonly
@@ -113,6 +114,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         sink("RiderLinkInstallMessage", InstallMessage).async
         sink("InstallPluginFinished", bool).async
         property("RiderLinkInstallationInProgress", false)
+        property("RefreshInProgress", false)
+        property("IsUproject", false)
 
         source("CancelRiderLinkInstall", void)
     }

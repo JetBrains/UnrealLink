@@ -7,6 +7,7 @@ using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp;
+using JetBrains.ReSharper.Psi.Cpp.UE4;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
@@ -32,7 +33,8 @@ namespace RiderPlugin.UnrealLink
             myModel = solution.GetProtocolSolution().GetRdRiderModel();
             solutionDetector.IsUE4Solution_Observable.Change.Advise_HasNew(myLifetime, args =>
             {
-                    myModel.IsUnrealEngineSolution.Set(args.New == TriBool.True);
+                myModel.IsUnrealEngineSolution.Set(args.New == TriBool.True);
+                myModel.IsUproject.Set(args.New == TriBool.True && solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened);
             });
         }
 
