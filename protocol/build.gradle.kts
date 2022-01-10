@@ -1,9 +1,9 @@
 import com.jetbrains.rd.generator.gradle.RdGenExtension
 import com.jetbrains.rd.generator.gradle.RdGenTask
 
-val rdLibDirectory by lazy {
+val rdLibDirectory by lazy<File> {
     val intellij = rootProject.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
-    val rdLib = intellij.ideaDependency.classes.resolve("lib").resolve("rd")
+    val rdLib = intellij.getIdeaDependency(project).classes.resolve("lib").resolve("rd")
     assert(rdLib.isDirectory)
     return@lazy rdLib
 }
@@ -17,7 +17,7 @@ repositories {
     }
 }
 
-val riderModelJar by lazy {
+val riderModelJar by lazy<File> {
     val jarFile = File(rdLibDirectory, "rider-model.jar").canonicalFile
     assert(jarFile.isFile)
     return@lazy jarFile
@@ -27,6 +27,11 @@ plugins {
     id("java")
     kotlin("jvm")
     id("com.jetbrains.rdgen")
+}
+
+apply {
+    plugin("kotlin")
+    plugin("com.jetbrains.rdgen")
 }
 dependencies {
     implementation(kotlin("stdlib"))
@@ -53,7 +58,7 @@ tasks {
         outputs.dirs(
             csLibraryOutput
             ,cppLibraryOutput
-            , ktLibraryOutput
+            ,ktLibraryOutput
         )
 
         configure<RdGenExtension> {

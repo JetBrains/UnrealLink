@@ -1,5 +1,4 @@
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -11,9 +10,9 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 plugins {
     kotlin("jvm") version "1.4.32"
 
-    id("org.jetbrains.changelog") version "1.1.2"
-    id("org.jetbrains.intellij") version "0.7.2"
-    id("com.jetbrains.rdgen") version "0.211.234"
+    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.intellij") version "1.2.0"
+    id("com.jetbrains.rdgen") version "2021.3.4"
 }
 
 dependencies {
@@ -23,7 +22,6 @@ dependencies {
 
 repositories {
     maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/www.myget.org/F/rd-snapshots/maven") }
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
     maven { setUrl("https://cache-redirector.jetbrains.com/plugins.gradle.org") }
 }
@@ -67,8 +65,8 @@ val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val dotnetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
-val dotNetSdkPath by lazy {
-    val sdkPath = intellij.ideaDependency.classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
+val dotNetSdkPath by lazy<File> {
+    val sdkPath = intellij.getIdeaDependency(project).classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
     assert(sdkPath.isDirectory)
     println(".NETSDK path: $sdkPath")
 
@@ -276,31 +274,31 @@ tasks {
 }
 
 changelog {
-    version = project.version.toString()
+    version.set(project.version.toString())
     // https://github.com/JetBrains/gradle-changelog-plugin/blob/main/src/main/kotlin/org/jetbrains/changelog/Changelog.kt#L23
     // This is just common semVerRegex with the addition of a forth optional group (number) ( x.x.x[.x][-alpha43] )
-    headerParserRegex =
+    headerParserRegex.set(
         """^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.?(0|[1-9]\d*)?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)
             (?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?${'$'}"""
-            .trimMargin().toRegex()
-    groups = listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues")
-    keepUnreleasedSection = true
-    itemPrefix = "-"
+            .trimMargin().toRegex())
+    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues"))
+    keepUnreleasedSection.set(true)
+    itemPrefix.set("-")
 }
 
 intellij {
-    type = "RD"
-    instrumentCode = false
-    downloadSources = false
+    type.set("RD")
+    instrumentCode.set(false)
+    downloadSources.set(false)
 
-    setPlugins("com.jetbrains.rider-cpp")
+    plugins.set(listOf("com.jetbrains.rider-cpp"))
 
     val dependencyPath = File(projectDir, "dependencies")
     if (dependencyPath.exists()) {
-        localPath = dependencyPath.canonicalPath
-        println("Will use ${File(localPath, "build.txt").readText()} from $localPath as RiderSDK")
+        localPath.set(dependencyPath.canonicalPath)
+        println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
     } else {
-        version = "${project.property("majorVersion")}-SNAPSHOT"
+        version.set("${project.property("majorVersion")}-SNAPSHOT")
         println("Will download and use build/riderRD-$version as RiderSDK")
     }
 
@@ -315,20 +313,20 @@ intellij {
         // dumpCurrentChangelog dumps the same section to file (for Marketplace changelog)
         // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
         // So order is important!
-        patchPluginXml { changeNotes( closure { currentReleaseNotesAsHtml }) }
+        patchPluginXml { changeNotes.set( provider { currentReleaseNotesAsHtml }) }
         patchChangelog { mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
 
         publishPlugin {
             dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
-            token(System.getenv("UNREALLINK_intellijPublishToken"))
+            token.set(System.getenv("UNREALLINK_intellijPublishToken"))
 
             val pubChannels = project.findProperty("publishChannels")
             if ( pubChannels != null) {
                 val chan = pubChannels.toString().split(',')
                 println("Channels for publish $chan")
-                channels(chan)
+                channels.set(chan)
             } else {
-                channels(listOf("alpha"))
+                channels.set(listOf("alpha"))
             }
         }
     }
