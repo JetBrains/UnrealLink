@@ -186,7 +186,6 @@ tasks {
         return@lazy sdkPath
     }
     val rdLibDirectory by lazy {
-        val intellij = rootProject.extensions.findByType(org.jetbrains.intellij.IntelliJPluginExtension::class.java)!!
         val rdLib = intellij.ideaDependency.get().classes.resolve("lib").resolve("rd")
         assert(rdLib.isDirectory)
         return@lazy rdLib
