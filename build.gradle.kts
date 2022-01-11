@@ -22,9 +22,10 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     kotlin("jvm") version "1.4.32"
+    id("com.jetbrains.rdgen") version "2021.3.4"
+    id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.2.0"
-    id("com.jetbrains.rdgen") version "2021.3.4"
 }
 
 apply {
