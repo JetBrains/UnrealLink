@@ -132,7 +132,7 @@ intellij {
         println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
     } else {
         version.set("${project.property("majorVersion")}-SNAPSHOT")
-        println("Will download and use build/riderRD-$version as RiderSDK")
+        println("Will download and use build/riderRD-${version.get()} as RiderSDK")
     }
 
     tasks {
@@ -408,11 +408,11 @@ tasks {
         )
 
         dllFiles.forEach {
-            from(it) { into("${intellij.pluginName}/dotnet") }
+            from(it) { into("${intellij.pluginName.get()}/dotnet") }
         }
 
         from(packCppSide.outputs.files.first()) {
-            into("${intellij.pluginName}/EditorPlugin")
+            into("${intellij.pluginName.get()}/EditorPlugin")
         }
 
         doLast {
