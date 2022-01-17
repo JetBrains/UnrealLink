@@ -173,7 +173,10 @@ Path to old plugin:</code></pre>
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
     <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
     <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor" />
-    <notificationGroup id="Unreal Editor connection is out of sync" displayType="BALLOON"/>
+    <notificationGroup id="OutOfSyncConnection" displayType="BALLOON"
+                       bundle="messages.UnrealLinkBundle" key="notificationAction.UnrealEditorOutOfSync.groupId"/>
+    <notificationGroup id="RiderLinkActions" displayType="BALLOON"
+                       bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
   </extensions>
 
   <actions resource-bundle="messages.UnrealLinkBundle">

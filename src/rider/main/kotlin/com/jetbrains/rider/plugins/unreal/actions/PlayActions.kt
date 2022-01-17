@@ -1,10 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.icons.AllIcons
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationGroup
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
+import com.intellij.notification.*
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -27,12 +24,7 @@ import com.jetbrains.rider.plugins.unreal.model.NotificationType as ReplyNotific
 class PlayStateActionStateService(val project: Project) : LifetimedService() {
     companion object {
         fun getInstance(project: Project): PlayStateActionStateService = project.service()
-        private const val NOTIFICATION_GROUP_DISPLAY_ID = "RiderLink"
-        private val notificationGroupId =
-                NotificationGroup.createIdWithTitle(
-                        NOTIFICATION_GROUP_DISPLAY_ID,
-                        UnrealLinkBundle.message("notification.RiderLink.ReplyFromEditor.groupId")
-                )
+        private const val RIDER_LINK_ACTIONS_NOTIFICATION_GROUP_ID = "RiderLinkActions"
     }
 
     private var disabledUntilModelChange: Boolean = false
@@ -57,8 +49,10 @@ class PlayStateActionStateService(val project: Project) : LifetimedService() {
                             ReplyNotificationType.Message -> NotificationType.INFORMATION
                             ReplyNotificationType.Error -> NotificationType.ERROR
                         }
-                        val notification = Notification(notificationGroupId, title, message, type)
-                        Notifications.Bus.notify(notification, project)
+                        NotificationGroupManager.getInstance()
+                                .getNotificationGroup(RIDER_LINK_ACTIONS_NOTIFICATION_GROUP_ID)
+                                .createNotification(title, message, type)
+                                .notify(project)
                     }
                 }
             }

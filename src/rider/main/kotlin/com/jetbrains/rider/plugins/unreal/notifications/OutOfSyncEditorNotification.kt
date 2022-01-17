@@ -9,14 +9,8 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.*
 import com.jetbrains.rider.projectView.solution
 
 class OutOfSyncEditorNotification(project: Project) : ProtocolSubscribedProjectComponent(project) {
-    // TO-DO: move all public strings to resource bundle
     companion object {
-        private val notificationGroupId =
-            NotificationGroup.createIdWithTitle(
-                "Unreal Editor connection is out of sync",
-                UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.groupId")
-            )
-
+        private const val OUT_OF_SYNC_NOTIFICATION_GROUP_ID = "OutOfSyncConnection"
     }
 
     init {
@@ -37,9 +31,10 @@ class OutOfSyncEditorNotification(project: Project) : ProtocolSubscribedProjectC
             else
                 UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.title.wrongVersion")
 
-            val notification = Notification(notificationGroupId, title, message, NotificationType.WARNING)
+            val notification = NotificationGroupManager.getInstance()
+                    .getNotificationGroup(OUT_OF_SYNC_NOTIFICATION_GROUP_ID)
+                    .createNotification(title, message, NotificationType.WARNING)
 
-            @Suppress("NON_EXHAUSTIVE_WHEN")
             when (it.status) {
                 PluginInstallStatus.NoPlugin -> {
                     notification.apply {
@@ -89,6 +84,7 @@ class OutOfSyncEditorNotification(project: Project) : ProtocolSubscribedProjectC
                         })
                     }
                 }
+                else -> return@adviseNotNull
             }
 
             Notifications.Bus.notify(notification, project)
