@@ -21,11 +21,11 @@ buildscript {
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.6.10"
     id("com.jetbrains.rdgen") version "2021.3.4"
     id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.2.0"
+    id("org.jetbrains.intellij") version "1.4.0-SNAPSHOT"
 }
 
 apply {
@@ -180,21 +180,19 @@ intellij {
 
 tasks {
     val dotNetSdkPath by lazy {
-        val sdkPath = intellij.ideaDependency.get().classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
+        val sdkPath = setupDependencies.get().idea.get().classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
         assert(sdkPath.isDirectory)
         println(".NET SDK path: $sdkPath")
 
-        return@lazy sdkPath
+        return@lazy sdkPath.canonicalPath
     }
-    val rdLibDirectory by lazy {
-        val rdLib = intellij.ideaDependency.get().classes.resolve("lib").resolve("rd")
+
+    val riderModelJar by lazy {
+        val rdLib = setupDependencies.get().idea.get().classes.resolve("lib").resolve("rd")
         assert(rdLib.isDirectory)
-        return@lazy rdLib
-    }
-    val riderModelJar by lazy<File> {
-        val jarFile = File(rdLibDirectory, "rider-model.jar").canonicalFile
+        val jarFile = File(rdLib, "rider-model.jar")
         assert(jarFile.isFile)
-        return@lazy jarFile
+        return@lazy jarFile.canonicalPath
     }
 
     withType<RunIdeTask> {
@@ -221,14 +219,14 @@ tasks {
         group = "RiderBackend"
         val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
 
-        inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
+        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
 
         doLast {
             project.file(generatedFile).writeText(
                 """<Project>
             |  <PropertyGroup>
-            |    <DotNetSdkPath>${dotNetSdkPath.canonicalPath}</DotNetSdkPath>
+            |    <DotNetSdkPath>$dotNetSdkPath</DotNetSdkPath>
             |  </PropertyGroup>
             |</Project>""".trimMargin()
             )
@@ -240,18 +238,17 @@ tasks {
         dependsOn(prepareRiderBuildProps)
 
         val generatedFile = project.projectDir.resolve("NuGet.Config")
-        inputs.property("dotNetSdkFile", { dotNetSdkPath.canonicalPath })
+        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
             logger.info("dotNetSdk location: '$dotNetSdkFile'")
-            assert(dotNetSdkFile.isDirectory)
 
             val nugetConfigText = """<?xml version="1.0" encoding="utf-8"?>
         |<configuration>
         |  <packageSources>
         |    <clear />
-        |    <add key="local-dotnet-sdk" value="${dotNetSdkFile.canonicalPath}" />
+        |    <add key="local-dotnet-sdk" value="$dotNetSdkFile" />
         |    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
         |  </packageSources>
         |</configuration>
