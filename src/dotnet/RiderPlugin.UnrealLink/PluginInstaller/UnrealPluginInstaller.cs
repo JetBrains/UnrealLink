@@ -337,7 +337,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (isSln)
             {
-                mySolution.Locks.Tasks.UnguardedMainThreadScheduler.Queue(() =>
+                mySolution.Locks.ExecuteOrQueue(Lifetime, "Refresh projects after RiderLink installation", () => 
                     UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, installDescription, engineRoot));
             } else {
                 var actionTitle = "Update VirtualFileSystem after RiderLink installation";

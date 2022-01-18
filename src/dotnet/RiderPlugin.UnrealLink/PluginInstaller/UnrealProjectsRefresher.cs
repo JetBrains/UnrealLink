@@ -27,7 +27,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         }
         
         public static void RefreshProjects(Lifetime parentLifetime, [NotNull] ISolution solution,
-            [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription, [NotNull] VirtualFileSystemPath engineRoot)
+            [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription, [CanBeNull] VirtualFileSystemPath engineRoot)
         {
             parentLifetime.UsingNestedAsync(async lt =>
             {
