@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction
 import com.intellij.openapi.project.DumbAware
@@ -11,7 +12,6 @@ class UnrealLogCategoryFilterComboBox(private val logFilter: UnrealLogFilter) : 
     init {
         val presentation = this.templatePresentation
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categoriesSelection.label")
-        presentation.isEnabledAndVisible = true
 
         logFilter.addOnCategoryAddedListener(this::onCategoryAdded)
     }
@@ -21,6 +21,11 @@ class UnrealLogCategoryFilterComboBox(private val logFilter: UnrealLogFilter) : 
 
     // sorted list of categories
     private val categoriesCheckboxes: ArrayList<FilterCheckboxAction> = arrayListOf()
+
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabledAndVisible = true
+        super.update(e)
+    }
 
     override fun createPopupActionGroup(parent: JComponent?): DefaultActionGroup {
         val group = DefaultActionGroup()

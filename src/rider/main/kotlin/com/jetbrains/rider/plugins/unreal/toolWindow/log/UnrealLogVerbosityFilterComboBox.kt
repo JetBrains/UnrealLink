@@ -12,7 +12,6 @@ class UnrealLogVerbosityFilterComboBox(logFilter: UnrealLogFilter) : ComboBoxAct
     init {
         val presentation = this.templatePresentation
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbositySelection.label")
-        presentation.isEnabledAndVisible = true
     }
 
     private val messagesCheckBox: FilterCheckboxAction =
@@ -22,6 +21,11 @@ class UnrealLogVerbosityFilterComboBox(logFilter: UnrealLogFilter) : ComboBoxAct
     private val errorsCheckBox: FilterCheckboxAction =
             FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Errors.text"), logFilter::showErrors)
     private val popupGroup: DefaultActionGroup = VerbosityActionGroup()
+
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabledAndVisible = true
+        super.update(e)
+    }
 
     override fun createPopupActionGroup(button: JComponent?): DefaultActionGroup {
         return popupGroup
