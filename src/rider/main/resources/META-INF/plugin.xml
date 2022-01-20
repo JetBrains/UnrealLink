@@ -211,9 +211,11 @@ Path to old plugin:</code></pre>
       <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
       <action id="RiderLink.SingleStepUnreal" class="com.jetbrains.rider.plugins.unreal.actions.SingleStepInUnrealAction"/>
       <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
+      <separator/>
       <add-to-group group-id="NavBarToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
       <add-to-group group-id="MainToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
-      <add-to-group group-id="CustomActions" anchor="last"/>
+      <add-to-group group-id="RightToolbarSideGroup" anchor="first"/>
+      <add-to-group group-id="RightToolbarSideGroupNoRunWidget" anchor="first"/>
     </group>
 
     <action id="UnrealLink.InstallEditorPluginToEngineAction"
