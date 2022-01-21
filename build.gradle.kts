@@ -14,7 +14,7 @@ buildscript {
         maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")}
     }
     dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2021.3.4")
+        classpath("com.jetbrains.rd:rd-gen:2022.1.2")
     }
 }
 
@@ -22,7 +22,7 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     kotlin("jvm") version "1.6.10"
-    id("com.jetbrains.rdgen") version "2021.3.4"
+    id("com.jetbrains.rdgen") version "2022.1.2"
     id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.3.1"
