@@ -103,7 +103,7 @@ fun getBranchName(): String {
         if (output.isNotEmpty())
             return output
     }
-    return "net212"
+    return "net221"
 }
 
 changelog {
