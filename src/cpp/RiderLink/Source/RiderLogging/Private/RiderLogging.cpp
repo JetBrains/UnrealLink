@@ -1,4 +1,4 @@
-#include "RiderLoggingExtension.hpp"
+#include "RiderLogging.hpp"
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
@@ -12,9 +12,9 @@
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
-DEFINE_LOG_CATEGORY(FLogRiderLoggingExtensionModule);
+DEFINE_LOG_CATEGORY(FLogRiderLoggingModule);
 
-IMPLEMENT_MODULE(FRiderLoggingExtensionModule, RiderLoggingExtension);
+IMPLEMENT_MODULE(FRiderLoggingModule, RiderLogging);
 
 namespace LoggingExtensionImpl
 {
@@ -91,9 +91,9 @@ void ScheduledSendMessage(FString* Msg, const JetBrains::EditorPlugin::LogMessag
 }
 
 
-void FRiderLoggingExtensionModule::StartupModule()
+void FRiderLoggingModule::StartupModule()
 {
-	UE_LOG(FLogRiderLoggingExtensionModule, Verbose, TEXT("STARTUP START"));
+	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("STARTUP START"));
 
 	static const auto START_TIME = FDateTime::UtcNow().ToUnixTimestamp();
 	static const auto GetTimeNow = [](double Time) -> rd::DateTime
@@ -130,12 +130,12 @@ void FRiderLoggingExtensionModule::StartupModule()
 			OutputDevice.onSerializeMessage.Unbind();
 	});
 
-	UE_LOG(FLogRiderLoggingExtensionModule, Verbose, TEXT("STARTUP FINISH"));
+	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
-void FRiderLoggingExtensionModule::ShutdownModule()
+void FRiderLoggingModule::ShutdownModule()
 {
-	UE_LOG(FLogRiderLoggingExtensionModule, Verbose, TEXT("SHUTDOWN START"));
+	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("SHUTDOWN START"));
 	ModuleLifetimeDef.terminate();
-	UE_LOG(FLogRiderLoggingExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
+	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
