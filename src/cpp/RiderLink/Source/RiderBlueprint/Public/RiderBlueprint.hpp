@@ -8,13 +8,13 @@
 #include "Modules/ModuleInterface.h"
 #include "Templates/SharedPointer.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(FLogRiderBlueprintExtensionModule, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(FLogRiderBlueprintModule, Log, All);
 
-class FRiderBlueprintExtensionModule : public IModuleInterface
+class FRiderBlueprintModule : public IModuleInterface
 {
 public:
-    FRiderBlueprintExtensionModule() = default;
-    virtual ~FRiderBlueprintExtensionModule() override = default;
+    FRiderBlueprintModule() = default;
+    virtual ~FRiderBlueprintModule() override = default;
 
     /** IModuleInterface implementation */
     virtual void StartupModule() override;

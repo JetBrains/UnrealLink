@@ -1,4 +1,4 @@
-#include "RiderGameControlExtension.hpp"
+#include "RiderGameControl.hpp"
 
 
 #include "IRiderLink.hpp"
@@ -30,9 +30,9 @@
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
-DEFINE_LOG_CATEGORY(FLogRiderGameControlExtensionModule);
+DEFINE_LOG_CATEGORY(FLogRiderGameControlModule);
 
-IMPLEMENT_MODULE(FRiderGameControlExtensionModule, RiderGameControlExtension);
+IMPLEMENT_MODULE(FRiderGameControlModule, RiderGameControl);
 
 extern UNREALED_API class UUnrealEdEngine* GUnrealEd;
 
@@ -474,11 +474,11 @@ FRiderGameControl::~FRiderGameControl()
 }
 
 
-void FRiderGameControlExtensionModule::StartupModule()
+void FRiderGameControlModule::StartupModule()
 {
     using namespace JetBrains::EditorPlugin;
     
-    UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP START"));
+    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("STARTUP START"));
 
     // Actions cache is not related to connection and its lifetimes
     ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
@@ -496,13 +496,13 @@ void FRiderGameControlExtensionModule::StartupModule()
         }
     );
 
-    UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("STARTUP FINISH"));
+    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
-void FRiderGameControlExtensionModule::ShutdownModule()
+void FRiderGameControlModule::ShutdownModule()
 {
-    UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN START"));
+    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("SHUTDOWN START"));
     ModuleLifetimeDefinition.terminate();
     ActionsCache.Reset();
-    UE_LOG(FLogRiderGameControlExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
+    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
