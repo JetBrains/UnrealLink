@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class RiderBlueprintExtension : ModuleRules
+public class RiderLogging : ModuleRules
 {
-	public RiderBlueprintExtension(ReadOnlyTargetRules Target) : base(Target)
+	public RiderLogging(ReadOnlyTargetRules Target) : base(Target)
 	{
 #if UE_4_22_OR_LATER
 		PCHUsage = PCHUsageMode.NoPCHs;
@@ -13,21 +13,13 @@ public class RiderBlueprintExtension : ModuleRules
 #endif
 		
 		bUseRTTI = true;
-		
-		PublicDependencyModuleNames.Add("RD");
 
 		PrivateDependencyModuleNames.AddRange(new []
 		{
 			"Core",
-			"SlateCore",
+			"RD",
 			"RiderLink",
-			"Slate",
-			"AssetRegistry",
-			"MessagingCommon",
-			"UnrealEd",
-			"UnrealEdMessages",
-			"Engine",
-			"CoreUObject"
+			"RiderBlueprint"
 		});
 	}
 }
