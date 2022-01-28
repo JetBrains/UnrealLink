@@ -113,7 +113,7 @@ void SocketWire::Base::send(RdId const& rd_id, std::function<void(Buffer& buffer
 	local_send_buffer.write_integral<int16_t>(0);	 // placeholder for context
 	writer(local_send_buffer);						 // write rest
 
-	size_t len = static_cast<int32_t>(local_send_buffer.get_position());
+	int32_t len = static_cast<int32_t>(local_send_buffer.get_position());
 
 	local_send_buffer.rewind();
 	local_send_buffer.write_integral<int32_t>(len - 4);
