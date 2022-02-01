@@ -1,0 +1,432 @@
+===================
+Init
+
+-Project
+ -EmptyUProject * 2 projects
+  -Games * 1 project
+   -EmptyUProject
+    Dependencies
+    -Source
+     -EmptyUProject
+      EmptyUProject.cpp
+      EmptyUProject.h
+      EmptyUProject.Build.cs
+     EmptyUProject.Target.cs
+     EmptyUProjectEditor.Target.cs
+    EmptyUProject.uproject
+  -Visualizers
+   UE4.natvis
+
+
+Project [Name:EmptyUProject, GUID:GUID]
+  Child items:
+    ProjectFileImpl(Path : EmptyUProject.uproject (relative_path/EmptyUProject.uproject))[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+    ProjectFileImpl(Path : EmptyUProject.vcxproj)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+]
+    Folder [Name:Source, Virtual:relative_path/Source]
+      Child items:
+        Folder [Name:EmptyUProject]
+          Child items:
+            ProjectFileImpl(Path : EmptyUProject.Build.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+            ProjectFileImpl(Path : EmptyUProject.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UE4Editor/Development/EmptyUProject/Definitions.h
+  FullIncludePath:;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/cudamanager;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/filebuf;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/foundation;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/pvd;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/task;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/cooking;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/common;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/extensions;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/geometry;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/clothing;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/nvparameterized;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/legacy;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/PhysX3;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/RenderDebug/public;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/PairFilter/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/internal/include;
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingYes
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreadedDLL
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: True
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : EmptyUProject.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLINCLUDE ]
+        ProjectFileImpl(Path : EmptyUProject.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+        ProjectFileImpl(Path : EmptyUProjectEditor.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+
+
+===================
+Add Simple Test to 'EmptyUProject'
+
+-Project
+ -EmptyUProject * 2 projects
+  -Games * 1 project
+   -EmptyUProject
+    Dependencies
+    -Source
+     -EmptyUProject
+      EmptyUProject.cpp
+      EmptyUProject.h
+      EmptyUProject.Build.cs
+      SimpleTest.cpp
+     EmptyUProject.Target.cs
+     EmptyUProjectEditor.Target.cs
+    EmptyUProject.uproject
+  -Visualizers
+   UE4.natvis
+
+
+Project [Name:EmptyUProject, GUID:GUID]
+  Child items:
+    ProjectFileImpl(Path : EmptyUProject.uproject (relative_path/EmptyUProject.uproject))[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+    ProjectFileImpl(Path : EmptyUProject.vcxproj)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+]
+    Folder [Name:Source, Virtual:relative_path/Source]
+      Child items:
+        Folder [Name:EmptyUProject]
+          Child items:
+            ProjectFileImpl(Path : EmptyUProject.Build.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+            ProjectFileImpl(Path : EmptyUProject.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UE4Editor/Development/EmptyUProject/Definitions.h
+  FullIncludePath:;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/cudamanager;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/filebuf;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/foundation;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/pvd;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/task;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/cooking;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/common;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/extensions;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/geometry;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/clothing;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/nvparameterized;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/legacy;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/PhysX3;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/RenderDebug/public;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/PairFilter/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/internal/include;
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingYes
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreadedDLL
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: True
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : EmptyUProject.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLINCLUDE ]
+            ProjectFileImpl(Path : SimpleTest.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLCOMPILE ]
+        ProjectFileImpl(Path : EmptyUProject.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+        ProjectFileImpl(Path : EmptyUProjectEditor.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+
+
