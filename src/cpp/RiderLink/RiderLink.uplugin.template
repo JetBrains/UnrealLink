@@ -16,34 +16,39 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "RD",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault"
+		  "Name": "RD",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "RiderLink",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault"
+		  "Name": "RiderLink",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "RiderLoggingExtension",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault"
+		  "Name": "RiderLoggingExtension",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "RiderBlueprintExtension",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "Default"
+		  "Name": "RiderBlueprintExtension",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "Default"
 		},
 		{
-			"Name": "RiderGameControlExtension",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "Default"
+		  "Name": "RiderGameControlExtension",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "Default"
 		},
 		{
-			"Name": "RiderShaderInfoDump",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PostEngineInit"
+		  "Name": "RiderShaderInfoDump",
+		  "Type": "EditorNoCommandlet",
+		  "LoadingPhase": "PostEngineInit"
+		},
+		{
+		  "Name": "RDCmdlets",
+		  "Type": "Runtime",
+		  "LoadingPhase": "Default"
 		}
 	]
 }
