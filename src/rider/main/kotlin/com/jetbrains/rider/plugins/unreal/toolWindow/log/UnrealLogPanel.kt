@@ -9,11 +9,9 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.jetbrains.rd.util.eol
 import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
@@ -31,7 +29,6 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
         private const val TIME_WIDTH = 29
         private const val VERBOSITY_WIDTH = 12
-        private const val CATEGORY_WIDTH = 20
     }
 
     private val settings: UnrealLogPanelSettings = UnrealLogPanelSettings.getInstance(project)
@@ -44,7 +41,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
     private val logFilter: UnrealLogFilter = UnrealLogFilter(settings)
     private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(logFilter)
     private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(logFilter)
-    private val timestampCheckBox: JBCheckBox = JBCheckBox(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), settings.showTimestamps)
+    private val settingsActionGroup = UnrealLogSettingsActionGroup(logFilter)
 
     init {
         setContent(consoleView)
@@ -57,13 +54,13 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         val topGroup = DefaultActionGroup().apply {
             add(verbosityFilterActionGroup)
             add(categoryFilterActionGroup)
+            add(settingsActionGroup)
         }
         val topToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, topGroup, true)
 
         val topPanel = JPanel(HorizontalLayout(0))
         topToolbar.targetComponent = topPanel
         topPanel.add(topToolbar.component)
-        topPanel.add(timestampCheckBox)
 
         consoleView.scrollTo(0)
 
@@ -72,13 +69,6 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         setToolbar(toolbar.component)
 
         logFilter.addFilterChangedListener { filter(); }
-
-        timestampCheckBox.addChangeListener {
-            if (settings.showTimestamps != timestampCheckBox.isSelected) {
-                settings.showTimestamps = !settings.showTimestamps
-                filter()
-            }
-        }
 
         val model = project.solution.rdRiderModel
         model.unrealLog.advise(lifetime) { event ->
@@ -110,11 +100,12 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
     }
 
     private fun printSpaces(n: Int = 1, style: ConsoleViewContentType) {
+        if (n <= 0) return
         consoleView.print(" ".repeat(n), style)
     }
 
     private fun printInfo(s: LogMessageInfo, style: ConsoleViewContentType) {
-        if (timestampCheckBox.isSelected) {
+        if (logFilter.showTimestamps) {
             val timeString = s.time?.toString()
             if (timeString != null) {
                 consoleView.print(timeString, style)
@@ -124,13 +115,28 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             }
         }
 
-        val verbosityString = s.type.toString().take(VERBOSITY_WIDTH)
-        consoleView.print(verbosityString, style)
-        printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1, style)
+        if (settings.alignMessages) {
+            if (settings.showVerbosity) {
+                val verbosityString = s.type.toString()
+                consoleView.print(verbosityString, style)
+                printSpaces(VERBOSITY_WIDTH - verbosityString.length + 1, style)
+            }
 
-        val category = s.category.data.take(CATEGORY_WIDTH)
-        consoleView.print(category, style)
-        printSpaces(CATEGORY_WIDTH - category.length + 1, style)
+            val category = s.category.data
+            consoleView.print(category, style)
+            printSpaces(settings.categoryWidth - category.length, style)
+            printSpaces(1, style)
+        }
+        else {
+            if (settings.showVerbosity) {
+                val verbosityString = s.type.toString()
+                consoleView.print(verbosityString, style)
+                consoleView.print(": ", style)
+            }
+
+            consoleView.print(s.category.data, style)
+            consoleView.print(": ", style)
+        }
     }
 
     private fun getMessageStyle(type: VerbosityType): ConsoleViewContentType {

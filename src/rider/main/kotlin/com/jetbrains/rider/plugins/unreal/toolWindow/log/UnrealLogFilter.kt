@@ -38,6 +38,42 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
             }
         }
 
+    var showTimestamps: Boolean
+        get() = settings.showTimestamps
+        set(value) {
+            if (settings.showTimestamps != value) {
+                settings.showTimestamps = value
+                onFilterChanged()
+            }
+        }
+
+    var showVerbosity: Boolean
+        get() = settings.showVerbosity
+        set(value) {
+            if (settings.showVerbosity != value) {
+                settings.showVerbosity = value
+                onFilterChanged()
+            }
+        }
+
+    var alignMessages: Boolean
+        get() = settings.alignMessages
+        set(value) {
+            if (settings.alignMessages != value) {
+                settings.alignMessages = value
+                onFilterChanged()
+            }
+        }
+
+    var categoryWidth: Int
+        get() = settings.categoryWidth
+        set(value) {
+            if (settings.categoryWidth != value) {
+                settings.categoryWidth = value
+                onFilterChanged()
+            }
+        }
+
     private val categories: HashSet<String> = hashSetOf()
     private val selectedCategories: HashSet<String> = hashSetOf()
 
