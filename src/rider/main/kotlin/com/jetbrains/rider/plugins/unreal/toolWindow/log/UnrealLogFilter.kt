@@ -6,6 +6,17 @@ import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
 import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 
 class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSettings) {
+    var clearOnStart: Boolean
+        get() = settings.clearOnStart
+        set(value) {
+            settings.clearOnStart = value
+        }
+    var focusOnStart: Boolean
+        get() = settings.focusOnStart
+        set(value) {
+            settings.focusOnStart = value
+        }
+
     var showMessages: Boolean
         get() = settings.showMessages
         set(value) {

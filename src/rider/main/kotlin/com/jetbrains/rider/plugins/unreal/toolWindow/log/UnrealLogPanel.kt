@@ -71,6 +71,13 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         logFilter.addFilterChangedListener { filter(); }
 
         val model = project.solution.rdRiderModel
+        model.isConnectedToUnrealEditor.advise(lifetime) {
+            if (it) {
+                if (settings.clearOnStart) {
+                    clear()
+                }
+            }
+        }
         model.unrealLog.advise(lifetime) { event ->
             print(event)
         }
