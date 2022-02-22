@@ -38,7 +38,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     val console: ConsoleViewImpl get() = consoleView
 
-    private val logFilter: UnrealLogFilter = UnrealLogFilter(settings)
+    private val logFilter: UnrealLogFilter = UnrealLogFilter(lifetime, settings)
     private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(logFilter)
     private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(logFilter)
     private val settingsActionGroup = UnrealLogSettingsActionGroup(logFilter)
