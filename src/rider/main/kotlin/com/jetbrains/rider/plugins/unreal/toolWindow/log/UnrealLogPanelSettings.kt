@@ -13,6 +13,17 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         fun getInstance(project: Project): UnrealLogPanelSettings = project.service()
     }
 
+    var clearOnStart: Boolean
+        get() = state.clearOnStart
+        set(value) {
+            state.clearOnStart = value
+        }
+    var focusOnStart: Boolean
+        get() = state.focusOnStart
+        set(value) {
+            state.focusOnStart = value
+        }
+
     var showMessages: Boolean
         get() = state.showMessages
         set(value) {
@@ -95,6 +106,9 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
     }
 
     class State : BaseState() {
+        var clearOnStart by property(defaultValue = false)
+        var focusOnStart by property(defaultValue = true)
+
         var showMessages by property(defaultValue = true)
         var showWarnings by property(defaultValue = true)
         var showErrors by property(defaultValue = true)

@@ -25,6 +25,15 @@ class UnrealLogSettingsConfigurable(private val project: Project) : DslConfigura
 
         group(UnrealLinkBundle.message("configurable.UnrealLink.log.settings.label")) {
             row {
+                checkBox(UnrealLinkBundle.message("configurable.UnrealLink.clearLogOnStart.label"))
+                        .bindSelected(settings::clearOnStart)
+            }
+            row {
+                checkBox(UnrealLinkBundle.message("configurable.UnrealLink.focusLogOnStart.label"))
+                        .bindSelected(settings::focusOnStart)
+            }
+            separator()
+            row {
                 checkBox(UnrealLinkBundle.message("configurable.UnrealLink.showTimestampsCheckbox.label"))
                         .bindSelected(settings::showTimestamps)
             }

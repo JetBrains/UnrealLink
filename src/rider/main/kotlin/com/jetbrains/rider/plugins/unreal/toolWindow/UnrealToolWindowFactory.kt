@@ -14,6 +14,7 @@ import com.intellij.ui.content.ContentManagerListener
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.RiderIcons
 
@@ -52,6 +53,11 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     fun showTabForNewSession() {
-        showTab(TITLE_ID, project.lifetime)
+        val settings = project.service<UnrealLogPanelSettings>()
+        if (settings.focusOnStart) {
+            showTab(TITLE_ID, project.lifetime)
+        } else {
+            getOrCreateTab(TITLE_ID, project.lifetime)
+        }
     }
 }

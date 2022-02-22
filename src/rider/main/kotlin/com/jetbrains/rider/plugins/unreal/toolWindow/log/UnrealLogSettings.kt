@@ -12,6 +12,9 @@ class UnrealLogSettingsActionGroup(private val settings: UnrealLogFilter) : Defa
         isPopup = true
         templatePresentation.icon = AllIcons.General.GearPlain
 
+        add(FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.clearLogOnStart.label"), settings::clearOnStart))
+        add(FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.focusLogOnStart.label"), settings::focusOnStart))
+        addSeparator()
         add(FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showTimestampsCheckbox.label"), settings::showTimestamps))
         add(FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.showVerbosityCheckbox.label"), settings::showVerbosity))
         add(FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.alignMessagesCheckbox.label"), settings::alignMessages))
