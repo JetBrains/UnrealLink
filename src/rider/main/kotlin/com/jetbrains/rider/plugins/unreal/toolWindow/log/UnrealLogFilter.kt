@@ -1,77 +1,58 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
+import com.intellij.openapi.rd.createNestedDisposable
+import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
 import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 
-class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
+class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSettings) {
     var showMessages: Boolean
         get() = settings.showMessages
         set(value) {
-            if (settings.showMessages != value) {
-                settings.showMessages = value
-                onFilterChanged()
-            }
+            settings.showMessages = value
         }
     var showWarnings: Boolean
         get() = settings.showWarnings
         set(value) {
-            if (settings.showWarnings != value) {
-                settings.showWarnings = value
-                onFilterChanged()
-            }
+            settings.showWarnings = value
         }
     var showErrors: Boolean
         get() = settings.showErrors
         set(value) {
-            if (settings.showErrors != value) {
-                settings.showErrors = value
-                onFilterChanged()
-            }
+            settings.showErrors = value
         }
 
     var showAllCategories: Boolean
         get() = settings.showAllCategories
         set(value) {
             if (settings.showAllCategories != value) {
-                settings.showAllCategories = value
                 toggleAllCategories(value)
+                settings.showAllCategories = value
             }
         }
 
     var showTimestamps: Boolean
         get() = settings.showTimestamps
         set(value) {
-            if (settings.showTimestamps != value) {
-                settings.showTimestamps = value
-                onFilterChanged()
-            }
+            settings.showTimestamps = value
         }
 
     var showVerbosity: Boolean
         get() = settings.showVerbosity
         set(value) {
-            if (settings.showVerbosity != value) {
-                settings.showVerbosity = value
-                onFilterChanged()
-            }
+            settings.showVerbosity = value
         }
 
     var alignMessages: Boolean
         get() = settings.alignMessages
         set(value) {
-            if (settings.alignMessages != value) {
-                settings.alignMessages = value
-                onFilterChanged()
-            }
+            settings.alignMessages = value
         }
 
     var categoryWidth: Int
         get() = settings.categoryWidth
         set(value) {
-            if (settings.categoryWidth != value) {
-                settings.categoryWidth = value
-                onFilterChanged()
-            }
+            settings.categoryWidth = value
         }
 
     private val categories: HashSet<String> = hashSetOf()
@@ -80,7 +61,12 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
     private val filterChangedListeners: ArrayList<() -> Unit> = arrayListOf()
     private val onCategoryAddedListeners: ArrayList<(String) -> Unit> = arrayListOf()
 
-    fun addFilterChangedListener(listener: ()-> Unit) {
+    init {
+        val disposable = lifetime.createNestedDisposable()
+        settings.addSettingsChangedListener({ onFilterChanged() }, disposable)
+    }
+
+    fun addFilterChangedListener(listener: () -> Unit) {
         filterChangedListeners.add(listener)
     }
 
@@ -128,7 +114,7 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         fireOnCategoryAdded(category)
     }
 
-    fun addOnCategoryAddedListener(listener: (String)-> Unit) {
+    fun addOnCategoryAddedListener(listener: (String) -> Unit) {
         onCategoryAddedListeners.add(listener)
     }
 
@@ -136,7 +122,7 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         onCategoryAddedListeners.forEach { it.invoke(category) }
     }
 
-    fun isCategorySelected(category: String) : Boolean {
+    fun isCategorySelected(category: String): Boolean {
         return category in selectedCategories
     }
 
@@ -155,8 +141,5 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         if (state) {
             selectedCategories.addAll(categories)
         }
-
-        onFilterChanged()
     }
-
 }

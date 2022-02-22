@@ -171,7 +171,11 @@ Path to old plugin:</code></pre>
   <extensions defaultExtensionNs="com.intellij">
     <projectService serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
     <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
-    <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
+    <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
+                             instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable" />
+    <projectConfigurable groupId="tools" id="UnrealLogSettings" bundle="messages.UnrealLinkBundle"
+                         instance="com.jetbrains.rider.settings.UnrealLogSettingsConfigurable"/>
+
     <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor" />
     <notificationGroup id="OutOfSyncConnection" displayType="BALLOON"
                        bundle="messages.UnrealLinkBundle" key="notificationAction.UnrealEditorOutOfSync.groupId"/>
