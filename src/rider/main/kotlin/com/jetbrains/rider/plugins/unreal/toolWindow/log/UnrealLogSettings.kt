@@ -7,7 +7,7 @@ import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 
 
-class UnrealLogSettingsActionGroup(private val settings: UnrealLogFilter) : DefaultActionGroup(), DumbAware {
+class UnrealLogSettingsActionGroup(private val settings: UnrealLogPanelSettings) : DefaultActionGroup(), DumbAware {
     init {
         isPopup = true
         templatePresentation.icon = AllIcons.General.GearPlain

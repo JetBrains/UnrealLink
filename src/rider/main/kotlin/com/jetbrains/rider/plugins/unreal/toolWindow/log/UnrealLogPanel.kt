@@ -39,9 +39,9 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
     val console: ConsoleViewImpl get() = consoleView
 
     private val logFilter: UnrealLogFilter = UnrealLogFilter(lifetime, settings)
-    private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(logFilter)
-    private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(logFilter)
-    private val settingsActionGroup = UnrealLogSettingsActionGroup(logFilter)
+    private val verbosityFilterActionGroup: UnrealLogVerbosityFilterComboBox = UnrealLogVerbosityFilterComboBox(settings)
+    private val categoryFilterActionGroup: UnrealLogCategoryFilterComboBox = UnrealLogCategoryFilterComboBox(settings, logFilter)
+    private val settingsActionGroup = UnrealLogSettingsActionGroup(settings)
 
     init {
         setContent(consoleView)
@@ -112,7 +112,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
     }
 
     private fun printInfo(s: LogMessageInfo, style: ConsoleViewContentType) {
-        if (logFilter.showTimestamps) {
+        if (settings.showTimestamps) {
             val timeString = s.time?.toString()
             if (timeString != null) {
                 consoleView.print(timeString, style)

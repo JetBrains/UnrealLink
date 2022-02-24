@@ -8,18 +8,18 @@ import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import javax.swing.JComponent
 
-class UnrealLogVerbosityFilterComboBox(logFilter: UnrealLogFilter) : ComboBoxAction(), DumbAware {
+class UnrealLogVerbosityFilterComboBox(settings: UnrealLogPanelSettings) : ComboBoxAction(), DumbAware {
     init {
         val presentation = this.templatePresentation
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbositySelection.label")
     }
 
     private val messagesCheckBox: FilterCheckboxAction =
-            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Messages.text"), logFilter::showMessages)
+            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Messages.text"), settings::showMessages)
     private val warningsCheckBox: FilterCheckboxAction =
-            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Warnings.text"), logFilter::showWarnings)
+            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Warnings.text"), settings::showWarnings)
     private val errorsCheckBox: FilterCheckboxAction =
-            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Errors.text"), logFilter::showErrors)
+            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Errors.text"), settings::showErrors)
     private val popupGroup: DefaultActionGroup = VerbosityActionGroup()
 
     override fun update(e: AnActionEvent) {

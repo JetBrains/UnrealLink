@@ -8,7 +8,8 @@ import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.actions.FilterCheckboxAction
 import javax.swing.JComponent
 
-class UnrealLogCategoryFilterComboBox(private val logFilter: UnrealLogFilter) : ComboBoxAction(), DumbAware {
+class UnrealLogCategoryFilterComboBox(private val settings: UnrealLogPanelSettings,
+                                      private val logFilter: UnrealLogFilter) : ComboBoxAction(), DumbAware {
     init {
         val presentation = this.templatePresentation
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categoriesSelection.label")
@@ -16,8 +17,18 @@ class UnrealLogCategoryFilterComboBox(private val logFilter: UnrealLogFilter) : 
         logFilter.addOnCategoryAddedListener(this::onCategoryAdded)
     }
 
+    private var showAllCategories: Boolean
+        get() = settings.showAllCategories
+        set(value) {
+            if (settings.showAllCategories != value) {
+                logFilter.toggleAllCategories(value)
+                settings.showAllCategories = value
+            }
+        }
+
+
     private val allSelectedCheckbox: FilterCheckboxAction =
-            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categories.ShowAll.text"), logFilter::showAllCategories)
+            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categories.ShowAll.text"), ::showAllCategories)
 
     // sorted list of categories
     private val categoriesCheckboxes: ArrayList<FilterCheckboxAction> = arrayListOf()

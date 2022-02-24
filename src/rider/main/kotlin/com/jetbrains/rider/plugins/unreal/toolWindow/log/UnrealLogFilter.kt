@@ -6,66 +6,6 @@ import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
 import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 
 class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSettings) {
-    var clearOnStart: Boolean
-        get() = settings.clearOnStart
-        set(value) {
-            settings.clearOnStart = value
-        }
-    var focusOnStart: Boolean
-        get() = settings.focusOnStart
-        set(value) {
-            settings.focusOnStart = value
-        }
-
-    var showMessages: Boolean
-        get() = settings.showMessages
-        set(value) {
-            settings.showMessages = value
-        }
-    var showWarnings: Boolean
-        get() = settings.showWarnings
-        set(value) {
-            settings.showWarnings = value
-        }
-    var showErrors: Boolean
-        get() = settings.showErrors
-        set(value) {
-            settings.showErrors = value
-        }
-
-    var showAllCategories: Boolean
-        get() = settings.showAllCategories
-        set(value) {
-            if (settings.showAllCategories != value) {
-                toggleAllCategories(value)
-                settings.showAllCategories = value
-            }
-        }
-
-    var showTimestamps: Boolean
-        get() = settings.showTimestamps
-        set(value) {
-            settings.showTimestamps = value
-        }
-
-    var showVerbosity: Boolean
-        get() = settings.showVerbosity
-        set(value) {
-            settings.showVerbosity = value
-        }
-
-    var alignMessages: Boolean
-        get() = settings.alignMessages
-        set(value) {
-            settings.alignMessages = value
-        }
-
-    var categoryWidth: Int
-        get() = settings.categoryWidth
-        set(value) {
-            settings.categoryWidth = value
-        }
-
     private val categories: HashSet<String> = hashSetOf()
     private val selectedCategories: HashSet<String> = hashSetOf()
 
@@ -90,15 +30,15 @@ class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSe
 
         // Checking verbosity
         val verbosity = message.type
-        if (verbosity == VerbosityType.Error && !showErrors) {
+        if (verbosity == VerbosityType.Error && !settings.showErrors) {
             return false
         }
 
-        if (verbosity == VerbosityType.Warning && !showWarnings) {
+        if (verbosity == VerbosityType.Warning && !settings.showWarnings) {
             return false
         }
 
-        if (verbosity != VerbosityType.Error && verbosity != VerbosityType.Warning && !showMessages) {
+        if (verbosity != VerbosityType.Error && verbosity != VerbosityType.Warning && !settings.showMessages) {
             return false
         }
 
@@ -117,7 +57,7 @@ class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSe
         }
 
         // new categories selected state relies on showAllCategories state
-        val isSelected = showAllCategories
+        val isSelected = settings.showAllCategories
         if (isSelected) {
             selectedCategories.add(category)
         }
@@ -147,7 +87,7 @@ class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSe
         onFilterChanged()
     }
 
-    private fun toggleAllCategories(state: Boolean) {
+    fun toggleAllCategories(state: Boolean) {
         selectedCategories.clear()
         if (state) {
             selectedCategories.addAll(categories)
