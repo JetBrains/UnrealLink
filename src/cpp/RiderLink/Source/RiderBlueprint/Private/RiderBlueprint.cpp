@@ -1,4 +1,4 @@
-#include "RiderBlueprintExtension.hpp"
+#include "RiderBlueprint.hpp"
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
@@ -14,31 +14,31 @@
 
 #define LOCTEXT_NAMESPACE "RiderLink"
 
-DEFINE_LOG_CATEGORY(FLogRiderBlueprintExtensionModule);
+DEFINE_LOG_CATEGORY(FLogRiderBlueprintModule);
 
-IMPLEMENT_MODULE(FRiderBlueprintExtensionModule, RiderBlueprintExtension);
+IMPLEMENT_MODULE(FRiderBlueprintModule, RiderBlueprint);
 
 static void AllowSetForeGroundForEditor(JetBrains::EditorPlugin::RdEditorModel const & unrealToBackendModel) {
     static const int32 CurrentProcessId = FPlatformProcess::GetCurrentProcessId();
     try {
         const rd::WiredRdTask<bool> Task = unrealToBackendModel.get_allowSetForegroundWindow().sync(CurrentProcessId);
         if (Task.is_faulted()) {
-            UE_LOG(FLogRiderBlueprintExtensionModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(Task.value_or_throw()).c_str());
+            UE_LOG(FLogRiderBlueprintModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(Task.value_or_throw()).c_str());
         }
         else if (Task.is_succeeded()) {
             if (!(Task.value_or_throw().unwrap())) {
-                UE_LOG(FLogRiderBlueprintExtensionModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(Task.value_or_throw()).c_str());
+                UE_LOG(FLogRiderBlueprintModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(Task.value_or_throw()).c_str());
             }
         }
     }
     catch (std::exception const &e) {
-        UE_LOG(FLogRiderBlueprintExtensionModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(e).c_str());
+        UE_LOG(FLogRiderBlueprintModule, Error, TEXT("AllowSetForeGroundForEditor failed: %hs "), rd::to_string(e).c_str());
     }
 }
 
-void FRiderBlueprintExtensionModule::StartupModule()
+void FRiderBlueprintModule::StartupModule()
 {
-    UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP START"));
+    UE_LOG(FLogRiderBlueprintModule, Verbose, TEXT("STARTUP START"));
     IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
     ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
 
@@ -89,12 +89,12 @@ void FRiderBlueprintExtensionModule::StartupModule()
             return BluePrintProvider::IsBlueprint(pathName);
         });
     });
-    UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("STARTUP FINISH"));
+    UE_LOG(FLogRiderBlueprintModule, Verbose, TEXT("STARTUP FINISH"));
 }
 
-void FRiderBlueprintExtensionModule::ShutdownModule()
+void FRiderBlueprintModule::ShutdownModule()
 {
-    UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("SHUTDOWN START"));
+    UE_LOG(FLogRiderBlueprintModule, Verbose, TEXT("SHUTDOWN START"));
     ModuleLifetimeDef.terminate();
-    UE_LOG(FLogRiderBlueprintExtensionModule, Verbose, TEXT("SHUTDOWN FINISH"));
+    UE_LOG(FLogRiderBlueprintModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }

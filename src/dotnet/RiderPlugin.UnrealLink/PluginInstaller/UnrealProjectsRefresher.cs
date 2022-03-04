@@ -107,7 +107,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             // Invalid uproject file means we couldn't get uproject file from solution detector and the project might be
             // under Engine source
             var invalidUprojectFile = !uprojectFile.IsValidAndExistFile();
-            var isProjectUnderEngine = uprojectFile.StartsWith(engineRoot) || invalidUprojectFile;
+            var isProjectUnderEngine = invalidUprojectFile || uprojectFile.StartsWith(engineRoot);
             if (!isProjectUnderEngine)
             {
                 ourLogger.Info($"[UnrealLink]: {solution.SolutionFilePath} is not in {engineRoot} ");
