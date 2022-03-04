@@ -1,4 +1,4 @@
-<idea-plugin allow-bundled-update="true">
+<idea-plugin allow-bundled-update="true" require-restart="true">
   <id>unreal-link</id>
   <name>UnrealLink</name>
   <version>_PLACEHOLDER_</version>
