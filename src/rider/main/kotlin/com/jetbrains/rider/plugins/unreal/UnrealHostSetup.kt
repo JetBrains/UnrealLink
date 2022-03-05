@@ -23,6 +23,8 @@ import com.sun.jna.win32.StdCallLibrary
 // We need to finish `init` first, then subscribe to changes in model
 class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
     var isUnrealEngineSolution = false
+    var isPreBuiltEngine = false
+
     init {
         val unrealHost = UnrealHost.getInstance(project)
 
@@ -45,6 +47,9 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 this.isUnrealEngineSolution = isUnrealEngineSolution
                 project.getService(StatusBarWidgetsManager::class.java).updateWidget(UnrealStatusBarWidget::class.java)
             }
+            it.isPreBuiltEngine.change.advise(project.lifetime) { isPreBuiltEngine ->
+                this.isPreBuiltEngine = isPreBuiltEngine
+            }
         }
 
         unrealHost.performModelAction {
@@ -58,7 +63,7 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         unrealHost.performModelAction {
             it.riderLinkInstallPanelInit.advise(project.lifetime) {
                 val riderLinkInstallContext =
-                    RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
+                        RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
                 riderLinkInstallContext.clear()
                 riderLinkInstallContext.showToolWindowIfHidden()
             }
@@ -88,8 +93,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         }
     }
 
-    private val user32 = if(SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
-    private val kernel32 = if(SystemInfo.isWindows) Native.load("kernel32", Kernel32::class.java) else null
+    private val user32 = if (SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
+    private val kernel32 = if (SystemInfo.isWindows) Native.load("kernel32", Kernel32::class.java) else null
 
     @Suppress("FunctionName")
     private interface User32 : StdCallLibrary {
