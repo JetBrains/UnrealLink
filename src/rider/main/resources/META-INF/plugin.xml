@@ -1,13 +1,13 @@
 <idea-plugin allow-bundled-update="true" require-restart="true">
-  <id>unreal-link</id>
-  <name>UnrealLink</name>
-  <version>_PLACEHOLDER_</version>
-  <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
-  <idea-version since-build="_PLACEHOLDER_" until-build="_PLACEHOLDER_" />
-  <depends>com.intellij.modules.rider</depends>
-  <depends>com.jetbrains.rider-cpp</depends>
+    <id>unreal-link</id>
+    <name>UnrealLink</name>
+    <version>_PLACEHOLDER_</version>
+    <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
+    <idea-version since-build="_PLACEHOLDER_" until-build="_PLACEHOLDER_"/>
+    <depends>com.intellij.modules.rider</depends>
+    <depends>com.jetbrains.rider-cpp</depends>
 
-  <description><![CDATA[
+    <description><![CDATA[
   <br/>
     The UnrealLink plugin enables advanced integration between JetBrains
     <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a>
@@ -159,72 +159,112 @@ Path to old plugin:</code></pre>
     If you have any issues with the plugin that you can’t resolve, please contact the developers
     via <a href="https://github.com/JetBrains/UnrealLink/issues">GitHub Issues</a>.
     ]]>
-  </description>
+    </description>
 
-  <project-components>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class></component>
-    <component><implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class></component>
-  </project-components>
+    <project-components>
+        <component>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager
+            </implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification
+            </implementation-class>
+        </component>
+    </project-components>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <projectService serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
-    <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget" order="after readOnlyWidget, before fatalErrorWidget" />
-    <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" provider="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurableProvider" />
-    <consoleActionsPostProcessor implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor" />
-    <notificationGroup id="OutOfSyncConnection" displayType="BALLOON"
-                       bundle="messages.UnrealLinkBundle" key="notificationAction.UnrealEditorOutOfSync.groupId"/>
-    <notificationGroup id="RiderLinkActions" displayType="BALLOON"
-                       bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService
+                serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
+        <statusBarWidgetFactory implementation="com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget"
+                                order="after readOnlyWidget, before fatalErrorWidget"/>
+        <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
+                                 instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"/>
+        <projectConfigurable groupId="tools" id="UnrealLogSettings" bundle="messages.UnrealLinkBundle"
+                             instance="com.jetbrains.rider.settings.UnrealLogSettingsConfigurable"/>
 
-  <actions resource-bundle="messages.UnrealLinkBundle">
-    <group id="UnrealInteractionToolbar">
-      <action id="RiderLink.RefreshProjects" class="com.jetbrains.rider.plugins.unreal.actions.RefreshProjects"/>
-      <separator/>
-      <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain" class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
-        <group id="RiderLink.NumberOfPlayers" popup="true" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.OnePlayer" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="1"/>
-          <action id="RiderLink.TwoPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="2"/>
-          <action id="RiderLink.ThreePlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="3"/>
-          <action id="RiderLink.FourPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers" text="4"/>
+        <consoleActionsPostProcessor
+                implementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogConsoleActionsPostProcessor"/>
+        <notificationGroup id="OutOfSyncConnection" displayType="BALLOON"
+                           bundle="messages.UnrealLinkBundle" key="notificationAction.UnrealEditorOutOfSync.groupId"/>
+        <notificationGroup id="RiderLinkActions" displayType="BALLOON"
+                           bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
+    </extensions>
+
+    <actions resource-bundle="messages.UnrealLinkBundle">
+        <group id="UnrealInteractionToolbar">
+            <action id="RiderLink.RefreshProjects" class="com.jetbrains.rider.plugins.unreal.actions.RefreshProjects"/>
+            <separator/>
+            <group id="RiderLink.UnrealPlaySettings" popup="true" icon="AllIcons.General.GearPlain"
+                   class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
+                <group id="RiderLink.NumberOfPlayers" popup="true"
+                       class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
+                    <action id="RiderLink.OnePlayer" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers"
+                            text="1"/>
+                    <action id="RiderLink.TwoPlayers" class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers"
+                            text="2"/>
+                    <action id="RiderLink.ThreePlayers"
+                            class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers"
+                            text="3"/>
+                    <action id="RiderLink.FourPlayers"
+                            class="com.jetbrains.rider.plugins.unreal.actions.NumberOfPlayers"
+                            text="4"/>
+                </group>
+                <group id="RiderLink.SpawnPlayerAt" popup="true"
+                       class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
+                    <action id="RiderLink.CurrentCamLoc"
+                            class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
+                    <action id="RiderLink.DefaultPlayerStart"
+                            class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
+                </group>
+                <group id="RiderLink.Modes" popup="true"
+                       class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
+                    <action id="RiderLink.SelectedViewport"
+                            class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                </group>
+                <action id="RiderLink.DedicatedServer"
+                        class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer"/>
+                <action id="RiderLink.CompileBeforeRun"
+                        class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun"/>
+            </group>
+            <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
+            <action id="RiderLink.ResumeUnreal"
+                    class="com.jetbrains.rider.plugins.unreal.actions.ResumeInUnrealAction"/>
+            <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
+            <action id="RiderLink.SingleStepUnreal"
+                    class="com.jetbrains.rider.plugins.unreal.actions.SingleStepInUnrealAction"/>
+            <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
+            <separator/>
+            <add-to-group group-id="NavBarToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
+            <add-to-group group-id="MainToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
+            <add-to-group group-id="RightToolbarSideGroup" anchor="first"/>
+            <add-to-group group-id="RightToolbarSideGroupNoRunWidget" anchor="first"/>
         </group>
-        <group id="RiderLink.SpawnPlayerAt" popup="true" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.CurrentCamLoc" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
-          <action id="RiderLink.DefaultPlayerStart" class="com.jetbrains.rider.plugins.unreal.actions.SpawnPlayer"/>
-        </group>
-        <group id="RiderLink.Modes" popup="true" class="com.jetbrains.rider.plugins.unreal.actions.PlaySubsettings">
-          <action id="RiderLink.SelectedViewport" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.MobilePreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.NewEditorWindow" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-          <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-        </group>
-        <action id="RiderLink.DedicatedServer" class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer"/>
-        <action id="RiderLink.CompileBeforeRun" class="com.jetbrains.rider.plugins.unreal.actions.CompileBeforeRun"/>
-      </group>
-      <action id="RiderLink.StartUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PlayInUnrealAction"/>
-      <action id="RiderLink.ResumeUnreal" class="com.jetbrains.rider.plugins.unreal.actions.ResumeInUnrealAction"/>
-      <action id="RiderLink.PauseUnreal" class="com.jetbrains.rider.plugins.unreal.actions.PauseInUnrealAction"/>
-      <action id="RiderLink.SingleStepUnreal" class="com.jetbrains.rider.plugins.unreal.actions.SingleStepInUnrealAction"/>
-      <action id="RiderLink.StopUnreal" class="com.jetbrains.rider.plugins.unreal.actions.StopInUnrealAction"/>
-      <separator/>
-      <add-to-group group-id="NavBarToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
-      <add-to-group group-id="MainToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
-      <add-to-group group-id="RightToolbarSideGroup" anchor="first"/>
-      <add-to-group group-id="RightToolbarSideGroupNoRunWidget" anchor="first"/>
-    </group>
 
-    <action id="UnrealLink.InstallEditorPluginToEngineAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"/>
-    <action id="UnrealLink.InstallEditorPluginToGameAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"/>
-    <action id="UnrealLink.EnableAutoUpdatePlugin"
-            class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
-    <action id="UnrealLink.CancelRiderLinkInstallAction"
-            class="com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction"/>
-  </actions>
+        <action id="UnrealLink.InstallEditorPluginToEngineAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"/>
+        <action id="UnrealLink.InstallEditorPluginToGameAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToGameAction"/>
+
+        <action id="UnrealLink.CopyEditorPluginToEngineAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.ExtractEditorPluginToEngineAction"/>
+        <action id="UnrealLink.CopyEditorPluginToGameAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.ExtractEditorPluginToGameAction"/>
+
+        <action id="UnrealLink.EnableAutoUpdatePlugin"
+                class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
+        <action id="UnrealLink.CancelRiderLinkInstallAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction"/>
+    </actions>
 </idea-plugin>

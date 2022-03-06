@@ -1,50 +1,23 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
+import com.intellij.openapi.rd.createNestedDisposable
+import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
 import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 
-class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
-    var showMessages: Boolean
-        get() = settings.showMessages
-        set(value) {
-            if (settings.showMessages != value) {
-                settings.showMessages = value
-                onFilterChanged()
-            }
-        }
-    var showWarnings: Boolean
-        get() = settings.showWarnings
-        set(value) {
-            if (settings.showWarnings != value) {
-                settings.showWarnings = value
-                onFilterChanged()
-            }
-        }
-    var showErrors: Boolean
-        get() = settings.showErrors
-        set(value) {
-            if (settings.showErrors != value) {
-                settings.showErrors = value
-                onFilterChanged()
-            }
-        }
-
-    var showAllCategories: Boolean
-        get() = settings.showAllCategories
-        set(value) {
-            if (settings.showAllCategories != value) {
-                settings.showAllCategories = value
-                toggleAllCategories(value)
-            }
-        }
-
+class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSettings) {
     private val categories: HashSet<String> = hashSetOf()
     private val selectedCategories: HashSet<String> = hashSetOf()
 
     private val filterChangedListeners: ArrayList<() -> Unit> = arrayListOf()
     private val onCategoryAddedListeners: ArrayList<(String) -> Unit> = arrayListOf()
 
-    fun addFilterChangedListener(listener: ()-> Unit) {
+    init {
+        val disposable = lifetime.createNestedDisposable()
+        settings.addSettingsChangedListener({ onFilterChanged() }, disposable)
+    }
+
+    fun addFilterChangedListener(listener: () -> Unit) {
         filterChangedListeners.add(listener)
     }
 
@@ -57,15 +30,15 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
 
         // Checking verbosity
         val verbosity = message.type
-        if (verbosity == VerbosityType.Error && !showErrors) {
+        if (verbosity == VerbosityType.Error && !settings.showErrors) {
             return false
         }
 
-        if (verbosity == VerbosityType.Warning && !showWarnings) {
+        if (verbosity == VerbosityType.Warning && !settings.showWarnings) {
             return false
         }
 
-        if (verbosity != VerbosityType.Error && verbosity != VerbosityType.Warning && !showMessages) {
+        if (verbosity != VerbosityType.Error && verbosity != VerbosityType.Warning && !settings.showMessages) {
             return false
         }
 
@@ -84,7 +57,7 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         }
 
         // new categories selected state relies on showAllCategories state
-        val isSelected = showAllCategories
+        val isSelected = settings.showAllCategories
         if (isSelected) {
             selectedCategories.add(category)
         }
@@ -92,7 +65,7 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         fireOnCategoryAdded(category)
     }
 
-    fun addOnCategoryAddedListener(listener: (String)-> Unit) {
+    fun addOnCategoryAddedListener(listener: (String) -> Unit) {
         onCategoryAddedListeners.add(listener)
     }
 
@@ -100,7 +73,7 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         onCategoryAddedListeners.forEach { it.invoke(category) }
     }
 
-    fun isCategorySelected(category: String) : Boolean {
+    fun isCategorySelected(category: String): Boolean {
         return category in selectedCategories
     }
 
@@ -114,13 +87,10 @@ class UnrealLogFilter(private val settings: UnrealLogPanelSettings) {
         onFilterChanged()
     }
 
-    private fun toggleAllCategories(state: Boolean) {
+    fun toggleAllCategories(state: Boolean) {
         selectedCategories.clear()
         if (state) {
             selectedCategories.addAll(categories)
         }
-
-        onFilterChanged()
     }
-
 }

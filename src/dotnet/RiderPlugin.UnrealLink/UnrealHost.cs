@@ -35,6 +35,7 @@ namespace RiderPlugin.UnrealLink
             {
                 myModel.IsUnrealEngineSolution.Set(args.New == TriBool.True);
                 myModel.IsUproject.Set(args.New == TriBool.True && solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened);
+                myModel.IsPreBuiltEngine.Set(args.New == TriBool.True && !solutionDetector.BuiltFromSources);
             });
         }
 

@@ -13,7 +13,7 @@ class InstallEditorPluginToEngineAction : DumbAwareAction() {
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
-            InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes)
+                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes)
         )
     }
 
@@ -32,7 +32,45 @@ class InstallEditorPluginToGameAction : DumbAwareAction() {
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
-            InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
+                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
+        )
+    }
+
+    override fun update(e: AnActionEvent) {
+        val project = e.project
+        if (project == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
+    }
+}
+
+class ExtractEditorPluginToEngineAction : DumbAwareAction() {
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        val project = actionEvent.project ?: return
+        project.solution.rdRiderModel.installEditorPlugin.fire(
+                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes, false)
+        )
+    }
+
+    override fun update(e: AnActionEvent) {
+        val project = e.project
+        if (project == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution && unrealHostSetup.isPreBuiltEngine.not()
+    }
+}
+
+class ExtractEditorPluginToGameAction : DumbAwareAction() {
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        val project = actionEvent.project ?: return
+        project.solution.rdRiderModel.installEditorPlugin.fire(
+                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes, false)
         )
     }
 

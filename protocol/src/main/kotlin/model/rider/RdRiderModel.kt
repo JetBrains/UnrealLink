@@ -73,6 +73,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
             +"Yes"
             +"No"
         })
+        field("buildRequired", bool).default(true)
     }
 
     init {
@@ -92,6 +93,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         property("isConnectedToUnrealEditor", false).readonly.async
         property("isUnrealEngineSolution", false)
+        property("isPreBuiltEngine", false)
 
         sink("onEditorPluginOutOfSync", EditorPluginOutOfSync)
         source("installEditorPlugin", InstallPluginDescription)
