@@ -118,6 +118,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("RiderLinkInstallationInProgress", false)
         property("RefreshInProgress", false)
         property("IsUproject", false)
+        property("isInstallInfoAvailable", false)
 
         source("CancelRiderLinkInstall", void)
     }
