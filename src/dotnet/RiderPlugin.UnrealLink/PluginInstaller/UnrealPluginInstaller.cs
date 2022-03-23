@@ -11,6 +11,7 @@ using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
+using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
@@ -58,6 +59,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             myPluginDetector.InstallInfoProperty.Change.Advise_NewNotNull(Lifetime, installInfo =>
             {
+                myUnrealHost.myModel.IsInstallInfoAvailable.Set(true);
                 mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                     "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
                     () => { HandleAutoUpdatePlugin(installInfo.New); });

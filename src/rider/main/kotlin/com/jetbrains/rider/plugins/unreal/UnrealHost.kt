@@ -33,6 +33,8 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.refreshInProgress.value
     val isUproject:Boolean
         get() = model.isUproject.value
+    val isInstallInfoAvailable:Boolean
+        get() = model.isInstallInfoAvailable.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
         action(model)
