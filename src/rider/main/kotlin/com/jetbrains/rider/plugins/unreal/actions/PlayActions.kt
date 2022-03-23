@@ -207,7 +207,9 @@ class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
         if (host == null) return
 
         e.presentation.isEnabled = !host.isUproject &&
-                !host.isRefreshProjectsInProgress && !host.isRiderLinkInstallationInProgress
+                !host.isRefreshProjectsInProgress &&
+                !host.isRiderLinkInstallationInProgress &&
+                host.isInstallInfoAvailable
     }
 
     override fun actionPerformed(e: AnActionEvent) {
