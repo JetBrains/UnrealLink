@@ -86,7 +86,7 @@ namespace RiderPlugin.UnrealLink.Settings
                     new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes, false)
                 );
             });
-            AddCommentText("Extract RiderLink plugin into every Game available in the Solution." +
+            AddCommentText("Extract RiderLink plugin into every Game available in the Solution.\n" +
                            "Note: It will not try to build RiderLink for your current project.\n" +
                            "Use this option if installation of RiderLink plugin fails for some reason.");
 
