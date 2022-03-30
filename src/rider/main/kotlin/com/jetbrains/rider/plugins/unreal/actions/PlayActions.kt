@@ -202,12 +202,13 @@ class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getHost()
-        e.presentation.isVisible = host?.isUnrealEngineSolution ?: false
-        e.presentation.isEnabled = false
-        if (host == null) return
+        if (host == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
 
-        e.presentation.isEnabled = !host.isUproject &&
-                !host.isRefreshProjectsInProgress &&
+        e.presentation.isVisible = host.isUnrealEngineSolution && !host.isUproject
+        e.presentation.isEnabled = !host.isRefreshProjectsInProgress &&
                 !host.isRiderLinkInstallationInProgress &&
                 host.isInstallInfoAvailable
     }
