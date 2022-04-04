@@ -50,11 +50,11 @@ static TArray<rd::Wrapper<JetBrains::EditorPlugin::StringRange>> GetMethodRanges
 	return Ranges;
 }
 
-static const FRegexPattern PathPattern = FRegexPattern(TEXT("[^\\s]*/[^\\s]+"));
-static const FRegexPattern MethodPattern = FRegexPattern(TEXT("[0-9a-z_A-Z]+::~?[0-9a-z_A-Z]+"));
-
 static bool SendMessageToRider(const JetBrains::EditorPlugin::LogMessageInfo& MessageInfo, const FString& Message)
 {
+	static const FRegexPattern PathPattern = FRegexPattern(TEXT("[^\\s]*/[^\\s]+"));
+	static const FRegexPattern MethodPattern = FRegexPattern(TEXT("[0-9a-z_A-Z]+::~?[0-9a-z_A-Z]+"));
+	
 	return IRiderLinkModule::Get().FireAsyncAction(
 	[&MessageInfo, &Message] (JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
 	{
