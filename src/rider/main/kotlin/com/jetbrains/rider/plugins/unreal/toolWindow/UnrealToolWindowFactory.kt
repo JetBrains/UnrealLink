@@ -52,6 +52,8 @@ class UnrealToolWindowFactory(val project: Project)
     }
 
     fun showTabForNewSession() {
-        showTab(TITLE_ID, project.lifetime)
+        ToolWindowManager.getInstance(project).invokeLater {
+            showTab(TITLE_ID, project.lifetime)
+        }
     }
 }

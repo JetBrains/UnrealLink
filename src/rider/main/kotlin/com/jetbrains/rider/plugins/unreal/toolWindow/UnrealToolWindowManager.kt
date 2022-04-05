@@ -13,8 +13,7 @@ class UnrealToolWindowManager(project: Project) : LifetimedProjectComponent(proj
         UE4Library.registerSerializersCore(host.model.serializationContext.serializers)
 
         host.model.isConnectedToUnrealEditor.whenTrue(componentLifetime) {
-            val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
-            toolWindowsFactory.showTabForNewSession()
+            UnrealToolWindowFactory.getInstance(project).showTabForNewSession()
         }
     }
 }
