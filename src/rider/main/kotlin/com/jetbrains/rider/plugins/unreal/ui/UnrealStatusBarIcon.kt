@@ -29,8 +29,8 @@ class UnrealStatusBarIcon(project: Project) : StatusBarWidget, StatusBarWidget.I
         }
     }
 
-    private val connectedIcon = ExecutionUtil.getLiveIndicator(UnrealIcons.Status.Connected)
-    private val disconnectedIcon = ExecutionUtil.getIndicator(UnrealIcons.Status.Disconnected, 13, 13, Color.RED)
+    private val connectedIcon = ExecutionUtil.getLiveIndicator(UnrealIcons.Status.UnrealEngineLogo)
+    private val disconnectedIcon = ExecutionUtil.getIndicator(UnrealIcons.Status.UnrealEngineLogo, 13, 13, Color.RED)
     private var myStatusBar: StatusBar? = null
 
     override fun ID(): String {
