@@ -5,6 +5,7 @@ import com.intellij.openapi.util.IconLoader
 class UnrealIcons {
     class Status {
         companion object {
+            val UnrealEngineLogo = IconLoader.getIcon("/Icons/Status/UnrealEngineLogo.svg", UnrealIcons::class.java)
             val Connected = IconLoader.getIcon("/Icons/Status/unrealStatusOn.svg", UnrealIcons::class.java)
             val Disconnected = IconLoader.getIcon("/Icons/Status/unrealStatus.svg", UnrealIcons::class.java)
             val Pause = IconLoader.getIcon("/Icons/Status/unrealStatusPause.svg", UnrealIcons::class.java)

@@ -15,7 +15,7 @@ import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanel
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
-import icons.RiderIcons
+import icons.UnrealIcons
 
 @Service
 class UnrealToolWindowFactory(val project: Project)
@@ -31,9 +31,11 @@ class UnrealToolWindowFactory(val project: Project)
 
     override fun registerToolWindow(toolWindowManager: ToolWindowManager, project: Project): ToolWindow {
         val toolWindow = toolWindowManager.registerToolWindow(
-                RegisterToolWindowTask(id = TOOLWINDOW_ID, anchor = ToolWindowAnchor.BOTTOM,
-                        icon = RiderIcons.Stacktrace.Stacktrace, // TODO: change this placeholder to proper icon
-                        canCloseContent = false, canWorkInDumbMode = true, sideTool = false)
+                RegisterToolWindowTask(
+                    id = TOOLWINDOW_ID, anchor = ToolWindowAnchor.BOTTOM,
+                    icon = UnrealIcons.Status.UnrealEngineLogo,
+                    canCloseContent = false, canWorkInDumbMode = true, sideTool = false
+                )
         )
         toolWindow.title = UnrealLinkBundle.message("toolWindow.UnrealLog.title")
 
