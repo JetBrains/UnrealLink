@@ -1,11 +1,11 @@
+import com.jetbrains.rd.generator.gradle.RdGenExtension
+import com.jetbrains.rd.generator.gradle.RdGenTask
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import com.jetbrains.rd.generator.gradle.RdGenTask
-import com.jetbrains.rd.generator.gradle.RdGenExtension
-import org.gradle.kotlin.dsl.support.listFilesOrdered
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 
@@ -25,7 +25,7 @@ plugins {
     id("com.jetbrains.rdgen") version "2022.1.2"
     id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.3.1"
+    id("org.jetbrains.intellij") version "1.5.2"
 }
 
 apply {
@@ -103,7 +103,7 @@ fun getBranchName(): String {
         if (output.isNotEmpty())
             return output
     }
-    return "net221"
+    return "net222"
 }
 
 changelog {
@@ -426,9 +426,7 @@ tasks {
 
         inputs.dir(modelDir.resolve("lib").resolve("ue4"))
         outputs.dirs(
-            csLibraryOutput
-            ,cppLibraryOutput
-            ,ktLibraryOutput
+            csLibraryOutput, cppLibraryOutput, ktLibraryOutput
         )
 
         configure<RdGenExtension> {
@@ -512,8 +510,7 @@ tasks {
         val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
         inputs.dir(modelDir.resolve("editorPlugin"))
         outputs.dirs(
-            csEditorOutput
-            ,cppEditorOutput
+            csEditorOutput, cppEditorOutput
         )
 
         configure<RdGenExtension> {
@@ -605,13 +602,12 @@ tasks {
                 // Check if it's Junction to local RiderLink
                 if(result.exitValue == 0) {
                     val output = stdOut.toString().trim()
-                    if(output.isNotEmpty())
-                    {
-                        val pathToJunction = if(isWindows)
+                    if (output.isNotEmpty()) {
+                        val pathToJunction = if (isWindows)
                             output.substringAfter("Print Name:").trim()
                         else
                             output.substringAfter("->").trim()
-                        if(File(pathToJunction) == riderLinkDir) {
+                        if (File(pathToJunction) == riderLinkDir) {
                             println("Junction is already correct")
                             throw StopExecutionException()
                         }
