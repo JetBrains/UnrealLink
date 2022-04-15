@@ -200,6 +200,7 @@ tasks {
     }
 
     withType<Test> {
+        maxHeapSize = "4096m"
         useTestNG()
         testLogging {
             showStandardStreams = true

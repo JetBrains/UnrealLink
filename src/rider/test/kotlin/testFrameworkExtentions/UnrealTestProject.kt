@@ -7,7 +7,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rdclient.notifications.NotificationsHost
 import com.jetbrains.rdclient.util.idea.waitAndPump
@@ -37,10 +36,6 @@ import com.jetbrains.rider.test.framework.getFileWithExtension as getFileWithExt
  * If necessary, solution generator is activated.
  */
 abstract class UnrealTestProject : BaseTestWithSolutionBase() {
-
-//    override val traceScenarios: Set<LogTraceScenario>
-//        get() = setOf(RdLogTraceScenarios.Protocol)
-
     private var myProject: Project? = null
 
     var project: Project
@@ -61,26 +56,13 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     lateinit var uprojectFile: File
 
     /**
-     * Unreal Engine's versions which will be used in tests.
-     * Tests generate base on this data. Can be expanded.
-     */
-    protected val testingVersions = arrayOf(
-        UnrealVersion(4, 27, 2),
-        UnrealVersion(5, 0, 0)
-    )
-
-    /**
      * Property represents object with unreal-specific information about suite/test.
      */
     lateinit var unrealInfo : EngineInfo
 
-//    override val testCaseNameToTempDir: String
-//        get() = "Connection"
-////        get() = this.javaClass.simpleName
-
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
-        unrealInfo = EngineInfo(testingVersions)
+        unrealInfo = EngineInfo()
         println("Found ${unrealInfo.engineList}")
 
         GeneralSettings.getInstance().isConfirmExit = false
@@ -150,14 +132,12 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         }
     }
 
-//    protected open fun prepareUproject(
+//    TODO:
+//     protected open fun prepareUproject(
 //        uprojectFile: File,
 //        engine: UnrealEngine,
 //        openWith: UnrealTestInfo.UnrealOpenType,
-//        riderLinkLocation: PluginInstallLocation
-//    ) {
-//
-//    }
+//        riderLinkLocation: PluginInstallLocation)
 
     fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(180)) {
         var riderLinkInstalled = false
