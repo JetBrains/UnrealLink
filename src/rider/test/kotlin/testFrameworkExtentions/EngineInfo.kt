@@ -1,19 +1,27 @@
 package testFrameworkExtentions
+
+import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
-import com.jetbrains.rd.platform.util.application
 import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.protocol.testProtocolHost
 
-class EngineInfo(
-    val testingVersions: Array<UnrealVersion>
-) {
+class EngineInfo {
+    /**
+     * Unreal Engine's versions which will be used in tests.
+     * Tests generate base on this data. Can be expanded.
+     */
+    // TODO: Meditate. Maybe it mustn't be hardcoded
+    private val testingVersions: Array<UnrealVersion> = arrayOf(
+        UnrealVersion(4, 27, 2),
+        UnrealVersion(5, 0, 0)
+    )
+
     var needInstallRiderLink: Boolean = false
     var placeToInstallRiderLink: PluginInstallLocation = PluginInstallLocation.Game
 
     enum class UnrealOpenType { Sln, Uproject }
-    var openWith: UnrealOpenType = UnrealOpenType.Uproject
 
     var currentEngine: UnrealEngine? = null
 
