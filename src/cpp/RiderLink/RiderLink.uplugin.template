@@ -26,17 +26,17 @@
 			"LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "RiderLoggingExtension",
+			"Name": "RiderLogging",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "RiderBlueprintExtension",
+			"Name": "RiderBlueprint",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "RiderGameControlExtension",
+			"Name": "RiderGameControl",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default"
 		},
