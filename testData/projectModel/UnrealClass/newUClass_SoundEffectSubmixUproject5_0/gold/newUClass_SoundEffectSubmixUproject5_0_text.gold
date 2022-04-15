@@ -11624,7 +11624,18 @@ public class EmptyUProject : ModuleRules
 #include "EmptyUProject.h"
 #include "Modules/ModuleManager.h"
 
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
 
@@ -11657,7 +11668,7 @@ public class EmptyUProjectEditorTarget : TargetRules
 
 
 ===================
-Add Actor Component to 'EmptyUProject'
+Add Sound Effect Submix to 'EmptyUProject'
 
 [SharedPCH.Core.ShadowErrors.TypeCastWarnings.h]
 // PCH for Runtime/Core/Public/CoreSharedPCH.h
@@ -23250,74 +23261,6 @@ public class EmptyUProjectTarget : TargetRules
 }
 
 
-[ActorComponent.cpp]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "ActorComponent.h"
-
-
-// Sets default values for this component's properties
-UActorComponent::UActorComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
-}
-
-
-// Called when the game starts
-void UActorComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-
-// Called every frame
-void UActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
-
-
-[ActorComponent.h]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "ActorComponent.generated.h"
-
-
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class EMPTYUPROJECT_API UActorComponent : public UActorComponent
-{
-	GENERATED_BODY()
-
-public:
-	// Sets default values for this component's properties
-	UActorComponent();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
-};
-
-
 [EmptyUProject.Build.cs]
 // Fill out your copyright notice in the Description page of Project Settings.
 
@@ -23350,7 +23293,18 @@ public class EmptyUProject : ModuleRules
 #include "EmptyUProject.h"
 #include "Modules/ModuleManager.h"
 
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
 
@@ -23362,6 +23316,146 @@ IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUPro
 
 #include "CoreMinimal.h"
 
+
+
+[SoundEffectSubmix.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SoundEffectSubmix.h"
+// Includes for audio dsp helper classes
+
+
+FSoundEffectSubmix::FSoundEffectSubmix()
+{
+}
+
+FSoundEffectSubmix::~FSoundEffectSubmix()
+{
+}
+
+void FSoundEffectSubmix::Init(const FSoundEffectSubmixInitData& InitData)
+{
+	// Do any initializations here
+	// SampleRate = InitData.SampleRate
+}
+
+void FSoundEffectSubmix::OnPresetChanged()
+{
+	GET_EFFECT_SETTINGS(SoundEffectSubmix);
+
+	// Can access your settings safely here as they've been copied from the game thread
+	// This function is called in the audio render thread before OnProcessAudio
+	float MyProperty = Settings.MyProperty;
+}
+
+void FSoundEffectSubmix::OnProcessAudio(const FSoundEffectSubmixInputData& InData,
+                                        FSoundEffectSubmixOutputData& OutData)
+{
+	const float* InputBuffer = InData.AudioBuffer->GetData();
+	int32 InputBufferSize = InData.AudioBuffer->Num();
+	float* OutputBuffer = OutData.AudioBuffer->GetData();
+	int32 OutputBufferSize = OutData.AudioBuffer->Num();
+
+	// here, we get min of num channels of input and output (note that submix processing output channels can be different than input)
+	int32 NumChannels = FMath::Min(InData.NumChannels, OutData.NumChannels);
+
+	// Do your submix processing here. Here we just do a pass through. Submix buffers will be pre-zero'd so no need to pad out extra zeros.
+	for (int32 OutputBufferIndex = 0, InputBufferIndex = 0; OutputBufferIndex < OutputBufferSize; OutputBufferIndex +=
+	     OutData.NumChannels, InputBufferIndex += InData.NumChannels)
+	{
+		// Copy the input audio frame to the output frame
+		for (int32 ChannelIndex = 0; ChannelIndex < NumChannels; ChannelIndex++)
+		{
+			OutputBuffer[OutputBufferIndex + ChannelIndex] = InputBuffer[InputBufferIndex + ChannelIndex];
+		}
+	}
+}
+
+void USoundEffectSubmixPreset::SetSettings(const FSoundEffectSubmixSettings& InSettings)
+{
+	UpdateSettings(InSettings);
+}
+
+
+[SoundEffectSubmix.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "AudioEffect.h"
+#include "SoundEffectSubmix.generated.h"
+
+// ========================================================================
+// FSoundEffectSubmixSettings
+// UStruct used to define user-exposed params for use with your effect.
+// ========================================================================
+
+USTRUCT(BlueprintType)
+struct EMPTYUPROJECT_API FSoundEffectSubmixSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+	// Define your effect parameters below...
+
+	// Information about your parameter described here will show up in the editor as a tool-tip in the effect preset object
+	UPROPERTY(EditAnywhere, Category = SoundEffect)
+	float MyProperty;
+
+	FSoundEffectSubmixSettings()
+		: MyProperty(1.0f)
+	{
+	}
+};
+
+// ========================================================================
+// USoundEffectSubmix
+// Class which processes audio streams and uses parameters defined in the preset class.
+// This class is instanced for each submix effect preset in a submix effect chain.
+// ========================================================================
+
+class EMPTYUPROJECT_API FSoundEffectSubmix : public FSoundEffectSubmix
+{
+public:
+	FSoundEffectSubmix();
+	~FSoundEffectSubmix();
+
+	// Called on an audio effect at initialization on main thread before audio processing begins.
+	virtual void Init(const FSoundEffectSubmixInitData& InSampleRate) override;
+
+	// Called when an audio effect preset is changed
+	virtual void OnPresetChanged() override;
+
+	// Process the input block of audio. Called on audio thread.
+	virtual void
+	OnProcessAudio(const FSoundEffectSubmixInputData& InData, FSoundEffectSubmixOutputData& OutData) override;
+
+private:
+	// Any code you need to actually run an instance of the submix effect goes here
+};
+
+// ========================================================================
+// USoundEffectSubmixPreset
+// This code exposes your preset settings and effect class to the editor.
+// ========================================================================
+
+UCLASS()
+class EMPTYUPROJECT_API USoundEffectSubmixPreset : public USoundEffectSubmixPreset
+{
+	GENERATED_BODY()
+
+public:
+	EFFECT_PRESET_METHODS(SoundEffectSubmix)
+
+	UFUNCTION(BlueprintCallable, Category = "Audio|Effects")
+	void SetSettings(const FSoundEffectSubmixSettings& InSettings);
+
+	// SoundEffectSubmix Preset Settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SubmixEffectPreset)
+	FSoundEffectSubmixSettings Settings;
+};
 
 
 [EmptyUProjectEditor.Target.cs]
