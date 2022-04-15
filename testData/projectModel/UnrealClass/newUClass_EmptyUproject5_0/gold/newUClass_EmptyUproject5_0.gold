@@ -2,7 +2,7 @@
 Init
 
 -Project
- -EmptyUProject * 1,274 projects
+ -EmptyUProject * 1,416 projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
@@ -107,10 +107,10 @@ Project [Name:EmptyUProject, GUID:GUID]
 
 
 ===================
-Add Actor Component to 'EmptyUProject'
+Add Empty to 'EmptyUProject'
 
 -Project
- -EmptyUProject * 1,274 projects
+ -EmptyUProject * 1,416 projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
@@ -120,8 +120,8 @@ Add Actor Component to 'EmptyUProject'
        CoreUObject
        Engine
        InputCore
-     ActorComponent.cpp
-     ActorComponent.h
+     Empty.cpp
+     Empty.h
      EmptyUProject.cpp
      EmptyUProject.h
      EmptyUProject.Build.cs
@@ -139,7 +139,7 @@ Project [Name:EmptyUProject, GUID:GUID]
       Child items:
         Project [Name:EmptyUProject, GUID:GUID]
           Child items:
-            ProjectFileImpl(Path : ActorComponent.cpp)[  CompileAsManagedOptions:ManagedNotSet
+            ProjectFileImpl(Path : Empty.cpp)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:
@@ -164,7 +164,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
-            ProjectFileImpl(Path : ActorComponent.h)[  CompileAsManagedOptions:ManagedNotSet
+            ProjectFileImpl(Path : Empty.h)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:

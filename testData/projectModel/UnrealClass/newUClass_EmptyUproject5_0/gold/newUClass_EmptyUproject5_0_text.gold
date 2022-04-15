@@ -11668,7 +11668,7 @@ public class EmptyUProjectEditorTarget : TargetRules
 
 
 ===================
-Add Slate Widget Style to 'EmptyUProject'
+Add Empty to 'EmptyUProject'
 
 [SharedPCH.Core.ShadowErrors.TypeCastWarnings.h]
 // PCH for Runtime/Core/Public/CoreSharedPCH.h
@@ -23261,6 +23261,40 @@ public class EmptyUProjectTarget : TargetRules
 }
 
 
+[Empty.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Empty.h"
+
+
+Empty::Empty()
+{
+}
+
+Empty::~Empty()
+{
+}
+
+
+[Empty.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+/**
+ * 
+ */
+class EMPTYUPROJECT_API Empty
+{
+public:
+	Empty();
+	~Empty();
+};
+
+
 [EmptyUProject.Build.cs]
 // Fill out your copyright notice in the Description page of Project Settings.
 
@@ -23316,83 +23350,6 @@ IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUPro
 
 #include "CoreMinimal.h"
 
-
-
-[SlateWidgetStyle.cpp]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "SlateWidgetStyle.h"
-
-
-FSlateStyle::FSlateStyle()
-{
-}
-
-FSlateStyle::~FSlateStyle()
-{
-}
-
-const FName FSlateStyle::TypeName(TEXT("FSlateStyle"));
-
-const FSlateStyle& FSlateStyle::GetDefault()
-{
-	static FSlateStyle Default;
-	return Default;
-}
-
-void FSlateStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const
-{
-	// Add any brush resources here so that Slate can correctly atlas and reference them
-}
-
-
-[SlateWidgetStyle.h]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
-#include "Styling/SlateWidgetStyle.h"
-#include "Styling/SlateWidgetStyleContainerBase.h"
-
-#include "SlateWidgetStyle.generated.h"
-
-/**
- * 
- */
-USTRUCT()
-struct EMPTYUPROJECT_API FSlateStyle : public FSlateWidgetStyle
-{
-	GENERATED_USTRUCT_BODY()
-
-	FSlateStyle();
-	virtual ~FSlateStyle();
-
-	// FSlateWidgetStyle
-	virtual void GetResources(TArray<const FSlateBrush*>& OutBrushes) const override;
-	static const FName TypeName;
-	virtual const FName GetTypeName() const override { return TypeName; };
-	static const FSlateStyle& GetDefault();
-};
-
-/**
- */
-UCLASS(hidecategories=Object, MinimalAPI)
-class USlateWidgetStyle : public USlateWidgetStyleContainerBase
-{
-	GENERATED_BODY()
-
-public:
-	/** The actual data describing the widget appearance. */
-	UPROPERTY(Category=Appearance, EditAnywhere, meta=(ShowOnlyInnerProperties))
-	FSlateStyle WidgetStyle;
-
-	virtual const struct FSlateWidgetStyle* const GetStyle() const override
-	{
-		return static_cast<const struct FSlateWidgetStyle*>(&WidgetStyle);
-	}
-};
 
 
 [EmptyUProjectEditor.Target.cs]
