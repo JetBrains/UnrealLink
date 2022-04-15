@@ -24,7 +24,7 @@ import java.time.Duration
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
-class Connection : UnrealTestProject() {
+class UnrealLinkInstallation : UnrealTestProject() {
     // TODO think about no-copypaste decision
     init {
         projectDirectoryName = "EmptyUProject"
@@ -52,7 +52,7 @@ class Connection : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun connection(openWith: EngineInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
+    fun installationAndRun(openWith: EngineInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
         unrealInfo.currentEngine = engine
         unrealInfo.placeToInstallRiderLink = location
 
@@ -87,11 +87,13 @@ class Connection : UnrealTestProject() {
         }
     }
 
-    @Test//(enabled = false)
-    fun connection_s() {
+    // Special test template for manual launch with specific parameters.
+    // Just do "enable = true" and set openWith, engine and template variables.
+    @Test(enabled = false)
+    fun installationAndRunSingle() {
         val location = PluginInstallLocation.Engine
         val openWith = EngineInfo.UnrealOpenType.Uproject
         val engine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
-        connection(openWith, location, engine)
+        installationAndRun(openWith, location, engine)
     }
 }
