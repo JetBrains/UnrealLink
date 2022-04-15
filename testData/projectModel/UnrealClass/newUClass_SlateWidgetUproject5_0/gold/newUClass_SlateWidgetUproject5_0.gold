@@ -2,7 +2,7 @@
 Init
 
 -Project
- -EmptyUProject * 1,274 projects
+ -EmptyUProject * 1,416 projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
@@ -10,6 +10,7 @@ Init
       -Projects
        Core
        CoreUObject
+       Engine
        InputCore
      EmptyUProject.cpp
      EmptyUProject.h
@@ -106,10 +107,10 @@ Project [Name:EmptyUProject, GUID:GUID]
 
 
 ===================
-Add Simple Test to 'EmptyUProject'
+Add Slate Widget to 'EmptyUProject'
 
 -Project
- -EmptyUProject * 1,274 projects
+ -EmptyUProject * 1,416 projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
@@ -117,11 +118,13 @@ Add Simple Test to 'EmptyUProject'
       -Projects
        Core
        CoreUObject
+       Engine
        InputCore
      EmptyUProject.cpp
      EmptyUProject.h
      EmptyUProject.Build.cs
-     SimpleTest.cpp
+     SlateWidget.cpp
+     SlateWidget.h
    EmptyUProject.uproject
    EmptyUProject.Target.cs
    EmptyUProjectEditor.Target.cs
@@ -211,7 +214,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
-            ProjectFileImpl(Path : SimpleTest.cpp)[  CompileAsManagedOptions:ManagedNotSet
+            ProjectFileImpl(Path : SlateWidget.cpp)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:
@@ -236,5 +239,30 @@ Project [Name:EmptyUProject, GUID:GUID]
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
+            ProjectFileImpl(Path : SlateWidget.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
 
 

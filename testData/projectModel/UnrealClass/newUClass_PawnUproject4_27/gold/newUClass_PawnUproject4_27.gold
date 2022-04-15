@@ -10,6 +10,7 @@ Init
       -Projects
        Core
        CoreUObject
+       Engine
        InputCore
      EmptyUProject.cpp
      EmptyUProject.h
@@ -117,6 +118,7 @@ Add Pawn to 'EmptyUProject'
       -Projects
        Core
        CoreUObject
+       Engine
        InputCore
      EmptyUProject.cpp
      EmptyUProject.h
