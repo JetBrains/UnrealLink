@@ -63,10 +63,8 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
-        println("Found ${unrealInfo.engineList}")
-
+        logger.debug("Found engines ${unrealInfo.engineList}")
         GeneralSettings.getInstance().isConfirmExit = false
-        setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
     }
 
     @BeforeMethod
@@ -79,15 +77,22 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     fun testTeardown() {
         try {
             closeSolution(myProject)
-            val result = FileUtil.delete(tempTestDirectory)
-            if (!result)
+            val tempDirDelResult = FileUtil.delete(tempTestDirectory)
+            if (!tempDirDelResult)
                 frameworkLogger.warn("Error deleting '$tempTestDirectory' folder")
+
+            // Clearing engine after test
+            if (unrealInfo.needInstallRiderLink && unrealInfo.placeToInstallRiderLink == PluginInstallLocation.Engine) {
+                val unrealLinkDelResult = FileUtil.delete(unrealInfo.pathToRiderLinkInEngine)
+                if (!unrealLinkDelResult)
+                    frameworkLogger.warn("Error deleting '${unrealInfo.pathToRiderLinkInEngine}' folder")
+            }
         } finally {
             myProject = null
         }
     }
 
-    // temp
+    // TODO: refactor existent openProject's function and replace
     fun openProject(openWith: EngineInfo.UnrealOpenType): Project {
         val params = openSolutionParams // TODO
 

@@ -52,9 +52,10 @@ class UnrealLinkInstallation : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun installationAndRun(openWith: EngineInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
+    fun installAndRun(openWith: EngineInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
         unrealInfo.currentEngine = engine
         unrealInfo.placeToInstallRiderLink = location
+        unrealInfo.needInstallRiderLink = true
 
         println("Test starting with $engine, RiderLink will install in $location, opening by $openWith.")
 
@@ -90,10 +91,10 @@ class UnrealLinkInstallation : UnrealTestProject() {
     // Special test template for manual launch with specific parameters.
     // Just do "enable = true" and set openWith, engine and template variables.
     @Test(enabled = false)
-    fun installationAndRunSingle() {
+    fun installAndRunSingle() {
         val location = PluginInstallLocation.Engine
         val openWith = EngineInfo.UnrealOpenType.Uproject
         val engine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
-        installationAndRun(openWith, location, engine)
+        installAndRun(openWith, location, engine)
     }
 }

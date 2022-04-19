@@ -3,9 +3,11 @@ package testFrameworkExtentions
 import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
+import com.jetbrains.rdclient.util.idea.toIOFile
 import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.protocol.testProtocolHost
+import java.io.File
 
 class EngineInfo {
     /**
@@ -20,6 +22,9 @@ class EngineInfo {
 
     var needInstallRiderLink: Boolean = false
     var placeToInstallRiderLink: PluginInstallLocation = PluginInstallLocation.Game
+    val pathToRiderLinkInEngine: File
+        get() = currentEngine!!.path.toIOFile().resolve("Plugins").resolve("Developer")
+            .resolve("RiderLink")
 
     enum class UnrealOpenType { Sln, Uproject }
 
