@@ -132,8 +132,8 @@ class UnrealClass : UnrealTestProject() {
         val engine = unrealInfo.testingEngines.find { it.id == "5.0" && it.isInstalledBuild }!!
         val template = UNREAL_ACTOR_COMPONENT
 
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            "$baseString${engine.id.replace('.', '_')}"
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
+            "$baseString${eng.id.replace('.', '_')}"
         }
         val caseName = uniqueDataString("${template.type.replace(" ", "")}$openWith", engine)
         newUClass(caseName, template, openWith, engine)
