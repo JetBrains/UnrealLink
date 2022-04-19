@@ -41,7 +41,7 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "RiderShaderInfoDump",
+			"Name": "RiderShaderInfo",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PostEngineInit"
 		}

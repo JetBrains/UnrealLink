@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class RiderShaderInfoDump : ModuleRules
+public class RiderShaderInfo : ModuleRules
 {
-	public RiderShaderInfoDump(ReadOnlyTargetRules Target) : base(Target)
+	public RiderShaderInfo(ReadOnlyTargetRules Target) : base(Target)
 	{
 #if UE_4_22_OR_LATER
 		PCHUsage = PCHUsageMode.NoPCHs;
