@@ -2,7 +2,7 @@
 Init
 
 -Project
- -EmptyUProject * 1,416 projects
+ -EmptyUProject * number of projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
@@ -110,7 +110,7 @@ Project [Name:EmptyUProject, GUID:GUID]
 Add Sound Effect Submix to 'EmptyUProject'
 
 -Project
- -EmptyUProject * 1,416 projects
+ -EmptyUProject * number of projects
   -EmptyUProject
    -Source * 1 project
     -EmptyUProject
