@@ -9,6 +9,7 @@ import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
+import com.jetbrains.rider.test.framework.executeWithGold
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
@@ -17,7 +18,6 @@ import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
-import kotlin.collections.ArrayList
 
 
 @TestEnvironment(
@@ -102,13 +102,20 @@ class UnrealClass : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun newUClass(caseName: String, template: TemplateType, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String, template: TemplateType,
+                  openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
         project = openProject(openWith)
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
         doTestDumpProjectsView {
-            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEngine!!.path
-            profile.customRegexToMask["relative_path/"] = Regex("(\\.\\.[\\\\/])+") // Any quantity ..\ or ../
+            // I'm limited by the technology of my time, but someday it will be better here.
+            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
+            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
+            // Replace any quantity of ..\ or ../ and everything after them up to the root of the engine
+            profile.customRegexToMask["relative_path_ue_root"] =
+                Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
+            profile.customRegexToMask["relative_path/"] =
+                Regex("(\\.\\.[\\\\/])+")
             dump("Init") {}
             dump("Add ${template.type} to 'EmptyUProject'") {
                 val path = mutableListOf("EmptyUProject").apply {
@@ -124,18 +131,22 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    // Special test template for manual launch with specific parameters.
-    // Just do "enable = true" and set openWith, engine and template variables.
-    @Test(enabled = false)
-    fun newUnrealClass_single() {
+    // Special Data Provider for manual test launch with specific parameters.
+    // Just change @Test(dataProvider= "") to "enginesAndOthers_single" and set openWith, engine and template variables.
+    @DataProvider
+    fun enginesAndOthers_single(): MutableIterator<Array<Any>> {
+        val result: ArrayList<Array<Any>> = arrayListOf()
         val openWith = EngineInfo.UnrealOpenType.Uproject
-        val engine = unrealInfo.testingEngines.find { it.id == "5.0" && it.isInstalledBuild }!!
-        val template = UNREAL_ACTOR_COMPONENT
+        val engine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
+        val template = UNREAL_SIMPLE_TEST
 
         val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
             "$baseString${eng.id.replace('.', '_')}"
         }
         val caseName = uniqueDataString("${template.type.replace(" ", "")}$openWith", engine)
-        newUClass(caseName, template, openWith, engine)
+
+        result.add(arrayOf(caseName, template, openWith, engine))
+        frameworkLogger.debug("Data Provider Single was generated: $result")
+        return result.iterator()
     }
 }

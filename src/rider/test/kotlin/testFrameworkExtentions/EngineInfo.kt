@@ -23,12 +23,14 @@ class EngineInfo {
     var needInstallRiderLink: Boolean = false
     var placeToInstallRiderLink: PluginInstallLocation = PluginInstallLocation.Game
     val pathToRiderLinkInEngine: File
-        get() = currentEngine!!.path.toIOFile().resolve("Plugins").resolve("Developer")
+        get() = currentEnginePath!!.resolve("Plugins").resolve("Developer")
             .resolve("RiderLink")
 
     enum class UnrealOpenType { Sln, Uproject }
 
     var currentEngine: UnrealEngine? = null
+    val currentEnginePath: File?
+        get() = currentEngine?.path?.toIOFile()
 
     val engineList : Array<UnrealEngine>
         get() = getEngLst()
