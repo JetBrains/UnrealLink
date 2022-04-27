@@ -1,8 +1,10 @@
 package integrationTests.projectModel
 
+import com.intellij.openapi.project.Project
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.reactive.hasTrueValue
+import com.jetbrains.rider.projectView.SolutionConfigurationManager
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
@@ -17,6 +19,7 @@ import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
+import java.io.PrintStream
 import java.time.Duration
 
 
