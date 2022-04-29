@@ -23,7 +23,11 @@ public:
 
 private:
 	using WT = typename IViewableSet<T, A>::WT;
+#if __cplusplus < 201703L
 	using WA = typename A::template rebind<Wrapper<T>>::other;
+#else
+	using WA = typename std::allocator_traits<A>::template rebind_alloc<Wrapper<T>>;
+#endif
 
 	Signal<Event> change;
 	using data_t = ordered_set<Wrapper<T>, wrapper::TransparentHash<T>, wrapper::TransparentKeyEqual<T>, WA>;

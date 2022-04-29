@@ -28,7 +28,12 @@ private:
 	using WV = typename IViewableMap<K, V>::WV;
 	using OV = typename IViewableMap<K, V>::OV;
 
+#if __cplusplus < 201703L
 	using PA = typename VA::template rebind<std::pair<Wrapper<K>, Wrapper<V>>>::other;
+#else
+	using PA = typename std::allocator_traits<VA>::template rebind_alloc<std::pair<Wrapper<K>, Wrapper<V>>>;
+#endif
+
 
 	Signal<Event> change;
 
