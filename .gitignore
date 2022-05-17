@@ -52,3 +52,4 @@ tools/Zipper/*
 !tools/Zipper/Program.cs
 !tools/Zipper/Zipper.csproj
 !tools/Zipper/Zipper.sln
+/src/cpp/RiderLink/Resources/checksum

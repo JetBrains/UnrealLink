@@ -346,12 +346,13 @@ tasks {
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
         val resourcesDir = riderLinkDir.resolve("Resources")
         val sourceDir = riderLinkDir.resolve("Source")
-        val checksumFile = riderLinkDir.resolve("checksum")
+        val checksumFile = riderLinkDir.resolve("Resources/checksum")
         inputs.file(upluginFile)
         inputs.dir(resourcesDir)
         inputs.dir(sourceDir)
         outputs.file(checksumFile)
         doLast {
+            checksumFile.delete()
             val inputFiles = sequence{
                 yield(upluginFile)
                 resourcesDir.listFilesOrdered().forEach { if(it.isFile) yield(it) }
