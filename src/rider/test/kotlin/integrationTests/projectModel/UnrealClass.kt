@@ -2,6 +2,7 @@ package integrationTests.projectModel
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.ide.model.UnrealEngine
+import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.projectView.SolutionConfigurationManager
@@ -140,15 +141,30 @@ class UnrealClass : UnrealTestProject() {
     fun enginesAndOthers_single(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
         val openWith = EngineInfo.UnrealOpenType.Uproject
-        val engine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
+        val engine = unrealInfo.testingEngines.find {
+            it.version == UnrealVersion(5,0,1) && !it.isInstalledBuild }!!
         val template = UNREAL_SIMPLE_TEST
 
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
-            "$baseString${eng.id.replace('.', '_')}"
+        val unrealTemplates: Array<TemplateType> =
+            arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
+                UNREAL_CHARACTER, UNREAL_EMPTY)
+
+        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
+            else "$baseString${engine.id.replace('.', '_')}"
         }
         val caseName = uniqueDataString("${template.type.replace(" ", "")}$openWith", engine)
 
-        result.add(arrayOf(caseName, template, openWith, engine))
+        // for auto creating data
+        unrealTemplates.forEach {
+            result.add(arrayOf(caseName, it, openWith, engine))
+        }
+
+        // for single or manually ccreating data
+        // result.add(arrayOf(caseName, template, openWith, engine))
         frameworkLogger.debug("Data Provider Single was generated: $result")
         return result.iterator()
     }
