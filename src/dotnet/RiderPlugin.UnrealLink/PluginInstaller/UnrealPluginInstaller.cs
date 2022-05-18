@@ -72,25 +72,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var status = PluginInstallStatus.NoPlugin;
             var outOfSync = true;
-            Version installedVersion = new Version();
             if (unrealPluginInstallInfo.Location == PluginInstallLocation.Engine)
             {
                 status = PluginInstallStatus.InEngine;
-                outOfSync = unrealPluginInstallInfo.EnginePlugin.PluginVersion !=
-                            myPathsProvider.CurrentPluginVersion;
-                installedVersion = unrealPluginInstallInfo.EnginePlugin.PluginVersion;
+                outOfSync = !unrealPluginInstallInfo.EnginePlugin.PluginChecksum.SequenceEqual(myPathsProvider.CurrentPluginChecksum);
             }
 
             if (unrealPluginInstallInfo.Location == PluginInstallLocation.Game)
             {
                 status = PluginInstallStatus.InGame;
                 outOfSync = unrealPluginInstallInfo.ProjectPlugins.Any(description =>
-                {
-                    var isNotSynced = description.PluginVersion != myPathsProvider.CurrentPluginVersion;
-                    if (isNotSynced)
-                        installedVersion = description.PluginVersion;
-                    return isNotSynced;
-                });
+                    !description.PluginChecksum.SequenceEqual(myPathsProvider.CurrentPluginChecksum)
+                    );
             }
 
             if (!outOfSync) return;
@@ -106,9 +99,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 var isGameAvailable = !unrealPluginInstallInfo.ProjectPlugins.IsEmpty();
                 var isEngineAvailable = myPluginDetector.IsValidEngine();
-                model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(
-                    installedVersion.ToString(), myPathsProvider.CurrentPluginVersion.ToString(), status,
-                    isGameAvailable, isEngineAvailable));
+                model.OnEditorPluginOutOfSync(new EditorPluginOutOfSync(status, isGameAvailable, isEngineAvailable));
             });
         }
 
@@ -301,7 +292,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             installDescription.IsPluginAvailable = true;
-            installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
+            installDescription.PluginChecksum = myPathsProvider.CurrentPluginChecksum;
 
             const string title = "RiderLink plugin extracted";
             var text = $"RiderLink plugin was extracted to: {pluginRootFolder}";
@@ -411,7 +402,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             pluginBuildOutput.Copy(pluginRootFolder);
 
             installDescription.IsPluginAvailable = true;
-            installDescription.PluginVersion = myPathsProvider.CurrentPluginVersion;
+            installDescription.PluginChecksum = myPathsProvider.CurrentPluginChecksum;
 
             const string title = "RiderLink plugin installed";
             var text = $"RiderLink plugin was installed to: {pluginRootFolder}";

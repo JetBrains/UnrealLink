@@ -4,8 +4,8 @@ using System.IO.Compression;
 using System.Reflection;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
+using JetBrains.Extension;
 using JetBrains.Util;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
@@ -19,7 +19,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private static readonly string EditorPluginFile = "RiderLink.zip";
         public readonly FileSystemPath PathToPackedPlugin;
-        public readonly Version CurrentPluginVersion;
+        public readonly byte[] CurrentPluginChecksum;
+        private readonly byte[] NullChecksum = { 0 };
 
         public PluginPathsProvider(ApplicationPackages applicationPackages,
             IDeployedPackagesExpandLocationResolver resolver, ILogger logger)
@@ -28,7 +29,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myResolver = resolver;
             myLogger = logger;
             PathToPackedPlugin = GetEditorPluginPathFile();
-            CurrentPluginVersion = GetCurrentPluginVersion();
+            CurrentPluginChecksum = GetCurrentPluginChecksum();
         }
 
         private FileSystemPath GetEditorPluginPathFile()
@@ -40,43 +41,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return editorPluginPathFile;
         }
 
-        private Version GetCurrentPluginVersion()
+        private byte[] GetCurrentPluginChecksum()
         {
-            Version result = null;
             var editorPluginPathFile = PathToPackedPlugin;
             using var zipArchive = ZipFile.OpenRead(editorPluginPathFile.FullPath);
-            var zipArchiveEntry = zipArchive.GetEntry(UnrealPluginDetector.UPLUGIN_FILENAME);
-            if (zipArchiveEntry == null) return null;
-
-            var stream = zipArchiveEntry.Open();
-            using var streamReader = new StreamReader(stream);
-            using var jsonReader = new JsonTextReader(streamReader);
-            while (jsonReader.Read())
-            {
-                if (jsonReader.Value == null || jsonReader.TokenType != JsonToken.PropertyName) continue;
-
-                if (jsonReader.Value.ToString()
-                    .Equals("VersionName", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var versionAsString = jsonReader.ReadAsString();
-                    result = Version.Parse(versionAsString);
-                    break;
-                }
-            }
-
-            return result;
+            var zipArchiveEntry = zipArchive.GetEntry(UnrealPluginDetector.CHEKSUM_ENTRY_PATH);
+            var stream = zipArchiveEntry?.Open();
+            return stream?.ReadAllBytes();
         }
 
-        public Version GetPluginVersion(VirtualFileSystemPath upluginFilePath)
+        public byte[] GetPluginChecksum(VirtualFileSystemPath checksumPath)
         {
+            if (!checksumPath.ExistsFile)
+            {
+                return NullChecksum;
+            }
             try
             {
-                var text = File.ReadAllText(upluginFilePath.FullPath);
-                var upluginDescription = JObject.Parse(text);
-                var versionToken = upluginDescription.GetValue("VersionName");
-                if (versionToken == null) return null;
-
-                return new Version(versionToken.ToString());
+                return File.ReadAllBytes(checksumPath.FullPath);
             }
             catch (Exception exception)
             {
