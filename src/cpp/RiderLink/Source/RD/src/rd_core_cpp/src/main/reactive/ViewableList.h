@@ -21,11 +21,8 @@ public:
 	using Event = typename IViewableList<T>::Event;
 
 private:
-#if __cplusplus < 201703L
-	using WA = typename A::template rebind<Wrapper<T>>::other;
-#else
 	using WA = typename std::allocator_traits<A>::template rebind_alloc<Wrapper<T>>;
-#endif
+
 	using data_t = std::vector<Wrapper<T>, WA>;
 	mutable data_t list;
 	Signal<Event> change;
