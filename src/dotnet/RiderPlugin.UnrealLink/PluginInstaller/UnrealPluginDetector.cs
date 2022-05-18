@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.Application.Threading;
@@ -23,6 +22,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     public class UnrealPluginDetector
     {
         public static readonly string UPLUGIN_FILENAME = "RiderLink.uplugin";
+        public static readonly string CHEKSUM_ENTRY_PATH = "Resources/checksum";
         private static readonly string UPROJECT_FILE_FORMAT = "uproject";
         private readonly RelativePath ourPathToProjectPlugin = $"Plugins/Developer/RiderLink/{UPLUGIN_FILENAME}";
 
@@ -215,11 +215,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (!upluginFilePath.ExistsFile) return installDescription;
 
             var pluginPathsProvider = Shell.Instance.GetComponent<PluginPathsProvider>();
-            var version = pluginPathsProvider.GetPluginVersion(upluginFilePath);
-            if (version == null) return installDescription;
+            var pluginChecksumFilePath = upluginFilePath.Directory.Combine("Resources").Combine("checksum");
+            var pluginChecksum = pluginPathsProvider.GetPluginChecksum(pluginChecksumFilePath);
+            if (pluginChecksum == null) return installDescription;
 
             installDescription.IsPluginAvailable = true;
-            installDescription.PluginVersion = version;
+            installDescription.PluginChecksum = pluginChecksum;
             return installDescription;
         }
     }

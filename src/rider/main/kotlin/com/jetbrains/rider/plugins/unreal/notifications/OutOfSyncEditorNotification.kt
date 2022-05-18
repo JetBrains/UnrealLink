@@ -21,9 +21,7 @@ class OutOfSyncEditorNotification(project: Project) : ProtocolSubscribedProjectC
                 UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.description.notInstalled")
             else
                 UnrealLinkBundle.message(
-                    "notificationAction.UnrealEditorOutOfSync.description.wrongVersion",
-                    it.installedVersion,
-                    it.requiredVersion
+                    "notificationAction.UnrealEditorOutOfSync.description.wrongVersion"
                 )
 
             val title = if (it.status == PluginInstallStatus.NoPlugin)
