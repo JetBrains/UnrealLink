@@ -904,7 +904,6 @@ bool CSimpleSocket::SetBlocking(void)
 // SendFile() - stands-in for system provided sendfile
 //
 //------------------------------------------------------------------------------
-
 int32_t CSimpleSocket::SendFile(int32_t nOutFd, int32_t nInFd, off_t *pOffset, int32_t nCount)
 {
     int32_t  nOutCount = CSimpleSocket::SocketError;

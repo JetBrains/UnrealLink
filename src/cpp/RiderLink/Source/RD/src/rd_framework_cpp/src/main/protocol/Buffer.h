@@ -155,7 +155,7 @@ public:
 	}
 
 	template <template <class, class> class C, typename T, typename A = allocator<T>,
-		typename = typename std::enable_if_t<!std::is_abstract<T>::value>>
+		typename = typename std::enable_if_t<!rd::util::in_heap_v<T>>>
 	void write_array(C<T, A> const& container, std::function<void(T const&)> writer)
 	{
 		using rd::size;
@@ -237,7 +237,7 @@ public:
 		write_integral<int32_t>(static_cast<int32_t>(x));
 	}
 
-	template <typename T, typename F, typename = typename std::enable_if_t<util::is_same_v<typename std::result_of_t<F()>, T>>>
+	template <typename T, typename F, typename = typename std::enable_if_t<util::is_same_v<typename util::result_of_t<F()>, T>>>
 	opt_or_wrapper<T> read_nullable(F&& reader)
 	{
 		bool nullable = !read_bool();
@@ -249,7 +249,7 @@ public:
 	}
 
 	template <typename T, typename F,
-		typename = typename std::enable_if_t<util::is_same_v<typename std::result_of_t<F()>, Wrapper<T>>>>
+		typename = typename std::enable_if_t<util::is_same_v<typename util::result_of_t<F()>, Wrapper<T>>>>
 	Wrapper<T> read_nullable(F&& reader)
 	{
 		bool nullable = !read_bool();

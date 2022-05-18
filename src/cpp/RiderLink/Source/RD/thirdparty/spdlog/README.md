@@ -1,10 +1,10 @@
 # spdlog
 
-Very fast, header-only/compiled, C++ logging library. [![Build Status](https://travis-ci.org/gabime/spdlog.svg?branch=v1.x)](https://travis-ci.org/gabime/spdlog)&nbsp; [![Build status](https://ci.appveyor.com/api/projects/status/d2jnxclg20vd0o50?svg=true)](https://ci.appveyor.com/project/gabime/spdlog) [![Release](https://img.shields.io/github/release/gabime/spdlog.svg)](https://github.com/gabime/spdlog/releases/latest)
+Very fast, header-only/compiled, C++ logging library. [![Build Status](https://app.travis-ci.com/gabime/spdlog.svg?branch=v1.x)](https://app.travis-ci.com/gabime/spdlog)&nbsp; [![Build status](https://ci.appveyor.com/api/projects/status/d2jnxclg20vd0o50?svg=true&branch=v1.x)](https://ci.appveyor.com/project/gabime/spdlog) [![Release](https://img.shields.io/github/release/gabime/spdlog.svg)](https://github.com/gabime/spdlog/releases/latest)
 
 ## Install 
 #### Header only version
-Copy the source [folder](https://github.com/gabime/spdlog/tree/v1.x/include/spdlog) to your build tree and use a C++11 compiler.
+Copy the include [folder](https://github.com/gabime/spdlog/tree/v1.x/include/spdlog) to your build tree and use a C++11 compiler.
 
 #### Static lib version (recommended - much faster compile times)
 ```console
@@ -22,15 +22,17 @@ $ cmake .. && make -j
  * Android
 
 ## Package managers:
+* Debian: `sudo apt install libspdlog-dev`
 * Homebrew: `brew install spdlog`
 * MacPorts: `sudo port install spdlog`
-* FreeBSD:  `cd /usr/ports/devel/spdlog/ && make install clean`
-* Fedora: `yum install spdlog`
+* FreeBSD:  `pkg install spdlog`
+* Fedora: `dnf install spdlog`
 * Gentoo: `emerge dev-libs/spdlog`
 * Arch Linux: `pacman -S spdlog`
 * vcpkg: `vcpkg install spdlog`
 * conan: `spdlog/[>=1.4.1]`
 * conda: `conda install -c conda-forge spdlog`
+* build2: ```depends: spdlog ^1.8.2```
 
 
 ## Features
@@ -45,8 +47,9 @@ $ cmake .. && make -j
     * Daily log files.
     * Console logging (colors supported).
     * syslog.
-    * Windows debugger (```OutputDebugString(..)```)
-    * Easily extendable with custom log targets  (just implement a single function in the [sink](include/spdlog/sinks/sink.h) interface).
+    * Windows event log.
+    * Windows debugger (```OutputDebugString(..)```).
+    * Easily [extendable](https://github.com/gabime/spdlog/wiki/4.-Sinks#implementing-your-own-sink) with custom log targets.
 * Log filtering - log levels can be modified in runtime as well as in compile time.
 * Support for loading log levels from argv or from environment var.
 * [Backtrace](#backtrace-support) support - store debug messages in a ring buffer and display later on demand.
@@ -56,7 +59,6 @@ $ cmake .. && make -j
 #### Basic usage
 ```c++
 #include "spdlog/spdlog.h"
-#include "spdlog/sinks/basic_file_sink.h"
 
 int main() 
 {
@@ -79,10 +81,6 @@ int main()
     // define SPDLOG_ACTIVE_LEVEL to desired level
     SPDLOG_TRACE("Some trace message with param {}", 42);
     SPDLOG_DEBUG("Some debug message");
-    
-    // Set the default logger to file logger
-    auto file_logger = spdlog::basic_logger_mt("basic_logger", "logs/basic.txt");
-    spdlog::set_default_logger(file_logger);            
 }
 
 ```
@@ -145,8 +143,9 @@ void daily_example()
 ---
 #### Backtrace support
 ```c++
-// Loggers can store in a ring buffer all messages (including debug/trace) and display later on demand.
-// When needed, call dump_backtrace() to see them
+// Debug messages can be stored in a ring buffer instead of being logged immediately.
+// This is useful in order to display debug logs only when really needed (e.g. when error happens).
+// When needed, call dump_backtrace() to see them.
 
 spdlog::enable_backtrace(32); // Store the latest 32 messages in a buffer. Older messages will be dropped.
 // or my_logger->enable_backtrace(32)..
@@ -170,6 +169,20 @@ spdlog::flush_every(std::chrono::seconds(3));
 ```
 
 ---
+#### Stopwatch
+```c++
+// Stopwatch support for spdlog
+#include "spdlog/stopwatch.h"
+void stopwatch_example()
+{
+    spdlog::stopwatch sw;    
+    spdlog::debug("Elapsed {}", sw);
+    spdlog::debug("Elapsed {:.3}", sw);       
+}
+
+```
+
+---
 #### Log binary data in hex
 ```c++
 // many types of std::container<char> types can be used.
@@ -179,6 +192,7 @@ spdlog::flush_every(std::chrono::seconds(3));
 // {:s} - don't separate each byte with space.
 // {:p} - don't print the position on each line start.
 // {:n} - don't split the output to lines.
+// {:a} - show ASCII if :n is not set.
 
 #include "spdlog/fmt/bin_to_hex.h"
 
@@ -349,7 +363,7 @@ int main (int argc, char *argv[])
     // or from command line:
     // ./example SPDLOG_LEVEL=info,mylogger=trace
     // #include "spdlog/cfg/argv.h" // for loading levels from argv
-    // spdlog::cfg::load_argv_levels(args, argv);
+    // spdlog::cfg::load_argv_levels(argc, argv);
 }
 ```
 So then you can:
@@ -357,6 +371,35 @@ So then you can:
 ```console
 $ export SPDLOG_LEVEL=info,mylogger=trace
 $ ./example
+```
+
+
+---
+#### Log file open/close event handlers
+```c++
+// You can get callbacks from spdlog before/after log file has been opened or closed. 
+// This is useful for cleanup procedures or for adding someting the start/end of the log files.
+void file_events_example()
+{
+    // pass the spdlog::file_event_handlers to file sinks for open/close log file notifications
+    spdlog::file_event_handlers handlers;
+    handlers.before_open = [](spdlog::filename_t filename) { spdlog::info("Before opening {}", filename); };
+    handlers.after_open = [](spdlog::filename_t filename, std::FILE *fstream) { fputs("After opening\n", fstream); };
+    handlers.before_close = [](spdlog::filename_t filename, std::FILE *fstream) { fputs("Before closing\n", fstream); };
+    handlers.after_close = [](spdlog::filename_t filename) { spdlog::info("After closing {}", filename); };
+    auto my_logger = spdlog::basic_logger_st("some_logger", "logs/events-sample.txt", true, handlers);        
+}
+```
+
+---
+#### Replace the Default Logger
+```c++
+void replace_default_logger_example()
+{
+    auto new_logger = spdlog::basic_logger_mt("new_default_logger", "logs/new-default-log.txt", true);
+    spdlog::set_default_logger(new_logger);
+    spdlog::info("new logger log message");
+}
 ```
 
 ---
@@ -418,6 +461,6 @@ Documentation can be found in the [wiki](https://github.com/gabime/spdlog/wiki/1
 
 ---
 
-Thanks to [JetBrains](https://www.jetbrains.com/?from=spdlog) for donating licenses to their products to help developing **spdlog** <a href="https://www.jetbrains.com/?from=spdlog"><img src="logos/jetbrains-variant-4.svg" width="94" align="center" /></a>
+Thanks to [JetBrains](https://www.jetbrains.com/?from=spdlog) for donating product licenses to help develop **spdlog** <a href="https://www.jetbrains.com/?from=spdlog"><img src="logos/jetbrains-variant-4.svg" width="94" align="center" /></a>
 
 

@@ -34,7 +34,7 @@ public:
 } // namespace spdlog
 
 #ifdef SPDLOG_HEADER_ONLY
-#include "log_msg_buffer-inl.h"
+#    include "log_msg_buffer-inl.h"
 #endif
 
 #if defined(_MSC_VER)

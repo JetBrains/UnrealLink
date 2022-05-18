@@ -69,7 +69,7 @@ private:
 } // namespace spdlog
 
 #ifdef SPDLOG_HEADER_ONLY
-#include "async_logger-inl.h"
+#    include "async_logger-inl.h"
 #endif
 
 #if defined(_MSC_VER)
