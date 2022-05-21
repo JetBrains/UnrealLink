@@ -60,6 +60,8 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
      */
     lateinit var unrealInfo : EngineInfo
 
+    private val ubtGenerateProjectFilesTimeout: Long = 30
+
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
@@ -162,12 +164,13 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 
     protected fun generateSolutionFromUProject(uprojectFile: File) {
         val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool\\" else ""
+        val engineKey = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
         val ubtCommand = "${unrealInfo.currentEngine!!.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " +
-                "-ProjectFiles -UsePrecompiled -Game \"${uprojectFile.absolutePath}\""
+                "-ProjectFiles -project=\"${uprojectFile.absolutePath}\" -game $engineKey"
         ProcessBuilder(*(ubtCommand).split(" ").toTypedArray())
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
-            .waitFor(90, TimeUnit.SECONDS)
+            .waitFor(ubtGenerateProjectFilesTimeout, TimeUnit.SECONDS)
     }
 }
