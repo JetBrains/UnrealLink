@@ -25,7 +25,7 @@ plugins {
     id("com.jetbrains.rdgen") version "2022.1.3"
     id("me.filippov.gradle.jvm.wrapper") version "0.10.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.5.3"
+    id("org.jetbrains.intellij") version "1.6.0"
 }
 
 apply {
