@@ -75,7 +75,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 unrealHost.myModel.RiderLinkInstallMessage(
                     new InstallMessage("RiderLink will not be visible in solution explorer", ContentType.Normal));
                 unrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(
-                    "Need to refresh project files in Unreal Editor or in File Explorer with context action for .uproject file 'Refresh Project files'",
+                    "Need to refresh project files in Unreal Editor or in File Explorer with context action for .uproject file 'Generate project files'",
                     ContentType.Normal));
             }
             if (!engineRoot.IsValidAndExistDirectory())
@@ -85,6 +85,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 LogFailedRefreshProjectFiles();
                 return;
             }
+
+            if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return;
 
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
 
@@ -146,8 +148,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private static bool RegenerateProjectUsingSystemUVS(Lifetime lifetime, ISolution solution, UnrealHost unrealHost,
             VirtualFileSystemPath uprojectFile)
         {
-            if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows || uprojectFile.IsNullOrEmpty()) return false;
-
             var programFiles = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             if (programFiles.IsNullOrEmpty()) return false;
             
@@ -162,8 +162,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private static bool RegenerateProjectUsingBundledUVS(Lifetime lifetime, UnrealHost unrealHost, VirtualFileSystemPath uprojectFile,
             VirtualFileSystemPath engineRoot)
         {
-            if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return false;
-
             var pathToUnrealVersionSelector =
                 engineRoot / "Engine" / "Binaries" / "Win64" / "UnrealVersionSelector.exe";
             return RegenerateProjectUsingUVS(lifetime, unrealHost, uprojectFile, pathToUnrealVersionSelector);
@@ -213,7 +211,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pipeStreams = CreatePipeStreams(unrealHost, "[UBT]:");
             var startInfo = CmdUtils.GetProcessStartInfo(pipeStreams, pathToUnrealBuildToolBin,
                 pathToUnrealBuildToolBin.Directory, "-ProjectFiles",
-                $"-project=\"{uprojectFile.FullPath}\"", "-game", isInstalledBuild ? "-rocket" : "-engine");
+                $"-project=\"{uprojectFile.FullPath}\"", "-game", "-progress", isInstalledBuild ? "-rocket" : "-engine");
             try
             {
                 var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, ourLogger) == 0;
