@@ -162,8 +162,9 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 
     protected fun generateSolutionFromUProject(uprojectFile: File) {
         val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool\\" else ""
+        val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
         val ubtCommand = "${unrealInfo.currentEngine!!.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " +
-                "-ProjectFiles -UsePrecompiled -Game \"${uprojectFile.absolutePath}\""
+                "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
         ProcessBuilder(*(ubtCommand).split(" ").toTypedArray())
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
