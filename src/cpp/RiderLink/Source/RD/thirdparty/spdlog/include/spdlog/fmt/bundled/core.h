@@ -1204,6 +1204,11 @@ template <typename Context> struct custom_value {
   void (*format)(void* arg, parse_context& parse_ctx, Context& ctx);
 };
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4582 4583)
+#endif
+
 // A formatting argument value.
 template <typename Context> class value {
  public:
@@ -1282,6 +1287,10 @@ template <typename Context> class value {
     ctx.advance_to(f.format(*static_cast<qualified_type*>(arg), ctx));
   }
 };
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 template <typename Context, typename T>
 FMT_CONSTEXPR auto make_arg(const T& value) -> basic_format_arg<Context>;

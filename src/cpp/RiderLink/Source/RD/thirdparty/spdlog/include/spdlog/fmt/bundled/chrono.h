@@ -1547,6 +1547,11 @@ OutputIt format_duration_unit(OutputIt out) {
   return out;
 }
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4582 4583)
+#endif
+
 class get_locale {
  private:
   union {
@@ -1566,6 +1571,10 @@ class get_locale {
     return has_locale_ ? locale_ : get_classic_locale();
   }
 };
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 template <typename FormatContext, typename OutputIt, typename Rep,
           typename Period>
