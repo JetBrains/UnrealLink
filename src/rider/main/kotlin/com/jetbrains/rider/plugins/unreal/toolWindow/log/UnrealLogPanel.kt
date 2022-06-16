@@ -133,8 +133,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             consoleView.print(category, style)
             printSpaces(settings.categoryWidth - category.length, style)
             printSpaces(1, style)
-        }
-        else {
+        } else {
             if (settings.showVerbosity) {
                 val verbosityString = s.type.toString()
                 consoleView.print(verbosityString, style)
@@ -177,7 +176,21 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
             return true
         }
 
-        val allRanges = (unrealLogEvent.bpPathRanges + unrealLogEvent.methodRanges).sortedBy { it.first }
+        val sortedRanges = (unrealLogEvent.bpPathRanges + unrealLogEvent.methodRanges).sortedBy { it.first }
+        assert(sortedRanges.isNotEmpty())
+
+        // collect sorted non-intersecting string ranges
+        val allRanges = arrayListOf<StringRange>()
+        var lastAddedRange = sortedRanges[0]
+        allRanges.add(lastAddedRange)
+        for (index in 1 until sortedRanges.size) {
+            val curRange = sortedRanges[index]
+            if (lastAddedRange.last <= curRange.first) {
+                allRanges.add(curRange)
+                lastAddedRange = curRange
+            }
+        }
+
         val line = unrealLogEvent.text.data
         if (allRanges.first().first > 0) {
             consoleView.print(line.substring(0, allRanges[0].first), style)
