@@ -68,7 +68,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     @BeforeMethod
-    fun testSetup() {
+    open fun testSetup() {
         uprojectFile = putSolutionToTempTestDir(projectDirectoryName, "$projectDirectoryName.uproject")
         setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
     }
