@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "NatvisTest",
+	"Description": "Testing natvis",
+	"Category": "Other",
+	"CreatedBy": "LM",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NatvisTest",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
