@@ -1,0 +1,32 @@
+--> TestPuzzleProjectBlock.cpp:37$(1451) // 	BlockMesh->SetRelativeLocation(FVector(0.f,0.f,25.f));
+ATestPuzzleProjectBlock::ATestPuzzleProjectBlock() TestPuzzleProjectBlock.cpp:37
+    +this = <address> (Name=Default__TestPuzzleProjectBlock): ATestPuzzleProjectBlock *const
+    +ConstructorStatics = {PlaneMesh={Object=<address> (Name=PuzzleCube), ObjectToFind=<address> <error>, LoadFlags=0}, BaseMaterial={Object=<address> (Name=???), ObjectToFind=<address> L"/Game/Puzzle/Meshes/BaseMaterial.BaseMaterial", LoadFlags=...}, ...}: ATestPuzzleProjectBlock::FConstructorStatics
+    $TSS0 = -2147483647: int
+
+--> TestPuzzleProjectBlock.cpp:39$(1574) // 	BlockMesh->SetupAttachment(DummyRoot);
+ATestPuzzleProjectBlock::ATestPuzzleProjectBlock() TestPuzzleProjectBlock.cpp:39
+    +this = <address> (Name=Default__TestPuzzleProjectBlock): ATestPuzzleProjectBlock *const
+    +ConstructorStatics = {PlaneMesh={Object=<address> (Name=PuzzleCube), ObjectToFind=<address> <error>, LoadFlags=0}, BaseMaterial={Object=<address> (Name=???), ObjectToFind=<address> L"/Game/Puzzle/Meshes/BaseMaterial.BaseMaterial", LoadFlags=...}, ...}: ATestPuzzleProjectBlock::FConstructorStatics
+    $TSS0 = -2147483647: int
+
+--> TestPuzzleProjectBlock.cpp:38$(1507) // 	BlockMesh->SetMaterial(0, ConstructorStatics.BlueMaterial.Get());
+ATestPuzzleProjectBlock::ATestPuzzleProjectBlock() TestPuzzleProjectBlock.cpp:38
+    +this = <address> (Name=TestPuzzleProjectBlock_0): ATestPuzzleProjectBlock *const
+    +ConstructorStatics = {PlaneMesh={Object=<address> (Name=PuzzleCube), ObjectToFind=<address> <error>, LoadFlags=0}, BaseMaterial={Object=<address> (Name=BaseMaterial), ObjectToFind=<address> <error>, LoadFlags=0}, BlueMaterial={Object=...}, ...}: ATestPuzzleProjectBlock::FConstructorStatics
+    $TSS0 = -2147483647: int
+
+--> ConstructorHelpers.h:143$(3693) // 		{
+ConstructorHelpers::FObjectFinderOptional<UMaterialInstance>::Get() ConstructorHelpers.h:143
+    +this = <address> {Object=<address> (Name=Illegal name (block index out of range)), ObjectToFind=<address> L"澀릷翽", LoadFlags=1899468064}: ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> *const
+
+--> TestPuzzleProjectBlock.cpp:45$(1888) // 	BlueMaterial = ConstructorStatics.BlueMaterial.Get();
+ATestPuzzleProjectBlock::ATestPuzzleProjectBlock() TestPuzzleProjectBlock.cpp:45
+    +this = <address> (Name=TestPuzzleProjectBlock_0): ATestPuzzleProjectBlock *const
+    +ConstructorStatics = {PlaneMesh={Object=<address> (Name=PuzzleCube), ObjectToFind=<address> <error>, LoadFlags=0}, BaseMaterial={Object=<address> (Name=BaseMaterial), ObjectToFind=<address> <error>, LoadFlags=0}, BlueMaterial={Object=...}, ...}: ATestPuzzleProjectBlock::FConstructorStatics
+    $TSS0 = -2147483647: int
+
+--> Class.h:3376$(126045) // 	T::__DefaultConstructor(X);
+InternalConstructor<ATestPuzzleProjectBlock>(const FObjectInitializer &) Class.h:3376
+    +X = {Obj=<address> (Name=TestPuzzleProjectBlock_0), ObjectArchetype=<address> (Name=Default__TestPuzzleProjectBlock), bCopyTransientsFromClassDefaults=false, ...}: const FObjectInitializer &
+
