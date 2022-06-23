@@ -1,26 +1,25 @@
 package integrationTests.projectModel
 
-import com.intellij.openapi.project.Project
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.reactive.hasTrueValue
-import com.jetbrains.rider.projectView.SolutionConfigurationManager
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
-import com.jetbrains.rider.test.framework.executeWithGold
 import com.jetbrains.rider.test.framework.frameworkLogger
-import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.scriptingApi.TemplateType
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
+import com.jetbrains.rider.test.scriptingApi.addNewItem
+import com.jetbrains.rider.test.scriptingApi.dump
+import com.jetbrains.rider.test.scriptingApi.testProjectModel
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
-import java.io.PrintStream
 import java.time.Duration
 
 
@@ -37,6 +36,11 @@ class UnrealClass : UnrealTestProject() {
         openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
+
+    val unrealTemplates: Array<TemplateType> =
+        arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
+            UNREAL_CHARACTER, UNREAL_EMPTY, UNREAL_INTERFACE, UNREAL_PAWN, UNREAL_SLATE_WIDGET,
+            UNREAL_SLATE_WIDGET_STYLE, UNREAL_SOUND_EFFECT_SOURCE, UNREAL_SOUND_EFFECT_SUBMIX, UNREAL_SYNTH_COMPONENT)
 
     // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
     private fun TestProjectModelContext.dump(
@@ -56,12 +60,7 @@ class UnrealClass : UnrealTestProject() {
     @DataProvider
     fun enginesAndOthers(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
-        val unrealTemplates: Array<TemplateType> =
-            arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
-                    UNREAL_CHARACTER, UNREAL_EMPTY, UNREAL_INTERFACE, UNREAL_PAWN, UNREAL_SLATE_WIDGET,
-                    UNREAL_SLATE_WIDGET_STYLE, UNREAL_SOUND_EFFECT_SOURCE, UNREAL_SOUND_EFFECT_SUBMIX, UNREAL_SYNTH_COMPONENT)
         val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
-
         // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
         //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
         // Unique name need for gold file/dir name.
@@ -73,20 +72,45 @@ class UnrealClass : UnrealTestProject() {
         }
         unrealInfo.testingEngines.forEach { engine ->
             arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
-                unrealTemplates.forEach { template ->
-                    result.add(
-                        arrayOf(
-                            uniqueDataString("${template.type.replace(" ", "")}$type", engine),
-                            template,
-                            type,
-                            engine
-                        )
-                    )
-                }
+                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
             }
         }
         frameworkLogger.debug("Data Provider was generated: $result")
         return result.iterator()
+    }
+
+    @Test(dataProvider = "enginesAndOthers")
+    fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
+                  openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+        unrealInTestSetup(openWith, engine)
+        project = openProject(openWith)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+        doTestDumpProjectsView {
+            // I'm limited by the technology of my time, but someday it will be better here.
+            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
+            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
+            // Replace any quantity of ..\ or ../ and everything after them up to the root of the engine
+            profile.customRegexToMask["relative_path_ue_root"] =
+                Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
+            profile.customRegexToMask["relative_path/"] =
+                Regex("(\\.\\.[\\\\/])+")
+
+            dump("Init") {}
+            dump("Add different unreal class templates to '$activeSolution'") {
+                val path = mutableListOf("EmptyUProject").apply {
+                    if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
+                    add("EmptyUProject")
+                    add("Source")
+                    add("EmptyUProject")
+                }.toTypedArray()
+                for (template in unrealTemplates) {
+                    val className = template.type.split(' ').joinToString("")
+                    { word -> word.replaceFirstChar { it.uppercase() } }
+                    logger.info("Adding ${template.type}")
+                    addNewItem(project, path, template, className)
+                }
+            }
+        }
     }
 
     // Mandatory function before opening an unreal project
@@ -103,69 +127,5 @@ class UnrealClass : UnrealTestProject() {
         } else {
             openSolutionParams.minimalCountProjectsMustBeLoaded = 1400 // TODO: replace the magic number with something normal
         }
-    }
-
-    @Test(dataProvider = "enginesAndOthers")
-    fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String, template: TemplateType,
-                  openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInTestSetup(openWith, engine)
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
-        doTestDumpProjectsView {
-            // I'm limited by the technology of my time, but someday it will be better here.
-            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
-            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
-            // Replace any quantity of ..\ or ../ and everything after them up to the root of the engine
-            profile.customRegexToMask["relative_path_ue_root"] =
-                Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
-            profile.customRegexToMask["relative_path/"] =
-                Regex("(\\.\\.[\\\\/])+")
-            dump("Init") {}
-            dump("Add ${template.type} to 'EmptyUProject'") {
-                val path = mutableListOf("EmptyUProject").apply {
-                    if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
-                    add("EmptyUProject")
-                    add("Source")
-                    add("EmptyUProject")
-                }.toTypedArray()
-                val className = template.type.split(' ').joinToString("")
-                    { word -> word.replaceFirstChar { it.uppercase() } }
-                addNewItem(project, path, template, className)
-            }
-        }
-    }
-
-    // Special Data Provider for manual test launch with specific parameters.
-    // Just change @Test(dataProvider= "") to "enginesAndOthers_single" and set openWith, engine and template variables.
-    @DataProvider
-    fun enginesAndOthers_single(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val openWith = EngineInfo.UnrealOpenType.Uproject
-        val engine = unrealInfo.testingEngines.find {
-            it.version == UnrealVersion(5,0,1) && !it.isInstalledBuild }!!
-        val template = UNREAL_SIMPLE_TEST
-
-        val unrealTemplates: Array<TemplateType> =
-            arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
-                UNREAL_CHARACTER, UNREAL_EMPTY)
-
-        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
-            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
-            else "$baseString${engine.id.replace('.', '_')}"
-        }
-        val caseName = uniqueDataString("${template.type.replace(" ", "")}$openWith", engine)
-
-        // for auto creating data
-        unrealTemplates.forEach {
-            result.add(arrayOf(caseName, it, openWith, engine))
-        }
-
-        // for single or manually ccreating data
-        // result.add(arrayOf(caseName, template, openWith, engine))
-        frameworkLogger.debug("Data Provider Single was generated: $result")
-        return result.iterator()
     }
 }
