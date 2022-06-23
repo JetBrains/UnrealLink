@@ -1,7 +1,6 @@
 package integrationTests.debugger
 
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.options.SettingsEditor
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.unrealModel
@@ -17,14 +16,11 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
-import org.testng.annotations.AfterMethod
-import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.io.File
-import java.nio.file.Files
 import java.time.Duration
 
 @TestEnvironment(
@@ -32,7 +28,7 @@ import java.time.Duration
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
-class BreakpointBase : UnrealTestProject() {
+class Stepping : UnrealTestProject() {
     init {
         projectDirectoryName = "TestPuzzleProject"
         openSolutionParams.waitForCaches = true
@@ -51,7 +47,7 @@ class BreakpointBase : UnrealTestProject() {
         )
 
     @Test(dataProvider = "enginesAndOthers")
-    fun toggleBreakpointsTest(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun differentStepping(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
@@ -59,30 +55,45 @@ class BreakpointBase : UnrealTestProject() {
 
         testDebugProgram(
             {
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 34)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 45)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
+                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 37)
+                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 39)
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
 
-                waitForPause()
+                waitForPause()          // BlockMesh->SetRelativeLocation(FVector(0.f,0.f,25.f));
                 dumpFullCurrentData()
-
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 45)
-
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
-
+                stepInto()              // USceneComponent::GetRelativeRotation
+                stepOver()
+                dumpFullCurrentData()
                 resumeSession()
-                waitForPause()
+                waitForPause()          // BlockMesh->SetupAttachment(DummyRoot);
+                stepInto()              // USceneComponent::SetupAttachment
                 dumpFullCurrentData()
+                stepOver()              // stepping inside SetupAttachment
+                stepOver()
+                stepOver()
+                stepOver()
+                stepOver()              // USceneComponent::SetAttachParent
+                stepInto()              // MARK_PROPERTY_DIRTY_FROM_NAME(USceneComponent, AttachParent, this);
+                dumpFullCurrentData()
+                stepOut()               // USceneComponent::SetAttachSocketName
+                dumpFullCurrentData()
+                stepOut()               // BlockMesh->OnClicked.AddDynamic(this, &ATestPuzzleProjectBlock::BlockClicked);
+                dumpFullCurrentData()
+
             },
             exitProcessAfterTest = true
         )
     }
 
-    fun testDebugProgram(beforeRun: ExecutionEnvironment.() -> Unit, test: DebugTestExecutionContext.() -> Unit, exitProcessAfterTest: Boolean = false){
-        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(project) { }
+    fun testDebugProgram(
+        beforeRun: ExecutionEnvironment.() -> Unit,
+        test: DebugTestExecutionContext.() -> Unit,
+        exitProcessAfterTest: Boolean = false
+    ) {
+        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(
+            project
+        ) { }
         testDebugProgram(testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
     }
 
@@ -105,7 +116,8 @@ class BreakpointBase : UnrealTestProject() {
             generateSolutionFromUProject(uprojectFile)
             openSolutionParams.minimalCountProjectsMustBeLoaded = null
         } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded = 1400 // TODO: replace the magic number with something normal
+            openSolutionParams.minimalCountProjectsMustBeLoaded =
+                1400 // TODO: replace the magic number with something normal
         }
 
         project = openProject(openWith)
