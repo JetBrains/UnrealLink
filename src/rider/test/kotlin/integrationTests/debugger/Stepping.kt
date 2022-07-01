@@ -14,8 +14,10 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
+import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
@@ -30,7 +32,7 @@ import java.time.Duration
 )
 class Stepping : UnrealTestProject() {
     init {
-        projectDirectoryName = "TestPuzzleProject"
+        projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
         openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
@@ -46,8 +48,15 @@ class Stepping : UnrealTestProject() {
             "com.jetbrains.rider.test.framework"
         )
 
+    @BeforeMethod
+    override fun testSetup() {
+        super.testSetup()
+        testDataDirectory.combine("additionalSource", "plugins", "DebugTestPlugin")
+            .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("DebugTestPlugin"))
+    }
+
     @Test(dataProvider = "enginesAndOthers")
-    fun differentStepping(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun stepping(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
@@ -55,32 +64,36 @@ class Stepping : UnrealTestProject() {
 
         testDebugProgram(
             {
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 37)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 39)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 28)
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
 
-                waitForPause()          // BlockMesh->SetRelativeLocation(FVector(0.f,0.f,25.f));
-                dumpFullCurrentData()
-                stepInto()              // USceneComponent::GetRelativeRotation
-                stepOver()
-                dumpFullCurrentData()
-                resumeSession()
-                waitForPause()          // BlockMesh->SetupAttachment(DummyRoot);
-                stepInto()              // USceneComponent::SetupAttachment
-                dumpFullCurrentData()
-                stepOver()              // stepping inside SetupAttachment
+                waitForPause()
+                dumpFullCurrentData()   // 28: someNumber = Foo(someNumber);
+                stepInto()
                 stepOver()
                 stepOver()
+                dumpFullCurrentData()   // 12: return fooNum * 2;
+                stepOut()
+                dumpFullCurrentData()   // 28: someNumber = Foo(someNumber);
+                stepInto()
+                stepInto()
+                stepInto()
+                dumpFullCurrentData()   // 17: return b * 3;
                 stepOver()
-                stepOver()              // USceneComponent::SetAttachParent
-                stepInto()              // MARK_PROPERTY_DIRTY_FROM_NAME(USceneComponent, AttachParent, this);
-                dumpFullCurrentData()
-                stepOut()               // USceneComponent::SetAttachSocketName
-                dumpFullCurrentData()
-                stepOut()               // BlockMesh->OnClicked.AddDynamic(this, &ATestPuzzleProjectBlock::BlockClicked);
-                dumpFullCurrentData()
-
+                stepOver()
+                stepOver()
+                dumpFullCurrentData()   // 30: someNumber = Moo(someNumber);
+                stepInto()
+                stepInto()
+                stepInto()
+                stepInto()
+                stepInto()
+                dumpFullCurrentData()   // 12: return fooNum * 2;
+                stepOut()
+                stepOut()
+                stepOver()
+                dumpFullCurrentData()   // 31: std::cout << someNumber;
             },
             exitProcessAfterTest = true
         )
@@ -93,15 +106,8 @@ class Stepping : UnrealTestProject() {
     ) {
         withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(
             project
-        ) { }
-        testDebugProgram(testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
-    }
-
-    fun testDebugProgram(
-        testFile: File, beforeRun: ExecutionEnvironment.() -> Unit,
-        test: DebugTestExecutionContext.() -> Unit, outputConsumer: (String) -> Unit, exitProcessAfterTest: Boolean
-    ) {
-        testDebugProgram(project, testFile, beforeRun, test, outputConsumer, exitProcessAfterTest)
+        ) {}
+        testDebugProgram(project, testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
     }
 
     // Mandatory function before opening an unreal project

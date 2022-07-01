@@ -57,7 +57,7 @@ class Natvis : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun unrealBuiltinNatvis(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun unrealBuiltinNatvis(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")

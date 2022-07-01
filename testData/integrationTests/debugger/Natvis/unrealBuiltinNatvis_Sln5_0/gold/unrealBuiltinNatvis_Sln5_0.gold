@@ -17,12 +17,12 @@ TestFStringBuilder() NatvisTest.cpp:48
 
 --> NatvisTest.cpp:55$(1031) // 	nop(); // BREAK HERE
 TestFGuid() NatvisTest.cpp:55
-    +guid = {B9A9D3C4-4B32-8884-0E38-0991A2841634}: FGuid
+    +guid = {914C84D5-4EF4-35A0-F4A2-0C9E819F378B}: FGuid
 
 --> NatvisTest.cpp:64$(1201) // 	nop(); // BREAK HERE
 TestFText() NatvisTest.cpp:64
-    +empty = : FText
-    +from_text = : FText
+    +empty = Empty: FText
+    +from_text = L"Some text": FText
 
 --> NatvisTest.cpp:74$(1341) // 	nop(); // BREAK HERE
 TestFName() NatvisTest.cpp:74

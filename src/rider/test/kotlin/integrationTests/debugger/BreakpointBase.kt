@@ -15,6 +15,7 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
 import org.testng.annotations.AfterMethod
@@ -34,7 +35,7 @@ import java.time.Duration
 )
 class BreakpointBase : UnrealTestProject() {
     init {
-        projectDirectoryName = "TestPuzzleProject"
+        projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
         openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
@@ -50,8 +51,15 @@ class BreakpointBase : UnrealTestProject() {
             "com.jetbrains.rider.test.framework"
         )
 
+    @BeforeMethod
+    override fun testSetup(){
+        super.testSetup()
+        testDataDirectory.combine("additionalSource", "plugins", "DebugTestPlugin")
+            .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("DebugTestPlugin"))
+    }
+
     @Test(dataProvider = "enginesAndOthers")
-    fun toggleBreakpointsTest(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun toggleTest(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
@@ -59,22 +67,39 @@ class BreakpointBase : UnrealTestProject() {
 
         testDebugProgram(
             {
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 34)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 45)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 12)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 17)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 28)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 30)
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
 
-                waitForPause()
+                waitForPause()                  // 28: someNumber = Foo(someNumber);
+                dumpFullCurrentData()
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 30)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 30)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 32)
+                resumeSession()
+                waitForPause()                  // 12: return fooNum * 2;
                 dumpFullCurrentData()
 
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 45)
-
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
-                toggleBreakpoint(project, "TestPuzzleProjectBlock.cpp", 46)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 31)
+                toggleBreakpoint(project, "DebugTestPlugin.cpp", 31)
 
                 resumeSession()
-                waitForPause()
+                waitForPause()                  // 17: return b * 3;
+                dumpFullCurrentData()
+
+                resumeSession()
+                waitForPause()                  // 30: someNumber = Moo(someNumber);
+                dumpFullCurrentData()
+
+                resumeSession()
+                waitForPause()                  // 12: return fooNum * 2;
+                dumpFullCurrentData()
+
+                resumeSession()
+                waitForPause()                  // 32: }
                 dumpFullCurrentData()
             },
             exitProcessAfterTest = true
@@ -82,15 +107,8 @@ class BreakpointBase : UnrealTestProject() {
     }
 
     fun testDebugProgram(beforeRun: ExecutionEnvironment.() -> Unit, test: DebugTestExecutionContext.() -> Unit, exitProcessAfterTest: Boolean = false){
-        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(project) { }
-        testDebugProgram(testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
-    }
-
-    fun testDebugProgram(
-        testFile: File, beforeRun: ExecutionEnvironment.() -> Unit,
-        test: DebugTestExecutionContext.() -> Unit, outputConsumer: (String) -> Unit, exitProcessAfterTest: Boolean
-    ) {
-        testDebugProgram(project, testFile, beforeRun, test, outputConsumer, exitProcessAfterTest)
+        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(project) {}
+        testDebugProgram(project, testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
     }
 
     // Mandatory function before opening an unreal project
