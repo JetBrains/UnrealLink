@@ -249,7 +249,7 @@ Path to old plugin:</code></pre>
             <add-to-group group-id="NavBarToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
             <add-to-group group-id="MainToolBar" relative-to-action="ToolbarRunGroup" anchor="before"/>
             <add-to-group group-id="RightToolbarSideGroup" anchor="first"/>
-            <add-to-group group-id="RightToolbarSideGroupNoRunWidget" anchor="first"/>
+            <add-to-group group-id="RightToolbarSideGroupXamarin" anchor="first"/>
         </group>
 
         <action id="UnrealLink.InstallEditorPluginToEngineAction"
