@@ -1,0 +1,29 @@
+--> DebugTestPlugin.cpp:28$(359) // 	someNumber = Foo(someNumber);
+FDebugTestPluginModule::StartupModule() DebugTestPlugin.cpp:28
+    +this = <address> {}: FDebugTestPluginModule *const
+    someNumber = 0: int
+
+--> DebugTestPlugin.cpp:12$(193) // 	return fooNum * 2;
+Foo(int) DebugTestPlugin.cpp:12
+    f = 0: int
+    fooNum = 1: int
+
+--> DebugTestPlugin.cpp:17$(233) // 	return b * 3;
+Bar(int) DebugTestPlugin.cpp:17
+    b = 2: int
+
+--> DebugTestPlugin.cpp:30$(421) // 	someNumber = Moo(someNumber);
+FDebugTestPluginModule::StartupModule() DebugTestPlugin.cpp:30
+    +this = <address> {}: FDebugTestPluginModule *const
+    someNumber = 6: int
+
+--> DebugTestPlugin.cpp:12$(193) // 	return fooNum * 2;
+Foo(int) DebugTestPlugin.cpp:12
+    f = 6: int
+    fooNum = 7: int
+
+--> DebugTestPlugin.cpp:32$(478) // }
+FDebugTestPluginModule::StartupModule() DebugTestPlugin.cpp:32
+    +this = <address> {}: FDebugTestPluginModule *const
+    someNumber = 56: int
+
