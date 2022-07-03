@@ -112,20 +112,4 @@ class UnrealClass : UnrealTestProject() {
             }
         }
     }
-
-    // Mandatory function before opening an unreal project
-    private fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInfo.currentEngine = engine
-
-        println("Test starting with $engine, opening by $openWith.")
-
-        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
-
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
-            openSolutionParams.minimalCountProjectsMustBeLoaded = null
-        } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded = 1400 // TODO: replace the magic number with something normal
-        }
-    }
 }

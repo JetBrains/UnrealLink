@@ -68,31 +68,31 @@ class Stepping : UnrealTestProject() {
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
 
-                waitForPause()
+                waitForCidrPause()
                 dumpFullCurrentData()   // 28: someNumber = Foo(someNumber);
-                stepInto()
-                stepOver()
-                stepOver()
+                cidrStepInto()
+                cidrStepOver()
+                cidrStepOver()
                 dumpFullCurrentData()   // 12: return fooNum * 2;
-                stepOut()
+                cidrStepOut()
                 dumpFullCurrentData()   // 28: someNumber = Foo(someNumber);
-                stepInto()
-                stepInto()
-                stepInto()
+                cidrStepInto()
+                cidrStepInto()
+                cidrStepInto()
                 dumpFullCurrentData()   // 17: return b * 3;
-                stepOver()
-                stepOver()
-                stepOver()
+                cidrStepOver()
+                cidrStepOver()
+                cidrStepOver()
                 dumpFullCurrentData()   // 30: someNumber = Moo(someNumber);
-                stepInto()
-                stepInto()
-                stepInto()
-                stepInto()
-                stepInto()
+                cidrStepInto()
+                cidrStepInto()
+                cidrStepInto()
+                cidrStepInto()
+                cidrStepInto()
                 dumpFullCurrentData()   // 12: return fooNum * 2;
-                stepOut()
-                stepOut()
-                stepOver()
+                cidrStepOut()
+                cidrStepOut()
+                cidrStepOver()
                 dumpFullCurrentData()   // 31: std::cout << someNumber;
             },
             exitProcessAfterTest = true
@@ -104,30 +104,9 @@ class Stepping : UnrealTestProject() {
         test: DebugTestExecutionContext.() -> Unit,
         exitProcessAfterTest: Boolean = false
     ) {
-        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(
-            project
-        ) {}
+        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase,
+                SettingsEditor<RiderRunConfigurationBase>>(project) {}
         testDebugProgram(project, testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
-    }
-
-    // Mandatory function before opening an unreal project
-    private fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInfo.currentEngine = engine
-
-        println("Test starting with $engine, opening by $openWith.")
-
-        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
-
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
-            openSolutionParams.minimalCountProjectsMustBeLoaded = null
-        } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded =
-                1400 // TODO: replace the magic number with something normal
-        }
-
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
     @DataProvider

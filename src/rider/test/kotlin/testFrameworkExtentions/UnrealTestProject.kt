@@ -7,7 +7,9 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.jetbrains.rd.ide.model.UnrealEngine
+import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.lifetime.Lifetime
+import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rdclient.notifications.NotificationsHost
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
@@ -170,5 +172,24 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
             .waitFor(90, TimeUnit.SECONDS)
+    }
+
+    fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+        unrealInfo.currentEngine = engine
+
+        println("Test starting with $engine, opening by $openWith.")
+
+        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
+
+        if (openWith == EngineInfo.UnrealOpenType.Sln) {
+            generateSolutionFromUProject(uprojectFile)
+            openSolutionParams.minimalCountProjectsMustBeLoaded = null
+        } else {
+            openSolutionParams.minimalCountProjectsMustBeLoaded =
+                1400 // TODO: replace the magic number with something normal
+        }
+
+        project = openProject(openWith)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 }
