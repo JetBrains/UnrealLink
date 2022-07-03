@@ -91,7 +91,7 @@ class Natvis : UnrealTestProject() {
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
                 for (i in 0..21) {
-                    waitForPause()
+                    waitForCidrPause()
                     dumpFullCurrentData()
                     resumeSession()
                 }
@@ -99,39 +99,13 @@ class Natvis : UnrealTestProject() {
     }
 
     fun testDebugProgram(beforeRun: ExecutionEnvironment.() -> Unit, test: DebugTestExecutionContext.() -> Unit, exitProcessAfterTest: Boolean = false){
-        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(project) { }
-        testDebugProgram(testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
-    }
-
-    fun testDebugProgram(
-        testFile: File, beforeRun: ExecutionEnvironment.() -> Unit,
-        test: DebugTestExecutionContext.() -> Unit, outputConsumer: (String) -> Unit, exitProcessAfterTest: Boolean
-    ) {
-        testDebugProgram(project, testFile, beforeRun, test, outputConsumer, exitProcessAfterTest)
+        withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase,
+                SettingsEditor<RiderRunConfigurationBase>>(project) { }
+        testDebugProgram(project, testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
     }
 
     fun toggleBreakpoint(projectFile: String, lineNumber: Int): XLineBreakpoint<out XBreakpointProperties<*>>? {
         return toggleBreakpoint(project, projectFile, lineNumber)
-    }
-
-
-    // Mandatory function before opening an unreal project
-    private fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInfo.currentEngine = engine
-
-        println("Test starting with $engine, opening by $openWith.")
-
-        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
-
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
-            openSolutionParams.minimalCountProjectsMustBeLoaded = null
-        } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded = 1400 // TODO: replace the magic number with something normal
-        }
-
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
     @DataProvider

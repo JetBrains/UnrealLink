@@ -74,32 +74,32 @@ class BreakpointBase : UnrealTestProject() {
             }, {
                 dumpProfile.customRegexToMask["<address>"] = Regex("0x[\\da-fA-F]{16}")
 
-                waitForPause()                  // 28: someNumber = Foo(someNumber);
+                waitForCidrPause()                  // 28: someNumber = Foo(someNumber);
                 dumpFullCurrentData()
                 toggleBreakpoint(project, "DebugTestPlugin.cpp", 30)
                 toggleBreakpoint(project, "DebugTestPlugin.cpp", 30)
                 toggleBreakpoint(project, "DebugTestPlugin.cpp", 32)
                 resumeSession()
-                waitForPause()                  // 12: return fooNum * 2;
+                waitForCidrPause()                  // 12: return fooNum * 2;
                 dumpFullCurrentData()
 
                 toggleBreakpoint(project, "DebugTestPlugin.cpp", 31)
                 toggleBreakpoint(project, "DebugTestPlugin.cpp", 31)
 
                 resumeSession()
-                waitForPause()                  // 17: return b * 3;
+                waitForCidrPause()                  // 17: return b * 3;
                 dumpFullCurrentData()
 
                 resumeSession()
-                waitForPause()                  // 30: someNumber = Moo(someNumber);
+                waitForCidrPause()                  // 30: someNumber = Moo(someNumber);
                 dumpFullCurrentData()
 
                 resumeSession()
-                waitForPause()                  // 12: return fooNum * 2;
+                waitForCidrPause()                  // 12: return fooNum * 2;
                 dumpFullCurrentData()
 
                 resumeSession()
-                waitForPause()                  // 32: }
+                waitForCidrPause()                  // 32: }
                 dumpFullCurrentData()
             },
             exitProcessAfterTest = true
@@ -109,25 +109,6 @@ class BreakpointBase : UnrealTestProject() {
     fun testDebugProgram(beforeRun: ExecutionEnvironment.() -> Unit, test: DebugTestExecutionContext.() -> Unit, exitProcessAfterTest: Boolean = false){
         withRunConfigurationEditorWithFirstConfiguration<RiderRunConfigurationBase, SettingsEditor<RiderRunConfigurationBase>>(project) {}
         testDebugProgram(project, testGoldFile, beforeRun, test, {}, exitProcessAfterTest)
-    }
-
-    // Mandatory function before opening an unreal project
-    private fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInfo.currentEngine = engine
-
-        println("Test starting with $engine, opening by $openWith.")
-
-        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
-
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
-            openSolutionParams.minimalCountProjectsMustBeLoaded = null
-        } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded = 1400 // TODO: replace the magic number with something normal
-        }
-
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
     @DataProvider
