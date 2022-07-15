@@ -14,11 +14,15 @@ import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.getLoadedProjects
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
+import io.qameta.allure.Epic
+import io.qameta.allure.Feature
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import java.time.Duration
 
+@Epic("UnrealiLink")
+@Feature("Installation")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS],
     toolset = ToolsetVersion.TOOLSET_16_CPP,

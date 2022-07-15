@@ -4,20 +4,22 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.xdebugger.breakpoints.XBreakpointProperties
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
+import com.jetbrains.cidr.execution.debugger.CidrDebuggerSettings
+import com.jetbrains.cidr.execution.debugger.backend.lldb.formatters.LLDBNatvisDiagnosticsLevel
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.platform.diagnostics.LogTraceScenario
-import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.diagnostics.LogTraceScenarios
-import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.run.configurations.RiderRunConfigurationBase
+import com.jetbrains.rider.test.allure.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
+import io.qameta.allure.Epic
+import io.qameta.allure.Feature
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
@@ -26,6 +28,8 @@ import testFrameworkExtentions.UnrealTestProject
 import java.io.File
 import java.time.Duration
 
+@Epic(Subsystem.DEBUGGER)
+@Feature("Natvis")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
@@ -49,6 +53,8 @@ class Natvis : UnrealTestProject() {
     @BeforeMethod
     override fun testSetup(){
         super.testSetup()
+        CidrDebuggerSettings.getInstance().lldbNatvisDiagnosticsLevel = LLDBNatvisDiagnosticsLevel.VERBOSE
+
         File(testCaseSourceDirectory, "UnrealNatvisTestPlugin")
             .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("UnrealNatvisTestPlugin"))
     }

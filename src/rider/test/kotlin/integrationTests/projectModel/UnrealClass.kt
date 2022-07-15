@@ -1,7 +1,6 @@
 package integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.projectView.solution
@@ -16,6 +15,8 @@ import com.jetbrains.rider.test.scriptingApi.TemplateType.*
 import com.jetbrains.rider.test.scriptingApi.addNewItem
 import com.jetbrains.rider.test.scriptingApi.dump
 import com.jetbrains.rider.test.scriptingApi.testProjectModel
+import io.qameta.allure.Epic
+import io.qameta.allure.Feature
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
@@ -23,6 +24,8 @@ import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
 
+@Epic("Project Model")
+@Feature("New Unreal Class")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
