@@ -21,14 +21,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     {
         private static ILogger ourLogger = Logger.GetLogger(typeof(UnrealProjectsRefresher));
 
-        public static void RefreshProjects(Lifetime parentLifetime, [NotNull] ISolution solution,
+        public static void RefreshProjects(Lifetime parentLifetime, CppUE4Version myUnrealVersion,
+            [NotNull] ISolution solution,
             [NotNull] UnrealPluginInstallInfo installInfo)
         {
-            RefreshProjects(parentLifetime, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot);
+            RefreshProjects(parentLifetime, myUnrealVersion, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot);
         }
         
-        public static void RefreshProjects(Lifetime parentLifetime, [NotNull] ISolution solution,
-            [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription, [CanBeNull] VirtualFileSystemPath engineRoot)
+        public static void RefreshProjects(Lifetime parentLifetime, CppUE4Version myUnrealVersion,
+            [NotNull] ISolution solution,
+            [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription,
+            [CanBeNull] VirtualFileSystemPath engineRoot)
         {
             parentLifetime.UsingNestedAsync(async lt =>
             {
@@ -62,11 +65,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     }
                 }
 
-                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, solution, unrealHost, engineRoot, uprojectFile));
+                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, myUnrealVersion, solution, unrealHost, engineRoot, uprojectFile));
             });
         }
         
-        private static void RegenerateProjectFiles(Lifetime lifetime, ISolution solution, UnrealHost unrealHost,
+        private static void RegenerateProjectFiles(Lifetime lifetime, CppUE4Version myUnrealVersion, ISolution solution,
+            UnrealHost unrealHost,
             VirtualFileSystemPath engineRoot, VirtualFileSystemPath uprojectFile)
         {
             void LogFailedRefreshProjectFiles()
@@ -94,7 +98,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 ueVersion = solution.GetComponent<CppUE4SolutionDetector>().Version;
             }
-            
+
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot, ueVersion);
 
             // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
