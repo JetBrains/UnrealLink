@@ -9,6 +9,8 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.executeWithGold
 import com.jetbrains.rider.test.framework.frameworkLogger
+import io.qameta.allure.Epic
+import io.qameta.allure.Feature
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
@@ -16,7 +18,8 @@ import testFrameworkExtentions.UnrealTestProject
 import java.io.PrintStream
 import java.time.Duration
 
-
+@Epic("Project Model")
+@Feature("Solution Configurations")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
