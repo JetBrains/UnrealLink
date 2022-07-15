@@ -43,10 +43,7 @@ class Stepping : UnrealTestProject() {
         get() = setOf(LogTraceScenarios.Debugger)
 
     override val traceCategories: List<String>
-        get() = listOf(
-            "#com.jetbrains.cidr.execution.debugger",
-            "com.jetbrains.rider.test.framework"
-        )
+        get() = listOf("#com.jetbrains.cidr.execution.debugger")
 
     @BeforeMethod
     override fun testSetup() {
