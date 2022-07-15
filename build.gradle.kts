@@ -25,6 +25,7 @@ plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.10.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.7.0"
+    id("io.qameta.allure") version "2.10.0"
 }
 
 apply {
@@ -200,7 +201,9 @@ tasks {
 
     withType<Test> {
         maxHeapSize = "4096m"
-        useTestNG()
+        useTestNG {
+            listeners.add("com.jetbrains.rider.test.allure.AllureListener")
+        }
         testLogging {
             showStandardStreams = true
             showExceptions = true
