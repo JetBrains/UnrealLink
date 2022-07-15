@@ -8,6 +8,7 @@ using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
+using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp;
 using JetBrains.ReSharper.Resources.Shell;
@@ -33,28 +34,28 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
-        private readonly ISolution mySolution;
+        private readonly UEProjectsTracker myProjectsTracker;
         private readonly CppUE4SolutionDetector mySolutionDetector;
         public readonly IProperty<UnrealPluginInstallInfo> InstallInfoProperty;
 
-        private CppUE4Version myUnrealVersion;
+        public CppUE4Version UnrealVersion { get; private set; }
         private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
         private readonly CppUE4Version myNotWorkingInEngineVersion = new(5, 0, 0);
 
-        public bool IsValidEngine() => myUnrealVersion < myNotWorkingInEngineVersion || mySolutionDetector.BuiltFromSources;
+        public bool IsValidEngine() => UnrealVersion < myNotWorkingInEngineVersion || mySolutionDetector.BuiltFromSources;
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
             CppUE4SolutionDetector solutionDetector, ISolution solution,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler)
+            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, UEProjectsTracker projectsTracker)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
                 new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
             myLogger = logger;
-            mySolution = solution;
+            myProjectsTracker = projectsTracker;
             mySolutionDetector = solutionDetector;
 
             mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
@@ -65,9 +66,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         () =>
                         {
                             myLogger.Info("[UnrealLink]: Looking for RiderLink plugins");
-                            myUnrealVersion = mySolutionDetector.Version;
+                            UnrealVersion = mySolutionDetector.Version;
 
-                            if (myUnrealVersion < myMinimalSupportedVersion)
+                            if (UnrealVersion < myMinimalSupportedVersion)
                             {
                                 locks.ExecuteOrQueue(myLifetime, "UnrealLink.CheckSupportedVersion",
                                     () =>
@@ -90,57 +91,33 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                     });
                                 return;
                             }
-
+                            
+                            var riderLinkFolders = myProjectsTracker.GetAllPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
+                            // foreach (var pluginRoot in riderLinkFolders)
+                            // {
+                            //     myProjectsTracker.GetGameRoot(pluginRoot)
+                            // }
+                            var gameRoots = myProjectsTracker.GetAllGameRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
+                            
                             var installInfo = new UnrealPluginInstallInfo();
                             var foundEnginePlugin = TryGetEnginePluginFromSolution(solutionDetector, installInfo);
-                            ISet<VirtualFileSystemPath> uprojectLocations;
-                            using (solution.Locks.UsingReadLock())
+
+                            // Gather data about Project plugins
+                            foreach (var gameRoot in gameRoots)
                             {
-                                var allProjects = mySolution.GetAllProjects();
-                                if (solutionDetector.SupportRiderProjectModel ==
-                                    CppUE4ProjectModelSupportMode.UprojectOpened)
+                                myLogger.Info($"[UnrealLink]: Looking for plugin in {gameRoot}");
+                                var upluginFolder = riderLinkFolders.Find(path => path.StartsWith(gameRoot));
+                                VirtualFileSystemPath upluginPath = null;
+                                if (upluginFolder.IsNullOrEmpty())
                                 {
-                                    uprojectLocations = allProjects.Where(project =>
-                                    {
-                                        if (project.IsMiscProjectItem() || project.IsMiscFilesProject()) return false;
-
-                                        var location = project.ProjectFileLocation;
-                                        if (location == null) return false;
-
-                                        if (EXCLUDED_PROJECTS.Contains(location.NameWithoutExtension)) return false;
-
-                                        return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
-                                               location.NameWithoutExtension == project.Name;
-                                    }).Select(project => project.ProjectFileLocation).ToSet();
+                                    upluginPath = gameRoot.Combine(ourPathToProjectPlugin);
                                 }
                                 else
                                 {
-                                    uprojectLocations = allProjects.SelectMany(project =>
-                                        project.GetAllProjectFiles(projectFile =>
-                                        {
-                                            var location = projectFile.Location;
-                                            if (location == null || !location.ExistsFile) return false;
-
-                                            return location.ExtensionNoDot == UPROJECT_FILE_FORMAT &&
-                                                   location.NameWithoutExtension == project.Name;
-                                        })).Select(file => file.Location).ToSet();
+                                    upluginPath = upluginFolder.CombineWithShortName(UPLUGIN_FILENAME);
                                 }
-                            }
-
-                            myLogger.Info($"[UnrealLink]: Found {uprojectLocations.Count} uprojects");
-
-                            if (!foundEnginePlugin && !uprojectLocations.IsEmpty())
-                            {
-                                // All projects in the solution are bound to the same engine
-                                // So take first project and use it to find Unreal Engine
-                                foundEnginePlugin = TryGetEnginePluginFromUproject(uprojectLocations.FirstNotNull(), installInfo);
-                            }
-
-                            // Gather data about Project plugins
-                            foreach (var uprojectLocation in uprojectLocations)
-                            {
-                                myLogger.Info($"[UnrealLink]: Looking for plugin in {uprojectLocation}");
-                                var projectPlugin = GetProjectPluginForUproject(uprojectLocation);
+                                var uprojectPath = gameRoot.GetChildFiles().Single(filePath => filePath.ExtensionNoDot.Equals(UPROJECT_FILE_FORMAT));
+                                var projectPlugin = GetPluginInfo(upluginPath, uprojectPath );
                                 if (projectPlugin.IsPluginAvailable)
                                 {
                                     myLogger.Info(

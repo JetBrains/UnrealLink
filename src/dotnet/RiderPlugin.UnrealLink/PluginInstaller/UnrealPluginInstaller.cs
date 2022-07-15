@@ -318,7 +318,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 const string refreshText = "Refreshing project files";
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(refreshText, ContentType.Normal));
                 mySolution.Locks.ExecuteOrQueue(Lifetime, "Refresh projects after RiderLink installation", () => 
-                    UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, installDescription, engineRoot));
+                    UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, installDescription, engineRoot));
             } else {
                 var actionTitle = "Update VirtualFileSystem after RiderLink installation";
                 mySolution.Locks.Queue(Lifetime, actionTitle, () =>
@@ -428,7 +428,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 const string refreshText = "Refreshing project files";
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(refreshText, ContentType.Normal));
                 mySolution.Locks.ExecuteOrQueue(Lifetime, "Refresh projects after RiderLink installation", () => 
-                    UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, installDescription, engineRoot));
+                    UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, installDescription, engineRoot));
             } else {
                 var actionTitle = "Update VirtualFileSystem after RiderLink installation";
                 mySolution.Locks.Queue(Lifetime, actionTitle, () =>
@@ -547,7 +547,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         myBoundSettingsStore.SetValue<UnrealLinkSettings, bool>(s => s.InstallRiderLinkPlugin, true);
                     });
                 model.RefreshProjects.Advise(Lifetime,
-                    _ => UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, myPluginDetector.InstallInfoProperty.Value));
+                    _ => UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, myPluginDetector.InstallInfoProperty.Value));
             });
         }
 
