@@ -6,6 +6,7 @@ using JetBrains.ProjectModel;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
+using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Backend.Features.BackgroundTasks;
 using JetBrains.Util;
@@ -88,7 +89,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return;
 
-            var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
+            CppUE4Version ueVersion;
+            using (ReadLockCookie.Create())
+            {
+                ueVersion = solution.GetComponent<CppUE4SolutionDetector>().Version;
+            }
+            
+            var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot, ueVersion);
 
             // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
             if (GenerateProjectFilesCmd(lifetime, solution, unrealHost, uprojectFile, engineRoot)) return;
