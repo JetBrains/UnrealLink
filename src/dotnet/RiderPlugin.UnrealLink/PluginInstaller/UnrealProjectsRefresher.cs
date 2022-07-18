@@ -88,7 +88,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return;
 
-            var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot);
+            var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot,
+                solution.GetComponent<CppUE4SolutionDetector>().Version);
 
             // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
             if (GenerateProjectFilesCmd(lifetime, solution, unrealHost, uprojectFile, engineRoot)) return;
