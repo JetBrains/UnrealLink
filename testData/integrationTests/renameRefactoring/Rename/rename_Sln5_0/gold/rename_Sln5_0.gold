@@ -1,0 +1,23 @@
+---
+Source\EmptyUProject\MyActor.h
+---
+#include "MyActor.generated.h"
+
+UCLASS()
+class AMyActorRenameRename : public AActor
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(EditAnywhere)
+    uint8 bMyPropertyRenameRename:1;
+};
+
+---
+Config\DefaultEngine.ini
+---
+[CoreRedirects]
++PropertyRedirects=(OldName="/Script/EmptyUProject.MyActor.bMyProperty",NewName="/Script/EmptyUProject.MyActorRenameRename.bMyPropertyRenameRename")
++ClassRedirects=(OldName="/Script/EmptyUProject.MyActor",NewName="/Script/EmptyUProject.MyActorRenameRename")
++PropertyRedirects=(OldName="/Script/EmptyUProject.MyActorRename.bMyPropertyRename",NewName="/Script/EmptyUProject.MyActorRenameRename.bMyPropertyRenameRename")
++ClassRedirects=(OldName="/Script/EmptyUProject.MyActorRename",NewName="/Script/EmptyUProject.MyActorRenameRename")
