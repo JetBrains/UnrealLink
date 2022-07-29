@@ -146,7 +146,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 //        openWith: UnrealTestInfo.UnrealOpenType,
 //        riderLinkLocation: PluginInstallLocation)
 
-    fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(180)) {
+    fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(240)) {
         var riderLinkInstalled = false
         project.solution.rdRiderModel.installPluginFinished.advise(Lifetime.Eternal) { riderLinkInstalled = true }
         project.solution.rdRiderModel.installEditorPlugin.fire(

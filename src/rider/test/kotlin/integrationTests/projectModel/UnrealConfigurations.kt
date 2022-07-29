@@ -30,7 +30,7 @@ class UnrealConfigurations : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(200)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
 
@@ -45,8 +45,8 @@ class UnrealConfigurations : UnrealTestProject() {
         val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
             // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
             // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
-            else "$baseString${engine.id.replace('.', '_')}"
+            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}fromSource"
+            else "$baseString${engine.version.major}"
         }
         unrealInfo.testingEngines.forEach { engine ->
             arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->

@@ -34,21 +34,30 @@ class UnrealLinkInstallation : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(180)
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(400)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
 
     @DataProvider
     fun enginesAndOthers(): MutableIterator<Array<Any>> {
         val result: ArrayList<Array<Any>> = arrayListOf()
+        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+
+        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
+        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
+        // Unique name need for gold file/dir name.
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}Source"
+            else "$baseString${engine.version.major}"
+        }
         unrealInfo.testingEngines.forEach { engine ->
             arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
                 arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
                     // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
                     if ((engine.id == "5.0EA" || engine.id == "5.0") && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
-                    // TODO delete before commit. It's local hack
-                    if (engine.path.endsWith("REPO\\UE5")) return@forEach
-                    result.add(arrayOf(type, location, engine))
+                    result.add(arrayOf(uniqueDataString("$type$location", engine), type, location, engine))
                 }
             }
         }
@@ -56,7 +65,12 @@ class UnrealLinkInstallation : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun installAndRun(openWith: EngineInfo.UnrealOpenType, location: PluginInstallLocation, engine: UnrealEngine) {
+    fun newUClass(
+        @Suppress("UNUSED_PARAMETER") caseName: String,
+        openWith: EngineInfo.UnrealOpenType,
+        location: PluginInstallLocation,
+        engine: UnrealEngine
+    ) {
         unrealInfo.currentEngine = engine
         unrealInfo.placeToInstallRiderLink = location
         unrealInfo.needInstallRiderLink = true
@@ -83,7 +97,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         }
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false, timeout = Duration.ofMinutes(5))
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {
@@ -99,6 +113,18 @@ class UnrealLinkInstallation : UnrealTestProject() {
         val location = PluginInstallLocation.Engine
         val openWith = EngineInfo.UnrealOpenType.Uproject
         val engine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
-        installAndRun(openWith, location, engine)
+
+        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
+        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
+        // Unique name need for gold file/dir name.
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
+            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+            if (eng.id.matches(guidRegex)) "$baseString${eng.version.major}fromSource"
+            else "$baseString${eng.version.major}"
+        }
+
+        newUClass(uniqueDataString("$openWith$location", engine), openWith, location, engine)
     }
 }
