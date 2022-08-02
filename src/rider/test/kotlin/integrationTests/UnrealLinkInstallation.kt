@@ -97,7 +97,9 @@ class UnrealLinkInstallation : UnrealTestProject() {
         }
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false, timeout = Duration.ofMinutes(5))
+        val buildTimeout = if (unrealInfo.currentEngine!!.isInstalledBuild) Duration.ofMinutes(5) else Duration.ofMinutes(15)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false,
+            timeout = buildTimeout)
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {
@@ -121,7 +123,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
             // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
             // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (eng.id.matches(guidRegex)) "$baseString${eng.version.major}fromSource"
+            if (eng.id.matches(guidRegex)) "$baseString${eng.version.major}Source"
             else "$baseString${eng.version.major}"
         }
 
