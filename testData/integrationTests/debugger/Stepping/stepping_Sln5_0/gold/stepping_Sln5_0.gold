@@ -10,7 +10,6 @@ Foo(int) DebugTestPlugin.cpp:12
 
 --> DebugTestPlugin.cpp:28$(359) // 	someNumber = Foo(someNumber);
 FDebugTestPluginModule::StartupModule() DebugTestPlugin.cpp:28
-    Return Value = 2: int
     +this = <address> {}: FDebugTestPluginModule *const
     someNumber = 0: int
 
