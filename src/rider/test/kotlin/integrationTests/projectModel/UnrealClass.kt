@@ -4,6 +4,7 @@ import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -36,52 +37,11 @@ class UnrealClass : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(400)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
 
-    val unrealTemplates: Array<TemplateType> =
-        arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
-            UNREAL_CHARACTER, UNREAL_EMPTY, UNREAL_INTERFACE, UNREAL_PAWN, UNREAL_SLATE_WIDGET,
-            UNREAL_SLATE_WIDGET_STYLE, UNREAL_SOUND_EFFECT_SOURCE, UNREAL_SOUND_EFFECT_SUBMIX, UNREAL_SYNTH_COMPONENT)
-
-    // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
-    private fun TestProjectModelContext.dump(
-        caption: String,
-        checkSlnFile: Boolean = false,
-        checkIndex: Boolean = false,
-        action: () -> Unit
-    ) {
-        dump(caption, project, activeSolutionDirectory, checkSlnFile, checkIndex, action)
-    }
-
-    // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
-    private fun doTestDumpProjectsView(action: TestProjectModelContext.() -> Unit) {
-        testProjectModel(testGoldFile, project, action)
-    }
-
-    @DataProvider
-    fun enginesAndOthers(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
-        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
-        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
-        // Unique name need for gold file/dir name.
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
-            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
-            else "$baseString${engine.id.replace('.', '_')}"
-        }
-        unrealInfo.testingEngines.filter { it.isInstalledBuild }.forEach { engine ->
-            arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
-                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
-            }
-        }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
-    }
-
+    @Mute("RIDER-77926", specificParameters = ["Sln5_0", "Sln4_27", "Sln5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
@@ -114,5 +74,47 @@ class UnrealClass : UnrealTestProject() {
                 }
             }
         }
+    }
+
+    private val unrealTemplates: Array<TemplateType> =
+        arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
+            UNREAL_CHARACTER, UNREAL_EMPTY, UNREAL_INTERFACE, UNREAL_PAWN, UNREAL_SLATE_WIDGET,
+            UNREAL_SLATE_WIDGET_STYLE, UNREAL_SOUND_EFFECT_SOURCE, UNREAL_SOUND_EFFECT_SUBMIX, UNREAL_SYNTH_COMPONENT)
+
+    // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
+    private fun TestProjectModelContext.dump(
+        caption: String,
+        checkSlnFile: Boolean = false,
+        checkIndex: Boolean = false,
+        action: () -> Unit
+    ) {
+        dump(caption, project, activeSolutionDirectory.resolve("Source"), checkSlnFile, checkIndex, action)
+    }
+
+    // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
+    private fun doTestDumpProjectsView(action: TestProjectModelContext.() -> Unit) {
+        testProjectModel(testGoldFile, project, action)
+    }
+
+    @DataProvider
+    fun enginesAndOthers(): MutableIterator<Array<Any>> {
+        val result: ArrayList<Array<Any>> = arrayListOf()
+        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
+        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
+        // Unique name need for gold file/dir name.
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
+            else "$baseString${engine.id.replace('.', '_')}"
+        }
+        unrealInfo.testingEngines.forEach { engine ->
+            arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
+                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
+            }
+        }
+        frameworkLogger.debug("Data Provider was generated: $result")
+        return result.iterator()
     }
 }

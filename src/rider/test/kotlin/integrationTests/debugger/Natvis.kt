@@ -40,7 +40,7 @@ class Natvis : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
         openSolutionParams.waitForCaches = true
         openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(400)
         openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
 
@@ -64,7 +64,8 @@ class Natvis : UnrealTestProject() {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false)
+        val buildTimeout = if (unrealInfo.currentEngine!!.isInstalledBuild) Duration.ofMinutes(5) else Duration.ofMinutes(15)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false, timeout = buildTimeout)
 
         testDebugProgram(
             {

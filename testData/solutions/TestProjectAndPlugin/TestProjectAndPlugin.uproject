@@ -3,6 +3,7 @@
 	"EngineAssociation": "4.27",
 	"Category": "",
 	"Description": "",
+	"DisableEnginePluginsByDefault": true,
 	"Modules": [
 		{
 			"Name": "TestProjectAndPlugin",

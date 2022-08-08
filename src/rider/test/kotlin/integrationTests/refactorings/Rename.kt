@@ -14,6 +14,8 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
+import io.qameta.allure.Epic
+import io.qameta.allure.Feature
 import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
@@ -22,10 +24,11 @@ import testFrameworkExtentions.UnrealTestProject
 import java.io.File
 import java.time.Duration
 
-
 // TODO Split for multiple tests
 // TODO Use common data provider
 // TODO replace dumping functions with generic ones from TestFramework
+@Epic("Refactorings")
+@Feature("Rename")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.DEFAULT
 )
@@ -186,7 +189,6 @@ class Rename : UnrealTestProject() {
         return sb
     }
 
-
     /**
      * Renames Unreal Engine symbol from [oldSymbolName] to [newSymbolName].
      * Can rename files along with the symbol, for example when renaming class (optional) by [renameFile].
@@ -242,7 +244,7 @@ class Rename : UnrealTestProject() {
         }
 
         for (openWith in arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln)) {
-            for (engine in unrealInfo.testingEngines) {
+            for (engine in unrealInfo.testingEngines.filter { it.isInstalledBuild }) {
                 result.add(arrayOf(uniqueDataString("$openWith", engine), openWith, engine))
             }
         }

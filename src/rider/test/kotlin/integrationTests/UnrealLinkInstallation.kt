@@ -1,5 +1,6 @@
 package integrationTests
 
+import com.intellij.util.lateinitVal
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
@@ -7,6 +8,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import testFrameworkExtentions.UnrealTestProject
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.build.actions.BuildSolutionAction
+import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -20,8 +22,9 @@ import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
-@Epic("UnrealiLink")
+@Epic("UnrealLink")
 @Feature("Installation")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS],
@@ -65,7 +68,8 @@ class UnrealLinkInstallation : UnrealTestProject() {
     }
 
     @Test(dataProvider = "enginesAndOthers")
-    fun newUClass(
+    @RiderTestTimeout(30L, TimeUnit.MINUTES)
+    fun installAndRun(
         @Suppress("UNUSED_PARAMETER") caseName: String,
         openWith: EngineInfo.UnrealOpenType,
         location: PluginInstallLocation,
@@ -103,7 +107,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
         withRunProgram {
-            waitAndPump(Duration.ofSeconds(60),
+            waitAndPump(Duration.ofMinutes(3),
                 { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
         }
     }
@@ -123,10 +127,10 @@ class UnrealLinkInstallation : UnrealTestProject() {
         val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, eng: UnrealEngine ->
             // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
             // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (eng.id.matches(guidRegex)) "$baseString${eng.version.major}Source"
-            else "$baseString${eng.version.major}"
+            if (eng.id.matches(guidRegex)) "$baseString${eng.version.major}_${eng.version.minor}fromSource"
+            else "$baseString${engine.id.replace('.', '_')}"
         }
 
-        newUClass(uniqueDataString("$openWith$location", engine), openWith, location, engine)
+        installAndRun(uniqueDataString("$openWith$location", engine), openWith, location, engine)
     }
 }

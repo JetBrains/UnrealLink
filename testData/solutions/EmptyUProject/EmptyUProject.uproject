@@ -3,6 +3,7 @@
 	"EngineAssociation": "4.26",
 	"Category": "",
 	"Description": "",
+	"DisableEnginePluginsByDefault": true,
 	"Modules": [
 		{
 			"Name": "EmptyUProject",
