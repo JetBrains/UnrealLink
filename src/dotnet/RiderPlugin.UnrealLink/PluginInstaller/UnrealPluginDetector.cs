@@ -9,8 +9,6 @@ using JetBrains.ProjectModel.Tasks;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
-using JetBrains.ReSharper.Feature.Services.Cpp.Util;
-using JetBrains.ReSharper.Psi.Cpp;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.Rider.Model.Notifications;
@@ -35,7 +33,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
         private readonly UEProjectsTracker myProjectsTracker;
-        private readonly CppUE4SolutionDetector mySolutionDetector;
+        private readonly ICppUE4SolutionDetector mySolutionDetector;
         public readonly IProperty<UnrealPluginInstallInfo> InstallInfoProperty;
 
         public CppUE4Version UnrealVersion { get; private set; }
@@ -48,7 +46,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
-            CppUE4SolutionDetector solutionDetector, ISolution solution,
+            ICppUE4SolutionDetector solutionDetector, ISolution solution,
             IShellLocks locks, ISolutionLoadTasksScheduler scheduler, UEProjectsTracker projectsTracker)
         {
             myLifetime = lifetime;
@@ -58,8 +56,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myProjectsTracker = projectsTracker;
             mySolutionDetector = solutionDetector;
 
-            mySolutionDetector.IsUE4Solution_Observable.Change.Advise_When(myLifetime,
-                newValue => newValue == TriBool.True, _ =>
+            mySolutionDetector.IsUnrealSolution.Change.Advise_When(myLifetime,
+                newValue => newValue, _ =>
                 {
                     scheduler.EnqueueTask(new SolutionLoadTask("Find installed RiderLink plugins",
                         SolutionLoadTaskKinds.Done,
@@ -152,7 +150,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             return TryGetEnginePluginFromEngineRoot(installInfo, unrealEngineRoot);
         }
 
-        private bool TryGetEnginePluginFromSolution(CppUE4SolutionDetector solutionDetector,
+        private bool TryGetEnginePluginFromSolution(ICppUE4SolutionDetector solutionDetector,
             UnrealPluginInstallInfo installInfo)
         {
             var engineRootFolder = solutionDetector.UE4SourcesPath.Directory;

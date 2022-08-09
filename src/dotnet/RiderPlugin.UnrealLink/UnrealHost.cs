@@ -5,8 +5,6 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
-using JetBrains.ReSharper.Feature.Services.Cpp.Util;
-using JetBrains.ReSharper.Psi.Cpp;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
@@ -22,8 +20,7 @@ namespace RiderPlugin.UnrealLink
 
         public readonly RdRiderModel myModel;
 
-        // ReSharper disable once SuggestBaseTypeForParameter
-        public UnrealHost(Lifetime lifetime, ISolution solution, IShellLocks locks, CppUE4SolutionDetector solutionDetector)
+        public UnrealHost(Lifetime lifetime, ISolution solution, IShellLocks locks, ICppUE4SolutionDetector solutionDetector)
         {
             myIsInTests = locks.Dispatcher.IsAsyncBehaviorProhibited;
             if (myIsInTests)
@@ -31,11 +28,11 @@ namespace RiderPlugin.UnrealLink
 
             myLifetime = lifetime;   
             myModel = solution.GetProtocolSolution().GetRdRiderModel();
-            solutionDetector.IsUE4Solution_Observable.Change.Advise_HasNew(myLifetime, args =>
+            solutionDetector.IsUnrealSolution.Change.Advise_HasNew(myLifetime, args =>
             {
-                myModel.IsUnrealEngineSolution.Set(args.New == TriBool.True);
-                myModel.IsUproject.Set(args.New == TriBool.True && solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened);
-                myModel.IsPreBuiltEngine.Set(args.New == TriBool.True && !solutionDetector.BuiltFromSources);
+                myModel.IsUnrealEngineSolution.Set(args.New);
+                myModel.IsUproject.Set(args.New && solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened);
+                myModel.IsPreBuiltEngine.Set(args.New && !solutionDetector.BuiltFromSources);
             });
         }
 
