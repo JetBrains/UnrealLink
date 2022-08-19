@@ -80,7 +80,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
-        logger.debug("Found engines ${unrealInfo.engineList}")
+        logger.debug("Found installed engines: ${unrealInfo.installedEngineList}")
         GeneralSettings.getInstance().isConfirmExit = false
     }
 
