@@ -23,9 +23,13 @@ import com.jetbrains.rider.test.framework.getPersistentCacheFolder
 import com.jetbrains.rider.test.scriptingApi.setReSharperBoolSetting
 import com.jetbrains.rider.test.scriptingApi.startRunConfigurationProcess
 import com.jetbrains.rider.test.scriptingApi.stop
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.BeforeMethod
+import testFrameworkExtentions.suplementary.UprojectData
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -155,11 +159,13 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         waitAndPump(timeout, { riderLinkInstalled }, { "RiderLink did not install" })
     }
 
-    protected fun replaceUnrealEngineVersionInUproject(uprojectFile: File, engine: UnrealEngine) {
-        val uprojectText = uprojectFile.readText()
-            .replace("\"EngineAssociation\": \".*\",".toRegex(), "\"EngineAssociation\": \"${engine.id}\",")
+    protected fun prepareUprojectFile(uprojectFile: File, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
+        val uprojectData = Json.decodeFromString<UprojectData>(uprojectFile.readText())
+        uprojectData.EngineAssociation = engine.id
+        uprojectData.DisableEnginePluginsByDefault = disableEnginePlugins
+        val uprojectText = Json.encodeToString(uprojectData)
+        logger.debug("Content of final UProject: $uprojectText")
         uprojectFile.writeText(uprojectText)
-        println("Content of final UProject: \n${uprojectText}")
     }
 
     protected fun generateSolutionFromUProject(uprojectFile: File) {
@@ -174,12 +180,12 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
             .waitFor(90, TimeUnit.SECONDS)
     }
 
-    fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+    fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
         unrealInfo.currentEngine = engine
 
         println("Test starting with $engine, opening by $openWith.")
 
-        replaceUnrealEngineVersionInUproject(uprojectFile, unrealInfo.currentEngine!!)
+        prepareUprojectFile(uprojectFile, engine, disableEnginePlugins)
 
         if (openWith == EngineInfo.UnrealOpenType.Sln) {
             generateSolutionFromUProject(uprojectFile)
