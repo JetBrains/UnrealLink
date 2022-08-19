@@ -51,9 +51,15 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         }
 
     /**
-     * Params for solution/project. Overrides in/before concrete suite/test.
+     * Default settings for opening solution/project. Overrides in/before concrete suite/test.
      */
-    val openSolutionParams: OpenSolutionParams = OpenSolutionParams()
+    val openSolutionParams: OpenSolutionParams =
+        OpenSolutionParams().apply {
+            waitForCaches = true
+            projectModelReadyTimeout = Duration.ofSeconds(150)
+            backendLoadedTimeout = Duration.ofSeconds(400)
+            initWithCachesTimeout = Duration.ofSeconds(120)
+        }
     lateinit var projectDirectoryName: String
 
     /**
@@ -65,6 +71,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
      * Property represents object with unreal-specific information about suite/test.
      */
     lateinit var unrealInfo : EngineInfo
+
+    val buildTimeout: Duration
+        get() = if (unrealInfo.currentEngine!!.isInstalledBuild)
+                     Duration.ofMinutes(5)
+                else Duration.ofMinutes(15)
 
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
@@ -143,13 +154,6 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         }
     }
 
-//    TODO:
-//     protected open fun prepareUproject(
-//        uprojectFile: File,
-//        engine: UnrealEngine,
-//        openWith: UnrealTestInfo.UnrealOpenType,
-//        riderLinkLocation: PluginInstallLocation)
-
     fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(240)) {
         var riderLinkInstalled = false
         project.solution.rdRiderModel.installPluginFinished.advise(Lifetime.Eternal) { riderLinkInstalled = true }
@@ -168,7 +172,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         uprojectFile.writeText(uprojectText)
     }
 
-    protected fun generateSolutionFromUProject(uprojectFile: File) {
+    protected fun generateSolutionFromUProject(uprojectFile: File, timeout: Duration = Duration.ofSeconds(90)) {
         val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool\\" else ""
         val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
         val ubtCommand = "${unrealInfo.currentEngine!!.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " +
@@ -177,7 +181,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
-            .waitFor(90, TimeUnit.SECONDS)
+            .waitFor(timeout.seconds, TimeUnit.SECONDS)
     }
 
     fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
