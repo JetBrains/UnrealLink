@@ -3,11 +3,15 @@ package testFrameworkExtentions
 import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
+import com.jetbrains.rdclient.protocol.getComponent
 import com.jetbrains.rdclient.util.idea.toIOFile
 import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.protocol.testProtocolHost
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.io.File
+import java.time.Duration
 
 class EngineInfo {
     /**
@@ -43,18 +47,13 @@ class EngineInfo {
     val currentEnginePath: File?
         get() = currentEngine?.path?.toIOFile()
 
-    val engineList: Array<UnrealEngine>
-        get() = getEngLst()
-
-    private fun getEngLst(): Array<UnrealEngine> {
-        var engLst: Array<UnrealEngine>? = null
-        application.invokeAndWait {
-            engLst = application.testProtocolHost.components.filterIsInstance<UnrealShellHost>().single()
-                .model.getListOfEngines.sync(Unit)
+    val installedEngineList: Array<UnrealEngine> = runBlocking {
+        withTimeout(Duration.ofSeconds(30).toMillis()) {
+            val model = application.testProtocolHost.getComponent<UnrealShellHost>().model
+            model.getListOfEngines.startSuspending(Unit)
         }
-        return engLst!!
     }
 
     val testingEngines: Array<UnrealEngine> =
-        engineList.filter { eng -> testingVersions.any { it.basicallyEquals(eng.version) } }.toTypedArray()
+        installedEngineList.filter { eng -> testingVersions.any { it.basicallyEquals(eng.version) } }.toTypedArray()
 }
