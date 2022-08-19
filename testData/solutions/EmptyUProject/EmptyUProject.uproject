@@ -1,8 +1,9 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.26",
+	"EngineAssociation": "",
 	"Category": "",
 	"Description": "",
+	"DisableEnginePluginsByDefault": true,
 	"Modules": [
 		{
 			"Name": "EmptyUProject",
