@@ -53,6 +53,9 @@ sourceSets {
     main {
         resources.srcDir("src/rider/main/resources")
     }
+    test {
+        resources.srcDir("src/rider/test/resources")
+    }
 }
 
 project.version = "${property("majorVersion")}." +
