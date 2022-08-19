@@ -1,0 +1,1061 @@
+===================
+Init
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+===================
+Add different unreal class templates to 'EmptyUProject'
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+[Actor.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Actor.h"
+
+
+// Sets default values
+AActor::AActor()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+// Called when the game starts or when spawned
+void AActor::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void AActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+
+
+[Actor.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "Actor.generated.h"
+
+UCLASS()
+class EMPTYUPROJECT_API AActor : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this actor's properties
+	AActor();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+};
+
+
+[ActorComponent.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "ActorComponent.h"
+
+
+// Sets default values for this component's properties
+UActorComponent::UActorComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	// ...
+}
+
+
+// Called when the game starts
+void UActorComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// ...
+	
+}
+
+
+// Called every frame
+void UActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+
+
+[ActorComponent.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "ActorComponent.generated.h"
+
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class EMPTYUPROJECT_API UActorComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this component's properties
+	UActorComponent();
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
+};
+
+
+[Character.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Character.h"
+
+
+// Sets default values
+ACharacter::ACharacter()
+{
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+// Called when the game starts or when spawned
+void ACharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void ACharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+// Called to bind functionality to input
+void ACharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+
+
+[Character.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "Character.generated.h"
+
+UCLASS()
+class EMPTYUPROJECT_API ACharacter : public ACharacter
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this character's properties
+	ACharacter();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+};
+
+
+[ComplexTest.cpp]
+#include "Misc/AutomationTest.h"
+
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(ComplexTest, "DefaultNamespace.ComplexTest",
+                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+void ComplexTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+{
+	
+}
+
+bool ComplexTest::RunTest(const FString& Parameters)
+{
+	return true;
+}
+
+
+[Empty.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Empty.h"
+
+
+Empty::Empty()
+{
+}
+
+Empty::~Empty()
+{
+}
+
+
+[Empty.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+/**
+ * 
+ */
+class EMPTYUPROJECT_API Empty
+{
+public:
+	Empty();
+	~Empty();
+};
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[Interface.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Interface.h"
+
+
+// Add default functionality here for any IInterface functions that are not pure virtual.
+
+
+[Interface.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "Interface.generated.h"
+
+// This class does not need to be modified.
+UINTERFACE()
+class UInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+/**
+ * 
+ */
+class EMPTYUPROJECT_API IInterface
+{
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+};
+
+
+[Pawn.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Pawn.h"
+
+
+// Sets default values
+APawn::APawn()
+{
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+// Called when the game starts or when spawned
+void APawn::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void APawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+// Called to bind functionality to input
+void APawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+
+
+[Pawn.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
+#include "Pawn.generated.h"
+
+UCLASS()
+class EMPTYUPROJECT_API APawn : public APawn
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this pawn's properties
+	APawn();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+};
+
+
+[SimpleTest.cpp]
+#include "Misc/AutomationTest.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(SimpleTest, "DefaultNamespace.SimpleTest",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool SimpleTest::RunTest(const FString& Parameters)
+{
+	// Make the test pass by returning true, or fail by returning false.
+	return true;
+}
+
+
+[SlateWidget.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SlateWidget.h"
+
+#include "SlateOptMacros.h"
+
+BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+void SlateWidget::Construct(const FArguments& InArgs)
+{
+	/*
+	ChildSlot
+	[
+		// Populate the widget
+	];
+	*/
+}
+
+END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+
+[SlateWidget.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
+/**
+ * 
+ */
+class EMPTYUPROJECT_API SlateWidget : public SCompoundWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SlateWidget)
+	{
+	}
+
+	SLATE_END_ARGS()
+
+	/** Constructs this widget with InArgs */
+	void Construct(const FArguments& InArgs);
+};
+
+
+[SlateWidgetStyle.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SlateWidgetStyle.h"
+
+
+FSlateStyle::FSlateStyle()
+{
+}
+
+FSlateStyle::~FSlateStyle()
+{
+}
+
+const FName FSlateStyle::TypeName(TEXT("FSlateStyle"));
+
+const FSlateStyle& FSlateStyle::GetDefault()
+{
+	static FSlateStyle Default;
+	return Default;
+}
+
+void FSlateStyle::GetResources(TArray<const FSlateBrush*>& OutBrushes) const
+{
+	// Add any brush resources here so that Slate can correctly atlas and reference them
+}
+
+
+[SlateWidgetStyle.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+
+#include "SlateWidgetStyle.generated.h"
+
+/**
+ * 
+ */
+USTRUCT()
+struct EMPTYUPROJECT_API FSlateStyle : public FSlateWidgetStyle
+{
+	GENERATED_USTRUCT_BODY()
+
+	FSlateStyle();
+	virtual ~FSlateStyle();
+
+	// FSlateWidgetStyle
+	virtual void GetResources(TArray<const FSlateBrush*>& OutBrushes) const override;
+	static const FName TypeName;
+	virtual const FName GetTypeName() const override { return TypeName; };
+	static const FSlateStyle& GetDefault();
+};
+
+/**
+ */
+UCLASS(hidecategories=Object, MinimalAPI)
+class USlateWidgetStyle : public USlateWidgetStyleContainerBase
+{
+	GENERATED_BODY()
+
+public:
+	/** The actual data describing the widget appearance. */
+	UPROPERTY(Category=Appearance, EditAnywhere, meta=(ShowOnlyInnerProperties))
+	FSlateStyle WidgetStyle;
+
+	virtual const struct FSlateWidgetStyle* const GetStyle() const override
+	{
+		return static_cast<const struct FSlateWidgetStyle*>(&WidgetStyle);
+	}
+};
+
+
+[SoundEffectSource.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SoundEffectSource.h"
+
+
+// Useful header for various DSP-related utility functions.
+#include "DSP/Dsp.h"
+
+void FSoundEffectSource::Init(const FSoundEffectSourceInitData& InInitData)
+{
+	// Use InitData to setup DSP effects that depend on sample rate, etc.
+	bIsActive = true;
+	VolumeScale = 1.0f;
+	NumChannels = InInitData.NumSourceChannels;
+}
+
+void FSoundEffectSource::OnPresetChanged()
+{
+	// Macro to retrieve the current settings value of the parent preset asset.
+	GET_EFFECT_SETTINGS(SoundEffectSource);
+
+	// Update the instance's variables based on the settings values. 
+	// Note that Settings variable was created by the GET_EFFECT_SETTINGS macro.
+	VolumeScale = Audio::ConvertToLinear(Settings.VolumeAttenuationDb);
+}
+
+void FSoundEffectSource::ProcessAudio(const FSoundEffectSourceInputData& InData, float* OutAudioBufferData)
+{
+	// Use the volume scale value to scale the input audio frame data.
+	for (int32 Index = 0; Index < InData.NumSamples; ++Index)
+	{
+		OutAudioBufferData[Index] = VolumeScale * InData.InputSourceEffectBufferPtr[Index];
+	}
+}
+
+void USoundEffectSourcePreset::SetSettings(const FSoundEffectSourceSettings& InSettings)
+{
+	// Performs necessary broadcast to effect instances
+	UpdateSettings(InSettings);
+}
+
+
+[SoundEffectSource.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Sound/SoundEffectSource.h"
+#include "SoundEffectSource.generated.h"
+
+// ========================================================================
+// FSoundEffectSourceSettings
+// This is the source effect's setting struct. 
+// ========================================================================
+
+USTRUCT(BlueprintType)
+struct EMPTYUPROJECT_API FSoundEffectSourceSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+	// Volume attenuation in dB. 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SourceEffect|Preset",
+		meta = (ClampMin = "-96.0", UIMin = "-96.0", UIMax = "10.0"))
+	float VolumeAttenuationDb;
+
+	FSoundEffectSourceSettings()
+		: VolumeAttenuationDb(0.0f)
+	{
+	}
+};
+
+// ========================================================================
+// FSoundEffectSource
+// This is the instance of the source effect. Performs DSP calculations.
+// ========================================================================
+
+class EMPTYUPROJECT_API FSoundEffectSource : public FSoundEffectSource
+{
+public:
+	// Called on an audio effect at initialization on main thread before audio processing begins.
+	virtual void Init(const FSoundEffectSourceInitData& InInitData) override;
+
+	// Called when an audio effect preset is changed
+	virtual void OnPresetChanged() override;
+
+	// Process the input block of audio. Called on audio thread.
+	virtual void ProcessAudio(const FSoundEffectSourceInputData& InData, float* OutAudioBufferData) override;
+
+protected:
+	// Attenuation of sound in linear units
+	float VolumeScale;
+
+	int32 NumChannels;
+};
+
+// ========================================================================
+// USoundEffectSourcePreset
+// This code exposes your preset settings and effect class to the editor.
+// And allows for a handle to setting/updating effect settings dynamically.
+// ========================================================================
+
+UCLASS(ClassGroup = AudioSourceEffect, meta = (BlueprintSpawnableComponent))
+class EMPTYUPROJECT_API USoundEffectSourcePreset : public USoundEffectSourcePreset
+{
+	GENERATED_BODY()
+
+public:
+	// Macro which declares and implements useful functions.
+	EFFECT_PRESET_METHODS(SoundEffectSource)
+
+	// Allows you to customize the color of the preset in the editor.
+	virtual FColor GetPresetColor() const override { return FColor(196.0f, 185.0f, 121.0f); }
+
+	// Change settings of your effect from blueprints. Will broadcast changes to active instances.
+	UFUNCTION(BlueprintCallable, Category = "Audio|Effects")
+	void SetSettings(const FSoundEffectSourceSettings& InSettings);
+
+	// The copy of the settings struct. Can't be written to in BP, but can be read.
+	// Note that the value read in BP is the serialized settings, will not reflect dynamic changes made in BP.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio|Effects")
+	FSoundEffectSourceSettings Settings;
+};
+
+
+[SoundEffectSubmix.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SoundEffectSubmix.h"
+// Includes for audio dsp helper classes
+
+
+FSoundEffectSubmix::FSoundEffectSubmix()
+{
+}
+
+FSoundEffectSubmix::~FSoundEffectSubmix()
+{
+}
+
+void FSoundEffectSubmix::Init(const FSoundEffectSubmixInitData& InitData)
+{
+	// Do any initializations here
+	// SampleRate = InitData.SampleRate
+}
+
+void FSoundEffectSubmix::OnPresetChanged()
+{
+	GET_EFFECT_SETTINGS(SoundEffectSubmix);
+
+	// Can access your settings safely here as they've been copied from the game thread
+	// This function is called in the audio render thread before OnProcessAudio
+	float MyProperty = Settings.MyProperty;
+}
+
+void FSoundEffectSubmix::OnProcessAudio(const FSoundEffectSubmixInputData& InData,
+                                        FSoundEffectSubmixOutputData& OutData)
+{
+	const float* InputBuffer = InData.AudioBuffer->GetData();
+	int32 InputBufferSize = InData.AudioBuffer->Num();
+	float* OutputBuffer = OutData.AudioBuffer->GetData();
+	int32 OutputBufferSize = OutData.AudioBuffer->Num();
+
+	// here, we get min of num channels of input and output (note that submix processing output channels can be different than input)
+	int32 NumChannels = FMath::Min(InData.NumChannels, OutData.NumChannels);
+
+	// Do your submix processing here. Here we just do a pass through. Submix buffers will be pre-zero'd so no need to pad out extra zeros.
+	for (int32 OutputBufferIndex = 0, InputBufferIndex = 0; OutputBufferIndex < OutputBufferSize; OutputBufferIndex +=
+	     OutData.NumChannels, InputBufferIndex += InData.NumChannels)
+	{
+		// Copy the input audio frame to the output frame
+		for (int32 ChannelIndex = 0; ChannelIndex < NumChannels; ChannelIndex++)
+		{
+			OutputBuffer[OutputBufferIndex + ChannelIndex] = InputBuffer[InputBufferIndex + ChannelIndex];
+		}
+	}
+}
+
+void USoundEffectSubmixPreset::SetSettings(const FSoundEffectSubmixSettings& InSettings)
+{
+	UpdateSettings(InSettings);
+}
+
+
+[SoundEffectSubmix.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "AudioEffect.h"
+#include "SoundEffectSubmix.generated.h"
+
+// ========================================================================
+// FSoundEffectSubmixSettings
+// UStruct used to define user-exposed params for use with your effect.
+// ========================================================================
+
+USTRUCT(BlueprintType)
+struct EMPTYUPROJECT_API FSoundEffectSubmixSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+	// Define your effect parameters below...
+
+	// Information about your parameter described here will show up in the editor as a tool-tip in the effect preset object
+	UPROPERTY(EditAnywhere, Category = SoundEffect)
+	float MyProperty;
+
+	FSoundEffectSubmixSettings()
+		: MyProperty(1.0f)
+	{
+	}
+};
+
+// ========================================================================
+// USoundEffectSubmix
+// Class which processes audio streams and uses parameters defined in the preset class.
+// This class is instanced for each submix effect preset in a submix effect chain.
+// ========================================================================
+
+class EMPTYUPROJECT_API FSoundEffectSubmix : public FSoundEffectSubmix
+{
+public:
+	FSoundEffectSubmix();
+	~FSoundEffectSubmix();
+
+	// Called on an audio effect at initialization on main thread before audio processing begins.
+	virtual void Init(const FSoundEffectSubmixInitData& InSampleRate) override;
+
+	// Called when an audio effect preset is changed
+	virtual void OnPresetChanged() override;
+
+	// Process the input block of audio. Called on audio thread.
+	virtual void
+	OnProcessAudio(const FSoundEffectSubmixInputData& InData, FSoundEffectSubmixOutputData& OutData) override;
+
+private:
+	// Any code you need to actually run an instance of the submix effect goes here
+};
+
+// ========================================================================
+// USoundEffectSubmixPreset
+// This code exposes your preset settings and effect class to the editor.
+// ========================================================================
+
+UCLASS()
+class EMPTYUPROJECT_API USoundEffectSubmixPreset : public USoundEffectSubmixPreset
+{
+	GENERATED_BODY()
+
+public:
+	EFFECT_PRESET_METHODS(SoundEffectSubmix)
+
+	UFUNCTION(BlueprintCallable, Category = "Audio|Effects")
+	void SetSettings(const FSoundEffectSubmixSettings& InSettings);
+
+	// SoundEffectSubmix Preset Settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SubmixEffectPreset)
+	FSoundEffectSubmixSettings Settings;
+};
+
+
+[SynthComponent.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SynthComponent.h"
+
+
+bool USynthComponent::Init(int32& SampleRate)
+{
+	NumChannels = 1;
+
+#if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+	// Initialize the DSP objects
+	Osc.Init(SampleRate);
+	Osc.SetFrequency(440.0f);
+	Osc.Start();
+#endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+
+	return true;
+}
+
+int32 USynthComponent::OnGenerateAudio(float* OutAudio, int32 NumSamples)
+{
+#if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+	// Perform DSP operations here
+	for (int32 Sample = 0; Sample < NumSamples; ++Sample)
+	{
+		OutAudio[Sample] = Osc.Generate();
+	}
+#endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+
+	return NumSamples;
+}
+
+void USynthComponent::SetFrequency(const float InFrequencyHz)
+{
+#if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+	// Use this protected base class method to push a lambda function which will safely execute in the audio render thread.
+	SynthCommand([this, InFrequencyHz]()
+	{
+		Osc.SetFrequency(InFrequencyHz);
+		Osc.Update();
+	});
+#endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+}
+
+
+[SynthComponent.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/SynthComponent.h"
+#include "DSP/Osc.h"
+#include "SynthComponent.generated.h"
+
+// ========================================================================
+// USynthComponent
+// Synth component class which implements USynthComponent
+// This is a simple hello-world type example which generates a sine-wave
+// tone using a DSP oscillator class and implements a single function to set
+// the frequency. To enable example:
+// 1. Ensure "SignalProcessing" is added to project's .Build.cs in PrivateDependencyModuleNames
+// 2. Enable macro below that includes code utilizing SignalProcessing Oscilator
+// ========================================================================
+
+#define SYNTHCOMPONENT_EX_OSCILATOR_ENABLED 0
+
+UCLASS(ClassGroup = Synth, meta = (BlueprintSpawnableComponent))
+class EMPTYUPROJECT_API USynthComponent : public USynthComponent
+{
+	GENERATED_BODY()
+
+	// Called when synth is created
+	virtual bool Init(int32& SampleRate) override;
+
+	// Called to generate more audio
+	virtual int32 OnGenerateAudio(float* OutAudio, int32 NumSamples) override;
+
+	// Sets the oscillator's frequency
+	UFUNCTION(BlueprintCallable, Category = "Synth|Components|Audio")
+	void SetFrequency(const float FrequencyHz = 440.0f);
+
+protected:
+#if SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+	// A simple oscillator class. Can also generate Saw/Square/Tri/Noise.
+	Audio::FOsc Osc;
+#endif // SYNTHCOMPONENT_EX_OSCILATOR_ENABLED
+};
+
+
+[UObject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "UObject.h"
+
+
+[UObject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Object.h"
+#include "UObject.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class EMPTYUPROJECT_API UUObject : public UObject
+{
+	GENERATED_BODY()
+};
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
