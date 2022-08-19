@@ -28,33 +28,6 @@ import java.time.Duration
 class UnrealConfigurations : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"
-        openSolutionParams.waitForCaches = true
-        openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(200)
-        openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
-    }
-
-    @DataProvider
-    fun enginesAndOthers(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
-
-        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
-        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
-        // Unique name need for gold file/dir name.
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
-            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}fromSource"
-            else "$baseString${engine.version.major}"
-        }
-        unrealInfo.testingEngines.forEach { engine ->
-            arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
-                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
-            }
-        }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
     }
 
     @Test(dataProvider = "enginesAndOthers")
@@ -69,12 +42,35 @@ class UnrealConfigurations : UnrealTestProject() {
         }
     }
 
-    fun doTestDumpSolutionConfigurations(project: Project, printStream: PrintStream) {
+    private fun doTestDumpSolutionConfigurations(project: Project, printStream: PrintStream) {
         val slnConfManager = SolutionConfigurationManager.getInstance(project)
         val slnConfAndPlatforms = slnConfManager.solutionConfigurationsAndPlatforms
 
         printStream.println("Count: ${slnConfAndPlatforms.size}")
         for (cfg in slnConfAndPlatforms)
             printStream.println(cfg)
+    }
+
+    @DataProvider
+    fun enginesAndOthers(): MutableIterator<Array<Any>> {
+        val result: ArrayList<Array<Any>> = arrayListOf()
+        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+
+        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
+        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
+        // Unique name need for gold file/dir name.
+        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
+            else "$baseString${engine.version.major}_${engine.version.minor}"
+        }
+        unrealInfo.testingEngines.forEach { engine ->
+            arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
+                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
+            }
+        }
+        frameworkLogger.debug("Data Provider was generated: $result")
+        return result.iterator()
     }
 }

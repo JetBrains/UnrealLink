@@ -38,10 +38,6 @@ import java.time.Duration
 class Natvis : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"
-        openSolutionParams.waitForCaches = true
-        openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(150)
-        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(150)
-        openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
 
     override val traceScenarios: Set<LogTraceScenario>
@@ -64,7 +60,8 @@ class Natvis : UnrealTestProject() {
         unrealInTestSetup(openWith, engine)
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-        buildWithChecks(project, BuildSolutionAction(), "Build solution", useIncrementalBuild = false)
+        buildWithChecks(project, BuildSolutionAction(), "Build solution",
+            useIncrementalBuild = false, timeout = buildTimeout)
 
         testDebugProgram(
             {
@@ -118,13 +115,11 @@ class Natvis : UnrealTestProject() {
             "$baseString${engine.id.replace('.', '_')}"
         }
 
-        val openWith = EngineInfo.UnrealOpenType.Sln
-        val egs5: UnrealEngine = unrealInfo.testingEngines.find { it.id == "5.0" && it.isInstalledBuild }!!
-        val egs4: UnrealEngine = unrealInfo.testingEngines.find { it.id == "4.27" && it.isInstalledBuild }!!
-
-        result.add(arrayOf(uniqueDataString("$openWith", egs5), openWith, egs5))
-        result.add(arrayOf(uniqueDataString("$openWith", egs4), openWith, egs4))
-
+        unrealInfo.testingEngines.filter { it.isInstalledBuild } .forEach { engine ->
+            arrayOf(EngineInfo.UnrealOpenType.Sln).forEach { type ->
+                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
+            }
+        }
         frameworkLogger.debug("Data Provider was generated: $result")
         return result.iterator()
     }

@@ -9,16 +9,21 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 
+gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
+
 buildscript {
     repositories {
-        maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")}
+        maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2") }
     }
     dependencies {
         classpath("com.jetbrains.rd:rd-gen:2022.3.1")
     }
 }
 
-gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
+repositories {
+    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
+    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
+}
 
 plugins {
     kotlin("jvm") version "1.7.10"
@@ -36,11 +41,6 @@ dependencies {
 apply {
     plugin("kotlin")
     plugin("com.jetbrains.rdgen")
-}
-
-repositories {
-    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
 }
 
 kotlin {
