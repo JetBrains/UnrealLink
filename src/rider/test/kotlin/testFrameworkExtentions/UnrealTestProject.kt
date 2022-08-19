@@ -94,6 +94,10 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     fun testTeardown() {
         try {
             closeSolution(myProject)
+            val unrealLogsDir = activeSolutionDirectory.resolve("Saved")
+            if (unrealLogsDir.exists()) {
+                unrealLogsDir.copyRecursively(testMethod.logDirectory.resolve("UnrealInfo"))
+            }
             val tempDirDelResult = FileUtil.delete(tempTestDirectory)
             if (!tempDirDelResult)
                 frameworkLogger.warn("Error deleting '$tempTestDirectory' folder")
