@@ -22,7 +22,7 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     kotlin("jvm") version "1.7.0"
-    id("me.filippov.gradle.jvm.wrapper") version "0.10.0"
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.7.0"
 }
@@ -211,7 +211,7 @@ tasks {
     withType<KotlinCompile> {
         dependsOn("generateModels")
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "17"
         }
     }
 
