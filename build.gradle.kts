@@ -30,7 +30,7 @@ plugins {
     kotlin("plugin.serialization") version "1.7.10"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.7.0"
+    id("org.jetbrains.intellij") version "1.8.0"
     id("io.qameta.allure") version "2.10.0"
 }
 
