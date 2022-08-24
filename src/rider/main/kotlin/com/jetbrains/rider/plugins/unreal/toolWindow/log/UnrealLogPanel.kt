@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
+import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.ConsoleViewContentType.NORMAL_OUTPUT
@@ -19,7 +20,6 @@ import com.jetbrains.rider.plugins.unreal.model.*
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.ui.components.ComponentFactories
 import java.awt.BorderLayout
 import java.util.*
 import javax.swing.JPanel
@@ -29,12 +29,28 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
         private const val TIME_WIDTH = 29
         private const val VERBOSITY_WIDTH = 12
+
+        private fun createConsole(project: Project, lifetime: Lifetime): ConsoleViewImpl {
+            val consoleView = TextConsoleBuilderFactory.getInstance()
+                    .createBuilder(project)
+                    .console as ConsoleViewImpl
+
+            lifetime.bracketIfAlive({
+                // force create console ui
+                consoleView.component
+            }, {
+                consoleView.dispose()
+            })
+
+            return consoleView
+
+        }
     }
 
     private val settings: UnrealLogPanelSettings = UnrealLogPanelSettings.getInstance(project)
 
     private val logData: ArrayDeque<UnrealLogEvent> = ArrayDeque()
-    private val consoleView: ConsoleViewImpl = ComponentFactories.getConsoleView(project, lifetime)
+    private val consoleView: ConsoleViewImpl = createConsole(project, lifetime)
 
     val console: ConsoleViewImpl get() = consoleView
 
