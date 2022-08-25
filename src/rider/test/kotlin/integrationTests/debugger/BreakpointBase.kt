@@ -49,7 +49,7 @@ class BreakpointBase : UnrealTestProject() {
             .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("DebugTestPlugin"))
     }
 
-    @Test(dataProvider = "enginesAndOthers")
+    @Test(dataProvider = "enginesAndOthers", enabled = false)
     fun toggleTest(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 

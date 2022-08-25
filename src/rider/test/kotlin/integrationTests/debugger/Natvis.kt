@@ -55,7 +55,7 @@ class Natvis : UnrealTestProject() {
             .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("UnrealNatvisTestPlugin"))
     }
 
-    @Test(dataProvider = "enginesAndOthers")
+    @Test(dataProvider = "enginesAndOthers", enabled = false)
     fun unrealBuiltinNatvis(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         unrealInTestSetup(openWith, engine)
 

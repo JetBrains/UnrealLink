@@ -65,7 +65,7 @@ class UnrealConfigurations : UnrealTestProject() {
             if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
             else "$baseString${engine.version.major}_${engine.version.minor}"
         }
-        unrealInfo.testingEngines.forEach { engine ->
+        unrealInfo.testingEngines.filter { !it.isInstalledBuild } .forEach { engine ->
             arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
                 result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
             }

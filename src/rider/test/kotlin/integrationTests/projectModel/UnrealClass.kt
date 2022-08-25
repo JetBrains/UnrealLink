@@ -37,7 +37,6 @@ class UnrealClass : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
     }
 
-    @Mute("RIDER-77926", specificParameters = ["Sln5_0", "Sln4_27", "Sln5_1fromSource", "Uproject5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
@@ -105,7 +104,7 @@ class UnrealClass : UnrealTestProject() {
             if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
             else "$baseString${engine.id.replace('.', '_')}"
         }
-        unrealInfo.testingEngines.forEach { engine ->
+        unrealInfo.testingEngines.filter { !it.isInstalledBuild } .forEach { engine ->
             arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
                 result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
             }

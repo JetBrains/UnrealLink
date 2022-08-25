@@ -34,6 +34,10 @@ class UnrealLinkInstallation : UnrealTestProject() {
     // TODO think about no-copypaste decision
     init {
         projectDirectoryName = "EmptyUProject"
+        openSolutionParams.waitForCaches = true
+        openSolutionParams.projectModelReadyTimeout = Duration.ofSeconds(300)
+        openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(900)
+        openSolutionParams.initWithCachesTimeout = Duration.ofSeconds(120)
     }
     private val runProgramTimeout: Duration = Duration.ofMinutes(2)
 
@@ -85,7 +89,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
             if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
             else "$baseString${engine.id.replace('.', '_')}"
         }
-        unrealInfo.testingEngines.filter { it.isInstalledBuild }.forEach { engine ->
+        unrealInfo.testingEngines.filter { !it.isInstalledBuild }.forEach { engine ->
             arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
                 arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
                     // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?

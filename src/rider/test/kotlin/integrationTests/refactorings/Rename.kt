@@ -191,7 +191,7 @@ class Rename : UnrealTestProject() {
      * Can add Core Redirects (optional) by [addCoreRedirect].
      * Some [editor] must be set to work, for example by [withOpenedEditor].
      */
-    private fun renameUnrealSymbol(
+    private fun Rename.renameUnrealSymbol(
         oldSymbolName: String,
         newSymbolName: String,
         renameFile: Boolean = true,
