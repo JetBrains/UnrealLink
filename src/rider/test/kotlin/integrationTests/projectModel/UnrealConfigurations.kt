@@ -3,6 +3,7 @@ package integrationTests.projectModel
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.projectView.SolutionConfigurationManager
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -30,6 +31,7 @@ class UnrealConfigurations : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
     }
 
+    @Mute("Can't open backend solution in 400s", specificParameters = ["Uproject5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun solutionConfigurationsLoaded(
         @Suppress("UNUSED_PARAMETER") caseName: String,
