@@ -162,14 +162,14 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     private fun getMessageStyle(type: VerbosityType): ConsoleViewContentType {
         return when (type) {
-            VerbosityType.Fatal -> ConsoleViewContentType.LOG_ERROR_OUTPUT
-            VerbosityType.Error -> ConsoleViewContentType.LOG_ERROR_OUTPUT
-            VerbosityType.Warning -> ConsoleViewContentType.LOG_WARNING_OUTPUT
-            VerbosityType.Display -> ConsoleViewContentType.LOG_INFO_OUTPUT
-            VerbosityType.Log -> ConsoleViewContentType.LOG_INFO_OUTPUT
-            VerbosityType.Verbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
-            VerbosityType.VeryVerbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
-            else -> ConsoleViewContentType.LOG_INFO_OUTPUT
+            VerbosityType.Fatal -> UnrealLogConsoleViewContentType.UE_LOG_FATAL
+            VerbosityType.Error -> UnrealLogConsoleViewContentType.UE_LOG_ERROR
+            VerbosityType.Warning -> UnrealLogConsoleViewContentType.UE_LOG_WARNING
+            VerbosityType.Display -> UnrealLogConsoleViewContentType.UE_LOG_DISPLAY
+            VerbosityType.Log -> UnrealLogConsoleViewContentType.UE_LOG_LOG
+            VerbosityType.Verbose -> UnrealLogConsoleViewContentType.UE_LOG_VERBOSE
+            VerbosityType.VeryVerbose -> UnrealLogConsoleViewContentType.UE_LOG_VERY_VERBOSE
+            else -> UnrealLogConsoleViewContentType.UE_LOG_LOG
         }
     }
 
