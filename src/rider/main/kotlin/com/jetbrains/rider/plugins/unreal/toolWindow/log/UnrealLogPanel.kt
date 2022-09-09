@@ -3,7 +3,6 @@ package com.jetbrains.rider.plugins.unreal.toolWindow.log
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleViewContentType
-import com.intellij.execution.ui.ConsoleViewContentType.NORMAL_OUTPUT
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
@@ -163,14 +162,14 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
 
     private fun getMessageStyle(type: VerbosityType): ConsoleViewContentType {
         return when (type) {
-            VerbosityType.Fatal -> ConsoleViewContentType.ERROR_OUTPUT
-            VerbosityType.Error -> ConsoleViewContentType.ERROR_OUTPUT
+            VerbosityType.Fatal -> ConsoleViewContentType.LOG_ERROR_OUTPUT
+            VerbosityType.Error -> ConsoleViewContentType.LOG_ERROR_OUTPUT
             VerbosityType.Warning -> ConsoleViewContentType.LOG_WARNING_OUTPUT
             VerbosityType.Display -> ConsoleViewContentType.LOG_INFO_OUTPUT
             VerbosityType.Log -> ConsoleViewContentType.LOG_INFO_OUTPUT
             VerbosityType.Verbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
             VerbosityType.VeryVerbose -> ConsoleViewContentType.LOG_DEBUG_OUTPUT
-            else -> NORMAL_OUTPUT
+            else -> ConsoleViewContentType.LOG_INFO_OUTPUT
         }
     }
 
