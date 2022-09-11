@@ -8,7 +8,6 @@ using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
-using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.Rider.Model.Notifications;
@@ -32,7 +31,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
-        private readonly UEProjectsTracker myProjectsTracker;
+        private readonly CppUE4ProjectsTracker myProjectsTracker;
         private readonly ICppUE4SolutionDetector mySolutionDetector;
         public readonly IProperty<UnrealPluginInstallInfo> InstallInfoProperty;
 
@@ -45,9 +44,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
 
-        public UnrealPluginDetector(Lifetime lifetime, ILogger logger,
-            ICppUE4SolutionDetector solutionDetector, ISolution solution,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, UEProjectsTracker projectsTracker)
+        public UnrealPluginDetector(Lifetime lifetime, ILogger logger, ICppUE4SolutionDetector solutionDetector,
+            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, CppUE4ProjectsTracker projectsTracker)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
@@ -89,10 +87,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                     });
                                 return;
                             }
-                            
-                            var riderLinkFolders = myProjectsTracker.GetAllPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
-                            var gameRoots = myProjectsTracker.GetAllGameRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
-                            
+
+                            var riderLinkFolders = myProjectsTracker.GetAllUPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
+                            var gameRoots = myProjectsTracker.GetAllUProjectRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
+
                             var installInfo = new UnrealPluginInstallInfo();
                             var foundEnginePlugin = TryGetEnginePluginFromSolution(solutionDetector, installInfo);
 
@@ -101,15 +99,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             {
                                 myLogger.Info($"[UnrealLink]: Looking for plugin in {gameRoot}");
                                 var upluginFolder = riderLinkFolders.Find(path => path.StartsWith(gameRoot));
-                                VirtualFileSystemPath upluginPath = null;
-                                if (upluginFolder.IsNullOrEmpty())
-                                {
-                                    upluginPath = gameRoot.Combine(ourPathToProjectPlugin);
-                                }
-                                else
-                                {
-                                    upluginPath = upluginFolder.CombineWithShortName(UPLUGIN_FILENAME);
-                                }
+                                var upluginPath = upluginFolder.IsNullOrEmpty()
+                                    ? gameRoot.Combine(ourPathToProjectPlugin)
+                                    : upluginFolder.CombineWithShortName(UPLUGIN_FILENAME);
                                 var uprojectPath = gameRoot.GetChildFiles().Single(filePath => filePath.ExtensionNoDot.Equals(UPROJECT_FILE_FORMAT));
                                 var projectPlugin = GetPluginInfo(upluginPath, uprojectPath );
                                 if (projectPlugin.IsPluginAvailable)
@@ -174,14 +166,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         [NotNull]
         private UnrealPluginInstallInfo.InstallDescription GetPluginInfo(
-            [NotNull] VirtualFileSystemPath upluginFilePath, VirtualFileSystemPath UprojectPath)
+            [NotNull] VirtualFileSystemPath upluginFilePath, VirtualFileSystemPath uprojectPath)
         {
-            var ProjectName = UprojectPath.IsNullOrEmpty() ? "<ENGINE>" : UprojectPath.Name;
+            var projectName = uprojectPath.IsNullOrEmpty() ? "<ENGINE>" : uprojectPath.Name;
             var installDescription = new UnrealPluginInstallInfo.InstallDescription()
             {
                 UnrealPluginRootFolder = upluginFilePath.Directory,
-                ProjectName = ProjectName,
-                UprojectPath = UprojectPath
+                ProjectName = projectName,
+                UprojectPath = uprojectPath
             };
             if (!upluginFilePath.ExistsFile) return installDescription;
 
