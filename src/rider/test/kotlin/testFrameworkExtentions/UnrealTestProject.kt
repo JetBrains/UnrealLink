@@ -1,5 +1,7 @@
 package testFrameworkExtentions
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.execution.RunManagerEx
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.ide.GeneralSettings
@@ -168,10 +170,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     protected fun prepareUprojectFile(uprojectFile: File, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
-        val uprojectData = Json.decodeFromString<UprojectData>(uprojectFile.readText())
+        val mapper = jacksonObjectMapper()
+        val uprojectData = mapper.readValue<UprojectData>(uprojectFile.readText())
         uprojectData.EngineAssociation = engine.id
         uprojectData.DisableEnginePluginsByDefault = disableEnginePlugins
-        val uprojectText = Json.encodeToString(uprojectData)
+        val uprojectText = mapper.writeValueAsString(uprojectData)
         logger.debug("Content of final UProject: $uprojectText")
         uprojectFile.writeText(uprojectText)
     }
