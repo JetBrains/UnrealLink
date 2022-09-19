@@ -27,7 +27,6 @@ repositories {
 
 plugins {
     kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.9.0"
@@ -35,7 +34,7 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.4")
 }
 
 apply {
