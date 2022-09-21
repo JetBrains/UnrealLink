@@ -30,7 +30,7 @@ plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.intellij") version "1.9.0"
-    id("io.qameta.allure") version "2.10.0"
+    id("io.qameta.allure") version "2.11.0"
 }
 
 dependencies {
