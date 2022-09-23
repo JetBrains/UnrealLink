@@ -10,6 +10,8 @@
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
 #include "Toolkits/AssetEditorManager.h"
 #endif
+#include "Kismet2/BlueprintEditorUtils.h"
+#include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
 
 #include "Runtime/Launch/Resources/Version.h"
 
@@ -31,13 +33,15 @@ bool BluePrintProvider::IsBlueprint(FString const& pathName) {
     return FPackageName::IsValidObjectPath(pathName);
 }
 
-void BluePrintProvider::OpenBlueprint(FString const& AssetPathName, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
+void BluePrintProvider::OpenBlueprint(JetBrains::EditorPlugin::BlueprintReference const& BlueprintReference, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
     // Just to create asset manager if it wasn't created already
+    const FString AssetPathName = BlueprintReference.get_pathName();
+    const FGuid AssetGuid(BlueprintReference.get_guid());
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
     FAssetEditorManager::Get();
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(AssetPathName), EMessageScope::Process);
 #else
-    AsyncTask(ENamedThreads::GameThread, [AssetPathName]()
+    AsyncTask(ENamedThreads::GameThread, [AssetPathName, AssetGuid]()
     {
         // An asset needs loading
         UPackage* Package = LoadPackage(nullptr, *AssetPathName, LOAD_NoRedirects);
@@ -46,10 +50,17 @@ void BluePrintProvider::OpenBlueprint(FString const& AssetPathName, TSharedPtr<F
         {
             Package->FullyLoad();
 
-            FString AssetName = FPaths::GetBaseFilename(AssetPathName);
+            const FString AssetName = FPaths::GetBaseFilename(AssetPathName);
             UObject* Object = FindObject<UObject>(Package, *AssetName);
+            const UBlueprint* Blueprint = Cast<UBlueprint>(Object);
+            if(AssetGuid.IsValid() && Blueprint != nullptr)
+            {
+                Object = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, AssetGuid);   
+            }
             if(Object != nullptr)
-                FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(Object);
+            {
+                FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(Blueprint);                
+            }
         }
     });
 #endif

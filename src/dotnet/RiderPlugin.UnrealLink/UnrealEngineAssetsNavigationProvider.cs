@@ -16,7 +16,7 @@ namespace RiderPlugin.UnrealLink
 			myBackendToUnrealEditor = backendToUnrealEditor;
 		}
 		
-		public bool Navigate(VirtualFileSystemPath assetPath, UEObjectExport objectExport)
+		public bool Navigate(VirtualFileSystemPath assetPath, UEObjectExport objectExport, string guid)
 		{
 			var model = myBackendToUnrealEditor.EditorModel;
 			if (model == null)
@@ -24,7 +24,7 @@ namespace RiderPlugin.UnrealLink
 				return false;
 			}
 			
-			model.OpenBlueprint.Fire(new BlueprintReference(new FString(assetPath.NormalizeSeparators(FileSystemPathEx.SeparatorStyle.Unix))));
+			model.OpenBlueprint.Fire(new BlueprintReference(new FString(assetPath.NormalizeSeparators(FileSystemPathEx.SeparatorStyle.Unix)), new FString(guid ?? "")));
 			return true;
 		}
 	}

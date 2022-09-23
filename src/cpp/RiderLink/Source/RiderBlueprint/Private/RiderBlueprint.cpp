@@ -74,8 +74,7 @@ void FRiderBlueprintModule::StartupModule()
                     {
                         Window->HACK_ForceToFront();
                     }
-                    BluePrintProvider::OpenBlueprint(
-                        s.get_pathName(), MessageEndpoint);
+                    BluePrintProvider::OpenBlueprint(s, MessageEndpoint);
                 }
                 catch (std::exception const& e)
                 {

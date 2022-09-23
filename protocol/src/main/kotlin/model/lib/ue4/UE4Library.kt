@@ -199,6 +199,7 @@ object UE4Library : Root() {
 
     val BlueprintReference = structdef("BlueprintReference") {
         field("pathName", FString)
+        field("guid", FString)
     }
 }
 

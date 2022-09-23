@@ -216,7 +216,7 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
         for (rangeWithIndex in allRanges.withIndex()) {
             val match = line.substring(rangeWithIndex.value.first, rangeWithIndex.value.last)
             if (rangeWithIndex.value in unrealLogEvent.bpPathRanges) {
-                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match)))
+                val hyperLinkInfo = BlueprintClassHyperLinkInfo(model.openBlueprint, BlueprintReference(FString(match), FString("")))
                 consoleView.printHyperlink(match, hyperLinkInfo)
             } else {
                 val (`class`, method) = match.split(MethodReference.separator)
