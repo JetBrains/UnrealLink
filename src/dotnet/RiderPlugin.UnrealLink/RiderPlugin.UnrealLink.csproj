@@ -11,6 +11,11 @@
 
   <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +23,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>JetResourceGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" Condition="Exists('$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props')" />
