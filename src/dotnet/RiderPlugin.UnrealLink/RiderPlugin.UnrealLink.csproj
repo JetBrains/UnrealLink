@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
+    <AssemblyName>RiderPlugin.UnrealLink</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
