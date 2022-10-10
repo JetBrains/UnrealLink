@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using JetBrains.Application.Threading;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
+using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
@@ -45,7 +46,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     () => unrealHost.myModel.RefreshInProgress.Value = false
                 );
 
-                var task = RiderBackgroundTaskBuilder.Create()
+                var task = BackgroundProgressBuilder.Create()
                     .AsCancelable(() =>
                     {
                         unrealHost.myModel.RiderLinkInstallMessage(
@@ -53,8 +54,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         lifetimeDefinition.Terminate();
                     })
                     .WithHeader("Refreshing project model");
-                var backgroundTaskHost = solution.GetComponent<RiderBackgroundTaskHost>();
-                backgroundTaskHost.AddNewTask(lifetime, task);
+                solution.GetComponent<BackgroundProgressManager>().AddNewTask(lifetime, task);
                 var uprojectFile = installDescription?.UprojectPath;
                 if (uprojectFile.IsNullOrEmpty())
                 {

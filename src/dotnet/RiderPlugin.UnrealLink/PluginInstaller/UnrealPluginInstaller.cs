@@ -11,6 +11,7 @@ using JetBrains.Diagnostics;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
+using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
 using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
 using JetBrains.RdBackend.Common.Features.BackgroundTasks;
@@ -37,14 +38,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly ISolution mySolution;
         private readonly UnrealHost myUnrealHost;
         private readonly NotificationsModel myNotificationsModel;
-        private readonly RiderBackgroundTaskHost myBackgroundTaskHost;
+        private readonly BackgroundProgressManager myBackgroundProgressManager;
         private IContextBoundSettingsStoreLive myBoundSettingsStore;
         private UnrealPluginDetector myPluginDetector;
         private const string TMP_PREFIX = "UnrealLink";
 
         public UnrealPluginInstaller(Lifetime lifetime, ILogger logger, UnrealPluginDetector pluginDetector,
             PluginPathsProvider pathsProvider, ISolution solution, ISettingsStore settingsStore, UnrealHost unrealHost,
-            NotificationsModel notificationsModel, RiderBackgroundTaskHost backgroundTaskHost)
+            NotificationsModel notificationsModel, BackgroundProgressManager backgroundProgressManager)
         {
             Lifetime = lifetime;
             myLogger = logger;
@@ -52,7 +53,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolution = solution;
             myUnrealHost = unrealHost;
             myNotificationsModel = notificationsModel;
-            myBackgroundTaskHost = backgroundTaskHost;
+            myBackgroundProgressManager = backgroundProgressManager;
             myBoundSettingsStore =
                 settingsStore.BindToContextLive(Lifetime, ContextRange.Smart(solution.ToDataContext()));
             myPluginDetector = pluginDetector;
@@ -503,7 +504,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 var prefix = unrealPluginInstallInfo.EnginePlugin.IsPluginAvailable ? "Updating" : "Installing";
                 var header = $"{prefix} RiderLink plugin";
                 var progress = new Property<double>("UnrealLink.InstallPluginProgress", 0.0);
-                var task = RiderBackgroundTaskBuilder.Create()
+                var task = BackgroundProgressBuilder.Create()
                     .AsCancelable(() =>
                     {
                         myUnrealHost.myModel.RiderLinkInstallMessage(
@@ -513,7 +514,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     .WithHeader(header)
                     .WithProgress(progress)
                     .WithDescriptionFromProgress();
-                myBackgroundTaskHost.AddNewTask(lifetime, task);
+                myBackgroundProgressManager.AddNewTask(lifetime, task);
                 myUnrealHost.myModel.CancelRiderLinkInstall.AdviseOnce(lifetime, unit =>
                 {
                     myUnrealHost.myModel.RiderLinkInstallMessage(
