@@ -11,19 +11,14 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.framework.frameworkLogger
-import com.jetbrains.rider.test.scriptingApi.TemplateType
+import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
-import com.jetbrains.rider.test.scriptingApi.addNewItem
-import com.jetbrains.rider.test.scriptingApi.dump
-import com.jetbrains.rider.test.scriptingApi.testProjectModel
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
-import java.time.Duration
-
 
 @Epic("Project Model")
 @Feature("New Unreal Class")
@@ -68,6 +63,38 @@ class UnrealClass : UnrealTestProject() {
                     logger.info("Adding ${template.type}")
                     addNewItem(project, path, template, className)
                 }
+            }
+        }
+    }
+
+    @Test(dataProvider = "enginesAndOthers")
+    fun moveUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
+                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+        unrealInTestSetup(openWith, engine)
+        project = openProject(openWith)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+
+        doTestDumpProjectsView {
+            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
+            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
+            profile.customRegexToMask["relative_path_ue_root"] = Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
+            profile.customRegexToMask["relative_path/"] = Regex("(\\.\\.[\\\\/])+")
+
+            val sourcePath = mutableListOf("EmptyUProject").apply {
+                if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
+                add("EmptyUProject")
+                add("Source")
+                add("EmptyUProject")
+            }.toTypedArray()
+
+            addNewItem(project, sourcePath, UNREAL_ACTOR, "SomeActor")
+            addNewFolder(project, sourcePath, "TestMove")
+
+            dump("Init") {}
+            dump("Moving .h and .cpp") {
+                val moveToPath = sourcePath + "TestMove"
+                moveItem(project, sourcePath + "SomeActor.h", moveToPath)
+                moveItem(project, sourcePath + "SomeActor.cpp", moveToPath)
             }
         }
     }
