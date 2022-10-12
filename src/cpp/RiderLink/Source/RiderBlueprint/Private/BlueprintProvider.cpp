@@ -36,12 +36,13 @@ bool BluePrintProvider::IsBlueprint(FString const& pathName) {
 void BluePrintProvider::OpenBlueprint(JetBrains::EditorPlugin::BlueprintReference const& BlueprintReference, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint) {
     // Just to create asset manager if it wasn't created already
     const FString AssetPathName = BlueprintReference.get_pathName();
-    const FGuid AssetGuid(BlueprintReference.get_guid());
+    FGuid AssetGuid;
+    bool bIsValidGuid = FGuid::Parse(BlueprintReference.get_guid(), AssetGuid);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
     FAssetEditorManager::Get();
     messageEndpoint->Publish(new FAssetEditorRequestOpenAsset(AssetPathName), EMessageScope::Process);
 #else
-    AsyncTask(ENamedThreads::GameThread, [AssetPathName, AssetGuid]()
+    AsyncTask(ENamedThreads::GameThread, [AssetPathName, AssetGuid, bIsValidGuid]()
     {
         // An asset needs loading
         UPackage* Package = LoadPackage(nullptr, *AssetPathName, LOAD_NoRedirects);
@@ -53,7 +54,7 @@ void BluePrintProvider::OpenBlueprint(JetBrains::EditorPlugin::BlueprintReferenc
             const FString AssetName = FPaths::GetBaseFilename(AssetPathName);
             UObject* Object = FindObject<UObject>(Package, *AssetName);
             const UBlueprint* Blueprint = Cast<UBlueprint>(Object);
-            if(AssetGuid.IsValid() && Blueprint != nullptr)
+            if(bIsValidGuid && Blueprint != nullptr)
             {
                 Object = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, AssetGuid);   
             }
