@@ -8,7 +8,7 @@ using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
 using JetBrains.Platform.RdFramework.Util;
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.Cpp.Options;
+using JetBrains.ReSharper.Psi.Cpp.Resources;
 using JetBrains.ReSharper.Feature.Services.OptionPages.CodeEditing;
 using JetBrains.ReSharper.Resources.Settings;
 using JetBrains.ReSharper.Resources.Shell;
