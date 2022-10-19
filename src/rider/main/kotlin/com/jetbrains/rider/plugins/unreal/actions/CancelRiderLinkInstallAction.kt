@@ -1,6 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.actionSystem.ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
@@ -12,6 +13,8 @@ import icons.RiderIcons
 import javax.swing.JComponent
 
 class CancelRiderLinkInstallAction : AnAction(), CustomComponentAction, DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     override fun createCustomComponent(presentation: Presentation, place: String): JComponent {
         return ActionButton(this, presentation, place, DEFAULT_MINIMUM_BUTTON_SIZE)
     }
@@ -27,7 +30,7 @@ class CancelRiderLinkInstallAction : AnAction(), CustomComponentAction, DumbAwar
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?:  error("UnrealHost not found")
+        val host = e.getUnrealHost() ?:  error("UnrealHost not found")
         host.model.cancelRiderLinkInstall.fire(Unit)
     }
 }

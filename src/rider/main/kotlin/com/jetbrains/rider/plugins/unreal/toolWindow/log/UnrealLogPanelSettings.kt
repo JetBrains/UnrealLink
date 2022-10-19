@@ -90,6 +90,12 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
             }
         }
 
+    var showPlayButtons: Boolean
+        get() = state.showPlayButtons
+        set(value) {
+            state.showPlayButtons = value
+        }
+
     fun interface SettingsChangedListener : EventListener {
         fun settingsChanged()
     }
@@ -118,6 +124,8 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         var showVerbosity by property(defaultValue = true)
         var alignMessages by property(defaultValue = true)
         var categoryWidth by property(defaultValue = 25)
+
+        var showPlayButtons by property(defaultValue = true)
     }
 }
 

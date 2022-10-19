@@ -2,6 +2,7 @@ package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.icons.AllIcons
 import com.intellij.notification.*
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -15,6 +16,7 @@ import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.RequestFailed
 import com.jetbrains.rider.plugins.unreal.model.RequestSucceed
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.projectView.solution
 import icons.UnrealIcons
 import javax.swing.Icon
@@ -80,6 +82,8 @@ class PlayStateActionStateService(val project: Project) : LifetimedService() {
 }
 
 abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : DumbAwareAction(text, description, icon) {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     override fun update(e: AnActionEvent) {
         val project = e.project
         if (project == null) {
@@ -87,8 +91,9 @@ abstract class PlayStateAction(text: String?, description: String?, icon: Icon?)
             return
         }
         val host = UnrealHost.getInstance(project)
+        val settings = UnrealLogPanelSettings.getInstance(project)
 
-        e.presentation.isVisible = host.isUnrealEngineSolution
+        e.presentation.isVisible = host.isUnrealEngineSolution && settings.showPlayButtons
         e.presentation.isEnabled = host.isConnectedToUnrealEditor &&
                 host.model.isGameControlModuleInitialized.value
 
@@ -106,13 +111,13 @@ class PlayInUnrealAction : PlayStateAction(
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Idle
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Idle
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestPlayFromRider.fire(state.nextRequestID())
@@ -126,13 +131,13 @@ class ResumeInUnrealAction : PlayStateAction(
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Idle
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestResumeFromRider.fire(state.nextRequestID())
@@ -146,12 +151,12 @@ class StopInUnrealAction : PlayStateAction(
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestStopFromRider.fire(state.nextRequestID())
@@ -165,13 +170,13 @@ class PauseInUnrealAction : PlayStateAction(
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Play
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Pause
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestPauseFromRider.fire(state.nextRequestID())
@@ -185,13 +190,13 @@ class SingleStepInUnrealAction : PlayStateAction(
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Pause
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val host = e.getHost() ?: return
+        val host = e.getUnrealHost() ?: return
         val state = PlayStateActionStateService.getInstance(host.project)
         state.disableUntilStateChange()
         host.model.requestFrameSkipFromRider.fire(state.nextRequestID())
@@ -199,9 +204,11 @@ class SingleStepInUnrealAction : PlayStateAction(
 }
 
 class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getHost()
+        val host = e.getUnrealHost()
         if (host == null) {
             e.presentation.isEnabledAndVisible = false
             return
