@@ -13,7 +13,7 @@ import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 class UnrealLogSettingsConfigurable(private val project: Project) : DslConfigurableBase(), SearchableConfigurable {
     companion object {
         @NlsSafe
-        internal const val UNREAL_LINK = "UnrealLink"
+        const val UNREAL_LINK = "UnrealLink"
     }
 
     override fun getId(): String = "UnrealLogSettings"

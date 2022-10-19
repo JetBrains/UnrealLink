@@ -4,7 +4,7 @@ import com.intellij.ide.ActivityTracker
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 
-fun AnActionEvent.getHost(): UnrealHost? {
+fun AnActionEvent.getUnrealHost(): UnrealHost? {
     val project = project ?: return null
     return UnrealHost.getInstance(project)
 }

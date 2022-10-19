@@ -1,39 +1,136 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.DumbAwareToggleAction
+import com.intellij.openapi.util.NlsActions
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
+import com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable
+import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
+import icons.UnrealIcons
 
 class PlaySettings : DefaultActionGroup(), DumbAware {
+    private val connectedIcon = UnrealIcons.Status.UnrealEngineConnected
+    private val disconnectedIcon = UnrealIcons.Status.UnrealEngineDisconnected
+
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isVisible = e.getHost()?.isUnrealEngineSolution ?: false
-        e.presentation.isEnabled = e.getHost()?.isConnectedToUnrealEditor ?: false
+        val host = e.getUnrealHost()
+        if (host == null || !host.isUnrealEngineSolution) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+
+        e.presentation.isEnabled = true
+        e.presentation.isVisible = true
+        e.presentation.icon = if (host.isConnectedToUnrealEditor) connectedIcon else disconnectedIcon
     }
 }
 
-class PlaySubsettings : DefaultActionGroup(), DumbAware {
+class ProtocolStatus : DumbAwareAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun actionPerformed(e: AnActionEvent) = Unit
+
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        e.presentation.isEnabled = false
+
+        val host = e.getUnrealHost() ?: return
+        e.presentation.isVisible = true
+        e.presentation.text = getTooltipText(host)
+    }
+
+    @NlsActions.ActionText
+    fun getTooltipText(host: UnrealHost): String {
+        return if (host.isConnectedToUnrealEditor) {
+            UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.text")
+        } else {
+            UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.disconnected.text")
+        }
+    }
+}
+
+class OpenUnrealLinkSettings : DumbAwareAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        val host = e.getUnrealHost()
+        if (host == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        e.presentation.isEnabledAndVisible = true
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project?: return
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, UnrealLogSettingsConfigurable.UNREAL_LINK)
+    }
+}
+
+class OpenRiderLinkSettings : DumbAwareAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        val host = e.getUnrealHost()
+        if (host == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+        e.presentation.isEnabledAndVisible = true
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project?: return
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, "UnrealLinkOptionsId")
+    }
+}
+
+private fun updatePlayActionPresentation(e: AnActionEvent) {
+    val host = e.getUnrealHost()
+    if (host == null) {
+        e.presentation.isEnabledAndVisible = false
+        return
+    }
+    val settings = UnrealLogPanelSettings.getInstance(host.project)
+    e.presentation.isEnabled = host.isConnectedToUnrealEditor
+    e.presentation.isVisible = settings.showPlayButtons
+}
+
+class PlaySubsettings : DefaultActionGroup(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+
+        updatePlayActionPresentation(e)
     }
 }
 
 class NumberOfPlayers : DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     private fun setNumPlayers(mode: Int, num: Int): Int {
         return mode and 3.inv() or (num - 1)
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
-        val host: UnrealHost = e.getHost() ?: return false
+        val host: UnrealHost = e.getUnrealHost() ?: return false
         return ((host.playMode and 3) + 1).toString() == e.presentation.text
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
-        val host: UnrealHost = e.getHost() ?: return
+        val host: UnrealHost = e.getUnrealHost() ?: return
 
         if (isSelected) {
             host.playMode = setNumPlayers(host.playMode, e.presentation.text.toInt(10))
@@ -43,11 +140,14 @@ class NumberOfPlayers : DumbAwareToggleAction() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        updatePlayActionPresentation(e)
     }
 }
 
 class SpawnPlayer : DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     private fun getSpawnPlayerMode(text: String?) = when (text) {
         UnrealLinkBundle.message("action.RiderLink.CurrentCamLoc.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.DefaultPlayerStart.text") -> 1
@@ -55,7 +155,7 @@ class SpawnPlayer : DumbAwareToggleAction() {
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
-        val host: UnrealHost = e.getHost() ?: return false
+        val host: UnrealHost = e.getUnrealHost() ?: return false
 
         val actionID = getSpawnPlayerMode(e.presentation.text)
         if (actionID == -1) return false
@@ -64,7 +164,7 @@ class SpawnPlayer : DumbAwareToggleAction() {
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
-        val host: UnrealHost = e.getHost() ?: return
+        val host: UnrealHost = e.getUnrealHost() ?: return
 
         if (isSelected) {
             val actionID = getSpawnPlayerMode(e.presentation.text)
@@ -77,23 +177,26 @@ class SpawnPlayer : DumbAwareToggleAction() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        updatePlayActionPresentation(e)
     }
 }
 
 class DedicatedServer : DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     private fun setDedicatedServer(mode: Int, enabled: Boolean): Int {
         return mode and 8.inv() or (if (enabled) 8 else 0)
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
-        val host: UnrealHost = e.getHost() ?: return false
+        val host: UnrealHost = e.getUnrealHost() ?: return false
 
         return (host.playMode and 8) != 0
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
-        val host: UnrealHost = e.getHost() ?: return
+        val host: UnrealHost = e.getUnrealHost() ?: return
 
         host.playMode = setDedicatedServer(host.playMode, isSelected)
         host.model.playModeFromRider.fire(host.playMode)
@@ -101,23 +204,26 @@ class DedicatedServer : DumbAwareToggleAction() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        updatePlayActionPresentation(e)
     }
 }
 
 class CompileBeforeRun : DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     private fun setCompileBeforeRun(mode: Int, enabled: Boolean): Int {
         return mode and 128.inv() or (if (enabled) 128 else 0)
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
-        val host: UnrealHost = e.getHost() ?: return false
+        val host: UnrealHost = e.getUnrealHost() ?: return false
 
         return (host.playMode and 128) != 0
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
-        val host: UnrealHost = e.getHost() ?: return
+        val host: UnrealHost = e.getUnrealHost() ?: return
 
         host.playMode = setCompileBeforeRun(host.playMode, isSelected)
         host.model.playModeFromRider.fire(host.playMode)
@@ -125,7 +231,8 @@ class CompileBeforeRun : DumbAwareToggleAction() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        updatePlayActionPresentation(e)
     }
 }
 
@@ -135,6 +242,8 @@ const val PLAY_MODE_MASK = (1.shl(PLAY_MODE_MASK_SIZE) - 1).shl(PLAY_MODE_MASK_O
 const val PLAY_MODE_MASK_INV = PLAY_MODE_MASK.inv()
 
 class PlayMode : DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
     private fun getModeIndex(playModeName: String?) = when (playModeName) {
         UnrealLinkBundle.message("action.RiderLink.SelectedViewport.text") -> 0
         UnrealLinkBundle.message("action.RiderLink.MobilePreview.text") -> 1
@@ -146,14 +255,14 @@ class PlayMode : DumbAwareToggleAction() {
         else -> -1
     }
 
-    private fun getPlayModeIndex(mode : Int) = (mode and PLAY_MODE_MASK).ushr(PLAY_MODE_MASK_OFS)
+    private fun getPlayModeIndex(mode: Int) = (mode and PLAY_MODE_MASK).ushr(PLAY_MODE_MASK_OFS)
 
     private fun setPlayMode(mode: Int, playModeIndex: Int): Int {
         return (mode and PLAY_MODE_MASK_INV) or playModeIndex.shl(PLAY_MODE_MASK_OFS)
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
-        val host: UnrealHost = e.getHost() ?: return false
+        val host: UnrealHost = e.getUnrealHost() ?: return false
 
         val ind = getModeIndex(e.presentation.text)
         if (ind == -1) return false
@@ -161,7 +270,7 @@ class PlayMode : DumbAwareToggleAction() {
     }
 
     override fun setSelected(e: AnActionEvent, isSelected: Boolean) {
-        val host: UnrealHost = e.getHost() ?: return
+        val host: UnrealHost = e.getUnrealHost() ?: return
 
         if (isSelected) {
             val playModeIndex = getModeIndex(e.presentation.text)
@@ -174,6 +283,33 @@ class PlayMode : DumbAwareToggleAction() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isEnabledAndVisible = e.getHost()?.isConnectedToUnrealEditor ?: false
+
+        updatePlayActionPresentation(e)
+    }
+}
+
+class HidePlayButtonsAction: DumbAwareToggleAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+
+        val host = e.getUnrealHost()
+        if (host == null) {
+            e.presentation.isEnabledAndVisible = false
+        }
+        e.presentation.isEnabledAndVisible = true
+    }
+
+    override fun isSelected(e: AnActionEvent): Boolean {
+        val project = e.project ?: return false
+        val settings = UnrealLogPanelSettings.getInstance(project)
+        return settings.showPlayButtons
+    }
+
+    override fun setSelected(e: AnActionEvent, selected: Boolean) {
+        val project = e.project ?: return
+        val settings = UnrealLogPanelSettings.getInstance(project)
+        settings.showPlayButtons = selected
     }
 }
