@@ -2,14 +2,12 @@ package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
 import com.jetbrains.rider.plugins.unreal.model.PlayState
-import com.jetbrains.rider.plugins.unreal.ui.UnrealStatusBarWidget
 import com.sun.jna.LastErrorException
 import com.sun.jna.Native
 import com.sun.jna.platform.win32.WinDef
@@ -45,7 +43,6 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         unrealHost.performModelAction {
             it.isUnrealEngineSolution.change.advise(project.lifetime) { isUnrealEngineSolution ->
                 this.isUnrealEngineSolution = isUnrealEngineSolution
-                project.getService(StatusBarWidgetsManager::class.java).updateWidget(UnrealStatusBarWidget::class.java)
             }
             it.isPreBuiltEngine.change.advise(project.lifetime) { isPreBuiltEngine ->
                 this.isPreBuiltEngine = isPreBuiltEngine
