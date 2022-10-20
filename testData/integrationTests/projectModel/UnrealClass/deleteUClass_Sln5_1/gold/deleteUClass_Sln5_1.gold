@@ -1,0 +1,458 @@
+===================
+Init Remove UClass test
+
+-Project
+ -EmptyUProject * 2 projects
+  -Games * 1 project
+   -EmptyUProject
+    Dependencies
+    -Source
+     -EmptyUProject
+      EmptyUProject.cpp
+      EmptyUProject.h
+      EmptyUProject.Build.cs
+      SomeActor.cpp
+      SomeActor.h
+     EmptyUProject.Target.cs
+     EmptyUProjectEditor.Target.cs
+    EmptyUProject.uproject
+  -Visualizers
+   Unreal.natvis
+
+
+Project [Name:EmptyUProject, GUID:GUID]
+  Child items:
+    ProjectFileImpl(Path : EmptyUProject.uproject (relative_path/EmptyUProject.uproject))[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+    ProjectFileImpl(Path : EmptyUProject.vcxproj)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+]
+    Folder [Name:Source, Virtual:relative_path/Source]
+      Child items:
+        Folder [Name:EmptyUProject]
+          Child items:
+            ProjectFileImpl(Path : EmptyUProject.Build.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+            ProjectFileImpl(Path : EmptyUProject.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UnrealEditor/Development/EmptyUProject/Definitions.h
+  FullIncludePath:;absolute_ue_root/Engine/Source/Editor/ClassViewer/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GraphEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GraphEditor/VNI;absolute_ue_root/Engine/Source/Editor/GraphEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StructViewer/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StructViewer/VNI;absolute_ue_root/Engine/Source/Editor/StructViewer/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowser/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowser/VNI;absolute_ue_root/Engine/Source/Editor/ContentBrowser/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTools/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTools/VNI;absolute_ue_root/Engine/Source/Developer/AssetTools/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Merge/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Merge/VNI;absolute_ue_root/Engine/Source/Developer/Merge/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/CollectionManager/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/CollectionManager/VNI;absolute_ue_root/Engine/Source/Developer/CollectionManager/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowserData/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowserData/VNI;absolute_ue_root/Engine/Source/Editor/ContentBrowserData/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UELibSampleRate/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UELibSampleRate/VNI;absolute_ue_root/Engine/Source/ThirdParty/libSampleRate/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NetworkFileSystem/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NetworkFileSystem/VNI;absolute_ue_root/Engine/Source/Runtime/NetworkFileSystem/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UMG/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UMG/VNI;absolute_ue_root/Engine/Source/Runtime/UMG/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieScene/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieScene/VNI;absolute_ue_root/Engine/Source/Runtime/MovieScene/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/TimeManagement/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/TimeManagement/VNI;absolute_ue_root/Engine/Source/Runtime/TimeManagement/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneTracks/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneTracks/VNI;absolute_ue_root/Engine/Source/Runtime/MovieSceneTracks/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Constraints/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Constraints/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Animation;absolute_ue_root/Engine/Source/Runtime/Experimental/Animation/Constraints/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PropertyPath/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PropertyPath/VNI;absolute_ue_root/Engine/Source/Runtime/PropertyPath/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NavigationSystem/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NavigationSystem/VNI;absolute_ue_root/Engine/Source/Runtime/NavigationSystem/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GeometryCollectionEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GeometryCollectionEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/GeometryCollectionEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MSQS/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MSQS/VNI;absolute_ue_root/Engine/Source/Runtime/MaterialShaderQualitySettings/Classes;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/FieldSystemEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/FieldSystemEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/FieldSystem/Source;absolute_ue_root/Engine/Source/Runtime/Experimental/FieldSystem/Source/FieldSystemEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ChaosSolverEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ChaosSolverEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/ChaosSolverEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowCore/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowCore/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow/Core/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow/Engine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshBuilder/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshBuilder/VNI;absolute_ue_root/Engine/Source/Developer/MeshBuilder/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilitiesCommon/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilitiesCommon/VNI;absolute_ue_root/Engine/Source/Runtime/MeshUtilitiesCommon/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenusEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenusEditor/VNI;absolute_ue_root/Engine/Source/Editor/ToolMenusEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenus/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenus/VNI;absolute_ue_root/Engine/Source/Developer/ToolMenus/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StatusBar/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StatusBar/VNI;absolute_ue_root/Engine/Source/Editor/StatusBar/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeCore/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeCore/VNI;absolute_ue_root/Engine/Source/Runtime/Interchange;absolute_ue_root/Engine/Source/Runtime/Interchange/Core/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Interchange/Engine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DeveloperToolSettings/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DeveloperToolSettings/VNI;absolute_ue_root/Engine/Source/Developer/DeveloperToolSettings/Classes;absolute_ue_root/Engine/Source/Developer/DeveloperToolSettings/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectDataInterface/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectDataInterface/VNI;absolute_ue_root/Engine/Source/Editor/SubobjectDataInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectEditor/VNI;absolute_ue_root/Engine/Source/Editor/SubobjectEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Kismet/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Kismet/VNI;absolute_ue_root/Engine/Source/Editor/Kismet/Classes;absolute_ue_root/Engine/Source/Editor/Kismet/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PhysicsUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PhysicsUtilities/VNI;absolute_ue_root/Engine/Source/Developer/PhysicsUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolWidgets/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolWidgets/VNI;absolute_ue_root/Engine/Source/Developer/ToolWidgets/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AudioMixerXAudio2/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AudioMixerXAudio2/VNI;absolute_ue_root/Engine/Source/Runtime/Windows;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTagsEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTagsEditor/VNI;absolute_ue_root/Engine/Source/Editor/AssetTagsEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AddContentDialog/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AddContentDialog/VNI;absolute_ue_root/Engine/Source/Editor/AddContentDialog/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilities/VNI;absolute_ue_root/Engine/Source/Developer/MeshUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshMergeUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshMergeUtilities/VNI;absolute_ue_root/Engine/Source/Developer/MeshMergeUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/HierarchicalLODUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/HierarchicalLODUtilities/VNI;absolute_ue_root/Engine/Source/Developer/HierarchicalLODUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshReductionInterface/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshReductionInterface/VNI;absolute_ue_root/Engine/Source/Developer/MeshReductionInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletalMeshEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletalMeshEditor/VNI;absolute_ue_root/Engine/Source/Editor/SkeletalMeshEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Persona/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Persona/VNI;absolute_ue_root/Engine/Source/Editor/Persona/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletonEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletonEditor/VNI;absolute_ue_root/Engine/Source/Editor/SkeletonEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationWidgets/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationWidgets/VNI;absolute_ue_root/Engine/Source/Developer/AnimationWidgets/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationEditor/VNI;absolute_ue_root/Engine/Source/Editor/AnimationEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedPreviewScene/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedPreviewScene/VNI;absolute_ue_root/Engine/Source/Editor/AdvancedPreviewScene/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/KismetCompiler/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/KismetCompiler/VNI;absolute_ue_root/Engine/Source/Editor/KismetCompiler/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GameplayTasks/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GameplayTasks/VNI;absolute_ue_root/Engine/Source/Runtime/GameplayTasks/Classes;absolute_ue_root/Engine/Source/Runtime/GameplayTasks/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AIModule/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AIModule/VNI;absolute_ue_root/Engine/Source/Runtime/AIModule/Public;absolute_ue_root/Engine/Source/Runtime/AIModule/Classes;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ClothSysRuntimeIntrfc/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ClothSysRuntimeIntrfc/VNI;absolute_ue_root/Engine/Source/Runtime/ClothingSystemRuntimeInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/IrisStub/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/IrisStub/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Iris;absolute_ue_root/Engine/Source/Runtime/Experimental/Iris/Stub/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneCapture/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneCapture/VNI;absolute_ue_root/Engine/Source/Runtime/MovieSceneCapture/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationDataController/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationDataController/VNI;absolute_ue_root/Engine/Source/Developer/AnimationDataController/Public;absolute_ue_root/Engine/Source/ThirdParty/mimalloc/include;absolute_ue_root/Engine/Source/ThirdParty/LibTiff/Source/Win64;absolute_ue_root/Engine/Source/ThirdParty/LibTiff/Source;
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingYes
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreadedDLL
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: True
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : EmptyUProject.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLINCLUDE ]
+            ProjectFileImpl(Path : SomeActor.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : SomeActor.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLINCLUDE ]
+        ProjectFileImpl(Path : EmptyUProject.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+        ProjectFileImpl(Path : EmptyUProjectEditor.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+
+
+===================
+Deleting .h and .cpp
+
+-Project
+ -EmptyUProject * 2 projects
+  -Games * 1 project
+   -EmptyUProject
+    Dependencies
+    -Source
+     -EmptyUProject
+      EmptyUProject.cpp
+      EmptyUProject.h
+      EmptyUProject.Build.cs
+     EmptyUProject.Target.cs
+     EmptyUProjectEditor.Target.cs
+    EmptyUProject.uproject
+  -Visualizers
+   Unreal.natvis
+
+
+Project [Name:EmptyUProject, GUID:GUID]
+  Child items:
+    ProjectFileImpl(Path : EmptyUProject.uproject (relative_path/EmptyUProject.uproject))[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+    ProjectFileImpl(Path : EmptyUProject.vcxproj)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+]
+    Folder [Name:Source, Virtual:relative_path/Source]
+      Child items:
+        Folder [Name:EmptyUProject]
+          Child items:
+            ProjectFileImpl(Path : EmptyUProject.Build.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+            ProjectFileImpl(Path : EmptyUProject.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UnrealEditor/Development/EmptyUProject/Definitions.h
+  FullIncludePath:;absolute_ue_root/Engine/Source/Editor/ClassViewer/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GraphEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GraphEditor/VNI;absolute_ue_root/Engine/Source/Editor/GraphEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StructViewer/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StructViewer/VNI;absolute_ue_root/Engine/Source/Editor/StructViewer/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowser/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowser/VNI;absolute_ue_root/Engine/Source/Editor/ContentBrowser/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTools/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTools/VNI;absolute_ue_root/Engine/Source/Developer/AssetTools/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Merge/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Merge/VNI;absolute_ue_root/Engine/Source/Developer/Merge/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/CollectionManager/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/CollectionManager/VNI;absolute_ue_root/Engine/Source/Developer/CollectionManager/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowserData/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ContentBrowserData/VNI;absolute_ue_root/Engine/Source/Editor/ContentBrowserData/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UELibSampleRate/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UELibSampleRate/VNI;absolute_ue_root/Engine/Source/ThirdParty/libSampleRate/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NetworkFileSystem/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NetworkFileSystem/VNI;absolute_ue_root/Engine/Source/Runtime/NetworkFileSystem/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UMG/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/UMG/VNI;absolute_ue_root/Engine/Source/Runtime/UMG/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieScene/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieScene/VNI;absolute_ue_root/Engine/Source/Runtime/MovieScene/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/TimeManagement/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/TimeManagement/VNI;absolute_ue_root/Engine/Source/Runtime/TimeManagement/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneTracks/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneTracks/VNI;absolute_ue_root/Engine/Source/Runtime/MovieSceneTracks/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Constraints/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Constraints/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Animation;absolute_ue_root/Engine/Source/Runtime/Experimental/Animation/Constraints/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PropertyPath/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PropertyPath/VNI;absolute_ue_root/Engine/Source/Runtime/PropertyPath/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NavigationSystem/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/NavigationSystem/VNI;absolute_ue_root/Engine/Source/Runtime/NavigationSystem/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GeometryCollectionEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GeometryCollectionEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/GeometryCollectionEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MSQS/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MSQS/VNI;absolute_ue_root/Engine/Source/Runtime/MaterialShaderQualitySettings/Classes;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/FieldSystemEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/FieldSystemEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/FieldSystem/Source;absolute_ue_root/Engine/Source/Runtime/Experimental/FieldSystem/Source/FieldSystemEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ChaosSolverEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ChaosSolverEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/ChaosSolverEngine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowCore/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowCore/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow/Core/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DataflowEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Dataflow/Engine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshBuilder/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshBuilder/VNI;absolute_ue_root/Engine/Source/Developer/MeshBuilder/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilitiesCommon/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilitiesCommon/VNI;absolute_ue_root/Engine/Source/Runtime/MeshUtilitiesCommon/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenusEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenusEditor/VNI;absolute_ue_root/Engine/Source/Editor/ToolMenusEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenus/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolMenus/VNI;absolute_ue_root/Engine/Source/Developer/ToolMenus/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StatusBar/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/StatusBar/VNI;absolute_ue_root/Engine/Source/Editor/StatusBar/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeCore/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeCore/VNI;absolute_ue_root/Engine/Source/Runtime/Interchange;absolute_ue_root/Engine/Source/Runtime/Interchange/Core/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeEngine/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/InterchangeEngine/VNI;absolute_ue_root/Engine/Source/Runtime/Interchange/Engine/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DeveloperToolSettings/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/DeveloperToolSettings/VNI;absolute_ue_root/Engine/Source/Developer/DeveloperToolSettings/Classes;absolute_ue_root/Engine/Source/Developer/DeveloperToolSettings/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectDataInterface/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectDataInterface/VNI;absolute_ue_root/Engine/Source/Editor/SubobjectDataInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SubobjectEditor/VNI;absolute_ue_root/Engine/Source/Editor/SubobjectEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Kismet/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Kismet/VNI;absolute_ue_root/Engine/Source/Editor/Kismet/Classes;absolute_ue_root/Engine/Source/Editor/Kismet/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PhysicsUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/PhysicsUtilities/VNI;absolute_ue_root/Engine/Source/Developer/PhysicsUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolWidgets/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ToolWidgets/VNI;absolute_ue_root/Engine/Source/Developer/ToolWidgets/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AudioMixerXAudio2/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AudioMixerXAudio2/VNI;absolute_ue_root/Engine/Source/Runtime/Windows;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTagsEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AssetTagsEditor/VNI;absolute_ue_root/Engine/Source/Editor/AssetTagsEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AddContentDialog/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AddContentDialog/VNI;absolute_ue_root/Engine/Source/Editor/AddContentDialog/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshUtilities/VNI;absolute_ue_root/Engine/Source/Developer/MeshUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshMergeUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshMergeUtilities/VNI;absolute_ue_root/Engine/Source/Developer/MeshMergeUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/HierarchicalLODUtilities/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/HierarchicalLODUtilities/VNI;absolute_ue_root/Engine/Source/Developer/HierarchicalLODUtilities/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshReductionInterface/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MeshReductionInterface/VNI;absolute_ue_root/Engine/Source/Developer/MeshReductionInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletalMeshEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletalMeshEditor/VNI;absolute_ue_root/Engine/Source/Editor/SkeletalMeshEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Persona/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/Persona/VNI;absolute_ue_root/Engine/Source/Editor/Persona/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletonEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/SkeletonEditor/VNI;absolute_ue_root/Engine/Source/Editor/SkeletonEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationWidgets/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationWidgets/VNI;absolute_ue_root/Engine/Source/Developer/AnimationWidgets/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationEditor/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationEditor/VNI;absolute_ue_root/Engine/Source/Editor/AnimationEditor/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedPreviewScene/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AdvancedPreviewScene/VNI;absolute_ue_root/Engine/Source/Editor/AdvancedPreviewScene/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/KismetCompiler/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/KismetCompiler/VNI;absolute_ue_root/Engine/Source/Editor/KismetCompiler/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GameplayTasks/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/GameplayTasks/VNI;absolute_ue_root/Engine/Source/Runtime/GameplayTasks/Classes;absolute_ue_root/Engine/Source/Runtime/GameplayTasks/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AIModule/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AIModule/VNI;absolute_ue_root/Engine/Source/Runtime/AIModule/Public;absolute_ue_root/Engine/Source/Runtime/AIModule/Classes;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ClothSysRuntimeIntrfc/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/ClothSysRuntimeIntrfc/VNI;absolute_ue_root/Engine/Source/Runtime/ClothingSystemRuntimeInterface/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/IrisStub/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/IrisStub/VNI;absolute_ue_root/Engine/Source/Runtime/Experimental/Iris;absolute_ue_root/Engine/Source/Runtime/Experimental/Iris/Stub/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneCapture/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/MovieSceneCapture/VNI;absolute_ue_root/Engine/Source/Runtime/MovieSceneCapture/Public;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationDataController/UHT;absolute_ue_root/Engine/Intermediate/Build/Win64/UnrealEditor/Inc/AnimationDataController/VNI;absolute_ue_root/Engine/Source/Developer/AnimationDataController/Public;absolute_ue_root/Engine/Source/ThirdParty/mimalloc/include;absolute_ue_root/Engine/Source/ThirdParty/LibTiff/Source/Win64;absolute_ue_root/Engine/Source/ThirdParty/LibTiff/Source;
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingYes
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreadedDLL
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: True
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : EmptyUProject.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLINCLUDE ]
+        ProjectFileImpl(Path : EmptyUProject.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+        ProjectFileImpl(Path : EmptyUProjectEditor.Target.cs)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+
+
