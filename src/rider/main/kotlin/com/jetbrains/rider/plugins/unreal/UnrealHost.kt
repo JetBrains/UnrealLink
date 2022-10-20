@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.reactive.IProperty
 import com.jetbrains.rd.util.reactive.Property
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
+import com.jetbrains.rider.plugins.unreal.model.ConnectionInfo
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
@@ -27,6 +28,8 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.isUnrealEngineSolution.value
     val isConnectedToUnrealEditor:Boolean
         get() = model.isConnectedToUnrealEditor.value
+    val connectionInfo:ConnectionInfo?
+        get() = model.connectionInfo.valueOrNull
     val isRiderLinkInstallationInProgress:Boolean
         get() = model.riderLinkInstallationInProgress.value
     val isRefreshProjectsInProgress:Boolean

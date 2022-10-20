@@ -82,7 +82,8 @@ namespace RiderPlugin.UnrealLink
 
                     RenamedEventHandler handler = (obj, fileSystemEvent) =>
                     {
-                        var path = VirtualFileSystemPath.Parse(fileSystemEvent.FullPath, solution.GetInteractionContext());
+                        var path = VirtualFileSystemPath.Parse(fileSystemEvent.FullPath,
+                            solution.GetInteractionContext());
                         // Skip changes to temp files
                         if (path.Name.StartsWith("~")) return;
 
@@ -104,7 +105,9 @@ namespace RiderPlugin.UnrealLink
 
                 foreach (var projectName in projects)
                 {
-                    var portFileFullPath = VirtualFileSystemPath.Parse(portDirectoryFullPath, InteractionContext.SolutionContext) / projectName;
+                    var portFileFullPath =
+                        VirtualFileSystemPath.Parse(portDirectoryFullPath, InteractionContext.SolutionContext) /
+                        projectName;
                     myLocks.ExecuteOrQueue(myComponentLifetime, "UnrealLink.CreateProtocol",
                         () => CreateProtocols(portFileFullPath));
                 }
@@ -135,11 +138,15 @@ namespace RiderPlugin.UnrealLink
             }
 
             var modelLifetime = myConnectionLifetimeProducer.Next();
+            var projectName = portFileFullPath.Name;
 
             myLogger.Info("Creating SocketWire with port = {0}", port);
             var wire = new SocketWire.Client(modelLifetime, myDispatcher, port, "UnrealEditorClient");
-            wire.Connected.Advise(modelLifetime, isConnected => myUnrealHost.PerformModelAction(riderModel =>
-                riderModel.IsConnectedToUnrealEditor.SetValue(isConnected)));
+            wire.Connected.Advise(modelLifetime,
+                isConnected => myUnrealHost.PerformModelAction(riderModel =>
+                    riderModel.IsConnectedToUnrealEditor.SetValue(isConnected)
+                )
+            );
 
             var protocol = new Protocol("UnrealEditorPlugin", new Serializers(null, null),
                 new Identities(IdKind.Client), myDispatcher, wire, modelLifetime);
@@ -157,7 +164,7 @@ namespace RiderPlugin.UnrealLink
                     myLogger.Info("Wire disconnected");
                     model = null;
                 }
-                
+
                 EditorModel = model;
             });
         }
@@ -167,7 +174,8 @@ namespace RiderPlugin.UnrealLink
             text = "";
             try
             {
-                text = VirtualFileSystemPath.Parse(portFileFullPath.FullPath, InteractionContext.SolutionContext).ReadAllText2().Text;
+                text = VirtualFileSystemPath.Parse(portFileFullPath.FullPath, InteractionContext.SolutionContext)
+                    .ReadAllText2().Text;
             }
             catch (Exception exception)
             {
@@ -195,6 +203,10 @@ namespace RiderPlugin.UnrealLink
             var unrealModel = new RdEditorModel(lf, protocol);
             UE4Library.RegisterDeclaredTypesSerializers(unrealModel.SerializationContext.Serializers);
 
+            unrealModel.ConnectionInfo.Advise(lf, info =>
+                myUnrealHost.myModel.ConnectionInfo.SetValue(info)
+            );
+            
             unrealModel.AllowSetForegroundWindow.Set((lt, pid) =>
             {
                 return myUnrealHost.PerformModelAction(riderModel =>
@@ -204,10 +216,11 @@ namespace RiderPlugin.UnrealLink
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
 
             unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
-            
+
             unrealModel.NotificationReplyFromEditor.Advise(lf, myUnrealHost.myModel.NotificationReplyFromEditor);
-            
-            unrealModel.IsGameControlModuleInitialized.Advise(lf, myUnrealHost.myModel.IsGameControlModuleInitialized.Set);
+
+            unrealModel.IsGameControlModuleInitialized.Advise(lf,
+                myUnrealHost.myModel.IsGameControlModuleInitialized.Set);
 
             unrealModel.UnrealLog.Advise(lf,
                 logEvent =>
@@ -247,7 +260,7 @@ namespace RiderPlugin.UnrealLink
                 riderModel.RequestFrameSkipFromRider.Advise(lf, unrealModel.RequestFrameSkipFromRider);
                 riderModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
             });
-            
+
             return unrealModel;
         }
 

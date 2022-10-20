@@ -22,6 +22,8 @@ object RdEditorRoot : Root() {
 @Suppress("unused")
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
+        property("connectionInfo", UE4Library.ConnectionInfo).readonly
+
         signal("unrealLog", UE4Library.UnrealLogEvent).async
 
         signal("openBlueprint", UE4Library.BlueprintReference)

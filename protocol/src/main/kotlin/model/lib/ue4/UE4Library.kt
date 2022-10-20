@@ -201,5 +201,11 @@ object UE4Library : Root() {
         field("pathName", FString)
         field("guid", FString)
     }
+
+    val ConnectionInfo = structdef("ConnectionInfo") {
+        field("projectName", string)
+        field("executableName", string)
+        field("processId", int)
+    }
 }
 

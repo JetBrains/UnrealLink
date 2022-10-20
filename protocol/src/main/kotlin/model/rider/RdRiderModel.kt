@@ -92,6 +92,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("isConnectedToUnrealEditor", false).readonly.async
         property("isUnrealEngineSolution", false)
         property("isPreBuiltEngine", false)
+        property("connectionInfo", UE4Library.ConnectionInfo).readonly
 
         sink("onEditorPluginOutOfSync", EditorPluginOutOfSync)
         source("installEditorPlugin", InstallPluginDescription)

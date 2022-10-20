@@ -11,7 +11,6 @@ import com.intellij.openapi.util.NlsActions
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
-import com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable
 import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
 import icons.UnrealIcons
 
@@ -47,13 +46,19 @@ class ProtocolStatus : DumbAwareAction() {
 
         val host = e.getUnrealHost() ?: return
         e.presentation.isVisible = true
-        e.presentation.text = getTooltipText(host)
+        e.presentation.text = getActionText(host)
     }
 
     @NlsActions.ActionText
-    fun getTooltipText(host: UnrealHost): String {
+    fun getActionText(host: UnrealHost): String {
         return if (host.isConnectedToUnrealEditor) {
-            UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.text")
+            val info = host.connectionInfo
+            if (info != null) {
+                UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.ex.text",
+                        info.projectName, info.executableName, info.processId.toString())
+            } else {
+                UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.text")
+            }
         } else {
             UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.disconnected.text")
         }
