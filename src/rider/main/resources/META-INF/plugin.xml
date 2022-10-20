@@ -211,6 +211,10 @@ Path to old plugin:</code></pre>
             <group id="RiderLink.UnrealPlaySettings" popup="true"
                    class="com.jetbrains.rider.plugins.unreal.actions.PlaySettings">
                 <action id="RiderLink.ProtocolStatus" class="com.jetbrains.rider.plugins.unreal.actions.ProtocolStatus" />
+                <separator/>
+                <action id="RiderLink.AttachToConnectedEditor"
+                        class="com.jetbrains.rider.plugins.unreal.actions.AttachToConnectedEditor"
+                        icon="AllIcons.Debugger.AttachToProcess"/>
                 <action id="RiderLink.OpenRiderLinkSettings" class="com.jetbrains.rider.plugins.unreal.actions.OpenRiderLinkSettings"
                         icon="AllIcons.General.Settings"/>
                 <action id="RiderLink.OpenUnrealLinkSettings" class="com.jetbrains.rider.plugins.unreal.actions.OpenUnrealLinkSettings"
