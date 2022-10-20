@@ -57,6 +57,7 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 if (!connected) {
                     unrealHost.playStateModel.set(PlayState.Idle)
                 }
+                forceTriggerUIUpdate()
             }
         }
 
