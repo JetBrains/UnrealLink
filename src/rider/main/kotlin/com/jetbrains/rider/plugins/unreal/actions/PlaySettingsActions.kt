@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
+import com.intellij.execution.process.ProcessInfo
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
@@ -7,8 +8,11 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.DumbAwareToggleAction
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsActions
 import com.jetbrains.rider.UnrealLinkBundle
+import com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration
+import com.jetbrains.rider.cpp.debugger.RiderCppLocalAttachDebugger
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
@@ -65,6 +69,37 @@ class ProtocolStatus : DumbAwareAction() {
     }
 }
 
+class AttachToConnectedEditor : DumbAwareAction() {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+
+        val host = e.getUnrealHost()
+        if (host == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+
+        e.presentation.isVisible = true
+        e.presentation.isEnabled = host.isConnectedToUnrealEditor && host.connectionInfo != null
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val host = e.getUnrealHost() ?: return
+        val connectionInfo = host.connectionInfo ?: return
+
+        val processInfo = ProcessInfo(connectionInfo.processId, "", connectionInfo.executableName, "")
+        attachToUnrealProcess(host.project, processInfo)
+    }
+
+    private fun attachToUnrealProcess(project: Project, processInfo: ProcessInfo) {
+        val attachDebugger = RiderCppLocalAttachDebugger(RiderCppLLDBDriverConfiguration())
+        attachDebugger.attachDebugSession(project, processInfo)
+    }
+
+}
+
 class OpenUnrealLinkSettings : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
@@ -78,7 +113,7 @@ class OpenUnrealLinkSettings : DumbAwareAction() {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project?: return
+        val project = e.project ?: return
         ShowSettingsUtil.getInstance().showSettingsDialog(project, UnrealLogSettingsConfigurable.UNREAL_LINK)
     }
 }
@@ -96,7 +131,7 @@ class OpenRiderLinkSettings : DumbAwareAction() {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project?: return
+        val project = e.project ?: return
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "UnrealLinkOptionsId")
     }
 }
@@ -293,7 +328,7 @@ class PlayMode : DumbAwareToggleAction() {
     }
 }
 
-class HidePlayButtonsAction: DumbAwareToggleAction() {
+class HidePlayButtonsAction : DumbAwareToggleAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
