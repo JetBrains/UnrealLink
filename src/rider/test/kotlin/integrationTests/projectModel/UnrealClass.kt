@@ -100,7 +100,7 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute("Sync points were not ready in time: NuGetSoftOperationSuspender: Solution initialization", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource", "Sln5_0fromSource", "Uproject5_0fromSource"])
+    @Mute("Sync points were not ready in time: NuGetSoftOperationSuspender: Solution initialization", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource", "Sln5_0fromSource", "Uproject5_0fromSource", "Sln5_0"])
     @Test(dataProvider = "enginesAndOthers")
     fun deleteUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                      openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
