@@ -100,6 +100,37 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
+    @Mute("Sync points were not ready in time: NuGetSoftOperationSuspender: Solution initialization", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource", "Sln5_0fromSource", "Uproject5_0fromSource", "Sln5_0"])
+    @Test(dataProvider = "enginesAndOthers")
+    fun deleteUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
+                     openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+        unrealInTestSetup(openWith, engine)
+        project = openProject(openWith)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+
+        doTestDumpProjectsView{
+            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
+            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
+            profile.customRegexToMask["relative_path_ue_root"] = Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
+            profile.customRegexToMask["relative_path/"] = Regex("(\\.\\.[\\\\/])+")
+
+            val sourcePath = mutableListOf("EmptyUProject").apply {
+                if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
+                add("EmptyUProject")
+                add("Source")
+                add("EmptyUProject")
+            }.toTypedArray()
+
+            addNewItem(project, sourcePath, UNREAL_ACTOR, "SomeActor")
+
+            dump("Init Remove UClass test") {}
+            dump("Deleting .h and .cpp") {
+                deleteElement(project, sourcePath + "SomeActor.h")
+                deleteElement(project, sourcePath + "SomeActor.cpp")
+            }
+        }
+    }
+
     private val unrealTemplates: Array<TemplateType> =
         arrayOf(UNREAL_SIMPLE_TEST, UNREAL_COMPLEX_TEST, UNREAL_UOBJECT, UNREAL_ACTOR, UNREAL_ACTOR_COMPONENT,
             UNREAL_CHARACTER, UNREAL_EMPTY, UNREAL_INTERFACE, UNREAL_PAWN, UNREAL_SLATE_WIDGET,
