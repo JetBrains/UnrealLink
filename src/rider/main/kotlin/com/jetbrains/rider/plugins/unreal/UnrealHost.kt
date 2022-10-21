@@ -40,6 +40,8 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.isInstallInfoAvailable.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
-        action(model)
+        model.protocol.scheduler.invokeOrQueue {
+            action(model)
+        }
     }
 }
