@@ -1,17 +1,23 @@
 #include "BlueprintProvider.hpp"
 
 #include "Async/Async.h"
-#include "AssetData.h"
+
 #include "AssetEditorMessages.h"
 #include "BlueprintEditor.h"
 #include "MessageEndpointBuilder.h"
 #include "MessageEndpoint.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Runtime/Launch/Resources/Version.h"
+
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
 #include "Toolkits/AssetEditorManager.h"
 #endif
 
-#include "Runtime/Launch/Resources/Version.h"
+#if ENGINE_MAJOR_VERSION < 5
+#include "AssetData.h"
+#else
+#include "AssetRegistry/AssetData.h"
+#endif
 
 void BluePrintProvider::AddAsset(FAssetData const& AssetData) {
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
