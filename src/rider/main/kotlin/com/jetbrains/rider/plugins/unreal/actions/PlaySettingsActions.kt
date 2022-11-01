@@ -70,7 +70,7 @@ class ProtocolStatus : DumbAwareAction() {
 }
 
 class AttachToConnectedEditor : DumbAwareAction() {
-    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
 
     override fun update(e: AnActionEvent) {
         super.update(e)
@@ -82,7 +82,35 @@ class AttachToConnectedEditor : DumbAwareAction() {
         }
 
         e.presentation.isVisible = true
-        e.presentation.isEnabled = host.isConnectedToUnrealEditor && host.connectionInfo != null
+
+        if (!host.isConnectedToUnrealEditor) {
+            e.presentation.isEnabled = false
+            return
+        }
+
+        val connectionInfo = host.connectionInfo
+        if (connectionInfo == null) {
+            e.presentation.isEnabled = false
+            return
+        }
+
+        // try to enumerate current debug sessions and find if we have already a debugger attached
+        /*
+        val debuggerManager = XDebuggerManager.getInstance(host.project)
+        for (session in debuggerManager.debugSessions) {
+            val debugProcess = session.debugProcess
+            if (debugProcess is CidrDebugProcess) {
+                // TODO: need to retrieve target pid from process
+                val pid = 0 // debugProcess.processHandler
+                if (pid == connectionInfo.processId) {
+                    e.presentation.isEnabled = false
+                    return
+                }
+            }
+        }
+        */
+
+        e.presentation.isEnabled = true
     }
 
     override fun actionPerformed(e: AnActionEvent) {
