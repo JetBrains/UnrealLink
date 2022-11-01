@@ -29,7 +29,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.10.0-SNAPSHOT"
+    id("org.jetbrains.intellij") version "1.9.0"
     id("io.qameta.allure") version "2.11.0"
 }
 
@@ -201,6 +201,10 @@ tasks {
 
     withType<RunIdeTask> {
         maxHeapSize = "4096m"
+        jvmArgs = listOf(
+            "-Didea.jna.unpacked=true",
+            "-Djna.nounpack=true",
+            "-Djna.boot.library.path=${setupDependencies.orNull?.idea?.get()?.classes}/lib/jna/${System.getProperty("os.arch")}")
     }
 
     withType<Test> {
