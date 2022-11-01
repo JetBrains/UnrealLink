@@ -243,7 +243,8 @@ tasks {
             "--add-opens=jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED",
             "-Didea.jna.unpacked=true",
             "-Djna.nounpack=true",
-            "-Djna.boot.library.path=${setupDependencies.orNull?.idea?.get()?.classes}/lib/jna/${System.getProperty("os.arch")}")
+            "-Djna.boot.library.path=${setupDependencies.orNull?.idea?.get()?.classes}/lib/jna/${System.getProperty("os.arch")}",
+            "-Dpty4j.preferred.native.folder=${setupDependencies.orNull?.idea?.get()?.classes}/lib/pty4j")
 
     withType<RunIdeTask> {
         maxHeapSize = "4096m"
