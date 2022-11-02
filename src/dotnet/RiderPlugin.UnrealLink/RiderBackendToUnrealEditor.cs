@@ -136,7 +136,7 @@ namespace RiderPlugin.UnrealLink
 
             var modelLifetime = myConnectionLifetimeProducer.Next();
 
-            myLogger.Info("Creating SocketWire with port = {0}", port);
+            myLogger.Info($"Creating SocketWire with port = {port}");
             var wire = new SocketWire.Client(modelLifetime, myDispatcher, port, "UnrealEditorClient");
             wire.Connected.Advise(modelLifetime, isConnected => myUnrealHost.PerformModelAction(riderModel =>
                 riderModel.IsConnectedToUnrealEditor.SetValue(isConnected)));
@@ -222,11 +222,11 @@ namespace RiderPlugin.UnrealLink
 
             myUnrealHost.PerformModelAction(riderModel =>
             {
-                riderModel.FilterLinkCandidates.Set((lifetime, candidates) =>
+                riderModel.FilterLinkCandidates.Set((_, candidates) =>
                     RdTask<ILinkResponse[]>.Successful(candidates
                         .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))
                         .AsArray()));
-                riderModel.IsMethodReference.Set((lifetime, methodReference) =>
+                riderModel.IsMethodReference.Set((_, methodReference) =>
                 {
                     var b = myEditorNavigator.IsMethodReference(methodReference);
                     return RdTask<bool>.Successful(b);

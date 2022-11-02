@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="IfThisOptionIsEnabledTheRiderLinkEditor_Text" xml:space="preserve">
+        <value>If this option is enabled, the RiderLink editor plugin will be automatically updated.</value>
+    </data>
+    <data name="UnrealLinkPluginSettings_Text" xml:space="preserve">
+        <value>UnrealLink plugin settings</value>
+    </data>
+    <data name="InstallRiderLinkInEngine_Text" xml:space="preserve">
+        <value>Install RiderLink in Engine</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="InstallRiderLinkPluginInEngineDescription_Text" xml:space="preserve">
+        <value>Install RiderLink plugin into the Engine. Doesn't work with UE5 from Epic Games Launcher.</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="InstallRiderLinkInGame_Text" xml:space="preserve">
+        <value>Install RiderLink in Game</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="InstallRiderLinkPluginInGameDescription_Text" xml:space="preserve">
+        <value>Install RiderLink plugin into every Game available in the Solution. If Rider will fail to install RiderLink plugin to any of the Game projects, It'll revert the installation process.</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="ExtractRiderLinkInEngine_Text" xml:space="preserve">
+        <value>Extract RiderLink in Engine</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="ExtractRiderLinkPluginInEngineDescription_Text" xml:space="preserve">
+        <value>Extract RiderLink plugin into the Engine in the Solution.
+Note: Use it for Unreal Engine version built from source only. It will not work with UE4 and UE5 from Epic Games Launcher.
+Use this option if installation of RiderLink plugin fails for some reason.</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="ExtractRiderLinkInGame_Text" xml:space="preserve">
+        <value>Extract RiderLink in Game</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="ExtractRiderLinkPluginInGameDescription_Text" xml:space="preserve">
+        <value>Extract RiderLink plugin into every Game available in the Solution.
+Note: It will not try to build RiderLink for your current project.
+Use this option if installation of RiderLink plugin fails for some reason.</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="RiderLinkInstallationIsInProgress_Text" xml:space="preserve">
+        <value>Installation is in progress...</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+</root>

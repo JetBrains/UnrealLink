@@ -31,7 +31,7 @@ namespace RiderPlugin.UnrealLink.Utils
         }
         
         public static InvokeChildProcess.StartInfo GetProcessStartInfo([NotNull] InvokeChildProcess.PipeStreams pipeStreams,
-            [NotNull] VirtualFileSystemPath cmd, [CanBeNull] VirtualFileSystemPath workindDir, params string[] args)
+            [NotNull] VirtualFileSystemPath cmd, [CanBeNull] VirtualFileSystemPath workingDir, params string[] args)
         {
             var command = GetPlatformCommand(cmd);
             var commandLine = GetPlatformCommandLine(cmd, args);
@@ -40,7 +40,7 @@ namespace RiderPlugin.UnrealLink.Utils
             {
                 Arguments = commandLine,
                 Pipe = pipeStreams,
-                CurrentDirectory = workindDir?.ToNativeFileSystemPath()
+                CurrentDirectory = workingDir?.ToNativeFileSystemPath()
             };
             
             return startInfo;

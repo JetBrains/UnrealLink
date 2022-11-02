@@ -2,28 +2,29 @@
 using JetBrains.Application.Settings;
 using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionsDialog;
-using JetBrains.DataFlow;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
-using JetBrains.Platform.RdFramework.Util;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Psi.Cpp.Resources;
 using JetBrains.ReSharper.Feature.Services.OptionPages.CodeEditing;
 using JetBrains.ReSharper.Resources.Settings;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.UIAutomation;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.PluginInstaller;
+using RiderPlugin.UnrealLink.Resources;
 
 namespace RiderPlugin.UnrealLink.Settings
 {
-    [SettingsKey(typeof(CodeEditingSettings), "UnrealLink plugin settings")]
+    [SettingsKey(typeof(CodeEditingSettings),
+        typeof(Strings),
+        nameof(Strings.UnrealLinkPluginSettings_Text))]
     public class UnrealLinkSettings
     {
         [SettingsEntry(false,
-            "If this option is enabled, the RiderLink editor plugin will be automatically updated.")]
+            typeof(Strings),
+            nameof(Strings.IfThisOptionIsEnabledTheRiderLinkEditor_Text))]
         public bool InstallRiderLinkPlugin;
     }
 
@@ -53,44 +54,39 @@ namespace RiderPlugin.UnrealLink.Settings
             var solution = owner?.CurrentSolution;
             var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
 
-            var installInEngineButton = AddButton("Install RiderLink in Engine", () =>
+            var installInEngineButton = AddButton(Strings.InstallRiderLinkInEngine_Text, () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(
                     new InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes)
                     );
             });
-            AddCommentText("Install RiderLink plugin into the Engine. Doesn't work with UE5 from Epic Games Launcher.");
+            AddCommentText(Strings.InstallRiderLinkPluginInEngineDescription_Text);
 
-            var installInGameButton = AddButton("Install RiderLink in Game", () =>
+            var installInGameButton = AddButton(Strings.InstallRiderLinkInGame_Text, () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(
                     new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes)
                     );
             });
-            AddCommentText("Install RiderLink plugin into every Game available in the Solution. " +
-                           "If Rider will fail to install RiderLink plugin to any of the Game projects, It'll revert the installation process.");
+            AddCommentText(Strings.InstallRiderLinkPluginInGameDescription_Text);
 
-            var extractInEngineButton = AddButton("Extract RiderLink in Engine", () =>
+            var extractInEngineButton = AddButton(Strings.ExtractRiderLinkInEngine_Text, () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(
                     new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes, false)
                 );
             });
-            AddCommentText("Extract RiderLink plugin into the Engine in the Solution.\n" +
-                           "Note: Use it for Unreal Engine version built from source only. It will not work with UE4 and UE5 from Epic Games Launcher.\n" +
-                           "Use this option if installation of RiderLink plugin fails for some reason.");
+            AddCommentText(Strings.ExtractRiderLinkPluginInEngineDescription_Text);
 
-            var extractInGameButton = AddButton("Extract RiderLink in Game", () =>
+            var extractInGameButton = AddButton(Strings.ExtractRiderLinkInGame_Text, () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(
                     new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes, false)
                 );
             });
-            AddCommentText("Extract RiderLink plugin into every Game available in the Solution.\n" +
-                           "Note: It will not try to build RiderLink for your current project.\n" +
-                           "Use this option if installation of RiderLink plugin fails for some reason.");
+            AddCommentText(Strings.ExtractRiderLinkPluginInGameDescription_Text);
 
-            var installationInProgressText = AddText("Installation is in progress...");
+            var installationInProgressText = AddText(Strings.RiderLinkInstallationIsInProgress_Text);
             installationInProgressText.Visible.Value = ControlVisibility.Hidden;
 
             var unrealHost = solution?.GetComponent<UnrealHost>();
