@@ -1,16 +1,16 @@
+@file:Suppress("PropertyName")
+
 package testFrameworkExtentions.suplementary
 
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
-data class UprojectModule(val Name: String, val Type: String, val LoadingPhase: String)
+data class UprojectModule(@get:JsonProperty("Name") val Name: String,
+                          @get:JsonProperty("Type") val Type: String,
+                          @get:JsonProperty("LoadingPhase") val LoadingPhase: String)
 
-@Serializable
-data class UprojectData(
-    val FileVersion: Int,
-    var EngineAssociation: String,
-    val Category: String,
-    val Description: String,
-    var DisableEnginePluginsByDefault: Boolean,
-    val Modules: List<UprojectModule>
-)
+data class UprojectData(@get:JsonProperty("FileVersion") val FileVersion: Int,
+                        @get:JsonProperty("EngineAssociation") var EngineAssociation: String,
+                        @get:JsonProperty("Category") val Category: String,
+                        @get:JsonProperty("Description") val Description: String,
+                        @get:JsonProperty("DisableEnginePluginsByDefault") var DisableEnginePluginsByDefault: Boolean,
+                        @get:JsonProperty("Modules") val Modules: List<UprojectModule>)
