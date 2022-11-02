@@ -4,32 +4,31 @@ using JetBrains.Application.Threading;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
-using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Backend.Features.BackgroundTasks;
 using JetBrains.Util;
 using JetBrains.Util.Interop;
 using JetBrains.Util.Logging;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
+using RiderPlugin.UnrealLink.Resources;
 using RiderPlugin.UnrealLink.Utils;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
     public static class UnrealProjectsRefresher
     {
-        private static ILogger ourLogger = Logger.GetLogger(typeof(UnrealProjectsRefresher));
+        private static readonly ILogger OurLogger = Logger.GetLogger(typeof(UnrealProjectsRefresher));
 
         public static void RefreshProjects(Lifetime parentLifetime, CppUE4Version myUnrealVersion,
             [NotNull] ISolution solution,
             [NotNull] UnrealPluginInstallInfo installInfo)
         {
-            RefreshProjects(parentLifetime, myUnrealVersion, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot);
+            RefreshProjects(parentLifetime, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot);
         }
         
-        public static void RefreshProjects(Lifetime parentLifetime, CppUE4Version myUnrealVersion,
+        public static void RefreshProjects(Lifetime parentLifetime,
             [NotNull] ISolution solution,
             [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription,
             [CanBeNull] VirtualFileSystemPath engineRoot)
@@ -50,10 +49,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     .AsCancelable(() =>
                     {
                         unrealHost.myModel.RiderLinkInstallMessage(
-                            new InstallMessage("RiderLink projects refresh has been cancelled", ContentType.Error));
+                            new InstallMessage(Strings.RefreshingProjectsFilesHasBeenCancelled_Text, ContentType.Error));
                         lifetimeDefinition.Terminate();
                     })
-                    .WithHeader("Refreshing project model");
+                    .WithHeader(Strings.RefreshingProjectFiles_Text);
                 solution.GetComponent<BackgroundProgressManager>().AddNewTask(lifetime, task);
                 var uprojectFile = installDescription?.UprojectPath;
                 if (uprojectFile.IsNullOrEmpty())
@@ -65,27 +64,27 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     }
                 }
 
-                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, myUnrealVersion, solution, unrealHost, engineRoot, uprojectFile));
+                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, solution, unrealHost, engineRoot, uprojectFile));
             });
         }
         
-        private static void RegenerateProjectFiles(Lifetime lifetime, CppUE4Version myUnrealVersion, ISolution solution,
+        private static void RegenerateProjectFiles(Lifetime lifetime, ISolution solution,
             UnrealHost unrealHost,
             VirtualFileSystemPath engineRoot, VirtualFileSystemPath uprojectFile)
         {
             void LogFailedRefreshProjectFiles()
             {
-                unrealHost.myModel.RiderLinkInstallMessage(new InstallMessage("Failed to refresh project files",
+                unrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(Strings.FailedToRefreshProjectFiles_Text,
                     ContentType.Normal));
                 unrealHost.myModel.RiderLinkInstallMessage(
-                    new InstallMessage("RiderLink will not be visible in solution explorer", ContentType.Normal));
+                    new InstallMessage(Strings.RiderLinkPluginWillNotBeVisibleInThe_Text, ContentType.Normal));
                 unrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(
-                    "Need to refresh project files in Unreal Editor or in File Explorer with context action for .uproject file 'Generate project files'",
+                    Strings.NeedToRefreshProjectFilesManually_Text,
                     ContentType.Normal));
             }
             if (!engineRoot.IsValidAndExistDirectory())
             {
-                ourLogger.Warn($"[UnrealLink]: Couldn't find Unreal Engine root");
+                OurLogger.Warn($"[UnrealLink]: Couldn't find Unreal Engine root");
 
                 LogFailedRefreshProjectFiles();
                 return;
@@ -110,7 +109,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             // 3. If UVS is missing or have failed, fallback to UnrealBuildTool
             if (RegenerateProjectUsingUBT(lifetime, unrealHost, uprojectFile, pathToUnrealBuildToolBin, engineRoot)) return;
 
-            ourLogger.Warn("[UnrealLink]: Couldn't refresh project files");
+            OurLogger.Warn("[UnrealLink]: Couldn't refresh project files");
             LogFailedRefreshProjectFiles();
         }
 
@@ -123,34 +122,34 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var isProjectUnderEngine = invalidUprojectFile || uprojectFile.StartsWith(engineRoot);
             if (!isProjectUnderEngine)
             {
-                ourLogger.Info($"[UnrealLink]: {solution.SolutionFilePath} is not in {engineRoot} ");
+                OurLogger.Info($"[UnrealLink]: {solution.SolutionFilePath} is not in {engineRoot} ");
                 return false;
             }
 
             var generateProjectFilesCmd = engineRoot / $"GenerateProjectFiles.{CmdUtils.GetPlatformCmdExtension()}";
             if (!generateProjectFilesCmd.ExistsFile)
             {
-                ourLogger.Info($"[UnrealLink]: {generateProjectFilesCmd} is not available");
+                OurLogger.Info($"[UnrealLink]: {generateProjectFilesCmd} is not available");
                 return false;
             }
 
             var pipeStreams = CreatePipeStreams(unrealHost, "[GenerateProjectFiles]:");
             var startInfo = CmdUtils.GetProcessStartInfo(pipeStreams, generateProjectFilesCmd, generateProjectFilesCmd.Directory);
             
-            ourLogger.Info($"[UnrealLink]: Regenerating project files: {startInfo.Arguments}");
+            OurLogger.Info($"[UnrealLink]: Regenerating project files: {startInfo.Arguments}");
             try
             {
-                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, ourLogger) == 0;
+                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, OurLogger) == 0;
                 if (!result)
                 {
-                    ourLogger.Warn($"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesCmd} went wrong");
+                    OurLogger.Warn($"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesCmd} went wrong");
                 }
 
                 return result;
             }
             catch (ErrorLevelException errorLevelException)
             {
-                ourLogger.Error(errorLevelException,
+                OurLogger.Error(errorLevelException,
                     $"[UnrealLink]: Failed refresh project files, calling {generateProjectFilesCmd} went wrong");
                 return false;
             }
@@ -184,7 +183,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (!uprojectFile.IsValidAndExistFile()) return false;
             if (!pathToUnrealVersionSelector.ExistsFile)
             {
-                ourLogger.Info($"[UnrealLink]: {pathToUnrealVersionSelector} is not available");
+                OurLogger.Info($"[UnrealLink]: {pathToUnrealVersionSelector} is not available");
                 return false;
             }
             
@@ -195,10 +194,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
-                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, ourLogger) == 0;
+                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, OurLogger) == 0;
                 if (!result)
                 {
-                    ourLogger.Warn(
+                    OurLogger.Warn(
                         $"[UnrealLink]: Failed refresh project files: calling {pathToUnrealVersionSelector} {startInfo.Arguments}");
                 }
 
@@ -206,7 +205,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             catch (ErrorLevelException errorLevelException)
             {
-                ourLogger.Error(errorLevelException,
+                OurLogger.Error(errorLevelException,
                     $"[UnrealLink]: Failed refresh project files: calling {pathToUnrealVersionSelector} {startInfo.Arguments}");
                 return false;
             }
@@ -225,17 +224,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 $"-project=\"{uprojectFile.FullPath}\"", "-game", "-progress", isInstalledBuild ? "-rocket" : "-engine");
             try
             {
-                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, ourLogger) == 0;
+                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, OurLogger) == 0;
                 if (!result)
                 {
-                    ourLogger.Warn($"[UnrealLink]: Failed refresh project files: calling {startInfo.Arguments}");
+                    OurLogger.Warn($"[UnrealLink]: Failed refresh project files: calling {startInfo.Arguments}");
                 }
 
                 return result;
             }
             catch (ErrorLevelException errorLevelException)
             {
-                ourLogger.Error(errorLevelException,
+                OurLogger.Error(errorLevelException,
                     $"[UnrealLink]: Failed refresh project files: calling {startInfo.Arguments}");
                 return false;
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using JetBrains.Application.I18n;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
@@ -14,16 +15,15 @@ using JetBrains.ProjectModel.DataContext;
 using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
 using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
-using JetBrains.RdBackend.Common.Features.BackgroundTasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
-using JetBrains.Rider.Backend.Features.BackgroundTasks;
 using JetBrains.Rider.Model;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
 using Newtonsoft.Json.Linq;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
+using RiderPlugin.UnrealLink.Resources;
 using RiderPlugin.UnrealLink.Settings;
 using RiderPlugin.UnrealLink.Utils;
 
@@ -295,8 +295,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             installDescription.IsPluginAvailable = true;
             installDescription.PluginChecksum = myPathsProvider.CurrentPluginChecksum;
 
-            const string title = "RiderLink plugin extracted";
-            var text = $"RiderLink plugin was extracted to: {pluginRootFolder}";
+            var title = Strings.RiderLinkPluginExtracted_Title;
+            var text = Strings.RiderLinkPluginExtracted_Message.Format(pluginRootFolder);
 
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(title, ContentType.Normal));
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Normal));
@@ -319,7 +319,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 const string refreshText = "Refreshing project files";
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(refreshText, ContentType.Normal));
                 mySolution.Locks.ExecuteOrQueue(Lifetime, "Refresh projects after RiderLink installation", () => 
-                    UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, installDescription, engineRoot));
+                    UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, installDescription, engineRoot));
             } else {
                 var actionTitle = "Update VirtualFileSystem after RiderLink installation";
                 mySolution.Locks.Queue(Lifetime, actionTitle, () =>
@@ -388,9 +388,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (!PatchUpluginFileAfterInstallation(pluginBuildOutput))
             {
-                const string failedToPatch = "Failed to patch RiderLink.uplugin";
-                var failedPatchText = "Failed to set `EnableByDefault` to true in RiderLink.uplugin\n" +
-                                      "You need to manually enable RiderLink in UnrealEditor";
+                var failedToPatch = Strings.FailedToPatchRiderLinkUplugin_Text;
+                var failedPatchText = Strings.FailedToPatchRiderLinkUplugin_Message;
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(failedToPatch, ContentType.Normal));
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(failedPatchText, ContentType.Normal));
             }
@@ -405,8 +404,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             installDescription.IsPluginAvailable = true;
             installDescription.PluginChecksum = myPathsProvider.CurrentPluginChecksum;
 
-            const string title = "RiderLink plugin installed";
-            var text = $"RiderLink plugin was installed to: {pluginRootFolder}";
+            var title = Strings.RiderLinkPluginInstalled_Title;
+            var text = Strings.RiderLinkPluginInstalled_Message.Format(pluginRootFolder);
 
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(title, ContentType.Normal));
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Normal));
@@ -426,10 +425,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (isSln)
             {
-                const string refreshText = "Refreshing project files";
+                var refreshText = Strings.RefreshingProjectFiles_Text;
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(refreshText, ContentType.Normal));
-                mySolution.Locks.ExecuteOrQueue(Lifetime, "Refresh projects after RiderLink installation", () => 
-                    UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, installDescription, engineRoot));
+                mySolution.Locks.ExecuteOrQueue(Lifetime, Strings.RefreshProjectsAfterRiderLinkInstallation_Text, () => 
+                    UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, installDescription, engineRoot));
             } else {
                 var actionTitle = "Update VirtualFileSystem after RiderLink installation";
                 mySolution.Locks.Queue(Lifetime, actionTitle, () =>
@@ -508,17 +507,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     .AsCancelable(() =>
                     {
                         myUnrealHost.myModel.RiderLinkInstallMessage(
-                            new InstallMessage("RiderLink installation has been cancelled", ContentType.Error));
+                            new InstallMessage(Strings.RiderLinkInstallationHasBeenCancelled_Text, ContentType.Error));
                         lifetimeDefinition.Terminate();
                     })
                     .WithHeader(header)
                     .WithProgress(progress)
                     .WithDescriptionFromProgress();
                 myBackgroundProgressManager.AddNewTask(lifetime, task);
-                myUnrealHost.myModel.CancelRiderLinkInstall.AdviseOnce(lifetime, unit =>
+                myUnrealHost.myModel.CancelRiderLinkInstall.AdviseOnce(lifetime, _ =>
                 {
                     myUnrealHost.myModel.RiderLinkInstallMessage(
-                        new InstallMessage("RiderLink installation has been cancelled", ContentType.Error));
+                        new InstallMessage(Strings.RiderLinkInstallationHasBeenCancelled_Text, ContentType.Error));
                     lifetimeDefinition.Terminate();
                 });
                 myUnrealHost.myModel.RiderLinkInstallPanelInit();
@@ -561,10 +560,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (!pathToUat.ExistsFile)
             {
                 myLogger.Warn($"[UnrealLink]: Failed build plugin: {runUatName} is not available");
-                var text = $"{runUatName} is not available is not available at expected destination: {pathToUat}<br>";
                 myUnrealHost.myModel.RiderLinkInstallMessage(
-                    new InstallMessage($"Failed to build RiderLink plugin for {engineRoot}", ContentType.Error));
-                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Error));
+                    new InstallMessage(Strings.FailedToBuildRiderLinkPluginFor__Text.Format(engineRoot), ContentType.Error));
+                myUnrealHost.myModel.RiderLinkInstallMessage(
+                    new InstallMessage(Strings.Reason_UatIsNotAvailable_Text.Format(runUatName, pathToUat), ContentType.Error));
                 return false;
             }
 
@@ -585,7 +584,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 if (result != 0)
                 {
                     myLogger.Warn($"[UnrealLink]: Failed to build plugin for {engineRoot}");
-                    myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage("Failed to build RiderLink plugin",
+                    myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(Strings.FailedToBuildRiderLinkPluginFor__Text.Format(engineRoot),
                         ContentType.Error));
                     return false;
                 }
@@ -602,7 +601,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     $"[UnrealLink]: Failed to build plugin for {engineRoot}");
 
                 myUnrealHost.myModel.RiderLinkInstallMessage(
-                    new InstallMessage($"Failed to build RiderLink plugin for {engineRoot}", ContentType.Error));
+                    new InstallMessage(Strings.FailedToBuildRiderLinkPluginFor__Text.Format(engineRoot), ContentType.Error));
                 return false;
             }
 

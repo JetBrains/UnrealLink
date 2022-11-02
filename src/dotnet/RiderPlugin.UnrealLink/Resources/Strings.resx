@@ -73,4 +73,69 @@ Use this option if installation of RiderLink plugin fails for some reason.</valu
         <comment>Option Page: Name
         </comment>
     </data>
+    <data name="UnrealEngine_Version_IsRequired_Title" xml:space="preserve">
+        <value>Unreal Engine {0}+ is required</value>
+        <comment>{0} &lt;- 'myMinimalSupportedVersion'; 
+        </comment>
+    </data>
+    <data name="UnrealEngine_Version_IsRequired_Message" xml:space="preserve">
+        <value>&lt;html&gt;UnrealLink supports Unreal Engine versions starting with {0}&lt;/html&gt;</value>
+        <comment>{0} &lt;- 'myMinimalSupportedVersion'; 
+        </comment>
+    </data>
+    <data name="RiderLinkPluginExtracted_Title" xml:space="preserve">
+        <value>RiderLink plugin extracted</value>
+    </data>
+    <data name="RiderLinkPluginExtracted_Message" xml:space="preserve">
+        <value>RiderLink plugin was extracted to: {0}</value>
+        <comment>{0} &lt;- 'pluginRootFolder'; 
+        </comment>
+    </data>
+    <data name="RiderLinkPluginInstalled_Title" xml:space="preserve">
+        <value>RiderLink plugin installed</value>
+    </data>
+    <data name="RiderLinkPluginInstalled_Message" xml:space="preserve">
+        <value>RiderLink plugin was installed to: {0}</value>
+        <comment>{0} &lt;- 'pluginRootFolder'; 
+        </comment>
+    </data>
+    <data name="RefreshProjectsAfterRiderLinkInstallation_Text" xml:space="preserve">
+        <value>Refresh projects after RiderLink installation</value>
+    </data>
+    <data name="FailedToPatchRiderLinkUplugin_Text" xml:space="preserve">
+        <value>Failed to patch RiderLink.uplugin</value>
+    </data>
+    <data name="FailedToPatchRiderLinkUplugin_Message" xml:space="preserve">
+        <value>Failed to set `EnableByDefault` to true in RiderLink.uplugin
+You need to manually enable RiderLink in UnrealEditor</value>
+    </data>
+    <data name="RefreshingProjectFiles_Text" xml:space="preserve">
+        <value>Refreshing project files</value>
+    </data>
+    <data name="RiderLinkInstallationHasBeenCancelled_Text" xml:space="preserve">
+        <value>RiderLink installation has been cancelled</value>
+    </data>
+    <data name="FailedToBuildRiderLinkPluginFor__Text" xml:space="preserve">
+        <value>Failed to build RiderLink plugin for {0}</value>
+        <comment>{0} &lt;- 'engineRoot'; 
+        </comment>
+    </data>
+    <data name="Reason_UatIsNotAvailable_Text" xml:space="preserve">
+        <value>Reason: {0} is not available at expected destination: {1}</value>
+        <comment>{0} &lt;- 'runUatName'; 
+            {1} &lt;- 'pathToUat'; 
+        </comment>
+    </data>
+    <data name="RefreshingProjectsFilesHasBeenCancelled_Text" xml:space="preserve">
+        <value>Refreshing projects files has been cancelled</value>
+    </data>
+    <data name="FailedToRefreshProjectFiles_Text" xml:space="preserve">
+        <value>Failed to refresh project files</value>
+    </data>
+    <data name="RiderLinkPluginWillNotBeVisibleInThe_Text" xml:space="preserve">
+        <value>RiderLink plugin will not be visible in the solution explorer</value>
+    </data>
+    <data name="NeedToRefreshProjectFilesManually_Text" xml:space="preserve">
+        <value>Need to refresh project files in the Unreal Editor or in the File Explorer with a context action for .uproject file 'Generate project files'</value>
+    </data>
 </root>

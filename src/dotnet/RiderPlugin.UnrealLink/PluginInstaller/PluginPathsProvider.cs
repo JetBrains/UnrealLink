@@ -45,7 +45,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var editorPluginPathFile = PathToPackedPlugin;
             using var zipArchive = ZipFile.OpenRead(editorPluginPathFile.FullPath);
-            var zipArchiveEntry = zipArchive.GetEntry(UnrealPluginDetector.CHEKSUM_ENTRY_PATH);
+            var zipArchiveEntry = zipArchive.GetEntry(UnrealPluginDetector.CHEKCSUM_ENTRY_PATH);
             var stream = zipArchiveEntry?.Open();
             return stream?.ReadAllBytes();
         }
