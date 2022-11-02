@@ -16,22 +16,19 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
-import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.BeforeMethod
-import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.io.File
-import java.time.Duration
 
 @Epic(Subsystem.DEBUGGER)
 @Feature("Natvis")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS],
+    platform = [PlatformType.WINDOWS_X64],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
@@ -47,18 +44,15 @@ class Natvis : UnrealTestProject() {
         get() = listOf("#com.jetbrains.cidr.execution.debugger")
 
     @BeforeMethod
-    override fun testSetup(){
-        super.testSetup()
+    override fun prepareAndOpenSolution(parameters: Array<Any>){
         CidrDebuggerSettings.getInstance().lldbNatvisDiagnosticsLevel = LLDBNatvisDiagnosticsLevel.VERBOSE
-
         File(testCaseSourceDirectory, "UnrealNatvisTestPlugin")
             .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("UnrealNatvisTestPlugin"))
+        super.prepareAndOpenSolution(parameters)
     }
 
-    @Test(dataProvider = "enginesAndOthers")
+    @Test(dataProvider = "egsOnly_SlnOnly")
     fun unrealBuiltinNatvis(@Suppress("UNUSED_PARAMETER") caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInTestSetup(openWith, engine)
-
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
         buildWithChecks(project, BuildSolutionAction(), "Build solution",
             useIncrementalBuild = false, timeout = buildTimeout)
@@ -106,21 +100,5 @@ class Natvis : UnrealTestProject() {
 
     fun toggleBreakpoint(projectFile: String, lineNumber: Int): XLineBreakpoint<out XBreakpointProperties<*>>? {
         return toggleBreakpoint(project, projectFile, lineNumber)
-    }
-
-    @DataProvider
-    fun enginesAndOthers(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            "$baseString${engine.id.replace('.', '_')}"
-        }
-
-        unrealInfo.testingEngines.filter { it.isInstalledBuild } .forEach { engine ->
-            arrayOf(EngineInfo.UnrealOpenType.Sln).forEach { type ->
-                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
-            }
-        }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
     }
 }

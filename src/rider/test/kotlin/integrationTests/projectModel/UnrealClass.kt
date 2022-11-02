@@ -10,12 +10,10 @@ import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
-import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
-import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
@@ -23,7 +21,7 @@ import testFrameworkExtentions.UnrealTestProject
 @Epic("Project Model")
 @Feature("New Unreal Class")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS],
+    platform = [PlatformType.WINDOWS_X64],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
@@ -33,30 +31,16 @@ class UnrealClass : UnrealTestProject() {
     }
 
     @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "enginesAndOthers")
+    @Test(dataProvider = "AllEngines_AllPModels")
     fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInTestSetup(openWith, engine)
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
-        doTestDumpProjectsView {
-            // I'm limited by the technology of my time, but someday it will be better here.
-            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
-            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
-            // Replace any quantity of ..\ or ../ and everything after them up to the root of the engine
-            profile.customRegexToMask["relative_path_ue_root"] =
-                Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
-            profile.customRegexToMask["relative_path/"] =
-                Regex("(\\.\\.[\\\\/])+")
+        testProjectModel(testGoldFile, project) {
+            profile.customPathsToMask = unrealPathsToMask
+            profile.customRegexToMask = unrealRegexToMask
 
             dump("Init") {}
             dump("Add different unreal class templates to '$activeSolution'") {
-                val path = mutableListOf("EmptyUProject").apply {
-                    if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
-                    add("EmptyUProject")
-                    add("Source")
-                    add("EmptyUProject")
-                }.toTypedArray()
+                val path = calculateRootPathInSolutionExplorer(activeSolution, openWith) + "Source" + "EmptyUProject"
                 for (template in unrealTemplates) {
                     val className = template.type.split(' ').joinToString("")
                     { word -> word.replaceFirstChar { it.uppercase() } }
@@ -67,26 +51,15 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute(specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "enginesAndOthers")
+    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
+    @Test(dataProvider = "AllEngines_AllPModels")
     fun moveUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                    openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInTestSetup(openWith, engine)
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+        testProjectModel(testGoldFile, project) {
+            profile.customPathsToMask = unrealPathsToMask
+            profile.customRegexToMask = unrealRegexToMask
 
-        doTestDumpProjectsView {
-            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
-            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
-            profile.customRegexToMask["relative_path_ue_root"] = Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
-            profile.customRegexToMask["relative_path/"] = Regex("(\\.\\.[\\\\/])+")
-
-            val sourcePath = mutableListOf("EmptyUProject").apply {
-                if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
-                add("EmptyUProject")
-                add("Source")
-                add("EmptyUProject")
-            }.toTypedArray()
+            val sourcePath = calculateRootPathInSolutionExplorer(activeSolution, openWith) + "Source"
 
             addNewItem(project, sourcePath, UNREAL_ACTOR, "SomeActor")
             addNewFolder(project, sourcePath, "TestMove")
@@ -100,19 +73,13 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute(specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "enginesAndOthers")
+    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
+    @Test(dataProvider = "AllEngines_AllPModels")
     fun deleteUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                      openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
-        unrealInTestSetup(openWith, engine)
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
-
-        doTestDumpProjectsView{
-            profile.customPathsToMask["absolute_ue_root"] = unrealInfo.currentEnginePath!!.toString()
-            profile.customRegexToMask["number of projects"] = Regex("\\d,\\d\\d\\d projects")
-            profile.customRegexToMask["relative_path_ue_root"] = Regex("(\\.\\.[\\\\/])+.*${unrealInfo.currentEnginePath!!.name}")
-            profile.customRegexToMask["relative_path/"] = Regex("(\\.\\.[\\\\/])+")
+        testProjectModel(testGoldFile, project) {
+            profile.customPathsToMask = unrealPathsToMask
+            profile.customRegexToMask = unrealRegexToMask
 
             val sourcePath = mutableListOf("EmptyUProject").apply {
                 if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
@@ -144,32 +111,5 @@ class UnrealClass : UnrealTestProject() {
         action: () -> Unit
     ) {
         dump(caption, project, activeSolutionDirectory.resolve("Source"), checkSlnFile, checkIndex, action)
-    }
-
-    // TODO: delete after some refactoring at ScriptingApi.ProjectModel.kt
-    private fun doTestDumpProjectsView(action: TestProjectModelContext.() -> Unit) {
-        testProjectModel(testGoldFile, project, action)
-    }
-
-    @DataProvider
-    fun enginesAndOthers(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
-        // Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
-        //  based on file template type, UnrealOpenType, engine version and what engine uses - EGS/Source.
-        // Unique name need for gold file/dir name.
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
-            // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-            if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
-            else "$baseString${engine.id.replace('.', '_')}"
-        }
-        unrealInfo.testingEngines.forEach { engine ->
-            arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln).forEach { type ->
-                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
-            }
-        }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
     }
 }
