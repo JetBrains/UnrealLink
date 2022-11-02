@@ -13,6 +13,7 @@ import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rdclient.notifications.NotificationsHost
+import com.jetbrains.rdclient.util.idea.toIOFile
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
@@ -25,12 +26,10 @@ import com.jetbrains.rider.test.framework.getPersistentCacheFolder
 import com.jetbrains.rider.test.scriptingApi.setReSharperBoolSetting
 import com.jetbrains.rider.test.scriptingApi.startRunConfigurationProcess
 import com.jetbrains.rider.test.scriptingApi.stop
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.BeforeMethod
+import org.testng.annotations.DataProvider
 import testFrameworkExtentions.suplementary.UprojectData
 import java.io.File
 import java.time.Duration
@@ -55,11 +54,10 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     /**
      * Default settings for opening solution/project. Overrides in/before concrete suite/test.
      */
-    val openSolutionParams: OpenSolutionParams =
+    open val openSolutionParams: OpenSolutionParams =
         OpenSolutionParams().apply {
             waitForCaches = true
             projectModelReadyTimeout = Duration.ofSeconds(150)
-            backendLoadedTimeout = Duration.ofSeconds(400)
             initWithCachesTimeout = Duration.ofSeconds(120)
         }
     lateinit var projectDirectoryName: String
@@ -86,10 +84,18 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         GeneralSettings.getInstance().isConfirmExit = false
     }
 
-    @BeforeMethod
-    open fun testSetup() {
+    @BeforeMethod(alwaysRun = true)
+    open fun putSolutionToTempDir() {
         uprojectFile = putSolutionToTempTestDir(projectDirectoryName, "$projectDirectoryName.uproject")
+    }
+
+    @BeforeMethod(alwaysRun = true, dependsOnMethods = ["putSolutionToTempDir"])
+    open fun prepareAndOpenSolution(parameters: Array<Any>) {
+        val openSolutionWithParam = parameters[1] as EngineInfo.UnrealOpenType
+        val engineParam = parameters[2] as UnrealEngine
+
         setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
+        configureAndOpenUnrealProject(openSolutionWithParam, engineParam)
     }
 
     @AfterMethod(alwaysRun = true)
@@ -113,6 +119,30 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         } finally {
             myProject = null
         }
+    }
+
+    protected fun configureAndOpenUnrealProject(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
+        unrealInfo.currentEngine = engine
+
+        println("Test starting with $engine, opening by $openWith.")
+
+        prepareUprojectFile(uprojectFile, engine, disableEnginePlugins)
+
+        if (engine.isInstalledBuild)
+            openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(400)
+        else
+            openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(600)
+
+        if (openWith == EngineInfo.UnrealOpenType.Sln) {
+            generateSolutionFromUProject(uprojectFile)
+            openSolutionParams.minimalCountProjectsMustBeLoaded = null
+        } else {
+            openSolutionParams.minimalCountProjectsMustBeLoaded =
+                1400 // TODO: replace the magic number with something normal
+        }
+
+        project = openProject(openWith)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
     // TODO: refactor existent openProject's function and replace
@@ -191,22 +221,107 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
             .waitFor(timeout.seconds, TimeUnit.SECONDS)
     }
 
-    fun unrealInTestSetup(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
-        unrealInfo.currentEngine = engine
-
-        println("Test starting with $engine, opening by $openWith.")
-
-        prepareUprojectFile(uprojectFile, engine, disableEnginePlugins)
-
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
-            openSolutionParams.minimalCountProjectsMustBeLoaded = null
-        } else {
-            openSolutionParams.minimalCountProjectsMustBeLoaded =
-                1400 // TODO: replace the magic number with something normal
-        }
-
-        project = openProject(openWith)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+    fun calculateRootPathInSolutionExplorer(projectName: String,
+                                            openWith: EngineInfo.UnrealOpenType): Array<String> {
+        return mutableListOf(projectName).apply {
+            if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
+            add(projectName)
+        }.toTypedArray()
     }
+
+    val unrealPathsToMask: MutableMap<String, String>
+        get() = mutableMapOf(
+            Pair("absolute_ue_root", unrealInfo.currentEnginePath!!.toString()),
+            Pair("relative_path_ue_root", unrealInfo.currentEngine!!.path.toIOFile().name)
+        )
+    val unrealRegexToMask: MutableMap<String, Regex>
+        get() = mutableMapOf(
+            Pair("number of projects", Regex("\\d?,?\\d{2,3} projects")),
+            Pair("relative_path/", Regex("(\\.\\.[\\\\/])+"))
+        )
+
+    // ========== Data Provider section ==========
+    /**
+     * For some reasons TestNG cannot create instance of inner class, so this part lives in base class.
+     * And we cannot use separate class for data provider 'cause we need [EngineInfo.testingEngines] from [UnrealTestProject] class.
+     * The alternative is make a call to the backend from data provider, which is awful option.
+     *
+     * We have UE4/UE5 EGS/Source and Sln/Uproject project models
+     * For different tests we need different intersections, so we use scheme like <engineType>_<projectModelType>
+     * Examples: egsOnly_AllPModels, ue5EgsOnly_AllPModels, ue4Egs_slnOnly, egsOnly_uprojectOnly, AllEngines_slnOnly
+     */
+
+    @Suppress("FunctionName")
+    @DataProvider
+    fun AllEngines_AllPModels(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(allModels) { true }
+    }
+
+    @Suppress("FunctionName")
+    @DataProvider
+    fun egsOnly_AllPModels(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(allModels) { it.isInstalledBuild }
+    }
+
+    @Suppress("FunctionName")
+    @DataProvider
+    fun egsOnly_SlnOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlySln) { it.isInstalledBuild }
+    }
+
+    @Suppress("FunctionName")
+    @DataProvider
+    fun ue5EgsOnly_AllPModels(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(allModels) { it.isInstalledBuild && it.version.major == 5 }
+    }
+
+    @DataProvider
+    fun ue5SourceOnly_AllPModules() :MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(allModels) { !it.isInstalledBuild && it.version.major == 5 }
+    }
+
+    @Suppress("FunctionName")
+    @DataProvider
+    fun u5Only_slnOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlySln) { it.version.major == 5 }
+    }
+
+    // ===== Private things for creating Data Providers above =====
+    protected val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
+
+    /**
+     * Little hack for generate unique name in com.jetbrains.rider.test.TestCaseRunner#extractTestName
+     *  based on file template type, [EngineInfo.UnrealOpenType], [UnrealEngine.version] and what engine uses - EGS/Source.
+     * Unique name need for TestNG test collector, gold file/dir name, logging, etc.
+     */
+    protected val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+        // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+        // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+        if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"
+        else "$baseString${engine.id.replace('.', '_')}"
+    }
+
+    protected open fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
+                                                  predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+        val result: ArrayList<Array<Any>> = arrayListOf()
+        /**
+         * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
+         */
+        unrealInfo.testingEngines.filter(predicate).ifEmpty {
+            throw Exception("Failed to filter engines in ${unrealInfo.testingEngines} by $predicate")
+        }.forEach { engine ->
+            unrealPmTypes.forEach { type ->
+                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
+            }
+        }
+        frameworkLogger.debug("Data Provider was generated: $result")
+        return result.iterator()
+    }
+
+    // Just for easy calling
+    private val allModels = arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject)
+    private val onlySln = arrayOf(EngineInfo.UnrealOpenType.Sln)
+    private val onlyUproject = arrayOf(EngineInfo.UnrealOpenType.Uproject)
+
+    // ========== End of Data Provider section ==========
 }

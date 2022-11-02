@@ -17,12 +17,10 @@ import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.Assert
-import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.io.File
-import java.time.Duration
 
 // TODO Split for multiple tests
 // TODO Use common data provider
@@ -30,7 +28,7 @@ import java.time.Duration
 @Epic("Refactorings")
 @Feature("Rename")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.DEFAULT
+    platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.DEFAULT
 )
 class Rename : UnrealTestProject() {
     init {
@@ -45,15 +43,12 @@ class Rename : UnrealTestProject() {
      * This test renames class and property twice to make sure that rename works normally and all needed redirects appear.
      * [openWith] and [engine] come from data provider based on data from [EngineInfo.testingEngines]
      */
-    @Test(dataProvider = "enginesAndOthers")
+    @Test(dataProvider = "AllEngines_AllPModels")
     fun rename(@Suppress("UNUSED_PARAMETER")
                caseName: String,
                openWith: EngineInfo.UnrealOpenType,
                engine: UnrealEngine
     ) {
-        unrealInTestSetup(openWith, engine)
-        project = openProject(openWith)
-
         val projectFile = "$activeSolutionDirectory/Source/$projectDirectoryName/MyActor.h"
         val pluginFile = "$activeSolutionDirectory/Plugins/TestPlugin/Source/TestPlugin/Public/MyPluginActor.h"
 
@@ -230,22 +225,5 @@ class Rename : UnrealTestProject() {
         })
         waitBackendAndWorkspaceModel(project)
         persistAllFilesOnDisk()
-    }
-
-    @DataProvider
-    fun enginesAndOthers(): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-            "$baseString${engine.id.replace('.', '_')}"
-        }
-
-        for (openWith in arrayOf(EngineInfo.UnrealOpenType.Uproject, EngineInfo.UnrealOpenType.Sln)) {
-            for (engine in unrealInfo.testingEngines.filter { it.isInstalledBuild }) {
-                result.add(arrayOf(uniqueDataString("$openWith", engine), openWith, engine))
-            }
-        }
-
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
     }
 }
