@@ -74,6 +74,7 @@ static FString GetLogFile(const FString& projectName)
 
 ProtocolFactory::ProtocolFactory(const FString& ProjectName): ProjectName(ProjectName)
 {
+    InitRdLogging();
 }
 
 void ProtocolFactory::InitRdLogging()
