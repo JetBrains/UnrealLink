@@ -133,11 +133,7 @@ class OpenUnrealLinkSettings : DumbAwareAction() {
 
     override fun update(e: AnActionEvent) {
         val host = e.getUnrealHost()
-        if (host == null) {
-            e.presentation.isEnabledAndVisible = false
-            return
-        }
-        e.presentation.isEnabledAndVisible = true
+        e.presentation.isEnabledAndVisible = host != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -151,11 +147,7 @@ class OpenRiderLinkSettings : DumbAwareAction() {
 
     override fun update(e: AnActionEvent) {
         val host = e.getUnrealHost()
-        if (host == null) {
-            e.presentation.isEnabledAndVisible = false
-            return
-        }
-        e.presentation.isEnabledAndVisible = true
+        e.presentation.isEnabledAndVisible = host != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -363,10 +355,7 @@ class HidePlayButtonsAction : DumbAwareToggleAction() {
         super.update(e)
 
         val host = e.getUnrealHost()
-        if (host == null) {
-            e.presentation.isEnabledAndVisible = false
-        }
-        e.presentation.isEnabledAndVisible = true
+        e.presentation.isEnabledAndVisible = host != null
     }
 
     override fun isSelected(e: AnActionEvent): Boolean {
