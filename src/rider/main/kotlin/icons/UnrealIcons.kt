@@ -6,8 +6,8 @@ class UnrealIcons {
     class Status {
         companion object {
             val UnrealEngineLogo = IconLoader.getIcon("/Icons/Status/UnrealEngineLogo.svg", UnrealIcons::class.java)
-            val Connected = IconLoader.getIcon("/Icons/Status/unrealStatusOn.svg", UnrealIcons::class.java)
-            val Disconnected = IconLoader.getIcon("/Icons/Status/unrealStatus.svg", UnrealIcons::class.java)
+            val UnrealEngineConnected = IconLoader.getIcon("/Icons/Status/UnrealEngineConnected.svg", UnrealIcons::class.java)
+            val UnrealEngineDisconnected = IconLoader.getIcon("/Icons/Status/UnrealEngineDisconnected.svg", UnrealIcons::class.java)
             val Pause = IconLoader.getIcon("/Icons/Status/unrealStatusPause.svg", UnrealIcons::class.java)
             val Play = IconLoader.getIcon("/Icons/Status/unrealStatusPlay.svg", UnrealIcons::class.java)
             val Stop = IconLoader.getIcon("/Icons/Status/unrealStatusBreakpoint.svg", UnrealIcons::class.java)

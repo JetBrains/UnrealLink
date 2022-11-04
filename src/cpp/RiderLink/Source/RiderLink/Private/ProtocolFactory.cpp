@@ -66,26 +66,22 @@ static FString GetPathToPortsFolder()
     return FPaths::Combine(*MiscFilesFolder, TEXT("Ports"));
 }
 
-static FString GetProjectName()
-{
-    FString ProjectNameNoExtension = FApp::GetProjectName();
-    if(ProjectNameNoExtension.IsEmpty())
-        ProjectNameNoExtension = TEXT("<ENGINE>");
-    return ProjectNameNoExtension + TEXT(".uproject");
-}
-
-static FString GetLogFile()
+static FString GetLogFile(const FString& projectName)
 {
     const FString MiscFilesFolder = GetMiscFilesFolder();
-    return FPaths::Combine(*MiscFilesFolder, TEXT("Logs"), GetProjectName());
+    return FPaths::Combine(*MiscFilesFolder, TEXT("Logs"), projectName + TEXT(".uproject"));
 }
 
+ProtocolFactory::ProtocolFactory(const FString& ProjectName): ProjectName(ProjectName)
+{
+    InitRdLogging();
+}
 
 void ProtocolFactory::InitRdLogging()
 {
     spdlog::set_level(spdlog::level::err);
 #if defined(ENABLE_LOG_FILE) && ENABLE_LOG_FILE == 1
-    const FString LogFile = GetLogFile();
+    const FString LogFile = GetLogFile(ProjectName);
     const FString Msg = TEXT("[RiderLink] Path to log file: ") + LogFile;
     auto FileLogger = std::make_shared<spdlog::sinks::daily_file_sink_mt>(*LogFile, 23, 59);
     FileLogger->set_level(spdlog::level::trace);
@@ -98,7 +94,6 @@ void ProtocolFactory::InitRdLogging()
 
 std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime)
 {
-    const FString ProjectName = GetProjectName();
     return std::make_shared<rd::SocketWire::Server>(SocketLifetime, Scheduler, 0,
                                                          TCHAR_TO_UTF8(*FString::Printf(TEXT("UnrealEditorServer-%s"),
                                                              *ProjectName)));
@@ -107,18 +102,17 @@ std::shared_ptr<rd::SocketWire::Server> ProtocolFactory::CreateWire(rd::ISchedul
 
 TUniquePtr<rd::Protocol> ProtocolFactory::CreateProtocol(rd::IScheduler* Scheduler, rd::Lifetime SocketLifetime, std::shared_ptr<rd::SocketWire::Server> wire)
 {
-    const FString ProjectName = GetProjectName();
-
     auto protocol = MakeUnique<rd::Protocol>(rd::Identities::SERVER, Scheduler, wire, SocketLifetime);
 
     auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
     const FString PortFullDirectoryPath = GetPathToPortsFolder();
     if (PlatformFile.CreateDirectoryTree(*PortFullDirectoryPath) && !IsRunningCommandlet())
     {
-        const FString TmpPortFile = TEXT("~") + ProjectName;
+        const FString ProjectFileName = ProjectName + TEXT(".uproject");
+        const FString TmpPortFile = TEXT("~") + ProjectFileName;
         const FString TmpPortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *TmpPortFile);
         FFileHelper::SaveStringToFile(FString::FromInt(wire->port), *TmpPortFileFullPath);
-        const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectName);
+        const FString PortFileFullPath = FPaths::Combine(*PortFullDirectoryPath, *ProjectFileName);
         IFileManager::Get().Move(*PortFileFullPath, *TmpPortFileFullPath, true, true);
     }
     return protocol;
