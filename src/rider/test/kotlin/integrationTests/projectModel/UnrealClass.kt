@@ -32,7 +32,7 @@ class UnrealClass : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
     }
 
-    @Mute("RIDER-77926", specificParameters = ["Sln5_0", "Sln4_27", "Sln5_1fromSource", "Uproject5_1fromSource"])
+    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
@@ -67,7 +67,7 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute("Sync points were not ready in time: NuGetSoftOperationSuspender: Solution initialization", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource", "Sln5_0fromSource", "Uproject5_0fromSource", "Sln5_0"])
+    @Mute(specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun moveUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                    openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
@@ -100,7 +100,7 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute("Sync points were not ready in time: NuGetSoftOperationSuspender: Solution initialization", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource", "Sln5_0fromSource", "Uproject5_0fromSource", "Sln5_0"])
+    @Mute(specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
     @Test(dataProvider = "enginesAndOthers")
     fun deleteUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                      openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
