@@ -43,6 +43,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -68,6 +69,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -97,6 +99,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -105,7 +108,7 @@ NONE ]
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UE4Editor/Development/EmptyUProject/Definitions.h
-  FullIncludePath:;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/cudamanager;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/filebuf;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/foundation;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/pvd;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/task;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/cooking;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/common;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/extensions;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/geometry;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/clothing;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/nvparameterized;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/legacy;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/PhysX3;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/RenderDebug/public;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/PairFilter/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/internal/include;
+  <masked>
   PreprocessorDefinitions:
   UndefinePreprocessorDefinitions:
   DefaultCharIsUnsigned:False
@@ -122,6 +125,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: True
   ExcludedFromBuild: False
@@ -147,6 +151,7 @@ CLCOMPILE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -172,6 +177,7 @@ CLINCLUDE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -197,6 +203,7 @@ CLCOMPILE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -222,6 +229,7 @@ CLINCLUDE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -247,6 +255,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -296,6 +305,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -321,6 +331,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -350,6 +361,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -358,7 +370,7 @@ NONE ]
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:solutionDir/Intermediate/Build/Win64/UE4Editor/Development/EmptyUProject/Definitions.h
-  FullIncludePath:;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/cudamanager;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/filebuf;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/foundation;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/pvd;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PxShared/include/task;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/cooking;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/common;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/extensions;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/PhysX_3.4/Include/geometry;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/clothing;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/nvparameterized;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/legacy;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/include/PhysX3;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/common/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/framework/include/autogen;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/RenderDebug/public;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/general/PairFilter/include;absolute_ue_root/Engine/Source/ThirdParty/PhysX3/APEX_1.4/shared/internal/include;
+  <masked>
   PreprocessorDefinitions:
   UndefinePreprocessorDefinitions:
   DefaultCharIsUnsigned:False
@@ -375,6 +387,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: True
   ExcludedFromBuild: False
@@ -400,6 +413,7 @@ CLCOMPILE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -425,6 +439,7 @@ CLINCLUDE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -450,6 +465,7 @@ NONE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False

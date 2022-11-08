@@ -16,6 +16,7 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
@@ -46,7 +47,7 @@ class Natvis : UnrealTestProject() {
     @BeforeMethod
     override fun prepareAndOpenSolution(parameters: Array<Any>){
         CidrDebuggerSettings.getInstance().lldbNatvisDiagnosticsLevel = LLDBNatvisDiagnosticsLevel.VERBOSE
-        File(testCaseSourceDirectory, "UnrealNatvisTestPlugin")
+        testDataDirectory.combine("additionalSource", "plugins", "UnrealNatvisTestPlugin")
             .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("UnrealNatvisTestPlugin"))
         super.prepareAndOpenSolution(parameters)
     }

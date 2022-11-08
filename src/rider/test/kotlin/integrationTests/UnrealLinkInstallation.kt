@@ -52,11 +52,12 @@ class UnrealLinkInstallation : UnrealTestProject() {
         waitAndPump(Duration.ofSeconds(15),
             { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
 
+        setConfigurationAndPlatform(project, "Development Editor", "Win64")
+
         if (unrealInfo.needInstallRiderLink) {
             installRiderLink(unrealInfo.placeToInstallRiderLink)
         }
 
-        setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
         buildWithChecks(
             project, BuildSolutionAction(), "Build solution",
             useIncrementalBuild = false, timeout = buildTimeout
