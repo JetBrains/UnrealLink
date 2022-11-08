@@ -1,0 +1,780 @@
+===================
+Init
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+===================
+Add module to 'EmptyUProject' via project node
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject" });
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject" });
+	}
+}
+
+
+[TestNewModuleProject.cpp]
+﻿#include "TestNewModuleProject.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleProjectModule"
+
+void FTestNewModuleProjectModule::StartupModule()
+{
+}
+
+void FTestNewModuleProjectModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleProjectModule, TestNewModuleProject)
+
+[TestNewModuleProject.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleProjectModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleProject.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleProject : ModuleRules
+{
+    public TestNewModuleProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+
+===================
+Add module to 'EmptyUProject' via Source node
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject", "TestNewModuleSource" });
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject", "TestNewModuleSource" });
+	}
+}
+
+
+[TestNewModuleProject.cpp]
+﻿#include "TestNewModuleProject.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleProjectModule"
+
+void FTestNewModuleProjectModule::StartupModule()
+{
+}
+
+void FTestNewModuleProjectModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleProjectModule, TestNewModuleProject)
+
+[TestNewModuleProject.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleProjectModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleProject.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleProject : ModuleRules
+{
+    public TestNewModuleProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+
+[TestNewModuleSource.cpp]
+﻿#include "TestNewModuleSource.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleSourceModule"
+
+void FTestNewModuleSourceModule::StartupModule()
+{
+}
+
+void FTestNewModuleSourceModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleSourceModule, TestNewModuleSource)
+
+[TestNewModuleSource.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleSourceModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleSource.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleSource : ModuleRules
+{
+    public TestNewModuleSource(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+
+===================
+Add module to 'EmptyUProject' with custom location
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject", "TestNewModuleSource", "TestNewModuleCustom" });
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestNewModuleProject", "TestNewModuleSource", "TestNewModuleCustom" });
+	}
+}
+
+
+[TestNewModuleProject.cpp]
+﻿#include "TestNewModuleProject.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleProjectModule"
+
+void FTestNewModuleProjectModule::StartupModule()
+{
+}
+
+void FTestNewModuleProjectModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleProjectModule, TestNewModuleProject)
+
+[TestNewModuleProject.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleProjectModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleProject.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleProject : ModuleRules
+{
+    public TestNewModuleProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+
+[TestNewModuleSource.cpp]
+﻿#include "TestNewModuleSource.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleSourceModule"
+
+void FTestNewModuleSourceModule::StartupModule()
+{
+}
+
+void FTestNewModuleSourceModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleSourceModule, TestNewModuleSource)
+
+[TestNewModuleSource.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleSourceModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleSource.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleSource : ModuleRules
+{
+    public TestNewModuleSource(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+
+[TestNewModuleCustom.cpp]
+﻿#include "TestNewModuleCustom.h"
+
+#define LOCTEXT_NAMESPACE "FTestNewModuleCustomModule"
+
+void FTestNewModuleCustomModule::StartupModule()
+{
+}
+
+void FTestNewModuleCustomModule::ShutdownModule()
+{
+    
+}
+
+#undef LOCTEXT_NAMESPACE
+    
+IMPLEMENT_MODULE(FTestNewModuleCustomModule, TestNewModuleCustom)
+
+[TestNewModuleCustom.h]
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+class FTestNewModuleCustomModule : public IModuleInterface
+{
+public:
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+};
+
+
+[TestNewModuleCustom.Build.cs]
+﻿using UnrealBuildTool;
+
+public class TestNewModuleCustom : ModuleRules
+{
+    public TestNewModuleCustom(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore"
+            }
+        );
+    }
+}
+

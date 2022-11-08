@@ -52,6 +52,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -77,6 +78,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -102,6 +104,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -127,6 +130,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -152,6 +156,7 @@ CLCOMPILE ]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -210,6 +215,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -235,6 +241,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
@@ -260,6 +267,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   TargetMachine :NotSet
   CallingConvetion :CDecl
   CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
   ConformanceMode :False
   HasCompilerTool: False
   ExcludedFromBuild: False
