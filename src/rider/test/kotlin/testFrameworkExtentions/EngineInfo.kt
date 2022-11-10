@@ -24,7 +24,8 @@ class EngineInfo {
     private val testingVersions: Array<UnrealVersion> = arrayOf(
         UnrealVersion(4, 27, 2),
         UnrealVersion(5, 0, 3),
-        UnrealVersion(5, 1, 0)
+        UnrealVersion(5, 1, 0),
+        UnrealVersion(5, 2, 0)
     )
 
     private fun UnrealVersion.basicallyEquals(other: UnrealVersion): Boolean {
