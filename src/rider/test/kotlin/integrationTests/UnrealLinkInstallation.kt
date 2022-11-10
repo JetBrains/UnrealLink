@@ -13,12 +13,9 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
-import com.jetbrains.rider.test.scriptingApi.buildWithChecks
-import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
-import com.jetbrains.rider.test.scriptingApi.setReSharperBoolSetting
+import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
-import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
@@ -33,28 +30,19 @@ import java.util.concurrent.TimeUnit
     coreVersion = CoreVersion.DEFAULT
 )
 class UnrealLinkInstallation : UnrealTestProject() {
-    // TODO think about no-copypaste decision
     init {
         projectDirectoryName = "EmptyUProject"
+        disableEnginePlugins = false
     }
     private val runProgramTimeout: Duration = Duration.ofMinutes(2)
 
-    @BeforeMethod(alwaysRun = true)
-    override fun prepareAndOpenSolution(parameters: Array<Any>) {
-        val openSolutionWithParam = parameters[1] as EngineInfo.UnrealOpenType
-        val engineParam = parameters[3] as UnrealEngine
-
-        setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
-        configureAndOpenUnrealProject(openSolutionWithParam, engineParam)
-    }
-
     @Test(dataProvider = "AllEngines_AllPModels")
     @RiderTestTimeout(30L, TimeUnit.MINUTES)
-    fun installAndRun(
+    fun ul(
         @Suppress("UNUSED_PARAMETER") caseName: String,
         openWith: EngineInfo.UnrealOpenType,
-        location: PluginInstallLocation,
-        engine: UnrealEngine
+        engine: UnrealEngine,
+        location: PluginInstallLocation
     ) {
         unrealInfo.placeToInstallRiderLink = location
         unrealInfo.needInstallRiderLink = true
@@ -69,11 +57,13 @@ class UnrealLinkInstallation : UnrealTestProject() {
         }
 
         setConfigurationAndPlatform(project, "DebugGame Editor", "Win64")
-        buildWithChecks(project, BuildSolutionAction(), "Build solution",
-            useIncrementalBuild = false, timeout = buildTimeout)
+        buildWithChecks(
+            project, BuildSolutionAction(), "Build solution",
+            useIncrementalBuild = false, timeout = buildTimeout
+        )
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram {
+        withRunProgram(configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                 { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
         }
@@ -89,16 +79,25 @@ class UnrealLinkInstallation : UnrealTestProject() {
         /**
          * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
          */
-        unrealInfo.testingEngines.forEach { engine ->
+        unrealInfo.testingEngines.filter(predicate).ifEmpty {
+            throw Exception("Failed to filter engines in ${unrealInfo.testingEngines} by $predicate")
+        }.forEach { engine ->
             arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
                 arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
                     // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
-                    if ((engine.id.startsWith("5.")) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
-                    result.add(arrayOf(uniqueDataString("$type$location", engine), type, location, engine))
+                    if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
+                    result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
                 }
             }
         }
         frameworkLogger.debug("Data Provider was generated: $result")
         return result.iterator()
+    }
+
+    override val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+        // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
+        // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
+        if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}_Src"
+        else "$baseString${engine.id.replace('.', '_')}"
     }
 }

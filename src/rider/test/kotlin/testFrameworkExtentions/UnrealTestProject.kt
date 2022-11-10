@@ -77,6 +77,8 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
                      Duration.ofMinutes(5)
                 else Duration.ofMinutes(15)
 
+    var disableEnginePlugins = true
+
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
@@ -85,6 +87,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     @BeforeMethod(alwaysRun = true)
+    open fun configureSettings() {
+        setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
+    }
+
+    @BeforeMethod(alwaysRun = true, dependsOnMethods = ["configureSettings"])
     open fun putSolutionToTempDir() {
         uprojectFile = putSolutionToTempTestDir(projectDirectoryName, "$projectDirectoryName.uproject")
     }
@@ -94,8 +101,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         val openSolutionWithParam = parameters[1] as EngineInfo.UnrealOpenType
         val engineParam = parameters[2] as UnrealEngine
 
-        setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
-        configureAndOpenUnrealProject(openSolutionWithParam, engineParam)
+        configureAndOpenUnrealProject(openSolutionWithParam, engineParam, disableEnginePlugins)
     }
 
     @AfterMethod(alwaysRun = true)
@@ -121,7 +127,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         }
     }
 
-    protected fun configureAndOpenUnrealProject(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean = true) {
+    protected fun configureAndOpenUnrealProject(openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine, disableEnginePlugins: Boolean) {
         unrealInfo.currentEngine = engine
 
         println("Test starting with $engine, opening by $openWith.")
@@ -176,11 +182,14 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     // TODO Take out in framework?
     fun withRunProgram(
         timeout: Duration = Duration.ofSeconds(30),
+        configurationName: String? = null,
         action: (Project) -> Unit
     ) {
         var projectProcess: ProcessHandler? = null
         try {
             val runManagerEx = RunManagerEx.getInstanceEx(project)
+            if (configurationName != null)
+                runManagerEx.selectedConfiguration = runManagerEx.allSettings.single { it.name == configurationName }
             val settings = runManagerEx.selectedConfiguration
                 ?: throw AssertionError("No configuration selected")
             projectProcess = startRunConfigurationProcess(project, settings, timeout)
@@ -229,6 +238,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         }.toTypedArray()
     }
 
+    fun calculateProjectPathInSolutionExplorer(projectName: String,
+                                               openWith: EngineInfo.UnrealOpenType): Array<String> {
+        return calculateRootPathInSolutionExplorer(projectName, openWith) + "Source" + projectName
+    }
+
     val unrealPathsToMask: MutableMap<String, String>
         get() = mutableMapOf(
             Pair("absolute_ue_root", unrealInfo.currentEnginePath!!.toString()),
@@ -237,6 +251,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     val unrealRegexToMask: MutableMap<String, Regex>
         get() = mutableMapOf(
             Pair("number of projects", Regex("\\d?,?\\d{2,3} projects")),
+            Pair("<masked>", Regex("FullIncludePath:;.*")),
             Pair("relative_path/", Regex("(\\.\\.[\\\\/])+"))
         )
 
@@ -276,7 +291,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     @DataProvider
-    fun ue5SourceOnly_AllPModules() :MutableIterator<Array<Any>> {
+    fun ue5SourceOnly_AllPModels() :MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { !it.isInstalledBuild && it.version.major == 5 }
     }
 
@@ -294,7 +309,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
      *  based on file template type, [EngineInfo.UnrealOpenType], [UnrealEngine.version] and what engine uses - EGS/Source.
      * Unique name need for TestNG test collector, gold file/dir name, logging, etc.
      */
-    protected val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
+    protected open val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
         // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
         // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
         if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}fromSource"

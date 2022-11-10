@@ -1,10 +1,6 @@
 package integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rd.ide.model.unrealModel
-import com.jetbrains.rd.util.reactive.hasTrueValue
-import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -25,13 +21,12 @@ import testFrameworkExtentions.UnrealTestProject
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
+@Test(dataProvider = "AllEngines_AllPModels")
 class UnrealClass : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"
     }
 
-    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "AllEngines_AllPModels")
     fun newUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                   openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {
@@ -40,7 +35,7 @@ class UnrealClass : UnrealTestProject() {
 
             dump("Init") {}
             dump("Add different unreal class templates to '$activeSolution'") {
-                val path = calculateRootPathInSolutionExplorer(activeSolution, openWith) + "Source" + "EmptyUProject"
+                val path = calculateProjectPathInSolutionExplorer(activeSolution, openWith)
                 for (template in unrealTemplates) {
                     val className = template.type.split(' ').joinToString("")
                     { word -> word.replaceFirstChar { it.uppercase() } }
@@ -51,49 +46,40 @@ class UnrealClass : UnrealTestProject() {
         }
     }
 
-    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "AllEngines_AllPModels")
     fun moveUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                    openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {
             profile.customPathsToMask = unrealPathsToMask
             profile.customRegexToMask = unrealRegexToMask
 
-            val sourcePath = calculateRootPathInSolutionExplorer(activeSolution, openWith) + "Source"
+            val path = calculateProjectPathInSolutionExplorer(activeSolution, openWith)
 
-            addNewItem(project, sourcePath, UNREAL_ACTOR, "SomeActor")
-            addNewFolder(project, sourcePath, "TestMove")
+            addNewItem(project, path, UNREAL_ACTOR, "SomeActor")
+            addNewFolder(project, path, "TestMove")
 
             dump("Init") {}
             dump("Moving .h and .cpp") {
-                val moveToPath = sourcePath + "TestMove"
-                moveItem(project, sourcePath + "SomeActor.h", moveToPath)
-                moveItem(project, sourcePath + "SomeActor.cpp", moveToPath)
+                val moveToPath = path + "TestMove"
+                moveItem(project, path + "SomeActor.h", moveToPath)
+                moveItem(project, path + "SomeActor.cpp", moveToPath)
             }
         }
     }
 
-    @Mute("RIDER-77926", specificParameters = ["Sln5_1fromSource", "Uproject5_1fromSource"])
-    @Test(dataProvider = "AllEngines_AllPModels")
     fun deleteUClass(@Suppress("UNUSED_PARAMETER") caseName: String,
                      openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {
             profile.customPathsToMask = unrealPathsToMask
             profile.customRegexToMask = unrealRegexToMask
 
-            val sourcePath = mutableListOf("EmptyUProject").apply {
-                if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
-                add("EmptyUProject")
-                add("Source")
-                add("EmptyUProject")
-            }.toTypedArray()
+            val path = calculateProjectPathInSolutionExplorer(activeSolution, openWith)
 
-            addNewItem(project, sourcePath, UNREAL_ACTOR, "SomeActor")
+            addNewItem(project, path, UNREAL_ACTOR, "SomeActor")
 
             dump("Init Remove UClass test") {}
             dump("Deleting .h and .cpp") {
-                deleteElement(project, sourcePath + "SomeActor.h")
-                deleteElement(project, sourcePath + "SomeActor.cpp")
+                deleteElement(project, path + "SomeActor.h")
+                deleteElement(project, path + "SomeActor.cpp")
             }
         }
     }
