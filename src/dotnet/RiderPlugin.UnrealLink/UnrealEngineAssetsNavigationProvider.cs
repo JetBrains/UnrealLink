@@ -1,5 +1,4 @@
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Reader;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Search;
 using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model;
@@ -16,7 +15,7 @@ namespace RiderPlugin.UnrealLink
 			myBackendToUnrealEditor = backendToUnrealEditor;
 		}
 		
-		public bool Navigate(VirtualFileSystemPath assetPath, UEObjectExport objectExport, string guid)
+		public bool Navigate(VirtualFileSystemPath assetPath, string guid)
 		{
 			var model = myBackendToUnrealEditor.EditorModel;
 			if (model == null)
