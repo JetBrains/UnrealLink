@@ -400,7 +400,6 @@ tasks {
     }
 
     val generateChecksum by creating {
-        dependsOn(patchUpluginVersion)
         dependsOn(":generateModels")
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
         val resourcesDir = riderLinkDir.resolve("Resources")
@@ -414,8 +413,8 @@ tasks {
             checksumFile.delete()
             val inputFiles = sequence{
                 yield(upluginFile)
-                resourcesDir.listFilesOrdered().forEach { if(it.isFile) yield(it) }
-                sourceDir.listFilesOrdered().forEach { if(it.isFile) yield(it) }
+                resourcesDir.walkTopDown().forEach { if(it.isFile && (it.nameWithoutExtension != "checksum")) yield(it) }
+                sourceDir.walkTopDown().forEach { if(it.isFile) yield(it) }
             }
             val instance = MessageDigest.getInstance("MD5")
             inputFiles.forEach { instance.update(it.readBytes()) }
