@@ -83,7 +83,10 @@ void FRiderLinkModule::InitProtocol()
 			FString projectName = GetProjectName();
 			FString executableName = FPlatformProcess::ExecutableName(false);
 			uint32_t pid = FPlatformProcess::GetCurrentProcessId();
-			auto connectionInfo = JetBrains::EditorPlugin::ConnectionInfo(*projectName, *executableName, pid);
+			
+			std::wstring projectNameWstr = TCHAR_TO_WCHAR(GetData(projectName));
+			std::wstring executableNameWstr = TCHAR_TO_WCHAR(GetData(executableName));
+			auto connectionInfo = JetBrains::EditorPlugin::ConnectionInfo(projectNameWstr, executableNameWstr, pid);
 			EditorModel->get_connectionInfo().set(connectionInfo);
 		});
 	});
