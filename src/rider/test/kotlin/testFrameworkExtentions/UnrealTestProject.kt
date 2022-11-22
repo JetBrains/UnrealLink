@@ -78,6 +78,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
                 else Duration.ofMinutes(15)
 
     var disableEnginePlugins = true
+    var disableEngineIndexing = true
 
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
@@ -88,7 +89,10 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 
     @BeforeMethod(alwaysRun = true)
     open fun configureSettings() {
-        setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
+        if (disableEngineIndexing)
+            setReSharperBoolSetting("CppUnrealEngine/IndexEngine", false)
+        else
+            setReSharperBoolSetting("CppUnrealEngine/IndexEngine", true)
     }
 
     @BeforeMethod(alwaysRun = true, dependsOnMethods = ["configureSettings"])
@@ -272,6 +276,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         return generateUnrealDataProvider(allModels) { true }
     }
 
+    @DataProvider
+    fun AllEngines_slnOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlySln) { true}
+    }
+
     @Suppress("FunctionName")
     @DataProvider
     fun egsOnly_AllPModels(): MutableIterator<Array<Any>> {
@@ -299,6 +308,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     @DataProvider
     fun u5Only_slnOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlySln) { it.version.major == 5 }
+    }
+
+    @DataProvider
+    fun u5EgsOnly_slnOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlySln) { it.isInstalledBuild && it.version.major == 5 }
     }
 
     // ===== Private things for creating Data Providers above =====
