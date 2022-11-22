@@ -12,9 +12,12 @@ Init
        CoreUObject
        Engine
        InputCore
+     TestMove
      EmptyUProject.cpp
      EmptyUProject.h
      EmptyUProject.Build.cs
+     SomeActor.cpp
+     SomeActor.h
    EmptyUProject.uproject
    EmptyUProject.Target.cs
    EmptyUProjectEditor.Target.cs
@@ -2986,6 +2989,59 @@ Project [Name:EmptyUProject, GUID:GUID]
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
+            ProjectFileImpl(Path : SomeActor.cpp)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+CLCOMPILE ]
+            ProjectFileImpl(Path : SomeActor.h)[  CompileAsManagedOptions:ManagedNotSet
+  CompileAsOptions:Default
+  AdditionalOptions:
+  ForcedIncludeFiles:
+  FullIncludePath:
+  PreprocessorDefinitions:
+  UndefinePreprocessorDefinitions:
+  DefaultCharIsUnsigned:False
+  TreatWChar_tAsBuiltInType:True
+  RuntimeTypeInfo :True
+  UsePrecompiledHeader :None
+  PrecompiledHeaderThrough :
+  PrecompiledHeaderFile :
+  ExceptionHandling :CppExceptionHandlingNo
+  DisableLanguageExtensions :False
+  OmitDefaultLibName :False
+  BasicRuntimeChecks :BasicCheckNone
+  RuntimeLibrary :MultiThreaded
+  TargetMachine :NotSet
+  CallingConvetion :CDecl
+  CppLanguageStandard :Unspecified
+  CLanguageStandard :Default
+  ConformanceMode :False
+  HasCompilerTool: False
+  ExcludedFromBuild: False
+NONE ]
+            Folder [Name:TestMove]
 Project [Name:EpicGames.AspNet, GUID:GUID]
   Child items:
     ProjectFileImpl(Path : .editorconfig (relative_path/.editorconfig))[Hidden EDITORCONFIGFILES ]
@@ -4846,7 +4902,7 @@ Project [Name:XLocLocalization.Automation, GUID:GUID]
 
 
 ===================
-Add different unreal class templates to 'EmptyUProject'
+Moving .h and .cpp
 
 -Project
  -EmptyUProject * number of projects
@@ -4859,35 +4915,12 @@ Add different unreal class templates to 'EmptyUProject'
        CoreUObject
        Engine
        InputCore
-     Actor.cpp
-     Actor.h
-     ActorComponent.cpp
-     ActorComponent.h
-     Character.cpp
-     Character.h
-     ComplexTest.cpp
-     Empty.cpp
-     Empty.h
+     -TestMove
+      SomeActor.cpp
+      SomeActor.h
      EmptyUProject.cpp
      EmptyUProject.h
      EmptyUProject.Build.cs
-     Interface.cpp
-     Interface.h
-     Pawn.cpp
-     Pawn.h
-     SimpleTest.cpp
-     SlateWidget.cpp
-     SlateWidget.h
-     SlateWidgetStyle.cpp
-     SlateWidgetStyle.h
-     SoundEffectSource.cpp
-     SoundEffectSource.h
-     SoundEffectSubmix.cpp
-     SoundEffectSubmix.h
-     SynthComponent.cpp
-     SynthComponent.h
-     UObject.cpp
-     UObject.h
    EmptyUProject.uproject
    EmptyUProject.Target.cs
    EmptyUProjectEditor.Target.cs
@@ -7781,240 +7814,6 @@ Project [Name:EmptyUProject, GUID:GUID]
       Child items:
         Project [Name:EmptyUProject, GUID:GUID]
           Child items:
-            ProjectFileImpl(Path : Actor.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : Actor.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : ActorComponent.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : ActorComponent.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : Character.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : Character.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : ComplexTest.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : Empty.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : Empty.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
             ProjectFileImpl(Path : EmptyUProject.Build.cs)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
@@ -8093,7 +7892,9 @@ NONE ]
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
-            ProjectFileImpl(Path : Interface.cpp)[  CompileAsManagedOptions:ManagedNotSet
+            Folder [Name:TestMove]
+              Child items:
+                ProjectFileImpl(Path : SomeActor.cpp)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:
@@ -8119,397 +7920,7 @@ NONE ]
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
-            ProjectFileImpl(Path : Interface.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : Pawn.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : Pawn.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : SimpleTest.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SlateWidget.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SlateWidget.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : SlateWidgetStyle.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SlateWidgetStyle.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : SoundEffectSource.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SoundEffectSource.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : SoundEffectSubmix.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SoundEffectSubmix.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : SynthComponent.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : SynthComponent.h)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-NONE ]
-            ProjectFileImpl(Path : UObject.cpp)[  CompileAsManagedOptions:ManagedNotSet
-  CompileAsOptions:Default
-  AdditionalOptions:
-  ForcedIncludeFiles:
-  FullIncludePath:
-  PreprocessorDefinitions:
-  UndefinePreprocessorDefinitions:
-  DefaultCharIsUnsigned:False
-  TreatWChar_tAsBuiltInType:True
-  RuntimeTypeInfo :True
-  UsePrecompiledHeader :None
-  PrecompiledHeaderThrough :
-  PrecompiledHeaderFile :
-  ExceptionHandling :CppExceptionHandlingNo
-  DisableLanguageExtensions :False
-  OmitDefaultLibName :False
-  BasicRuntimeChecks :BasicCheckNone
-  RuntimeLibrary :MultiThreaded
-  TargetMachine :NotSet
-  CallingConvetion :CDecl
-  CppLanguageStandard :Unspecified
-  CLanguageStandard :Default
-  ConformanceMode :False
-  HasCompilerTool: False
-  ExcludedFromBuild: False
-CLCOMPILE ]
-            ProjectFileImpl(Path : UObject.h)[  CompileAsManagedOptions:ManagedNotSet
+                ProjectFileImpl(Path : SomeActor.h)[  CompileAsManagedOptions:ManagedNotSet
   CompileAsOptions:Default
   AdditionalOptions:
   ForcedIncludeFiles:
