@@ -1,0 +1,13 @@
+-ROOT
+ -Engine
+  -UE5
+   -Engine.AssetRegistry
+    -AssetBundleData
+     ImportExportText
+    -AssetBundleEntry
+     ImportExportText
+     LegacyAssetBundleEntry
+ -Games
+  -EmptyUProject
+   -EmptyUProject.EmptyUProject
+    SimpleUnitTest
