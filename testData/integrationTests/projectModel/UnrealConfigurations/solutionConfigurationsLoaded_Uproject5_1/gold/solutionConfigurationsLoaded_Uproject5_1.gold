@@ -1,6 +1,6 @@
 Count: 5
 RdConfigurationAndPlatform(configuration=DebugGame Editor, platform=Win64)
-RdConfigurationAndPlatform(configuration=Shipping, platform=Win64)
-RdConfigurationAndPlatform(configuration=DebugGame, platform=Win64)
+RdConfigurationAndPlatform(configuration=DebugGame Program, platform=Win64)
+RdConfigurationAndPlatform(configuration=Development Program, platform=Win64)
+RdConfigurationAndPlatform(configuration=Shipping Program, platform=Win64)
 RdConfigurationAndPlatform(configuration=Development Editor, platform=Win64)
-RdConfigurationAndPlatform(configuration=Development, platform=Win64)
