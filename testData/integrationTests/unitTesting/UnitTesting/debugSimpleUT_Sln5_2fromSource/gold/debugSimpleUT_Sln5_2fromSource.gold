@@ -1,10 +1,10 @@
 --> SimpleUnitTest.cpp:7$(293) // {
 SimpleUnitTest::RunTest(const FString &) SimpleUnitTest.cpp:7
-    +this = <address> {UE4Editor-EmptyUProject.dll!SimpleUnitTestAutomationTestInstance} {...}: SimpleUnitTest *const
+    +this = <address> {UnrealEditor-EmptyUProject.dll!SimpleUnitTestAutomationTestInstance} {...}: SimpleUnitTest *const
     +Parameters = Empty: const FString &
 
 --> SimpleUnitTest.cpp:10$(379) // }
 SimpleUnitTest::RunTest(const FString &) SimpleUnitTest.cpp:10
-    +this = <address> {UE4Editor-EmptyUProject.dll!SimpleUnitTestAutomationTestInstance} {...}: SimpleUnitTest *const
+    +this = <address> {UnrealEditor-EmptyUProject.dll!SimpleUnitTestAutomationTestInstance} {...}: SimpleUnitTest *const
     +Parameters = Empty: const FString &
 

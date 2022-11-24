@@ -26,6 +26,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -36,6 +38,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -49,6 +56,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -58,6 +67,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -68,6 +82,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         OneSky
         System
@@ -79,6 +95,12 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        AWSSDK.S3.CodeAnalysis
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         AWSSDK.S3/3.3.113.2
         Microsoft.CSharp/4.7.0
@@ -167,6 +189,11 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
+         EpicGames.MsBuild
+         EpicGames.Serialization
+         EpicGames.UHT
         fastJSON
         Ionic.Zip.Reduced
         System
@@ -178,6 +205,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Google.Apis.Drive.v3/1.33.1.1225
         Google.Apis.Sheets.v4/1.33.1.1229
@@ -248,6 +280,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         fastJSON
         Ionic.Zip.Reduced
         System
@@ -259,6 +293,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -333,6 +372,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -342,6 +383,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -353,6 +399,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -362,6 +410,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -371,11 +424,12 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         fastJSON
         Ionic.Zip.Reduced
         Magick.NET-Q16-HDRI-AnyCPU
         Magick.NET.Core
-        Newtonsoft.JSON
         System
         System.Core
         System.Data
@@ -386,6 +440,11 @@ Init Remove UClass test
         System.Xml
         System.Xml.Linq
         WindowsDevicePortalWrapper
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         MySql.Data/6.10.9
@@ -604,6 +663,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         BouncyCastle.Crypto
         Ionic.Zip.Reduced
         System
@@ -615,6 +676,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         Portable.BouncyCastle/1.8.6.7
@@ -647,6 +713,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -656,6 +724,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -669,6 +742,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -678,6 +753,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         System.Data.DataSetExtensions/4.5.0
      -Properties
@@ -688,6 +768,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -697,6 +779,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         MySql.Data/6.10.9
@@ -712,6 +799,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -721,6 +810,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -734,6 +828,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         OneSky
         System
         System.Core
@@ -744,6 +840,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -757,6 +858,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -766,6 +869,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -775,6 +883,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -784,6 +894,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -796,6 +911,12 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
+         EpicGames.MsBuild
+         EpicGames.Perforce
+         EpicGames.Serialization
+         EpicGames.UHT
         Ionic.Zip.Reduced
         System
         System.Core
@@ -807,6 +928,11 @@ Init Remove UClass test
         System.Xml
         System.Xml.Linq
         UnrealWindowsForms
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Google.Apis.Drive.v3/1.33.1.1225
         Microsoft.CSharp/4.7.0
@@ -858,6 +984,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -868,6 +996,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -881,6 +1014,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -891,6 +1026,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -907,6 +1047,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -916,6 +1058,11 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -1021,6 +1168,8 @@ Init Remove UClass test
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
         System
         System.Core
         System.Data
@@ -1030,6 +1179,9 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
      -Properties
       MetaData.cs
      -Expressions
@@ -1442,6 +1594,9 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         System.Memory/4.5.5
      -Properties
@@ -1565,6 +1720,9 @@ Init Remove UClass test
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.Win32.Registry/5.0.0
         System.Linq.Async/6.0.1
@@ -3510,6 +3668,7 @@ Project [Name:EpicGames.Perforce, GUID:GUID]
     ProjectFileImpl(Path : .editorconfig)[EDITORCONFIGFILES ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.dll (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/win-x64/Debug/EpicGames.Perforce.Native.dll))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.dylib (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/mac-x64/Release/EpicGames.Perforce.Native.dylib))[Hidden NONE ]
+    ProjectFileImpl(Path : EpicGames.Perforce.Native.pdb (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/win-x64/Debug/EpicGames.Perforce.Native.pdb))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.so (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/linux-x64/Release/EpicGames.Perforce.Native.so))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.csproj)[]
     ProjectFileImpl(Path : FileSpecList.cs)[COMPILE ]
@@ -4925,6 +5084,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -4935,6 +5096,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -4948,6 +5114,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -4957,6 +5125,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -4967,6 +5140,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         OneSky
         System
@@ -4978,6 +5153,12 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        AWSSDK.S3.CodeAnalysis
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         AWSSDK.S3/3.3.113.2
         Microsoft.CSharp/4.7.0
@@ -5066,6 +5247,11 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
+         EpicGames.MsBuild
+         EpicGames.Serialization
+         EpicGames.UHT
         fastJSON
         Ionic.Zip.Reduced
         System
@@ -5077,6 +5263,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Google.Apis.Drive.v3/1.33.1.1225
         Google.Apis.Sheets.v4/1.33.1.1229
@@ -5147,6 +5338,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         fastJSON
         Ionic.Zip.Reduced
         System
@@ -5158,6 +5351,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5232,6 +5430,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5241,6 +5441,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -5252,6 +5457,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5261,6 +5468,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -5270,11 +5482,12 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         fastJSON
         Ionic.Zip.Reduced
         Magick.NET-Q16-HDRI-AnyCPU
         Magick.NET.Core
-        Newtonsoft.JSON
         System
         System.Core
         System.Data
@@ -5285,6 +5498,11 @@ Deleting .h and .cpp
         System.Xml
         System.Xml.Linq
         WindowsDevicePortalWrapper
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         MySql.Data/6.10.9
@@ -5503,6 +5721,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         BouncyCastle.Crypto
         Ionic.Zip.Reduced
         System
@@ -5514,6 +5734,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         Portable.BouncyCastle/1.8.6.7
@@ -5546,6 +5771,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5555,6 +5782,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5568,6 +5800,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5577,6 +5811,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         System.Data.DataSetExtensions/4.5.0
      -Properties
@@ -5587,6 +5826,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5596,6 +5837,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         MySql.Data/6.10.9
@@ -5611,6 +5857,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5620,6 +5868,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5633,6 +5886,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         OneSky
         System
         System.Core
@@ -5643,6 +5898,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5656,6 +5916,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5665,6 +5927,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
      -Properties
@@ -5674,6 +5941,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5683,6 +5952,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5695,6 +5969,12 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
+         EpicGames.MsBuild
+         EpicGames.Perforce
+         EpicGames.Serialization
+         EpicGames.UHT
         Ionic.Zip.Reduced
         System
         System.Core
@@ -5706,6 +5986,11 @@ Deleting .h and .cpp
         System.Xml
         System.Xml.Linq
         UnrealWindowsForms
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Google.Apis.Drive.v3/1.33.1.1225
         Microsoft.CSharp/4.7.0
@@ -5757,6 +6042,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -5767,6 +6054,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5780,6 +6072,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         Ionic.Zip.Reduced
         System
         System.Core
@@ -5790,6 +6084,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5806,6 +6105,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         ...
         System
         System.Core
         System.Data
@@ -5815,6 +6116,11 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.CodeAnalysis.Analyzers
+        Microsoft.CodeAnalysis.CSharp.Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.CSharp/4.7.0
         System.Data.DataSetExtensions/4.5.0
@@ -5920,6 +6226,8 @@ Deleting .h and .cpp
      -Dependencies
       -.NET 6.0
        -Assemblies
+        -Implicit
+         EpicGames.IoHash
         System
         System.Core
         System.Data
@@ -5929,6 +6237,9 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
      -Properties
       MetaData.cs
      -Expressions
@@ -6341,6 +6652,9 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         System.Memory/4.5.5
      -Properties
@@ -6464,6 +6778,9 @@ Deleting .h and .cpp
         System.Runtime.Serialization
         System.Xml
         System.Xml.Linq
+       -Analyzers
+        Microsoft.Extensions.Logging.Generators
+        Microsoft.Extensions.Logging.Generators
        -Packages
         Microsoft.Win32.Registry/5.0.0
         System.Linq.Async/6.0.1
@@ -8357,6 +8674,7 @@ Project [Name:EpicGames.Perforce, GUID:GUID]
     ProjectFileImpl(Path : .editorconfig)[EDITORCONFIGFILES ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.dll (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/win-x64/Debug/EpicGames.Perforce.Native.dll))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.dylib (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/mac-x64/Release/EpicGames.Perforce.Native.dylib))[Hidden NONE ]
+    ProjectFileImpl(Path : EpicGames.Perforce.Native.pdb (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/win-x64/Debug/EpicGames.Perforce.Native.pdb))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.Native.so (relative_path/Binaries/DotNET/EpicGames.Perforce.Native/linux-x64/Release/EpicGames.Perforce.Native.so))[Hidden NONE ]
     ProjectFileImpl(Path : EpicGames.Perforce.csproj)[]
     ProjectFileImpl(Path : FileSpecList.cs)[COMPILE ]

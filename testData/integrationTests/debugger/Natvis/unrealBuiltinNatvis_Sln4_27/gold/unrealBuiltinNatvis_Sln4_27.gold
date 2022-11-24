@@ -76,7 +76,7 @@ TestTPair() NatvisTest.cpp:172
 --> NatvisTest.cpp:186$(3604) // 	nop(); // BREAK HERE
 TestSmartPointers() NatvisTest.cpp:186
     +null_wp = Null: TWeakPtr<Dummy,0>
-    +inline_big = {{value=5, pad=<address> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...}}}: TInlineValue<DummyBig,64,8>
+    +inline_big = {{value=5, pad=<address> {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...}}: TInlineValue<DummyBig,64,8>
     +inline_small = {{x=1, y=2, z=3}}: TInlineValue<Dummy,64,8>
     +sp = Ptr=<address>, SharedRefs=1, WeakRefs=2, Object={x=1, y=2, z=3}: TSharedPtr<Dummy,0>
     +sref = Ptr=<address>, SharedRefs=1, WeakRefs=1, Object={x=4, y=5, z=6}: TSharedRef<Dummy,0>
