@@ -3,6 +3,7 @@ package integrationTests.projectModel
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -64,6 +65,7 @@ class UnrealModule : UnrealTestProject() {
         }
     }
 
+    @Mute("Can not find requested path(s) in tree: \"Engine\". Fixed in 231.")
     @Test(dataProvider = "ue5SourceOnly_AllPModels")
     fun newRuntimeEngineModule(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {
