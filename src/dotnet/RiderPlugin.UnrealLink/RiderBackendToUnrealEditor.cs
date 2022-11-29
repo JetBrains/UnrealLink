@@ -236,13 +236,13 @@ namespace RiderPlugin.UnrealLink
             myUnrealHost.PerformModelAction(riderModel =>
             {
                 riderModel.FilterLinkCandidates.Set((_, candidates) =>
-                    RdTask<ILinkResponse[]>.Successful(candidates
+                    RdTask.Successful(candidates
                         .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))
                         .AsArray()));
                 riderModel.IsMethodReference.Set((_, methodReference) =>
                 {
                     var b = myEditorNavigator.IsMethodReference(methodReference);
-                    return RdTask<bool>.Successful(b);
+                    return RdTask.Successful(b);
                 });
                 riderModel.OpenBlueprint.Advise(lf, blueprintReference =>
                     OnOpenedBlueprint(unrealModel, blueprintReference));
