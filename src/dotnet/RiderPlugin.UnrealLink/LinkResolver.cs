@@ -5,7 +5,6 @@ using JetBrains.Diagnostics;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
-using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util.DataStructures;
 using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model;
@@ -18,8 +17,7 @@ namespace RiderPlugin.UnrealLink
     {
         private readonly ISolution _solution;
         private readonly ILogger _logger;
-        private readonly ICppUE4SolutionDetector _unrealEngineSolutionDetector;
-        private static readonly CompactMap<char, char> PairSymbol = new CompactMap<char, char>();
+        private static readonly CompactMap<char, char> PairSymbol = new();
         private readonly Lazy<VirtualFileSystemPath> _ue4SourcesPath;
         private readonly Lazy<List<VirtualFileSystemPath>> _possiblePaths;
 
@@ -36,15 +34,9 @@ namespace RiderPlugin.UnrealLink
         {
             _solution = solution;
             _logger = logger;
-            _unrealEngineSolutionDetector = unrealEngineSolutionDetector;
             var solutionDirectory = _solution.SolutionDirectory;
             _ue4SourcesPath = new Lazy<VirtualFileSystemPath>(() =>
-            {
-                using (ReadLockCookie.Create())
-                {
-                    return unrealEngineSolutionDetector.UE4SourcesPath;
-                }
-            });
+                unrealEngineSolutionDetector.UnrealContext.Value.UnrealEngineSourcePath);
 
             _possiblePaths = new Lazy<List<VirtualFileSystemPath>>(() =>
                 new List<VirtualFileSystemPath>

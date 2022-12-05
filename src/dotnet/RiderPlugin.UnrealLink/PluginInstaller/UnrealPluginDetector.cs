@@ -40,7 +40,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
         private readonly CppUE4Version myNotWorkingInEngineVersion = new(5, 0, 0);
 
-        public bool IsValidEngine() => UnrealVersion < myNotWorkingInEngineVersion || mySolutionDetector.BuiltFromSources;
+        public bool IsValidEngine() => UnrealVersion < myNotWorkingInEngineVersion ||
+                                       mySolutionDetector.UnrealContext.Value.IsBuiltFromSource;
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
@@ -63,7 +64,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         () =>
                         {
                             myLogger.Info("[UnrealLink]: Looking for RiderLink plugins");
-                            UnrealVersion = mySolutionDetector.Version;
+                            UnrealVersion = mySolutionDetector.UnrealContext.Value.Version;
 
                             if (UnrealVersion < myMinimalSupportedVersion)
                             {
@@ -140,7 +141,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private bool TryGetEnginePluginFromSolution(ICppUE4SolutionDetector solutionDetector,
             UnrealPluginInstallInfo installInfo)
         {
-            var engineRootFolder = solutionDetector.UE4SourcesPath.Directory;
+            var engineRootFolder = solutionDetector.UnrealContext.Value.UnrealEngineRoot;
             return TryGetEnginePluginFromEngineRoot(installInfo, engineRootFolder);
         }
 

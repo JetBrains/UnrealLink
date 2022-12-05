@@ -1,11 +1,9 @@
 using System;
 using JetBrains.Annotations;
-using JetBrains.Application.Threading;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
-using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util;
@@ -57,11 +55,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 var uprojectFile = installDescription?.UprojectPath;
                 if (uprojectFile.IsNullOrEmpty())
                 {
-                    var cppUe4SolutionDetector = solution.GetComponent<CppUE4SolutionDetector>();
-                    using (solution.Locks.UsingReadLock())
-                    {
-                        uprojectFile = cppUe4SolutionDetector.GetUProjectPath();   
-                    }
+                    var cppUe4SolutionDetector = solution.GetComponent<ICppUE4SolutionDetector>();
+                    uprojectFile = cppUe4SolutionDetector.GetUProjectPath();
                 }
 
                 await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, solution, unrealHost, engineRoot, uprojectFile));
@@ -92,12 +87,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return;
 
-            CppUE4Version ueVersion;
-            using (ReadLockCookie.Create())
-            {
-                ueVersion = solution.GetComponent<CppUE4SolutionDetector>().Version;
-            }
-
+            var ueVersion = solution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.Version;
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot, ueVersion);
 
             // 1. If project is under engine root, use GenerateProjectFiles.{extension} first
