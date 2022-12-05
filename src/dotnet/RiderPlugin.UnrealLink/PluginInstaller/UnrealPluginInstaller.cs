@@ -15,7 +15,6 @@ using JetBrains.ProjectModel.DataContext;
 using JetBrains.ProjectModel.ProjectsHost.SolutionHost.Progress;
 using JetBrains.Rd.Base;
 using JetBrains.RdBackend.Common.Features;
-using JetBrains.ReSharper.Feature.Services.Cpp.Util;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model;
@@ -307,12 +306,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
 
-            var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
-            bool isSln;
-            using (mySolution.Locks.UsingReadLock())
-            {
-                isSln = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
-            }
+            var cppUe4SolutionDetector = mySolution.GetComponent<ICppUE4SolutionDetector>();
+            var isSln = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
 
             if (isSln)
             {
@@ -416,13 +411,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
 
-            var cppUe4SolutionDetector = mySolution.GetComponent<CppUE4SolutionDetector>();
-            bool isSln;
-            using (mySolution.Locks.UsingReadLock())
-            {
-                isSln = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
-            }
-
+            var cppUe4SolutionDetector = mySolution.GetComponent<ICppUE4SolutionDetector>();
+            var isSln  = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
             if (isSln)
             {
                 var refreshText = Strings.RefreshingProjectFiles_Text;
