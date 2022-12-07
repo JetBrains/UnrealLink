@@ -21,7 +21,7 @@ import java.time.Duration
 @Epic("Project Model")
 @Feature("New Unreal Plugin")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS],
+    platform = [PlatformType.WINDOWS_ALL],
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )

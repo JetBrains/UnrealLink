@@ -7,6 +7,7 @@ import com.intellij.execution.process.ProcessHandler
 import com.intellij.ide.GeneralSettings
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.unrealModel
@@ -223,11 +224,14 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     protected fun generateSolutionFromUProject(uprojectFile: File, timeout: Duration = Duration.ofSeconds(90)) {
-        val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool\\" else ""
+        val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool/" else ""
         val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
-        val ubtCommand = "${unrealInfo.currentEngine!!.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " +
-                "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
-        ProcessBuilder(*(ubtCommand).split(" ").toTypedArray())
+        val ubtExecutable = "UnrealBuildTool${if(SystemInfo.isWindows) ".exe" else ""}"
+        val ubtBuildTool = unrealInfo.currentEnginePath!!.resolve("Engine/Binaries/DotNET/${ue5specific}/${ubtExecutable}").absolutePath
+        logger.debug("Unreal Engine Build Tool Path: ${ubtBuildTool}")
+        val ubtCommand = listOf(ubtBuildTool, "-ProjectFiles", "-game", "-progress", engineType, "-project=\"${uprojectFile.absolutePath}\"")
+
+        ProcessBuilder(ubtCommand)
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
@@ -278,12 +282,12 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 
     @DataProvider
     fun AllEngines_slnOnly(): MutableIterator<Array<Any>> {
-        return generateUnrealDataProvider(onlySln) { true}
+        return generateUnrealDataProvider(onlySln) { true }
     }
 
     @DataProvider
     fun AllEngines_uprojectOnly(): MutableIterator<Array<Any>> {
-        return generateUnrealDataProvider(onlyUproject) { true}
+        return generateUnrealDataProvider(onlyUproject) { true }
     }
 
     @Suppress("FunctionName")
