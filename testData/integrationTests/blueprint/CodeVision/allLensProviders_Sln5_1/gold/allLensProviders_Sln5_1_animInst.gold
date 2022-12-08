@@ -1,0 +1,10 @@
+Inline 577 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=481, endOffset=481) 0 blueprint usages
+    Hidden
+Block 266 BlockCodeVisionListRenderer
+Top
+    Visible
+        Text RdTextRange(startOffset=266, endOffset=266) 1 derived blueprint class
+    Hidden

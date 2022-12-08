@@ -281,6 +281,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         return generateUnrealDataProvider(onlySln) { true}
     }
 
+    @DataProvider
+    fun AllEngines_uprojectOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlyUproject) { true}
+    }
+    
     @Suppress("FunctionName")
     @DataProvider
     fun egsOnly_AllPModels(): MutableIterator<Array<Any>> {
@@ -315,6 +320,12 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         return generateUnrealDataProvider(onlySln) { it.isInstalledBuild && it.version.major == 5 }
     }
 
+    @DataProvider
+    fun specialTestProvider() :MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlySln) { it.isInstalledBuild && it.version.major == 5
+                && it.version.minor == 1 }
+    }
+    
     // ===== Private things for creating Data Providers above =====
     protected val guidRegex = "^[{]?[\\da-fA-F]{8}-([\\da-fA-F]{4}-){3}[\\da-fA-F]{12}[}]?$".toRegex()
 

@@ -1,0 +1,45 @@
+Inline 630 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=614, endOffset=614) Changed in 1 blueprint
+    Hidden
+Inline 765 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=722, endOffset=722) Changed in 2 blueprints
+    Hidden
+Inline 899 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=855, endOffset=855) Implemented in 1 blueprint
+    Hidden
+Inline 994 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=947, endOffset=947) Implemented in 0 blueprints
+    Hidden
+Inline 1128 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=1077, endOffset=1077) Implemented in 1 blueprint
+    Hidden
+Inline 1289 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=1236, endOffset=1236) 3 blueprint usages
+    Hidden
+Inline 1367 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=1327, endOffset=1327) 0 blueprint usages
+    Hidden
+Inline 1443 InlineCodeVisionListRenderer
+Right
+    Visible
+        Text RdTextRange(startOffset=1406, endOffset=1406) 0 blueprint usages
+    Hidden
+Block 223 BlockCodeVisionListRenderer
+Top
+    Visible
+        Text RdTextRange(startOffset=223, endOffset=223) 2 derived blueprint classes
+    Hidden
