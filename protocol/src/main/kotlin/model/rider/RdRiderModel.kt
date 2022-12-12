@@ -50,7 +50,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     private val EditorPluginOutOfSync = structdef("EditorPluginOutOfSync") {
         field("status", PluginInstallStatus)
         field("IsGameAvailable", bool)
-        field("IsEngineAvailable", bool)
     }
 
     private val InstallMessage = structdef("InstallMessage") {
