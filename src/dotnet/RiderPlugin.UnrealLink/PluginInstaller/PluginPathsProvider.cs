@@ -20,7 +20,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private static readonly string EditorPluginFile = "RiderLink.zip";
         public readonly FileSystemPath PathToPackedPlugin;
         public readonly byte[] CurrentPluginChecksum;
-        private readonly byte[] NullChecksum = { 0 };
+        public static readonly byte[] NullChecksum = { 0 };
 
         public PluginPathsProvider(ApplicationPackages applicationPackages,
             IDeployedPackagesExpandLocationResolver resolver, ILogger logger)

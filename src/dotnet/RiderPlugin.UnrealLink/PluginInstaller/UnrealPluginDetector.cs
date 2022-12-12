@@ -7,10 +7,12 @@ using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
+using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.Rider.Model.Notifications;
 using JetBrains.Util;
+using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.Resources;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
@@ -30,21 +32,18 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private readonly Lifetime myLifetime;
         private readonly ILogger myLogger;
-        private readonly UEProjectsTracker myProjectsTracker;
+        private readonly CppUE4ProjectsTracker myProjectsTracker;
         private readonly ICppUE4SolutionDetector mySolutionDetector;
         public readonly IProperty<UnrealPluginInstallInfo> InstallInfoProperty;
 
         public CppUE4Version UnrealVersion { get; private set; }
         private readonly CppUE4Version myMinimalSupportedVersion = new(4, 23, 0);
-        private readonly CppUE4Version myNotWorkingInEngineVersion = new(5, 0, 0);
-
-        public bool IsValidEngine() => UnrealVersion < myNotWorkingInEngineVersion || mySolutionDetector.BuiltFromSources;
 
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
 
         public UnrealPluginDetector(Lifetime lifetime, ILogger logger, ICppUE4SolutionDetector solutionDetector,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, UEProjectsTracker projectsTracker)
+            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, CppUE4ProjectsTracker projectsTracker)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
@@ -81,22 +80,34 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                 return;
                             }
                             
-                            var riderLinkFolders = myProjectsTracker.GetAllPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
-                            var gameRoots = myProjectsTracker.GetAllGameRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
+                            var riderLinkFolders = myProjectsTracker.GetAllUPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
+                            var gameRoots = myProjectsTracker.GetAllUProjectRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
 
                             var foundEnginePlugin = false;
-                            var installInfo = new UnrealPluginInstallInfo();
+                            var installInfo = new UnrealPluginInstallInfo
+                            {
+                                EngineRoot = solutionDetector.UnrealEngineRoot
+                            };
+                            var enginePluginsFolder = solutionDetector.UnrealEngineRoot.Combine("Engine").Combine("Plugins");
                             foreach (var riderLinkFolder in riderLinkFolders)
                             {
-                                if (riderLinkFolder.StartsWith(solutionDetector.UnrealEngineRoot))
+                                if (riderLinkFolder.StartsWith(enginePluginsFolder))
                                 {
                                     myLogger.Info($"[UnrealLink]: found plugin {installInfo.EnginePlugin.UnrealPluginRootFolder}");
                                     foundEnginePlugin = true;
                                     installInfo.EnginePlugin = 
                                         GetPluginInfo(riderLinkFolder.Combine(UPLUGIN_FILENAME),
                                             VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext));
-                                    installInfo.EngineRoot = solutionDetector.UnrealEngineRoot;
                                 }
+                            }
+
+                            if (!foundEnginePlugin)
+                            {
+                                installInfo.EnginePlugin.IsPluginAvailable = false;
+                                installInfo.EnginePlugin.PluginChecksum = PluginPathsProvider.NullChecksum;
+                                installInfo.EnginePlugin.ProjectName = "<ENGINE>";
+                                installInfo.EnginePlugin.UnrealPluginRootFolder =
+                                    installInfo.EngineRoot.Combine(ourPathToEnginePlugin).Directory;
                             }
 
                             // Gather data about Project plugins
