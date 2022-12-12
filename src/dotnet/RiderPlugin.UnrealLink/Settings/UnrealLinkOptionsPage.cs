@@ -1,8 +1,12 @@
 ﻿using System.Linq;
 using JetBrains.Application.Settings;
+using JetBrains.Application.UI.Controls.FileSystem;
 using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionsDialog;
+using JetBrains.DataFlow;
+using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
+using JetBrains.IDE.UI.Extensions.PathActions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
@@ -11,6 +15,7 @@ using JetBrains.ReSharper.Feature.Services.OptionPages.CodeEditing;
 using JetBrains.ReSharper.Resources.Settings;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Rider.Model.UIAutomation;
+using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Resources;
@@ -26,7 +31,13 @@ namespace RiderPlugin.UnrealLink.Settings
             typeof(Strings),
             nameof(Strings.IfThisOptionIsEnabledTheRiderLinkEditor_Text))]
         public bool InstallRiderLinkPlugin;
+
+        [SettingsEntry(null,
+            typeof(Strings),
+            nameof(Strings.IntermediateBuildFolderRoot_Text))]
+        public FileSystemPath IntermediateBuildFolderRoot;
     }
+    
 
     [OptionsPage(PID, Name, typeof(CppThemedIcons.Unreal), Sequence = 0.02,
         ParentId = CodeEditingPage.PID, SearchTags = new []{"Unreal Engine", "UnrealLink", "RiderLink"})]
@@ -36,15 +47,50 @@ namespace RiderPlugin.UnrealLink.Settings
         public const string PID = "UnrealLinkOptions";
         public const string Name = "Unreal Engine";
 
-        public UnrealLinkOptionsPage(Lifetime lifetime,
+        public UnrealLinkOptionsPage(
+            Lifetime lifetime,
             OptionsPageContext optionsPageContext,
-            OptionsSettingsSmartContext optionsSettingsSmartContext)
+            OptionsSettingsSmartContext optionsSettingsSmartContext,
+            IconHostBase iconHost,
+            ICommonFileDialogs commonFileDialogs)
             : base(lifetime, optionsPageContext, optionsSettingsSmartContext)
         {
             AddBoolOption((UnrealLinkSettings k) => k.InstallRiderLinkPlugin,
-                "Automatically update RiderLink plugin for Unreal Editor (recommended)");
+                "Automatically update RiderLink plugin for Unreal Editor");
+            AddTmpDirChooserOption(lifetime, iconHost, commonFileDialogs);
             
             SetupInstallButtons();
+        }
+        
+        private void AddTmpDirChooserOption(Lifetime lifetime, IconHostBase iconHost, ICommonFileDialogs commonFileDialogs)
+        {
+            var intermediateBuildFolderProperty = new Property<string>(lifetime, "IntermediateBuildFolderProperty");
+      
+            var intermediateBuildFolder = 
+                OptionsSettingsSmartContext.GetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot);
+
+            var defaultBuildPath = VirtualFileSystemDefinition.GetTempPath(InteractionContext.SolutionContext);
+            intermediateBuildFolderProperty.Value = intermediateBuildFolder.IsNullOrEmpty() ? defaultBuildPath.FullPath : intermediateBuildFolder.FullPath;
+      
+            intermediateBuildFolderProperty.Change.Advise_NoAcknowledgement(lifetime, args =>
+            {
+                var newValue = FileSystemPath.Parse(args.New);
+                
+                OptionsSettingsSmartContext.SetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot, (newValue.IsValidOnCurrentOS && newValue.IsAbsolute)? newValue : defaultBuildPath.ToNativeFileSystemPath());
+            });
+
+            AddControl(Strings.IntermediateBuildFolderRoot_Text.GetBeLabel());
+            AddFolderChooserOption(
+                intermediateBuildFolderProperty,
+                defaultBuildPath.ToNativeFileSystemPath(),
+                defaultBuildPath.ToNativeFileSystemPath(),
+                iconHost,
+                commonFileDialogs,
+                null,
+                null,
+                new[] { (BeSimplePathValidationRules.SHOULD_BE_ABSOLUTE, ValidationStates.validationWarning) });
+      
+            AddCommentText(Strings.BuildingRiderLinkMightFailWithNonASCIISymbols_Text);
         }
 
         private void SetupInstallButtons()

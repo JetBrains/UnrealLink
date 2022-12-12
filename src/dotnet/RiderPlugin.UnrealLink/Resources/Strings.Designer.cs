@@ -78,5 +78,8 @@
     public static string FailedToRefreshProjectFiles_Text => ResourceManager.GetString("FailedToRefreshProjectFiles_Text");
     public static string RiderLinkPluginWillNotBeVisibleInThe_Text => ResourceManager.GetString("RiderLinkPluginWillNotBeVisibleInThe_Text");
     public static string NeedToRefreshProjectFilesManually_Text => ResourceManager.GetString("NeedToRefreshProjectFilesManually_Text");
+    public static string IntermediateBuildFolderRoot_Text => ResourceManager.GetString("IntermediateBuildFolderRoot_Text");
+    public static string IntermediateBuildFolder_FileChooserOption_Tooltip => ResourceManager.GetString("IntermediateBuildFolder_FileChooserOption_Tooltip");
+    public static string BuildingRiderLinkMightFailWithNonASCIISymbols_Text => ResourceManager.GetString("BuildingRiderLinkMightFailWithNonASCIISymbols_Text");
   }
 }

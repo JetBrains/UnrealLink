@@ -30,7 +30,7 @@
         </comment>
     </data>
     <data name="InstallRiderLinkPluginInEngineDescription_Text" xml:space="preserve">
-        <value>Install RiderLink plugin into the Engine. Doesn't work with UE5 from Epic Games Launcher.</value>
+        <value>Install RiderLink plugin into the Engine.</value>
         <comment>Option Page: Name
         </comment>
     </data>
@@ -137,5 +137,15 @@ You need to manually enable RiderLink in UnrealEditor</value>
     </data>
     <data name="NeedToRefreshProjectFilesManually_Text" xml:space="preserve">
         <value>Need to refresh project files in the Unreal Editor or in the File Explorer with a context action for .uproject file 'Generate project files'</value>
+    </data>
+    <data name="IntermediateBuildFolderRoot_Text" xml:space="preserve">
+        <value>Intermediate folder to build RiderLink, before installing into the project.</value>
+    </data>
+    <data name="IntermediateBuildFolder_FileChooserOption_Tooltip" xml:space="preserve">
+        <value>Path to intermediate folder to build RiderLink, before installing into the project.</value>
+    </data>
+    <data name="BuildingRiderLinkMightFailWithNonASCIISymbols_Text" xml:space="preserve">
+        <value>Building RiderLink might fail if the path contains non-ASCII symbols.
+        If you have issues with building RiderLink that shows '???' symbols in the build Output window, try settings this variable to a folder without special characters (e.g. C:/temp_folder), but make sure that current user has write access to this folder.</value>
     </data>
 </root>

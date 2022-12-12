@@ -112,11 +112,26 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 ));
         }
 
+        private VirtualFileSystemPath CreateTempDirectory()
+        {
+            var entry = myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot);
+            if (entry.IsNullOrEmpty())
+            {
+                var text = $"Failed to create temporary folder in subfolder: {entry}";
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Error));
+                return null;
+            }
+            return VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, entry.ToVirtualFileSystemPath(),
+                TMP_PREFIX);
+        }
+
         private void InstallPluginInGame(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             Property<double> progress, bool buildRequired)
         {
             myLogger.Verbose("[UnrealLink]: Installing plugin in Game");
-            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
+            var backupDir = CreateTempDirectory();
+            if(backupDir.IsNullOrEmpty()) return;
+            
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -205,7 +220,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private void InstallPluginInEngine(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
             IProperty<double> progress, bool buildRequired)
         {
-            var backupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
+            var backupDir = CreateTempDirectory();
+            if (backupDir.IsNullOrEmpty()) return;
+            
             using var deleteTempFolders = new DeleteTempFolders(backupDir.Directory);
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
@@ -344,7 +361,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var pluginRootFolder = installDescription.UnrealPluginRootFolder;
 
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
-            var pluginTmpDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
+            var pluginTmpDir = CreateTempDirectory();
+            if (pluginTmpDir.IsNullOrEmpty()) return false;
+            
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
@@ -368,7 +387,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
-            var pluginBuildOutput = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, TMP_PREFIX);
+            var pluginBuildOutput = CreateTempDirectory();
+            if (pluginBuildOutput.IsNullOrEmpty()) return false;
+            
             def.Lifetime.OnTermination(() => { pluginBuildOutput.Delete(); });
             var buildProgress = progressProperty.Value;
             var isPluginBuilt = BuildPlugin(lifetime, upluginFile, pluginBuildOutput,
