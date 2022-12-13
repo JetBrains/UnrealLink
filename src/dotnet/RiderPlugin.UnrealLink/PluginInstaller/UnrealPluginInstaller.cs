@@ -89,7 +89,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if (!outOfSync) return;
 
-            if(myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.InstallRiderLinkPlugin))
+            if(myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.AutoUpdateRiderLinkPlugin))
             {
                 QueueAutoUpdate(unrealPluginInstallInfo);
                 return;
@@ -105,10 +105,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private void QueueAutoUpdate(UnrealPluginInstallInfo unrealPluginInstallInfo)
         {
+            var entry = myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior);
+            var shouldBeBuilt = (entry == InstallOrExtract.Install) ||
+                                (!mySolution.GetComponent<ICppUE4SolutionDetector>().BuiltFromSources && unrealPluginInstallInfo.Location == PluginInstallLocation.Engine);
             mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                 "UnrealPluginInstaller.InstallPluginIfRequired",
                 () => HandleManualInstallPlugin(
-                    new InstallPluginDescription(unrealPluginInstallInfo.Location, ForceInstall.No)
+                    new InstallPluginDescription(unrealPluginInstallInfo.Location, ForceInstall.No, shouldBeBuilt)
                 ));
         }
 
@@ -492,7 +495,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private void BindToInstallationSettingChange()
         {
-            var entry = myBoundSettingsStore.Schema.GetScalarEntry((UnrealLinkSettings s) => s.InstallRiderLinkPlugin);
+            var entry = myBoundSettingsStore.Schema.GetScalarEntry((UnrealLinkSettings s) => s.AutoUpdateRiderLinkPlugin);
             myBoundSettingsStore.GetValueProperty<bool>(Lifetime, entry, null).Change.Advise_When(Lifetime,
                 newValue => newValue, args => { InstallPluginIfInfoAvailable(); });
         }
@@ -564,7 +567,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 model.EnableAutoupdatePlugin.AdviseNotNull(Lifetime,
                     unit =>
                     {
-                        myBoundSettingsStore.SetValue<UnrealLinkSettings, bool>(s => s.InstallRiderLinkPlugin, true);
+                        myBoundSettingsStore.SetValue<UnrealLinkSettings, bool>(s => s.AutoUpdateRiderLinkPlugin, true);
                     });
                 model.RefreshProjects.Advise(Lifetime,
                     _ => UnrealProjectsRefresher.RefreshProjects(Lifetime, myPluginDetector.UnrealVersion, mySolution, myPluginDetector.InstallInfoProperty.Value));
