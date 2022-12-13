@@ -81,5 +81,9 @@
     public static string IntermediateBuildFolderRoot_Text => ResourceManager.GetString("IntermediateBuildFolderRoot_Text");
     public static string IntermediateBuildFolder_FileChooserOption_Tooltip => ResourceManager.GetString("IntermediateBuildFolder_FileChooserOption_Tooltip");
     public static string BuildingRiderLinkMightFailWithNonASCIISymbols_Text => ResourceManager.GetString("BuildingRiderLinkMightFailWithNonASCIISymbols_Text");
+    public static string DefaultBehaviorForRiderLinkUpdate_Text => ResourceManager.GetString("DefaultBehaviorForRiderLinkUpdate_Text");
+    public static string BuildAndInstall_RadioButton_Text => ResourceManager.GetString("BuildAndInstall_RadioButton_Text");
+    public static string ExtractOnly_RadioButton_Text => ResourceManager.GetString("ExtractOnly_RadioButton_Text");
+    public static string InstallOrExtractRadio_Comment_Text => ResourceManager.GetString("InstallOrExtractRadio_Comment_Text");
   }
 }

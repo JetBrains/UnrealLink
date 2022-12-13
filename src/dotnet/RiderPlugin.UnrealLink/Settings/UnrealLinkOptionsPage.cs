@@ -3,12 +3,14 @@ using JetBrains.Application.Settings;
 using JetBrains.Application.UI.Controls.FileSystem;
 using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionsDialog;
+using JetBrains.Application.UI.Options.OptionsDialog.SimpleOptions.ViewModel;
 using JetBrains.DataFlow;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Extensions.PathActions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
+using JetBrains.Platform.RdFramework.Util;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Psi.Cpp.Resources;
 using JetBrains.ReSharper.Feature.Services.OptionPages.CodeEditing;
@@ -22,6 +24,11 @@ using RiderPlugin.UnrealLink.Resources;
 
 namespace RiderPlugin.UnrealLink.Settings
 {
+    public enum InstallOrExtract
+    {
+        Install,
+        Extract
+    }
     [SettingsKey(typeof(CodeEditingSettings),
         typeof(Strings),
         nameof(Strings.UnrealLinkPluginSettings_Text))]
@@ -30,12 +37,17 @@ namespace RiderPlugin.UnrealLink.Settings
         [SettingsEntry(false,
             typeof(Strings),
             nameof(Strings.IfThisOptionIsEnabledTheRiderLinkEditor_Text))]
-        public bool InstallRiderLinkPlugin;
+        public bool AutoUpdateRiderLinkPlugin;
 
         [SettingsEntry(null,
             typeof(Strings),
             nameof(Strings.IntermediateBuildFolderRoot_Text))]
         public FileSystemPath IntermediateBuildFolderRoot;
+
+        [SettingsEntry(InstallOrExtract.Install,
+            typeof(Strings),
+            nameof(Strings.DefaultBehaviorForRiderLinkUpdate_Text))]
+        public InstallOrExtract DefaultUpdateRiderLinkBehavior;
     }
     
 
@@ -55,13 +67,24 @@ namespace RiderPlugin.UnrealLink.Settings
             ICommonFileDialogs commonFileDialogs)
             : base(lifetime, optionsPageContext, optionsSettingsSmartContext)
         {
-            AddBoolOption((UnrealLinkSettings k) => k.InstallRiderLinkPlugin,
-                "Automatically update RiderLink plugin for Unreal Editor");
+            AddAutoUpdateOption(lifetime);
             AddTmpDirChooserOption(lifetime, iconHost, commonFileDialogs);
-            
             SetupInstallButtons();
         }
-        
+
+        private void AddAutoUpdateOption(Lifetime lifetime)
+        {
+            var enableAutoupdate = AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
+                "Automatically update RiderLink plugin for Unreal Editor");
+            var installBehavior = AddRadioOption(
+                (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
+                /*Localized*/ string.Empty,
+                new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
+                new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
+            enableAutoupdate.Property.FlowInto(lifetime, installBehavior.Enabled, newValue => newValue is true);
+            AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
+        }
+
         private void AddTmpDirChooserOption(Lifetime lifetime, IconHostBase iconHost, ICommonFileDialogs commonFileDialogs)
         {
             var intermediateBuildFolderProperty = new Property<string>(lifetime, "IntermediateBuildFolderProperty");
