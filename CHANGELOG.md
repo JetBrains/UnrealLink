@@ -15,7 +15,23 @@ The plugin is always bundled with Rider.
 
 ### Changed
 
-- Disable installation to Engine for UE 5 Preview
+- Add option to specify intermediate folder for building RiderLink plugin (File | Settings | Languages & Frameworks | Unreal Engine). 
+  - If you have non-ASCII symbols in the path, your RiderLink build might fail.
+- Add option to specify behavior of the auto-update
+  - Select between automatically building and installing plugin, or simply extracting sources of RiderLink and building them yourselves
+  - Extracting plugin might be a better option for RiderLink installed in the Game projects, or Engine project built from the sources
+
+### Fixed
+
+- Support installing RiderLink into the pre-built version of the UE5 (eg installed through Epic Games Launcher) 
+  - From now on, RiderLink will be installed in the `Engine/Plugins/Marketplace/Developer/RiderLink` folder, if you chose to install it in the Engine
+- Initially, RiderLink will be installed into `Plugins/Developer/RiderLink` for Game project and `Engine/Plugins/Marketplace/Developer/RiderLink` for Engine project, but if you wish to move it to another folder, Rider will take into the account the new location and will be updating the plugin in place.
+
+## [2022.3.0.178]
+
+### Changed
+
+- Disable installation to Engine for UE 5
   - [RIDER-71374](https://youtrack.jetbrains.com/issue/RIDER-71374)
 
 - Unreal log panel was made more consistent with output log window in Unreal Editor
