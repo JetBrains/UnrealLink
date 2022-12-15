@@ -160,4 +160,7 @@ You need to manually enable RiderLink in UnrealEditor</value>
     <data name="InstallOrExtractRadio_Comment_Text" xml:space="preserve">
         <value>Note: if the plugin is placed in the Engine project and the Engine is pre-built (e.g. versions installed from Epic Games Launcher), it will always Install RiderLink, instead of extracting.</value>
     </data>
+    <data name="EnableAutoUpdate_Text" xml:space="preserve">
+        <value>Automatically update RiderLink plugin for Unreal Editor.</value>
+    </data>
 </root>

@@ -74,14 +74,13 @@ namespace RiderPlugin.UnrealLink.Settings
 
         private void AddAutoUpdateOption(Lifetime lifetime)
         {
-            var enableAutoupdate = AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
+            AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
                 "Automatically update RiderLink plugin for Unreal Editor");
-            var installBehavior = AddRadioOption(
+            AddRadioOption(
                 (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
                 /*Localized*/ string.Empty,
                 new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
                 new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
-            enableAutoupdate.Property.FlowInto(lifetime, installBehavior.Enabled, newValue => newValue is true);
             AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
         }
 
