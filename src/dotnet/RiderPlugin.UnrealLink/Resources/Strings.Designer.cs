@@ -85,5 +85,6 @@
     public static string BuildAndInstall_RadioButton_Text => ResourceManager.GetString("BuildAndInstall_RadioButton_Text");
     public static string ExtractOnly_RadioButton_Text => ResourceManager.GetString("ExtractOnly_RadioButton_Text");
     public static string InstallOrExtractRadio_Comment_Text => ResourceManager.GetString("InstallOrExtractRadio_Comment_Text");
+    public static string EnableAutoUpdate_Text => ResourceManager.GetString("EnableAutoUpdate_Text");
   }
 }
