@@ -12,7 +12,7 @@
 	"SupportURL": "",
 	"EnabledByDefault": true,
 	"CanContainContent": false,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
