@@ -253,6 +253,7 @@ tasks {
     withType<Test> {
         maxHeapSize = "4096m"
         jvmArgs = specialHackJvmArgs
+        if (project.hasProperty("ignoreFailures")) { ignoreFailures = true }
         useTestNG {
             listeners.add("com.jetbrains.rider.test.allure.AllureListener")
         }
