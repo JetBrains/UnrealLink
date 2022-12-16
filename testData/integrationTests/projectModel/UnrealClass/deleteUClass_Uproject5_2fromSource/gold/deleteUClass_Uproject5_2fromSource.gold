@@ -693,18 +693,7 @@ Init Remove UClass test
       MetaData.cs
       -Resources.resx
        Resources.Designer.cs
-     -Resources
-      -SourceArt
-       GreenCheck.psd
-       GreyCheck.psd
-       IPhonePackagerIcon.pdn
-       IPhonePackagerIcon.png
-       LowResIcon.pdn
-       LowResIcon.png
-      GreenCheck.png
-      GreyCheck.png
      ExportIPAFromArchive.cs
-     ExportOptions.plist.template
      ExportOptions.Values.xml
      IOSPlatform.Automation.cs
      MakeIPA.cs
@@ -1694,13 +1683,6 @@ Init Remove UClass test
       MetaData.cs
      -Sdk
       -2.9.3
-       -linux
-        -lib
-         liboo2corelinux.a
-         liboo2corelinux.so.9
-         liboo2corelinux64.a
-         liboo2corelinux64.so.9
-        oodle2_version_2.9.3
        -win
         -redist
          oo2core_9_win32.dll
@@ -3641,15 +3623,6 @@ Project [Name:EpicGames.Oodle, GUID:GUID]
       Child items:
         Folder [Name:2.9.3]
           Child items:
-            Folder [Name:linux]
-              Child items:
-                Folder [Name:lib]
-                  Child items:
-                    ProjectFileImpl(Path : liboo2corelinux.a)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux.so.9)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux64.a)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux64.so.9)[NONE ]
-                ProjectFileImpl(Path : oodle2_version_2.9.3)[NONE ]
             Folder [Name:win]
               Child items:
                 ProjectFileImpl(Path : oodle2_version_2.9.3)[NONE ]
@@ -4418,7 +4391,6 @@ Project [Name:IOS.Automation, GUID:GUID]
     ProjectFileImpl(Path : .editorconfig (relative_path/Shared/.editorconfig))[Hidden EDITORCONFIGFILES ]
     ProjectFileImpl(Path : ExportIPAFromArchive.cs)[COMPILE ]
     ProjectFileImpl(Path : ExportOptions.Values.xml)[NONE ]
-    ProjectFileImpl(Path : ExportOptions.plist.template)[NONE ]
     ProjectFileImpl(Path : IOS.Automation.csproj)[]
     ProjectFileImpl(Path : IOSPlatform.Automation.cs)[COMPILE ]
     ProjectFileImpl(Path : MakeIPA.cs)[COMPILE ]
@@ -4428,18 +4400,6 @@ Project [Name:IOS.Automation, GUID:GUID]
         ProjectFileImpl(Path : MetaData.cs (relative_path/Shared/MetaData.cs))[COMPILE ]
         ProjectFileImpl(Path : Resources.Designer.cs)[COMPILE ]
         ProjectFileImpl(Path : Resources.resx)[EMBEDDEDRESOURCE ]
-    Folder [Name:Resources]
-      Child items:
-        ProjectFileImpl(Path : GreenCheck.png)[NONE ]
-        ProjectFileImpl(Path : GreyCheck.png)[NONE ]
-        Folder [Name:SourceArt]
-          Child items:
-            ProjectFileImpl(Path : GreenCheck.psd)[NONE ]
-            ProjectFileImpl(Path : GreyCheck.psd)[NONE ]
-            ProjectFileImpl(Path : IPhonePackagerIcon.pdn)[NONE ]
-            ProjectFileImpl(Path : IPhonePackagerIcon.png)[NONE ]
-            ProjectFileImpl(Path : LowResIcon.pdn)[NONE ]
-            ProjectFileImpl(Path : LowResIcon.png)[NONE ]
     ProjectFileImpl(Path : WriteIniValueToPlist.cs)[COMPILE ]
 Project [Name:Linux.Automation, GUID:GUID]
   Child items:
@@ -5751,18 +5711,7 @@ Deleting .h and .cpp
       MetaData.cs
       -Resources.resx
        Resources.Designer.cs
-     -Resources
-      -SourceArt
-       GreenCheck.psd
-       GreyCheck.psd
-       IPhonePackagerIcon.pdn
-       IPhonePackagerIcon.png
-       LowResIcon.pdn
-       LowResIcon.png
-      GreenCheck.png
-      GreyCheck.png
      ExportIPAFromArchive.cs
-     ExportOptions.plist.template
      ExportOptions.Values.xml
      IOSPlatform.Automation.cs
      MakeIPA.cs
@@ -6752,13 +6701,6 @@ Deleting .h and .cpp
       MetaData.cs
      -Sdk
       -2.9.3
-       -linux
-        -lib
-         liboo2corelinux.a
-         liboo2corelinux.so.9
-         liboo2corelinux64.a
-         liboo2corelinux64.so.9
-        oodle2_version_2.9.3
        -win
         -redist
          oo2core_9_win32.dll
@@ -8647,15 +8589,6 @@ Project [Name:EpicGames.Oodle, GUID:GUID]
       Child items:
         Folder [Name:2.9.3]
           Child items:
-            Folder [Name:linux]
-              Child items:
-                Folder [Name:lib]
-                  Child items:
-                    ProjectFileImpl(Path : liboo2corelinux.a)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux.so.9)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux64.a)[NONE ]
-                    ProjectFileImpl(Path : liboo2corelinux64.so.9)[NONE ]
-                ProjectFileImpl(Path : oodle2_version_2.9.3)[NONE ]
             Folder [Name:win]
               Child items:
                 ProjectFileImpl(Path : oodle2_version_2.9.3)[NONE ]
@@ -9424,7 +9357,6 @@ Project [Name:IOS.Automation, GUID:GUID]
     ProjectFileImpl(Path : .editorconfig (relative_path/Shared/.editorconfig))[Hidden EDITORCONFIGFILES ]
     ProjectFileImpl(Path : ExportIPAFromArchive.cs)[COMPILE ]
     ProjectFileImpl(Path : ExportOptions.Values.xml)[NONE ]
-    ProjectFileImpl(Path : ExportOptions.plist.template)[NONE ]
     ProjectFileImpl(Path : IOS.Automation.csproj)[]
     ProjectFileImpl(Path : IOSPlatform.Automation.cs)[COMPILE ]
     ProjectFileImpl(Path : MakeIPA.cs)[COMPILE ]
@@ -9434,18 +9366,6 @@ Project [Name:IOS.Automation, GUID:GUID]
         ProjectFileImpl(Path : MetaData.cs (relative_path/Shared/MetaData.cs))[COMPILE ]
         ProjectFileImpl(Path : Resources.Designer.cs)[COMPILE ]
         ProjectFileImpl(Path : Resources.resx)[EMBEDDEDRESOURCE ]
-    Folder [Name:Resources]
-      Child items:
-        ProjectFileImpl(Path : GreenCheck.png)[NONE ]
-        ProjectFileImpl(Path : GreyCheck.png)[NONE ]
-        Folder [Name:SourceArt]
-          Child items:
-            ProjectFileImpl(Path : GreenCheck.psd)[NONE ]
-            ProjectFileImpl(Path : GreyCheck.psd)[NONE ]
-            ProjectFileImpl(Path : IPhonePackagerIcon.pdn)[NONE ]
-            ProjectFileImpl(Path : IPhonePackagerIcon.png)[NONE ]
-            ProjectFileImpl(Path : LowResIcon.pdn)[NONE ]
-            ProjectFileImpl(Path : LowResIcon.png)[NONE ]
     ProjectFileImpl(Path : WriteIniValueToPlist.cs)[COMPILE ]
 Project [Name:Linux.Automation, GUID:GUID]
   Child items:

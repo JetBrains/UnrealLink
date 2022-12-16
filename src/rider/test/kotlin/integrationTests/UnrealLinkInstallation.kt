@@ -6,6 +6,7 @@ import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
@@ -34,8 +35,11 @@ class UnrealLinkInstallation : UnrealTestProject() {
         projectDirectoryName = "EmptyUProject"
         disableEnginePlugins = false
     }
-    private val runProgramTimeout: Duration = Duration.ofMinutes(2)
+    private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
+    @Mute("RIDER-86732", specificParameters = [
+        "SlnEngine5_1_Src", "UprojectEngine5_1_Src","SlnGame5_1_Src", "UprojectGame5_1_Src",
+        "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"])
     @Test(dataProvider = "AllEngines_AllPModels")
     @RiderTestTimeout(30L, TimeUnit.MINUTES)
     fun ul(
