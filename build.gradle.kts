@@ -27,15 +27,15 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.intellij") version "1.10.1"
     id("io.qameta.allure") version "2.11.0"
 }
 
 dependencies {
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.4")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
 }
 
 apply {
@@ -254,6 +254,7 @@ tasks {
     withType<Test> {
         maxHeapSize = "4096m"
         jvmArgs = specialHackJvmArgs
+        ignoreFailures = true
         useTestNG {
             listeners.add("com.jetbrains.rider.test.allure.AllureListener")
         }
