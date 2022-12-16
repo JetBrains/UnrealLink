@@ -281,6 +281,11 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         return generateUnrealDataProvider(onlySln) { true}
     }
 
+    @DataProvider
+    fun AllEngines_uprojectOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlyUproject) { true}
+    }
+
     @Suppress("FunctionName")
     @DataProvider
     fun egsOnly_AllPModels(): MutableIterator<Array<Any>> {
@@ -300,13 +305,18 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
     }
 
     @DataProvider
-    fun ue5SourceOnly_AllPModels() :MutableIterator<Array<Any>> {
+    fun ue5SourceOnly_AllPModels(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { !it.isInstalledBuild && it.version.major == 5 }
+    }
+
+    @DataProvider
+    fun ue5SourceOnly_uprojectOnly(): MutableIterator<Array<Any>> {
+        return generateUnrealDataProvider(onlyUproject) { !it.isInstalledBuild && it.version.major == 5 }
     }
 
     @Suppress("FunctionName")
     @DataProvider
-    fun u5Only_slnOnly(): MutableIterator<Array<Any>> {
+    fun ue5Only_slnOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlySln) { it.version.major == 5 }
     }
 
