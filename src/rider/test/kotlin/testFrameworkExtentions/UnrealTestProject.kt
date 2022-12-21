@@ -122,9 +122,13 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
 
             // Clearing engine after test
             if (unrealInfo.needInstallRiderLink && unrealInfo.placeToInstallRiderLink == PluginInstallLocation.Engine) {
-                val unrealLinkDelResult = FileUtil.delete(unrealInfo.pathToRiderLinkInEngine)
-                if (!unrealLinkDelResult)
-                    frameworkLogger.warn("Error deleting '${unrealInfo.pathToRiderLinkInEngine}' folder")
+                for (path in unrealInfo.pathsToRiderLinkInEngine) {
+                    val unrealLinkDelResult = FileUtil.delete(path)
+                    if (!unrealLinkDelResult)
+                        frameworkLogger.warn("Error deleting '${path}' folder.")
+                    else
+                        frameworkLogger.info("$path deleted successfully.")
+                }
             }
         } finally {
             myProject = null
@@ -218,7 +222,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         uprojectData.EngineAssociation = engine.id
         uprojectData.DisableEnginePluginsByDefault = disableEnginePlugins
         val uprojectText = mapper.writeValueAsString(uprojectData)
-        logger.debug("Content of final UProject: $uprojectText")
+        logger.info("Content of final UProject: $uprojectText")
         uprojectFile.writeText(uprojectText)
     }
 
@@ -227,6 +231,7 @@ abstract class UnrealTestProject : BaseTestWithSolutionBase() {
         val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
         val ubtCommand = "${unrealInfo.currentEngine!!.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " +
                 "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
+        frameworkLogger.info("Generate project files by command: \"$ubtCommand\"")
         ProcessBuilder(*(ubtCommand).split(" ").toTypedArray())
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)

@@ -38,9 +38,9 @@ class EngineInfo {
 
     var needInstallRiderLink: Boolean = false
     var placeToInstallRiderLink: PluginInstallLocation = PluginInstallLocation.Game
-    val pathToRiderLinkInEngine: File
-        get() = currentEnginePath!!.resolve("Plugins").resolve("Developer")
-            .resolve("RiderLink")
+    val pathsToRiderLinkInEngine: List<File>
+        get() = listOf(currentEnginePath!!.resolve("Plugins").resolve("Developer").resolve("RiderLink"),
+                        currentEnginePath!!.resolve("Plugins").resolve("Marketplace").resolve("Developer").resolve("RiderLink"))
 
     enum class UnrealOpenType { Sln, Uproject }
 
