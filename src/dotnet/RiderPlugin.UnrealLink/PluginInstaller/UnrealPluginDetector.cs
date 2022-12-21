@@ -60,7 +60,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         () =>
                         {
                             myLogger.Info("[UnrealLink]: Looking for RiderLink plugins");
-                            UnrealVersion = mySolutionDetector.Version;
+                            UnrealVersion = mySolutionDetector.UnrealContext.Value.Version;
 
                             if (UnrealVersion < myMinimalSupportedVersion)
                             {
@@ -86,9 +86,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             var foundEnginePlugin = false;
                             var installInfo = new UnrealPluginInstallInfo
                             {
-                                EngineRoot = solutionDetector.UnrealEngineRoot
+                                EngineRoot = solutionDetector.UnrealContext.Value.UnrealEngineRoot
                             };
-                            var enginePluginsFolder = solutionDetector.UnrealEngineRoot.Combine("Engine").Combine("Plugins");
+                            var enginePluginsFolder = solutionDetector.UnrealContext.Value.UnrealEngineRoot.Combine("Engine").Combine("Plugins");
                             foreach (var riderLinkFolder in riderLinkFolders)
                             {
                                 if (riderLinkFolder.StartsWith(enginePluginsFolder))

@@ -106,7 +106,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             var entry = myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior);
             var shouldBeBuilt = (entry == InstallOrExtract.Install) ||
-                                (!mySolution.GetComponent<ICppUE4SolutionDetector>().BuiltFromSources && unrealPluginInstallInfo.Location == PluginInstallLocation.Engine);
+                                (!mySolution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.IsBuiltFromSource && unrealPluginInstallInfo.Location == PluginInstallLocation.Engine);
             mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                 "UnrealPluginInstaller.InstallPluginIfRequired",
                 () => HandleManualInstallPlugin(
