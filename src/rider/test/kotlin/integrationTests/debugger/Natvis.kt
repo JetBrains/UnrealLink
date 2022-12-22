@@ -12,6 +12,7 @@ import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.diagnostics.LogTraceScenarios
 import com.jetbrains.rider.run.configurations.RiderRunConfigurationBase
 import com.jetbrains.rider.test.allure.Subsystem
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -33,6 +34,7 @@ import java.io.File
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
+@Mute
 class Natvis : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"
