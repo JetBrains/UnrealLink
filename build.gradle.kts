@@ -372,34 +372,6 @@ tasks {
         delete(patchUpluginVersion.outputs.files)
     }
 
-    val buildZipper by creating {
-        description = "Build Zipper utility to pack RiderLink"
-
-        val zipperSolution = File("$rootDir/tools/Zipper/Zipper.sln")
-        inputs.file("$rootDir/tools/Zipper/Program.cs")
-        inputs.file("$rootDir/tools/Zipper/Zipper.csproj")
-        inputs.file(zipperSolution)
-        val zipperFolder = File("$rootDir/tools/Zipper/bin/Release/net461")
-        val zipperBinary = zipperFolder.resolve("Zipper.exe")
-        outputs.file(zipperBinary)
-
-        doLast {
-            val buildArguments = listOf(
-                "build",
-                zipperSolution.absolutePath,
-                "/p:Configuration=Release",
-                "/nologo"
-            )
-
-            logger.info("call dotnet.cmd with '$buildArguments'")
-            project.exec {
-                executable = "$rootDir/tools/dotnet.cmd"
-                args = buildArguments
-                workingDir = zipperSolution.parentFile
-            }
-        }
-    }
-
     val generateChecksum by creating {
         dependsOn(":generateModels")
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
@@ -426,29 +398,14 @@ tasks {
         delete(generateChecksum.outputs.files)
     }
 
-    val packCppSide by creating {
+    val packCppSide by registering(Zip::class) {
         dependsOn(patchUpluginVersion)
         dependsOn(":generateModels")
         dependsOn(generateChecksum)
-        dependsOn(buildZipper)
 
-        inputs.dir("$rootDir/src/cpp/RiderLink")
-        val outputZip = File("$rootDir/build/distributions/RiderLink.zip")
-        outputs.file(outputZip)
-        doLast {
-            if(isWindows){
-                project.exec {
-                    executable = buildZipper.outputs.files.first().absolutePath
-                    args = listOf(riderLinkDir.absolutePath, outputZip.absolutePath)
-                    workingDir = rootDir
-                }
-            } else {
-                project.exec {
-                    executable = "zsh"
-                    args = listOf("-c", "eval",  "`/usr/libexec/path_helper -s`", "&&", "mono", buildZipper.outputs.files.first().absolutePath, riderLinkDir.absolutePath, outputZip.absolutePath)
-                }
-            }
-        }
+        archiveFileName.set("RiderLink.zip")
+        destinationDirectory.set(File("$rootDir/build/distributions"))
+        from("$rootDir/src/cpp/RiderLink")
     }
 
     withType<PrepareSandboxTask> {
@@ -469,7 +426,8 @@ tasks {
             from(it) { into("${intellij.pluginName.get()}/dotnet") }
         }
 
-        from(packCppSide.outputs.files.first()) {
+
+        from(packCppSide.get().archiveFile) {
             into("${intellij.pluginName.get()}/EditorPlugin")
         }
 
