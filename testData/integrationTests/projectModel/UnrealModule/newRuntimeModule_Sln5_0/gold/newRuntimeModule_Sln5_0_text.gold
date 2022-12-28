@@ -209,6 +209,7 @@ public class EmptyUProjectEditorTarget : TargetRules
 
 void FTestNewModuleProjectModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleProjectModule::ShutdownModule()
@@ -377,6 +378,7 @@ public class EmptyUProjectEditorTarget : TargetRules
 
 void FTestNewModuleProjectModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleProjectModule::ShutdownModule()
@@ -437,6 +439,7 @@ public class TestNewModuleProject : ModuleRules
 
 void FTestNewModuleSourceModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleSourceModule::ShutdownModule()
@@ -605,6 +608,7 @@ public class EmptyUProjectEditorTarget : TargetRules
 
 void FTestNewModuleProjectModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleProjectModule::ShutdownModule()
@@ -665,6 +669,7 @@ public class TestNewModuleProject : ModuleRules
 
 void FTestNewModuleSourceModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleSourceModule::ShutdownModule()
@@ -725,6 +730,7 @@ public class TestNewModuleSource : ModuleRules
 
 void FTestNewModuleCustomModule::StartupModule()
 {
+    
 }
 
 void FTestNewModuleCustomModule::ShutdownModule()

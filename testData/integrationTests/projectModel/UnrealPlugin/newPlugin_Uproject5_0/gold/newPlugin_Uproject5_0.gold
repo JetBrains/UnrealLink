@@ -122,6 +122,10 @@ Add plugin to 'EmptyUProject' via project node
        -Dependencies
         -Projects
          Core
+         CoreUObject
+         Engine
+         Slate
+         SlateCore
        -Private
         TestNewPluginProject.cpp
        -Public

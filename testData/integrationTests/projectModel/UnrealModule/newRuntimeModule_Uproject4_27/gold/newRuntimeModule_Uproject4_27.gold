@@ -130,6 +130,10 @@ Add module to 'EmptyUProject' via project node
      -Dependencies
       -Projects
        Core
+       CoreUObject
+       Engine
+       Slate
+       SlateCore
      -Private
       TestNewModuleProject.cpp
      -Public
@@ -334,6 +338,10 @@ Add module to 'EmptyUProject' via Source node
      -Dependencies
       -Projects
        Core
+       CoreUObject
+       Engine
+       Slate
+       SlateCore
      -Private
       TestNewModuleProject.cpp
      -Public
@@ -343,6 +351,10 @@ Add module to 'EmptyUProject' via Source node
      -Dependencies
       -Projects
        Core
+       CoreUObject
+       Engine
+       Slate
+       SlateCore
      -Private
       TestNewModuleSource.cpp
      -Public
@@ -623,6 +635,10 @@ Add module to 'EmptyUProject' with custom location
        -Dependencies
         -Projects
          Core
+         CoreUObject
+         Engine
+         Slate
+         SlateCore
        -Private
         TestNewModuleCustom.cpp
        -Public
@@ -642,6 +658,10 @@ Add module to 'EmptyUProject' with custom location
      -Dependencies
       -Projects
        Core
+       CoreUObject
+       Engine
+       Slate
+       SlateCore
      -Private
       TestNewModuleProject.cpp
      -Public
@@ -651,6 +671,10 @@ Add module to 'EmptyUProject' with custom location
      -Dependencies
       -Projects
        Core
+       CoreUObject
+       Engine
+       Slate
+       SlateCore
      -Private
       TestNewModuleSource.cpp
      -Public
