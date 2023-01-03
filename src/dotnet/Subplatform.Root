@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SubplatformInfo xmlns="urn:schemas-jetbrains-com:build-subplatform-info" CompanyNameHuman="JetBrains" IsGitSubplatform="true">
+    <SubplatformInfo.SubplatformReferences>
+        <SubplatformReference Name="ReSharperCpp\RiderPlugin" />
+        <SubplatformReference Name="Plugins\_UnrealLink.Pregenerated\BackendModel" />
+    </SubplatformInfo.SubplatformReferences>
+</SubplatformInfo>

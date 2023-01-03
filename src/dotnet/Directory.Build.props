@@ -1,5 +1,9 @@
 <Project>
-  
+  <Sdk Name="JetBrains.Build.VersionLockFileTargets" Version="0.0.4" />
+  <PropertyGroup>
+    <PackageLockFilePath>$(MSBuildThisFileDirectory)PackagesLock.targets</PackageLockFilePath>
+  </PropertyGroup>
+
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
 
