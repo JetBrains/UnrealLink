@@ -80,12 +80,21 @@ val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val dotNetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
+val ktOutputRelativePath = "src/rider/main/kotlin/com/jetbrains/rider/model"
 val cppOutputRoot = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/Model")
 val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model")
-val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
+val ktOutputRoot = File(repoRoot, ktOutputRelativePath)
 val riderLinkDir = File("$rootDir/src/cpp/RiderLink")
 val rdLibDirectory: () -> File = { file("${tasks.setupDependencies.get().idea.get().classes}/lib/rd") }
 extra["rdLibDirectory"] = rdLibDirectory
+
+val productMonorepoDir = getProductMonorepoRoot()
+val monorepoPreGeneratedRootDir by lazy { productMonorepoDir?.resolve("Plugins/_UnrealLink.Pregenerated") ?: error("Building not in monorepo") }
+val monorepoPreGeneratedFrontendDir by lazy {  monorepoPreGeneratedRootDir.resolve("Frontend") }
+val monorepoPreGeneratedBackendDir by lazy {  monorepoPreGeneratedRootDir.resolve("BackendModel") }
+val monorepoPreGeneratedCppDir by lazy {  monorepoPreGeneratedRootDir.resolve("CppModel") }
+val ktOutputMonorepoRoot by lazy { monorepoPreGeneratedFrontendDir.resolve(ktOutputRelativePath) }
+
 
 val currentBranchName = getBranchName()
 
@@ -109,6 +118,20 @@ fun getBranchName(): String {
             return output
     }
     return "net222"
+}
+
+@Suppress("KotlinConstantConditions")
+fun getProductMonorepoRoot(): File? {
+    var currentDir = repoRoot
+
+    while (currentDir.parent != null) {
+        if (currentDir.listFiles()?.any { it.name == ".vcs" } == true) {
+            return currentDir
+        }
+        currentDir = currentDir.parentFile
+    }
+
+    return null
 }
 
 changelog {
@@ -387,10 +410,16 @@ tasks {
         }
     }
 
-    val generateUE4Lib by creating(RdGenTask::class) {
-        val csLibraryOutput = File(csOutputRoot, "Library")
-        val cppLibraryOutput = File(cppOutputRoot, "Library")
-        val ktLibraryOutput = File(ktOutputRoot, "Library")
+    fun generateUE4Lib(monorepo: Boolean) = creating(RdGenTask::class) {
+        val csLibraryOutput =
+            if (monorepo) File(monorepoPreGeneratedBackendDir, "Library")
+            else File(csOutputRoot, "Library")
+        val cppLibraryOutput =
+            if (monorepo) File(monorepoPreGeneratedCppDir, "Library")
+            else File(cppOutputRoot, "Library")
+        val ktLibraryOutput =
+            if (monorepo) File(ktOutputMonorepoRoot, "Library")
+            else File(ktOutputRoot, "Library")
 
         inputs.dir(modelDir.resolve("lib").resolve("ue4"))
         outputs.dirs(
@@ -400,8 +429,22 @@ tasks {
         configure<RdGenExtension> {
             verbose =
                 project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
-            classpath(riderModelJar)
-            sources("$modelDir/lib/ue4")
+
+            // *** Classpath and sources ***
+            if (monorepo) {
+                sources(
+                    listOf(
+                        File("$productMonorepoDir/Rider/Frontend/model/src"),
+                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        modelDir.resolve("lib/ue4")
+                    )
+                )
+            }
+            else {
+                classpath(riderModelJar)
+                sources("$modelDir/lib/ue4")
+            }
+
             hashFolder = "$hashBaseDir/lib/ue4"
             packages = "model.lib.ue4"
             generator {
@@ -409,6 +452,7 @@ tasks {
                 transform = "symmetric"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$csLibraryOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -416,6 +460,7 @@ tasks {
                 transform = "reversed"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$cppLibraryOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -423,30 +468,50 @@ tasks {
                 transform = "asis"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$ktLibraryOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
         }
     }
+
+    val generateUE4Lib by generateUE4Lib(false)
+    val generateUE4LibMonorepo by generateUE4Lib(true)
 
     withType<Delete> {
         delete(generateUE4Lib.outputs.files)
     }
 
-    val generateRiderModel by creating(RdGenTask::class) {
-        dependsOn(generateUE4Lib)
+    fun generateRiderModel(monorepo: Boolean) = creating(RdGenTask::class) {
+        if (monorepo) dependsOn(generateUE4LibMonorepo)
+        else dependsOn(generateUE4Lib)
 
-        val csRiderOutput = File(csOutputRoot, "RdRiderProtocol")
-        val ktRiderOutput = File(ktOutputRoot, "RdRiderProtocol")
+        val csRiderOutput =
+            if (monorepo) File(monorepoPreGeneratedBackendDir, "RdRiderProtocol")
+            else File(csOutputRoot, "RdRiderProtocol")
+        val ktRiderOutput =
+            if (monorepo) File(ktOutputMonorepoRoot, "RdRiderProtocol")
+            else File(ktOutputRoot, "RdRiderProtocol")
 
         inputs.dir(modelDir.resolve("rider"))
         outputs.dirs(csRiderOutput, ktRiderOutput)
 
         configure<RdGenExtension> {
-            // NOTE: classpath is evaluated lazily, at execution time, because it comes from the unzipped
-            // intellij SDK, which is extracted in afterEvaluate
             verbose = project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
-            classpath(riderModelJar)
 
-            sources("$modelDir")
+            // *** Classpath and sources ***
+            if (monorepo) {
+                sources(
+                    listOf(
+                        File("$productMonorepoDir/Rider/Frontend/model/src"),
+                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        modelDir
+                    )
+                )
+            }
+            else {
+                classpath(riderModelJar)
+                sources("$modelDir")
+            }
+
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
 
@@ -455,7 +520,7 @@ tasks {
                 transform = "asis"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
                 directory = "$ktRiderOutput"
-
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -463,19 +528,29 @@ tasks {
                 transform = "reversed"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
                 directory = "$csRiderOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
         }
     }
+
+    val generateRiderModel by generateRiderModel(false)
+    val generateRiderModelMonorepo by generateRiderModel(true)
 
     withType<Delete> {
         delete(generateRiderModel.outputs.files)
     }
 
-    val generateEditorPluginModel by creating(RdGenTask::class) {
-        dependsOn(generateUE4Lib)
+    fun generateEditorPluginModel(monorepo: Boolean) = creating(RdGenTask::class) {
+        if (monorepo) dependsOn(generateUE4LibMonorepo)
+        else dependsOn(generateUE4Lib)
 
-        val csEditorOutput = File(csOutputRoot, "RdEditorProtocol")
-        val cppEditorOutput = File(cppOutputRoot, "RdEditorProtocol")
+        val csEditorOutput =
+            if (monorepo) File(monorepoPreGeneratedBackendDir, "RdEditorProtocol")
+            else File(csOutputRoot, "RdEditorProtocol")
+        val cppEditorOutput =
+            if (monorepo) File(monorepoPreGeneratedCppDir, "RdEditorProtocol")
+            else File(cppOutputRoot, "RdEditorProtocol")
+
         inputs.dir(modelDir.resolve("editorPlugin"))
         outputs.dirs(
             csEditorOutput, cppEditorOutput
@@ -485,9 +560,22 @@ tasks {
             verbose =
                 project.gradle.startParameter.logLevel == LogLevel.INFO || project.gradle.startParameter.logLevel == LogLevel.DEBUG
             println()
-            classpath(riderModelJar)
 
-            sources("$modelDir")
+            // *** Classpath and sources ***
+            if (monorepo) {
+                sources(
+                    listOf(
+                        File("$productMonorepoDir/Rider/Frontend/model/src"),
+                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        modelDir
+                    )
+                )
+            }
+            else {
+                classpath(riderModelJar)
+                sources("$modelDir")
+            }
+
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
 
@@ -496,6 +584,7 @@ tasks {
                 transform = "asis"
                 root = "model.editorPlugin.RdEditorRoot"
                 directory = "$csEditorOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -503,9 +592,13 @@ tasks {
                 transform = "reversed"
                 root = "model.editorPlugin.RdEditorRoot"
                 directory = "$cppEditorOutput"
+                if (monorepo) generatedFileSuffix = ".Pregenerated"
             }
         }
     }
+
+    val generateEditorPluginModel by generateEditorPluginModel(false)
+    val generateEditorPluginModelMonorepo by generateEditorPluginModel(true)
 
     withType<Delete> {
         delete(generateEditorPluginModel.outputs.files)
@@ -520,6 +613,11 @@ tasks {
     }
     withType<Delete> {
         delete(csOutputRoot, cppOutputRoot, ktOutputRoot)
+    }
+
+    register("generateModelsMonorepo") {
+        dependsOn(generateEditorPluginModelMonorepo)
+        dependsOn(generateRiderModelMonorepo)
     }
 
     val getUnrealEngineProject by creating {
