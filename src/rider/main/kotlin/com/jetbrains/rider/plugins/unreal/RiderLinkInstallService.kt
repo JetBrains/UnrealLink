@@ -19,6 +19,7 @@ import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.lifetime.onTermination
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.build.BuildToolWindowFactory
 import com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ContentType
@@ -49,7 +50,7 @@ class RiderLinkInstallService(
         val contentManager = toolWindow.contentManager
 
         val panel = RiderLinkInstallPanel(project, serviceLifetime)
-        val toolWindowContent = contentManager.factory.createContent(null, "RiderLink Install Progress", true).apply {
+        val toolWindowContent = contentManager.factory.createContent(null, UnrealLinkBundle.message("RiderLink.InstallProgress.text.title"), true).apply {
             StatusBarUtil.setStatusBarInfo(project, "Install")
             component = panel
             panel.toolbar = createToolbarPanel()
