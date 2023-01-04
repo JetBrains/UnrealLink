@@ -120,8 +120,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (entry.IsNullOrEmpty())
             {
                 var defaultBuildPath = VirtualFileSystemDefinition.GetTempPath(InteractionContext.SolutionContext);
-                var text = $"Failed to create temporary folder in subfolder: {entry}, default build path will be used: {defaultBuildPath}";
-                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Error));
                 return VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, defaultBuildPath,
                     TMP_PREFIX);
             }
