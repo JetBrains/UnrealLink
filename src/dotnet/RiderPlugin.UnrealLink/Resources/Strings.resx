@@ -24,6 +24,9 @@
     <data name="UnrealLinkPluginSettings_Text" xml:space="preserve">
         <value>UnrealLink plugin settings</value>
     </data>
+    <data name="UnrealLinkPluginSettings_Title_Text" xml:space="preserve">
+        <value>Unreal Engine</value>
+    </data>
     <data name="InstallRiderLinkInEngine_Text" xml:space="preserve">
         <value>Install RiderLink in Engine</value>
         <comment>Option Page: Name
@@ -139,28 +142,28 @@ You need to manually enable RiderLink in UnrealEditor</value>
         <value>Need to refresh project files in the Unreal Editor or in the File Explorer with a context action for .uproject file 'Generate project files'</value>
     </data>
     <data name="IntermediateBuildFolderRoot_Text" xml:space="preserve">
-        <value>Intermediate folder to build RiderLink, before installing into the project.</value>
+        <value>Intermediate folder to build RiderLink, before installing into the project</value>
     </data>
     <data name="IntermediateBuildFolder_FileChooserOption_Tooltip" xml:space="preserve">
-        <value>Path to intermediate folder to build RiderLink, before installing into the project.</value>
+        <value>Path to intermediate folder to build RiderLink, before installing into the project</value>
     </data>
     <data name="BuildingRiderLinkMightFailWithNonASCIISymbols_Text" xml:space="preserve">
         <value>Building RiderLink might fail if the path contains non-ASCII symbols.
         If you have issues with building RiderLink that shows '???' symbols in the build Output window, try settings this variable to a folder without special characters (e.g. C:/temp_folder), but make sure that current user has write access to this folder.</value>
     </data>
     <data name="DefaultBehaviorForRiderLinkUpdate_Text" xml:space="preserve">
-        <value>Default behavior for auto-updating RiderLink plugin.</value>
+        <value>Default behavior for auto-updating RiderLink plugin</value>
     </data>
     <data name="BuildAndInstall_RadioButton_Text" xml:space="preserve">
-        <value>Build and install the RiderLink plugin.</value>
+        <value>Build and install the RiderLink plugin</value>
     </data>
     <data name="ExtractOnly_RadioButton_Text" xml:space="preserve">
-        <value>Extract the source code, don't build the RiderLink plugin.</value>
+        <value>Extract the source code, don't build the RiderLink plugin</value>
     </data>
     <data name="InstallOrExtractRadio_Comment_Text" xml:space="preserve">
-        <value>Note: if the plugin is placed in the Engine project and the Engine is pre-built (e.g. versions installed from Epic Games Launcher), it will always Install RiderLink, instead of extracting.</value>
+        <value>Note: if the plugin is placed in the Engine project and the Engine is pre-built (e.g. versions installed from Epic Games Launcher), it will always Install RiderLink, instead of extracting</value>
     </data>
-    <data name="EnableAutoUpdate_Text" xml:space="preserve">
-        <value>Automatically update RiderLink plugin for Unreal Editor.</value>
+    <data name="AutoupdateRiderLink_CheckBox_Text" xml:space="preserve">
+        <value>Automatically update RiderLink plugin for Unreal Editor</value>
     </data>
 </root>
