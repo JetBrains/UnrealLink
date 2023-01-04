@@ -10,7 +10,6 @@ using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Extensions.PathActions;
 using JetBrains.IDE.UI.Options;
 using JetBrains.Lifetimes;
-using JetBrains.Platform.RdFramework.Util;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Psi.Cpp.Resources;
 using JetBrains.ReSharper.Feature.Services.OptionPages.CodeEditing;
@@ -52,7 +51,9 @@ namespace RiderPlugin.UnrealLink.Settings
     
 
     [OptionsPage(PID, Name, typeof(CppThemedIcons.Unreal), Sequence = 0.02,
-        ParentId = CodeEditingPage.PID, SearchTags = new []{"Unreal Engine", "UnrealLink", "RiderLink"})]
+        ParentId = CodeEditingPage.PID, SearchTags = new []{"Unreal Engine", "UnrealLink", "RiderLink"},
+        NameResourceType = typeof(Strings),
+        NameResourceName = nameof(Strings.UnrealLinkPluginSettings_Title_Text))]
     public class UnrealLinkOptionsPage : BeSimpleOptionsPage
     {
         // Keep these in sync with the values in the front end!
@@ -74,8 +75,8 @@ namespace RiderPlugin.UnrealLink.Settings
 
         private void AddAutoUpdateOption(Lifetime lifetime)
         {
-            AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
-                "Automatically update RiderLink plugin for Unreal Editor");
+            var enableAutoUpdate = AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
+                Strings.AutoupdateRiderLink_CheckBox_Text);
             AddRadioOption(
                 (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
                 /*Localized*/ string.Empty,

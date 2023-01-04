@@ -52,6 +52,7 @@
 
     public static string IfThisOptionIsEnabledTheRiderLinkEditor_Text => ResourceManager.GetString("IfThisOptionIsEnabledTheRiderLinkEditor_Text");
     public static string UnrealLinkPluginSettings_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Text");
+    public static string UnrealLinkPluginSettings_Title_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Title_Text");
     public static string InstallRiderLinkInEngine_Text => ResourceManager.GetString("InstallRiderLinkInEngine_Text");
     public static string InstallRiderLinkPluginInEngineDescription_Text => ResourceManager.GetString("InstallRiderLinkPluginInEngineDescription_Text");
     public static string InstallRiderLinkInGame_Text => ResourceManager.GetString("InstallRiderLinkInGame_Text");
@@ -85,6 +86,6 @@
     public static string BuildAndInstall_RadioButton_Text => ResourceManager.GetString("BuildAndInstall_RadioButton_Text");
     public static string ExtractOnly_RadioButton_Text => ResourceManager.GetString("ExtractOnly_RadioButton_Text");
     public static string InstallOrExtractRadio_Comment_Text => ResourceManager.GetString("InstallOrExtractRadio_Comment_Text");
-    public static string EnableAutoUpdate_Text => ResourceManager.GetString("EnableAutoUpdate_Text");
+    public static string AutoupdateRiderLink_CheckBox_Text => ResourceManager.GetString("AutoupdateRiderLink_CheckBox_Text");
   }
 }
