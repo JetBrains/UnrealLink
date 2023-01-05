@@ -404,6 +404,7 @@ tasks {
         dependsOn(generateChecksum)
 
         archiveFileName.set("RiderLink.zip")
+        excludes.addAll(arrayOf("RiderLink.uplugin.template", "Intermediate", "Binaries"))
         destinationDirectory.set(File("$rootDir/build/distributions"))
         from("$rootDir/src/cpp/RiderLink")
     }
