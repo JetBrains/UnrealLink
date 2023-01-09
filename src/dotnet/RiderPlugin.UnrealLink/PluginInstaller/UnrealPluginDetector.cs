@@ -47,7 +47,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             myLifetime = lifetime;
             InstallInfoProperty =
-                new Property<UnrealPluginInstallInfo>(myLifetime, "UnrealPlugin.InstallInfoNotification", null, true);
+                new Property<UnrealPluginInstallInfo>( "UnrealPlugin.InstallInfoNotification", null, true);
             myLogger = logger;
             myProjectsTracker = projectsTracker;
             mySolutionDetector = solutionDetector;

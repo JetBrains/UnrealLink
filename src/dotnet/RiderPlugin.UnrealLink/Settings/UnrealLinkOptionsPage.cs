@@ -87,7 +87,7 @@ namespace RiderPlugin.UnrealLink.Settings
 
         private void AddTmpDirChooserOption(Lifetime lifetime, IconHostBase iconHost, ICommonFileDialogs commonFileDialogs)
         {
-            var intermediateBuildFolderProperty = new Property<string>(lifetime, "IntermediateBuildFolderProperty");
+            var intermediateBuildFolderProperty = new Property<string>( "IntermediateBuildFolderProperty");
       
             var intermediateBuildFolder = 
                 OptionsSettingsSmartContext.GetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot);
