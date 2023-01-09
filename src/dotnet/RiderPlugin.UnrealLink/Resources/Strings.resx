@@ -149,7 +149,7 @@ You need to manually enable RiderLink in UnrealEditor</value>
     </data>
     <data name="BuildingRiderLinkMightFailWithNonASCIISymbols_Text" xml:space="preserve">
         <value>Building RiderLink might fail if the path contains non-ASCII symbols.
-        If you have issues with building RiderLink that shows '???' symbols in the build Output window, try settings this variable to a folder without special characters (e.g. C:/temp_folder), but make sure that current user has write access to this folder.</value>
+        If you have issues with building RiderLink that shows '???' symbols in the build Output window, try setting this variable to a folder without special characters (e.g. C:\temp_folder), but make sure that current user has write access to this folder</value>
     </data>
     <data name="DefaultBehaviorForRiderLinkUpdate_Text" xml:space="preserve">
         <value>Default behavior for auto-updating RiderLink plugin</value>
@@ -161,9 +161,24 @@ You need to manually enable RiderLink in UnrealEditor</value>
         <value>Extract the source code, don't build the RiderLink plugin</value>
     </data>
     <data name="InstallOrExtractRadio_Comment_Text" xml:space="preserve">
-        <value>Note: if the plugin is placed in the Engine project and the Engine is pre-built (e.g. versions installed from Epic Games Launcher), it will always Install RiderLink, instead of extracting</value>
+        <value>Note: if the plugin is placed in the Engine project and the Engine is pre-built (e.g. installed from the Epic Games Launcher), it will always Install RiderLink, instead of extracting</value>
     </data>
     <data name="AutoupdateRiderLink_CheckBox_Text" xml:space="preserve">
         <value>Automatically update RiderLink plugin for Unreal Editor</value>
+    </data>
+    <data name="Settings_AutoUpdate_Header_Text" xml:space="preserve">
+        <value>Auto-update</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="Settings_General_Header_Text" xml:space="preserve">
+        <value>General</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="Settings_ManualInstallation_Header_Text" xml:space="preserve">
+        <value>Manual Installation</value>
+        <comment>Option Page: Name
+        </comment>
     </data>
 </root>

@@ -68,25 +68,31 @@ namespace RiderPlugin.UnrealLink.Settings
             ICommonFileDialogs commonFileDialogs)
             : base(lifetime, optionsPageContext, optionsSettingsSmartContext)
         {
-            AddAutoUpdateOption(lifetime);
             AddTmpDirChooserOption(lifetime, iconHost, commonFileDialogs);
+            AddAutoUpdateOption(lifetime);
             SetupInstallButtons();
         }
 
         private void AddAutoUpdateOption(Lifetime lifetime)
         {
-            var enableAutoUpdate = AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
+            AddHeader(Strings.Settings_AutoUpdate_Header_Text);
+            var autoUpdateCheckbox = AddBoolOption((UnrealLinkSettings k) => k.AutoUpdateRiderLinkPlugin,
                 Strings.AutoupdateRiderLink_CheckBox_Text);
-            AddRadioOption(
-                (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
-                /*Localized*/ string.Empty,
-                new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
-                new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
-            AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
+            using (Indent())
+            {
+                var updateBehaviorRadioButton = AddRadioOption(
+                    (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
+                    /*Localized*/ string.Empty,
+                    new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
+                    new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
+                updateBehaviorRadioButton.EnableWhen(lifetime, autoUpdateCheckbox.Property);
+                AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
+            }
         }
 
         private void AddTmpDirChooserOption(Lifetime lifetime, IconHostBase iconHost, ICommonFileDialogs commonFileDialogs)
         {
+            AddHeader(Strings.Settings_General_Header_Text);
             var intermediateBuildFolderProperty = new Property<string>( "IntermediateBuildFolderProperty");
       
             var intermediateBuildFolder = 
@@ -118,6 +124,7 @@ namespace RiderPlugin.UnrealLink.Settings
 
         private void SetupInstallButtons()
         {
+            AddHeader(Strings.Settings_ManualInstallation_Header_Text);
             var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
                 .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
             var solution = owner?.CurrentSolution;

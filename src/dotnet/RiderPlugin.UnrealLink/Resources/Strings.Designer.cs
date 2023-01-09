@@ -87,5 +87,8 @@
     public static string ExtractOnly_RadioButton_Text => ResourceManager.GetString("ExtractOnly_RadioButton_Text");
     public static string InstallOrExtractRadio_Comment_Text => ResourceManager.GetString("InstallOrExtractRadio_Comment_Text");
     public static string AutoupdateRiderLink_CheckBox_Text => ResourceManager.GetString("AutoupdateRiderLink_CheckBox_Text");
+    public static string Settings_AutoUpdate_Header_Text => ResourceManager.GetString("Settings_AutoUpdate_Header_Text");
+    public static string Settings_General_Header_Text => ResourceManager.GetString("Settings_General_Header_Text");
+    public static string Settings_ManualInstallation_Header_Text => ResourceManager.GetString("Settings_ManualInstallation_Header_Text");
   }
 }
