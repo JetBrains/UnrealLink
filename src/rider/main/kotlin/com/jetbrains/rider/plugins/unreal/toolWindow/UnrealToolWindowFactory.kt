@@ -18,14 +18,14 @@ import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.UnrealIcons
 
+@Suppress("UnstableApiUsage")
 @Service
 class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealLogPanel, { it }) {
 
     companion object {
         const val TOOLWINDOW_ID = "Unreal"
-        const val TITLE_ID = "Unreal Editor Log"
-        const val ACTION_PLACE = "unreal"
+        val TITLE_ID =  UnrealLinkBundle.message("RiderLink.UnrealEditorLog.text.title")
 
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
     }
