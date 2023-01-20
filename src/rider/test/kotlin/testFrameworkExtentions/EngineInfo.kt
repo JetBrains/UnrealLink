@@ -3,11 +3,10 @@ package testFrameworkExtentions
 import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
-import com.jetbrains.rdclient.protocol.getComponent
+import com.jetbrains.rd.ide.model.unrealShellModel
 import com.jetbrains.rdclient.util.idea.toIOFile
-import com.jetbrains.rider.cpp.unreal.UnrealShellHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
-import com.jetbrains.rider.test.protocol.testProtocolHost
+import com.jetbrains.rider.test.protocol.testProtocol
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import java.io.File
@@ -50,7 +49,7 @@ class EngineInfo {
 
     val installedEngineList: Array<UnrealEngine> = runBlocking {
         withTimeout(Duration.ofSeconds(30).toMillis()) {
-            val model = application.testProtocolHost.getComponent<UnrealShellHost>().model
+            val model = application.testProtocol.unrealShellModel
             model.getListOfEngines.startSuspending(Unit)
         }
     }
