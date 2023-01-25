@@ -1,6 +1,7 @@
 package integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -21,6 +22,7 @@ import testFrameworkExtentions.UnrealTestProject
     toolset = ToolsetVersion.TOOLSET_16_CPP,
     coreVersion = CoreVersion.DEFAULT
 )
+@Mute(reason = "Gold difference. RIDER-88373", specificParameters = ["Uproject5_2fromSource"])
 @Test(dataProvider = "AllEngines_AllPModels")
 class UnrealClass : UnrealTestProject() {
     init {
