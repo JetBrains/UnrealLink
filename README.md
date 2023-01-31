@@ -1,3 +1,5 @@
+[![official JetBrains project](https://jb.gg/badges/official-flat-square.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
 # UnrealLink for Unreal Engine
 
 <p>The UnrealLink plugin enables advanced integration between JetBrains <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a> and Epic Games’ <a href="https://www.unrealengine.com/en-US/">Unreal Editor</a>.</p>
