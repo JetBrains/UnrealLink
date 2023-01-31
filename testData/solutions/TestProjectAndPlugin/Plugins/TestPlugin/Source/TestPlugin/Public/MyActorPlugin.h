@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MyPluginActor.generated.h"
+#include "MyActorPlugin.generated.h"
 
 UCLASS()
-class TESTPLUGIN_API AMyPluginActor : public AActor
+class TESTPLUGIN_API AMyActorPlugin : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AMyPluginActor();
+	AMyActorPlugin();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,5 +24,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	uint8 bMyProperty:1;
+	uint8 bMyPropertyPlugin:1;
 };
+
+USTRUCT()
+struct FMyStructPlugin
+{
+	GENERATED_BODY()
+};
+
+UENUM()
+enum EMyEnumPlugin { Some_Field };
+
+
+UENUM()
+enum class EMyEnumClassPlugin : uint8 { Some_Field };
