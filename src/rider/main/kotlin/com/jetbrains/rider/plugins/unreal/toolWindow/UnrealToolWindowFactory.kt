@@ -24,7 +24,7 @@ class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealLogPanel, { it }) {
 
     companion object {
-        const val TOOLWINDOW_ID = "Unreal"
+        const val TOOLWINDOW_ID = "UnrealLink"
         val TITLE_ID =  UnrealLinkBundle.message("RiderLink.UnrealEditorLog.text.title")
 
         fun getInstance(project: Project): UnrealToolWindowFactory = project.service()
