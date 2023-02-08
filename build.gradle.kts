@@ -2,8 +2,6 @@ import com.jetbrains.rd.generator.gradle.RdGenExtension
 import com.jetbrains.rd.generator.gradle.RdGenTask
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.kotlin.dsl.support.listFilesOrdered
-import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -86,6 +84,8 @@ val cppOutputRoot = File(repoRoot, "src/cpp/RiderLink/Source/RiderLink/Public/Mo
 val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model")
 val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 val riderLinkDir = File("$rootDir/src/cpp/RiderLink")
+val rdLibDirectory: () -> File = { file("${tasks.setupDependencies.get().idea.get().classes}/lib/rd") }
+extra["rdLibDirectory"] = rdLibDirectory
 
 val currentBranchName = getBranchName()
 
@@ -289,7 +289,7 @@ tasks {
                 "/bl:${dotNetSolution.name}.binlog",
                 "/nologo"
             )
-            logger.info("call dotnet.cmd with '$buildArguments'")
+            logger.info("call dotnet.cmd with '{}'", buildArguments)
             project.exec {
                 executable = "$rootDir/tools/dotnet.cmd"
                 args = buildArguments
