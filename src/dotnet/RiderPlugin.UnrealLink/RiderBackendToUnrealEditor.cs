@@ -47,6 +47,8 @@ namespace RiderPlugin.UnrealLink
             };
         }
 
+        public LifetimeDefinition NestedLifetime() => myComponentLifetime.CreateNested();
+
         public RiderBackendToUnrealEditor(Lifetime lifetime, IShellLocks locks, RdDispatcher dispatcher, ILogger logger,
             UnrealHost unrealHost, UnrealLinkResolver linkResolver, EditorNavigator editorNavigator,
             UnrealPluginDetector pluginDetector, ISolution solution)

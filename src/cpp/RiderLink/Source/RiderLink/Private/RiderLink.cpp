@@ -3,6 +3,8 @@
 #include "ProtocolFactory.h"
 #include "UE4Library/UE4Library.Generated.h"
 
+#include "ILiveCodingModule.h"
+#include "Async/Async.h"
 #include "Misc/App.h"
 #include "Misc/ScopeRWLock.h"
 #include "Modules/ModuleManager.h"
@@ -25,19 +27,107 @@ static FString GetProjectName()
 void FRiderLinkModule::ShutdownModule()
 {
 	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink SHUTDOWN START"));
+	
+	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+	LiveCoding.GetOnPatchCompleteDelegate().Remove(PatchCompleteHandle);
 	ModuleLifetimeDef.terminate();
 	ProtocolFactory.Reset();
 	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink SHUTDOWN FINISH"));
 }
 
+void WrapRDCall(rd::RdEndpoint<rd::Void, bool, rd::Polymorphic<rd::Void>, rd::Polymorphic<bool>> const & Call, TFunction<bool(const ILiveCodingModule&)> LocalCall)
+{
+	Call.set([LocalCall](rd::Void const&)-> bool
+	{
+		const ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+		if(LiveCodingModule != nullptr)
+		{
+			return LocalCall(*LiveCodingModule);
+		}
+		return false;
+	});
+}
+
+void FRiderLinkModule::SetupLiveCodingBinds()
+{	
+	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+	PatchCompleteHandle = LiveCoding.GetOnPatchCompleteDelegate().AddLambda([this]
+	{
+		QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
+		{
+			RdEditorModel.get_lC_OnPatchComplete().fire();
+		});
+	});
+
+	ViewModel(ModuleLifetimeDef.lifetime, [](rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
+	{
+		RdEditorModel.get_lC_Compile().advise(Lifetime, []
+		{
+			AsyncTask(ENamedThreads::GameThread, []
+			{
+				ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+				if(LiveCodingModule != nullptr)
+				{
+					LiveCodingModule->Compile();
+				}				
+			});
+		});
+
+		RdEditorModel.get_lC_EnableByDefault().advise(Lifetime, [](bool Enable)
+		{
+			ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+			if(LiveCodingModule != nullptr)
+			{
+				LiveCodingModule->EnableByDefault(Enable);
+			}			
+		});
+
+		RdEditorModel.get_lC_EnableForSession().advise(Lifetime, [](bool Enable)
+		{
+			ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+			if(LiveCodingModule != nullptr)
+			{
+				LiveCodingModule->EnableForSession(Enable);
+			}			
+		});
+		
+		WrapRDCall(RdEditorModel.get_lC_HasStarted(), [](const ILiveCodingModule& LiveCodingModule)
+		{
+			return LiveCodingModule.HasStarted();
+		});
+		
+		WrapRDCall(RdEditorModel.get_lC_IsCompiling(), [](const ILiveCodingModule& LiveCodingModule)
+		{
+			return LiveCodingModule.IsCompiling();
+		});
+		
+		WrapRDCall(RdEditorModel.get_lC_IsEnabledByDefault(), [](const ILiveCodingModule& LiveCodingModule)
+		{
+			return LiveCodingModule.IsEnabledByDefault();
+		});
+		
+		WrapRDCall(RdEditorModel.get_lC_IsEnabledForSession(), [](const ILiveCodingModule& LiveCodingModule)
+		{
+			return LiveCodingModule.IsEnabledForSession();
+		});
+		
+		WrapRDCall(RdEditorModel.get_lC_CanEnableForSession(), [](const ILiveCodingModule& LiveCodingModule)
+		{
+			return LiveCodingModule.CanEnableForSession();
+		});
+	});
+}
+
 void FRiderLinkModule::StartupModule()
 {
 	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP START"));
+	
 	ProtocolFactory = MakeUnique<class ProtocolFactory>(GetProjectName());
 	Scheduler.queue([this]()
 	{
 		InitProtocol();
 	});
+	SetupLiveCodingBinds();
 	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP FINISH"));
 }
 
@@ -106,6 +196,16 @@ void FRiderLinkModule::ViewModel(rd::Lifetime Lifetime,
 		{
 			if (Cond) Handler(ModelLifetime, *EditorModel.Get());
 		});
+	});
+}
+
+void FRiderLinkModule::QueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler)
+{	
+	Scheduler.invoke_or_queue([this, Handler]
+	{
+		if(!RdIsModelAlive.has_value() || !RdIsModelAlive.get()) return;
+		
+		Handler(*EditorModel.Get());
 	});
 }
 
