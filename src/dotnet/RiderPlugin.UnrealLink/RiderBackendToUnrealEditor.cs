@@ -209,7 +209,7 @@ namespace RiderPlugin.UnrealLink
                 myUnrealHost.myModel.ConnectionInfo.SetValue(info)
             );
             
-            unrealModel.AllowSetForegroundWindow.Set((lt, pid) =>
+            unrealModel.AllowSetForegroundWindow.SetAsync((lt, pid) =>
             {
                 return myUnrealHost.PerformModelAction(riderModel =>
                     riderModel.AllowSetForegroundWindow.Start(lt, pid)) as RdTask<bool>;
@@ -237,11 +237,11 @@ namespace RiderPlugin.UnrealLink
 
             myUnrealHost.PerformModelAction(riderModel =>
             {
-                riderModel.FilterLinkCandidates.Set((_, candidates) =>
+                riderModel.FilterLinkCandidates.SetAsync((_, candidates) =>
                     RdTask.Successful(candidates
                         .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))
                         .AsArray()));
-                riderModel.IsMethodReference.Set((_, methodReference) =>
+                riderModel.IsMethodReference.SetAsync((_, methodReference) =>
                 {
                     var b = myEditorNavigator.IsMethodReference(methodReference);
                     return RdTask.Successful(b);
