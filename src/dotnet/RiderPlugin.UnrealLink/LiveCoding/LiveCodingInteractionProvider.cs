@@ -3,11 +3,12 @@ using JetBrains.Core;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
+using JetBrains.ReSharper.Feature.Services.Cpp.UE4.LiveCoding;
 
 namespace RiderPlugin.UnrealLink.LiveCoding;
 
 [SolutionComponent]
-public class LiveCodingInteractionProvider
+public class LiveCodingInteractionProvider : ILiveCodingProvider
 {
     private readonly RiderBackendToUnrealEditor _riderToEditor;
     private readonly LifetimeDefinition _lifetimeDef;
@@ -29,6 +30,4 @@ public class LiveCodingInteractionProvider
 
     public void SubscribeOnPatchComplete(Action<Unit> handle) =>
         _riderToEditor.EditorModel.LC_OnPatchComplete.Advise(_lifetimeDef.Lifetime, handle);
-
-
 }
