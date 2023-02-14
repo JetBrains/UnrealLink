@@ -1,30 +1,30 @@
 package testFrameworkExtentions
 
+import org.testng.annotations.AfterClass
 import org.testng.annotations.AfterMethod
-import org.testng.annotations.BeforeMethod
+import org.testng.annotations.BeforeClass
 
 /** Class for Unreal tests. TODO doc
  */
-abstract class UnrealTestProject : UnrealBase() {
+abstract class UnrealClassProject : UnrealBase() {
 
-    @BeforeMethod
+    @BeforeClass
     override fun configureSettings() {
         super.configureSettings()
     }
 
-    @BeforeMethod(dependsOnMethods = ["configureSettings"])
+    @BeforeClass(dependsOnMethods = ["configureSettings"])
     override fun putSolutionToTempDir() {
         super.putSolutionToTempDir()
     }
 
-    @BeforeMethod(dependsOnMethods = ["putSolutionToTempDir"])
-    override fun prepareAndOpenSolution(parameters: Array<Any>) {
-        super.prepareAndOpenSolution(parameters)
-    }
-
-    @AfterMethod(alwaysRun = true)
+    @AfterMethod
     fun testTeardown() {
         collectUnrealLogs()
+    }
+
+    @AfterClass(alwaysRun = true)
+    fun classTeardown() {
 //        deleteTempDir()
         closeProject()
     }
