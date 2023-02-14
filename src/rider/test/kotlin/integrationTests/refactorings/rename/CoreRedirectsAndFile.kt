@@ -1,20 +1,14 @@
 package integrationTests.refactorings.rename
 
-import com.intellij.openapi.actionSystem.ActionPlaces
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_RENAME
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.testFramework.ProjectViewTestUtil
 import com.jetbrains.ide.model.uiautomation.BeCheckbox
 import com.jetbrains.ide.model.uiautomation.BeTextBox
 import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.ui.bedsl.extensions.getBeControlById
 import com.jetbrains.rd.ui.bedsl.extensions.tryGetBeControlById
-import com.jetbrains.rdclient.util.idea.waitAndPump
-import com.jetbrains.rider.actions.RiderActions
 import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
-import com.jetbrains.rider.projectView.actions.SolutionViewAddActionGroup
-import com.jetbrains.rider.projectView.actions.newFile.RiderNewFileCustomAction
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
@@ -30,7 +24,6 @@ import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealClassProject
 import testFrameworkExtentions.UnrealConstants
 import java.io.File
-import java.time.Duration
 
 
 /**
@@ -46,6 +39,7 @@ import java.time.Duration
  * Project opened before each class (see [UnrealClassProject]), set of tests on each engine+model run on single-opened project.
  */
 // TODO replace dumping functions with generic ones from TestFramework
+@Mute("The Action 'Rename' wasn't been available at the execution time.")
 @Epic("Refactorings")
 @Feature("Rename")
 @TestEnvironment(platform = [PlatformType.WINDOWS_X64], coreVersion = CoreVersion.LATEST_STABLE)
@@ -72,14 +66,6 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         }
     }
     
-    @BeforeMethod
-    fun addAdditionalSourceToProject() {
-        testDataDirectory.combine("additionalSource", "CoreRedirectsAndFile").listFiles().forEach {file ->
-            file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
-        }
-        waitForProjectModelReady(project)
-    }
-    
     @BeforeClass(dependsOnMethods = ["putSolutionToTempDir"])
     fun prepareAndOpenSolution() {
 //        configureAndOpenUnrealProject(pmType, unrealInfo.getEngine(engineVersion), disableEnginePlugins)
@@ -88,6 +74,15 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         project = openProject(pmType)
     }
 
+    @BeforeMethod
+    fun addAdditionalSourceToProject() {
+        testDataDirectory.combine("additionalSource", "CoreRedirectsAndFile").listFiles()?.forEach { file ->
+            file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
+        }
+        waitForProjectModelReady(project)
+        waitBackendAndWorkspaceModel(project)
+    }
+    
     @AfterMethod
     fun restoreInitialProjectState() {
         restoreProject(activeSolutionDirectory,
@@ -122,7 +117,7 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         val result: ArrayList<Array<Any>> = arrayListOf()
         symbolsToRenameWithFile.forEach { symbol ->
             result.add(
-                arrayOf(uniqueDataString("$pmType", unrealInfo.getEngine(engineVersion)) + symbol.first, symbol.second)
+                arrayOf(uniqueDataString("$pmType", unrealInfo.currentEngine) + symbol.first, symbol.second)
             )
         }
         frameworkLogger.info("Data Provider was generated: ${result.joinToString()}")
