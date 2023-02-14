@@ -68,6 +68,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
                 }
             }
             frameworkLogger.info("Factory was generated: ${result.joinToString()}")
+            println("Factory was generated: ${result.joinToString()}")
             return result.toArray()
         }
     }
@@ -111,7 +112,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
         val result: ArrayList<Array<Any>> = arrayListOf()
         symbolsToRenameArray.forEach { symbol ->
             result.add(
-                arrayOf(uniqueDataString("$pmType", unrealInfo.getEngine(engineVersion)) + symbol.first, symbol)
+                arrayOf(uniqueDataString("$pmType", unrealInfo.currentEngine) + symbol.first, symbol)
             )
         }
         frameworkLogger.info("Data Provider was generated: ${result.joinToString()}")
