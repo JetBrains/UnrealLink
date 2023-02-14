@@ -12,21 +12,27 @@ import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.time.Duration
 
-class EngineInfo {
+object UnrealConstants {
     /**
      * Unreal Engine's versions which will be used in tests.
      * Tests generate base on this data. Can be expanded.
      * Only major and minor are important, the patch version is discarded when filtering engines.
      * See `fun UnrealVersion.basicallyEquals`
      */
-    // TODO: Meditate. Maybe it mustn't be hardcoded
-    private val testingVersions: Array<UnrealVersion> = arrayOf(
+    val testingVersions: Array<UnrealVersion> = arrayOf(
         UnrealVersion(4, 27, 2),
         UnrealVersion(5, 0, 3),
         UnrealVersion(5, 1, 0),
         UnrealVersion(5, 2, 0)
     )
 
+    val projectModelTypes: Array<EngineInfo.UnrealOpenType> = arrayOf(
+        EngineInfo.UnrealOpenType.Sln,
+        EngineInfo.UnrealOpenType.Uproject
+    )
+}
+
+class EngineInfo {
     private fun UnrealVersion.basicallyEquals(other: UnrealVersion): Boolean {
         if (this === other) return true
         if (major != other.major) return false
@@ -55,5 +61,9 @@ class EngineInfo {
     }
 
     val testingEngines: Array<UnrealEngine> =
-        installedEngineList.filter { eng -> testingVersions.any { it.basicallyEquals(eng.version) } }.toTypedArray()
+        installedEngineList.filter { eng -> UnrealConstants.testingVersions.any { it.basicallyEquals(eng.version) } }.toTypedArray()
+
+    fun getEngine(version: UnrealVersion, isInstalledBuild: Boolean = true): UnrealEngine {
+        return installedEngineList.single { it.version.basicallyEquals(version) && it.isInstalledBuild == isInstalledBuild }
+    }
 }
