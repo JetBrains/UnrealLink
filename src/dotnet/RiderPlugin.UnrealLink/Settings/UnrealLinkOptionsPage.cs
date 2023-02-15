@@ -80,12 +80,11 @@ namespace RiderPlugin.UnrealLink.Settings
                 Strings.AutoupdateRiderLink_CheckBox_Text);
             using (Indent())
             {
-                var updateBehaviorRadioButton = AddRadioOption(
+                AddRadioOption(
                     (UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior,
                     /*Localized*/ string.Empty,
                     new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
                     new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
-                updateBehaviorRadioButton.EnableWhen(lifetime, autoUpdateCheckbox.Property);
                 AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
             }
         }
