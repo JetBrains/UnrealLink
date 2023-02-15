@@ -1,5 +1,6 @@
 package testFrameworkExtentions
 
+import com.jetbrains.rider.test.framework.frameworkLogger
 import org.testng.annotations.AfterClass
 import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
@@ -10,11 +11,13 @@ abstract class UnrealClassProject : UnrealBase() {
 
     @BeforeClass
     override fun configureSettings() {
+        frameworkLogger.info("@BeforeClass configureSettings")
         super.configureSettings()
     }
 
     @BeforeClass(dependsOnMethods = ["configureSettings"])
     override fun putSolutionToTempDir() {
+        frameworkLogger.info("@BeforeClass putSolutionToTempDir")
         super.putSolutionToTempDir()
     }
 

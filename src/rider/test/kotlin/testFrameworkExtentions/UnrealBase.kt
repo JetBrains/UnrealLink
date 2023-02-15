@@ -85,7 +85,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
-        frameworkLogger.info("Found installed engines: ${unrealInfo.installedEngineList.joinToString()}")
+        frameworkLogger.info("Found installed engines:\n${unrealInfo.installedEngineList.joinToString("\n")}")
         GeneralSettings.getInstance().isConfirmExit = false
     }
 
