@@ -75,6 +75,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
 
     @BeforeClass(dependsOnMethods = ["putSolutionToTempDir"])
     fun prepareAndOpenSolution() {
+        frameworkLogger.info("@BeforeClass prepareAndOpenSolution")
 //        configureAndOpenUnrealProject(pmType, unrealInfo.getEngine(engineVersion), disableEnginePlugins)
         prepareUnrealProject(pmType, unrealInfo.getEngine(engineVersion))
         backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
@@ -83,6 +84,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
 
     @AfterMethod
     fun restoreInitialProjectState() {
+        frameworkLogger.info("@AfterMethod restoreInitialProjectState")
         closeAllOpenedEditors(project)
         restoreProject(activeSolutionDirectory,
             File(tempDirectory).resolve("${projectDirectoryName}_backup"),
