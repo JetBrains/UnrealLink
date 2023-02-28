@@ -28,6 +28,5 @@ public class RiderLink : ModuleRules
 		{
 			PublicIncludePaths.Add(Path.Combine(ModuleDirectory, Item));
 		}
-		PrivateDependencyModuleNames.AddRange(new string[] { "LiveCoding" });
 	}
 }

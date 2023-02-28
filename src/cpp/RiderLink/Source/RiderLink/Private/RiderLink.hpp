@@ -27,7 +27,6 @@ public:
 	FRiderLinkModule() = default;
 	virtual ~FRiderLinkModule() override = default;
 
-	void SetupLiveCodingBinds();
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
@@ -41,7 +40,7 @@ public:
 	virtual void ViewModel(rd::Lifetime Lifetime,
 	                       TFunction<void(rd::Lifetime,
 	                                      JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
-	void QueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler);
+	virtual void QueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 	virtual void QueueAction(TFunction<void()> Handler) override;
 	virtual bool FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) override;
 
@@ -56,5 +55,4 @@ private:
 	rd::RdProperty<bool> RdIsModelAlive;
 	TUniquePtr<JetBrains::EditorPlugin::RdEditorModel> EditorModel;
 	FRWLock ModelLock;
-	FDelegateHandle PatchCompleteHandle;
 };
