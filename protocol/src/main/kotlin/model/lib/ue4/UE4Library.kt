@@ -18,7 +18,7 @@ object UE4Library : Root() {
                 "Runtime/Core/Public/Containers/Array.h",
                 "Runtime/Core/Public/Containers/ContainerAllocationPolicies.h"
         ))
-        setting(Cpp17Generator.ListType, CppIntrinsicType(null, "TArray", "Runtime/Core/Public/Containers/Array.h"))
+        setting(Cpp17Generator.ListType, CppIntrinsicType(null, "TArray", "Containers/Array.h"))
         setting(Cpp17Generator.AllocatorType) { "FDefaultAllocator" }
         setting(Cpp17Generator.ExportMacroName,  "RIDERLINK_API")
         setting(Cpp17Generator.GeneratePrecompiledHeaders, false)
@@ -39,7 +39,7 @@ object UE4Library : Root() {
         field("last", int)
     }
 
-    val FString = declare(CppIntrinsicType(null, "FString", "Runtime/Core/Public/Containers/UnrealString.h")) {
+    val FString = declare(CppIntrinsicType(null, "FString", "Containers/UnrealString.h")) {
         structdef("FString") {
             field("data", string)
         }
@@ -55,9 +55,11 @@ object UE4Library : Root() {
         field("requestID", int)
     }
 
+    @Suppress("unused")
     val RequestSucceed = structdef("RequestSucceed") extends RequestResultBase {
     }
 
+    @Suppress("unused")
     val RequestFailed = structdef("RequestFailed") extends RequestResultBase {
         field("type", enum("NotificationType") {
             +"Message"
@@ -133,6 +135,7 @@ object UE4Library : Root() {
         field("name", FString)
     }
 
+    @Suppress("unused")
     val BlueprintFunction = structdef("BlueprintFunction") {
         field("class", UClass)
         field("name", FString)
@@ -192,6 +195,7 @@ object UE4Library : Root() {
 */
 
     //endregion
+    @Suppress("unused")
     val BlueprintHighlighter = structdef("BlueprintHighlighter") {
         field("begin", int)
         field("end", int)
