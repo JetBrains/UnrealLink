@@ -10,6 +10,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.DumbAwareToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsActions
+import com.intellij.xdebugger.attach.LocalAttachHost
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration
 import com.jetbrains.rider.cpp.debugger.RiderCppLocalAttachDebugger
@@ -123,7 +124,7 @@ class AttachToConnectedEditor : DumbAwareAction() {
 
     private fun attachToUnrealProcess(project: Project, processInfo: ProcessInfo) {
         val attachDebugger = RiderCppLocalAttachDebugger(RiderCppLLDBDriverConfiguration())
-        attachDebugger.attachDebugSession(project, processInfo)
+        attachDebugger.attachDebugSession(project, LocalAttachHost.INSTANCE, processInfo)
     }
 
 }
