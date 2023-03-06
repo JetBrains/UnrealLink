@@ -19,6 +19,7 @@ import com.jetbrains.rider.projectView.actions.newFile.RiderNewFileCustomAction
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
 import integrationTests.refactorings.rename.CoreRedirects.Companion.renameClassFactory
@@ -48,7 +49,7 @@ import java.time.Duration
 // TODO replace dumping functions with generic ones from TestFramework
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], coreVersion = CoreVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.LATEST_STABLE)
 class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 
@@ -67,17 +68,19 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
                     result.add(CoreRedirects(version, pmType))
                 }
             }
-            frameworkLogger.info("Factory was generated: ${result.joinToString()}")
-            println("Factory was generated: ${result.joinToString()}")
+            frameworkLogger.info("Factory was generated:\n${result.joinToString("\n")}")
+            println("Factory was generated:\n ${result.joinToString("\n")}")
             return result.toArray()
         }
     }
 
     @BeforeClass(dependsOnMethods = ["putSolutionToTempDir"])
     fun prepareAndOpenSolution() {
-        frameworkLogger.info("@BeforeClass prepareAndOpenSolution")
-//        configureAndOpenUnrealProject(pmType, unrealInfo.getEngine(engineVersion), disableEnginePlugins)
-        prepareUnrealProject(pmType, unrealInfo.getEngine(engineVersion))
+        frameworkLogger.info("@BeforeClass prepareAndOpenSolution with engine $engineVersion and type $pmType")
+
+        val engine = unrealInfo.getEngine(engineVersion)
+        
+        prepareUnrealProject(pmType, engine)
         backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
         project = openProject(pmType)
     }
@@ -111,13 +114,14 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
 
     @DataProvider
     fun differentUnrealSymbols(): Iterator<Array<Any>> {
+        frameworkLogger.info("Start DataProvider differentUnrealSymbols")
         val result: ArrayList<Array<Any>> = arrayListOf()
         symbolsToRenameArray.forEach { symbol ->
             result.add(
-                arrayOf(uniqueDataString("$pmType", unrealInfo.currentEngine) + symbol.first, symbol)
+                arrayOf(uniqueDataString("$pmType", unrealInfo.getEngine(engineVersion)) + symbol.first, symbol)
             )
         }
-        frameworkLogger.info("Data Provider was generated: ${result.joinToString()}")
+        frameworkLogger.info("Data Provider was generated: ${result.forEach { it.joinToString() }}")
         return result.iterator()
     }
 

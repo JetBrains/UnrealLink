@@ -50,7 +50,7 @@ class EngineInfo {
 
     enum class UnrealOpenType { Sln, Uproject }
 
-    var currentEngine: UnrealEngine = UnrealEngine("unknown", "unknown", UnrealVersion(0,0,0), false)
+    var currentEngine: UnrealEngine? = null
     val currentEnginePath: File?
         get() = currentEngine?.path?.toIOFile()
 
@@ -67,9 +67,8 @@ class EngineInfo {
     fun getEngine(version: UnrealVersion, isInstalledBuild: Boolean = true): UnrealEngine {
         frameworkLogger.info("Getting engine $version from" + if (isInstalledBuild) "EGS" else "source")
         val engine  = installedEngineList.singleOrNull { it.version.basicallyEquals(version) && it.isInstalledBuild == isInstalledBuild }
-        if (engine != null)
-            return engine
-        else
-            throw Exception("Engine version $version not found in the list: ${testingEngines.joinToString()}")
+        if (engine == null)
+            frameworkLogger.error("Engine version $version not found in the list: ${testingEngines.joinToString()}")
+        return engine!!
     }
 }
