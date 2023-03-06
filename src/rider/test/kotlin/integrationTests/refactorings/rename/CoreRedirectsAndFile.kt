@@ -5,13 +5,17 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.jetbrains.ide.model.uiautomation.BeCheckbox
 import com.jetbrains.ide.model.uiautomation.BeTextBox
 import com.jetbrains.rd.ide.model.UnrealVersion
+import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.ui.bedsl.extensions.getBeControlById
 import com.jetbrains.rd.ui.bedsl.extensions.tryGetBeControlById
+import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
+import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
 import integrationTests.refactorings.rename.CoreRedirects.Companion.renameClassFactory
@@ -42,7 +46,7 @@ import java.io.File
 @Mute("The Action 'Rename' wasn't been available at the execution time.")
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], coreVersion = CoreVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.LATEST_STABLE)
 class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 
@@ -70,17 +74,12 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
     fun prepareAndOpenSolution() {
 //        configureAndOpenUnrealProject(pmType, unrealInfo.getEngine(engineVersion), disableEnginePlugins)
         prepareUnrealProject(pmType, unrealInfo.getEngine(engineVersion))
-        backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
-        project = openProject(pmType)
-    }
-
-    @BeforeMethod
-    fun addAdditionalSourceToProject() {
-        testDataDirectory.combine("additionalSource", "CoreRedirectsAndFile").listFiles()?.forEach { file ->
+        testDataDirectory.combine("additionalSource", "files", "CoreRedirectsAndFile").listFiles()?.forEach { file ->
             file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
         }
-        waitForProjectModelReady(project)
-        waitBackendAndWorkspaceModel(project)
+        backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
+        project = openProject(pmType)
+        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
     
     @AfterMethod
@@ -117,7 +116,7 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         val result: ArrayList<Array<Any>> = arrayListOf()
         symbolsToRenameWithFile.forEach { symbol ->
             result.add(
-                arrayOf(uniqueDataString("$pmType", unrealInfo.currentEngine) + symbol.first, symbol.second)
+                arrayOf(uniqueDataString("$pmType", unrealInfo.getEngine(engineVersion)) + symbol.first, symbol.second)
             )
         }
         frameworkLogger.info("Data Provider was generated: ${result.joinToString()}")

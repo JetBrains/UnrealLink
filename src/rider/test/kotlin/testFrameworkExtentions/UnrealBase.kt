@@ -521,7 +521,8 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
 
     protected fun <T> Array<T>.filterEngines(predicate: (T) -> Boolean): List<T> {
         return this.filter(predicate).ifEmpty {
-            throw Exception("Failed to filter engines in $this by $predicate")
+            frameworkLogger.error("Failed to filter engines in $this by $predicate")
+            listOf()
         }
     }
 
