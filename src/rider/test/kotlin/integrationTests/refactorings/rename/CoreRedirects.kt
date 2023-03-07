@@ -39,7 +39,7 @@ import java.io.File
 // TODO replace dumping functions with generic ones from TestFramework
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.AUTODETECT)
 class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 

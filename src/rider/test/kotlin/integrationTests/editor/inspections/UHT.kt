@@ -25,7 +25,7 @@ import testFrameworkExtentions.UnrealTestProject
 @Feature("UHT")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
-    sdkVersion = SdkVersion.LATEST_STABLE
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class UHT : UnrealTestProject() {
     init {

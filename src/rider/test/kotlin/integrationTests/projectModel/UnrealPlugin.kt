@@ -19,7 +19,7 @@ import testFrameworkExtentions.UnrealTestProject
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_ALL],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.LATEST_STABLE
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class UnrealPlugin : UnrealTestProject() {
     init {
