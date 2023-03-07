@@ -30,7 +30,7 @@ import testFrameworkExtentions.UnrealTestProject
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.LATEST_STABLE
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class Natvis : UnrealTestProject() {
     init {

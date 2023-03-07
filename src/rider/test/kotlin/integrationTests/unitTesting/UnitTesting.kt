@@ -20,7 +20,7 @@ import java.time.Duration
 
 @Epic("Project Model")
 @Feature("New Unreal Module")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], buildTool = BuildTool.CPP, sdkVersion = SdkVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
 class UnitTesting : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"

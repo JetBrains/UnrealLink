@@ -29,7 +29,7 @@ import testFrameworkExtentions.UnrealTestProject
 
 @Epic("Blueprint")
 @Feature("Code Vision")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.AUTODETECT)
 class CodeVision : UnrealTestProject() {
 
     init {

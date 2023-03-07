@@ -13,9 +13,7 @@ import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
@@ -47,7 +45,7 @@ import java.io.File
 @Mute("The Action 'Rename' wasn't been available at the execution time.")
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.AUTODETECT)
 class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 
