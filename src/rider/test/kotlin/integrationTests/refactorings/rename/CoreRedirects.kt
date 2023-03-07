@@ -1,25 +1,16 @@
 package integrationTests.refactorings.rename
 
-import com.intellij.openapi.actionSystem.ActionPlaces
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_RENAME
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.testFramework.ProjectViewTestUtil
 import com.jetbrains.ide.model.uiautomation.BeCheckbox
 import com.jetbrains.ide.model.uiautomation.BeTextBox
 import com.jetbrains.rd.ide.model.UnrealVersion
 import com.jetbrains.rd.ui.bedsl.extensions.getBeControlById
 import com.jetbrains.rd.ui.bedsl.extensions.tryGetBeControlById
-import com.jetbrains.rdclient.util.idea.waitAndPump
-import com.jetbrains.rider.actions.RiderActions
 import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
-import com.jetbrains.rider.projectView.actions.SolutionViewAddActionGroup
-import com.jetbrains.rider.projectView.actions.newFile.RiderNewFileCustomAction
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
 import integrationTests.refactorings.rename.CoreRedirects.Companion.renameClassFactory
@@ -31,7 +22,6 @@ import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealClassProject
 import testFrameworkExtentions.UnrealConstants
 import java.io.File
-import java.time.Duration
 
 
 /**
@@ -49,7 +39,7 @@ import java.time.Duration
 // TODO replace dumping functions with generic ones from TestFramework
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
 class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 
@@ -58,6 +48,9 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
             "#com.jetbrains.rider.test.framework.dataContextTree"
         )
 
+    override val customTempTestDirName = "RenameTempTestRunDir"
+    override val cleanTempTestDirectory = false
+    
     companion object {
         @Factory
         fun renameClassFactory(): Array<Any> {
@@ -81,7 +74,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
         val engine = unrealInfo.getEngine(engineVersion)
         
         prepareUnrealProject(pmType, engine)
-        backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
+        backupProject(tempTestDirectory.resolve("${projectDirectoryName}_backup"))
         project = openProject(pmType)
     }
 
@@ -90,15 +83,12 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
         frameworkLogger.info("@AfterMethod restoreInitialProjectState")
         closeAllOpenedEditors(project)
         restoreProject(activeSolutionDirectory,
-            File(tempDirectory).resolve("${projectDirectoryName}_backup"),
+            tempTestDirectory.resolve("${projectDirectoryName}_backup"),
             BackupRestoreProfile().apply {
                 ignoreDirs.add("Intermediate")
                 ignoreDirs.add("Logs")
             })
     }
-
-    override val testCaseNameToTempDir = "RenameTempTestRunDir"
-    override val clearCaches: Boolean = false
 
     init {
         projectDirectoryName = "TestProjectAndPlugin"

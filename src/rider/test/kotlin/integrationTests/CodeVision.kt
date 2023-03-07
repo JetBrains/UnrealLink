@@ -17,9 +17,8 @@ import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.util.string.printToString
 import com.jetbrains.rdclient.util.idea.toRdTextRange
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.executeWithGold
 import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
@@ -30,7 +29,7 @@ import testFrameworkExtentions.UnrealTestProject
 
 @Epic("Blueprint")
 @Feature("Code Vision")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
 class CodeVision : UnrealTestProject() {
 
     init {
@@ -110,18 +109,22 @@ fun Editor.dumpULenses(): String {
     }
 
     fun addInlay(inlay: Inlay<*>) {
-        builder.appendln("${if (inlay.renderer is InlineCodeVisionListRenderer) "Inline" else "Block"} ${inlay.offset} ${inlay.renderer.javaClass.simpleName}")
+        builder.appendLine("${if (inlay.renderer is InlineCodeVisionListRenderer) "Inline" else "Block"} ${inlay.offset} ${inlay.renderer.javaClass.simpleName}")
         val lensList = CodeVisionListData.KEY.get(inlay) ?: return // todo: don't append non-lens inlays?
-        builder.appendln(lensList.anchor)
-        builder.appendln("    Visible")
+        builder.appendLine(lensList.anchor)
+        builder.appendLine("    Visible")
 
         val lineNum = document.getLineNumber(inlay.offset)
         val lineRange = TextRange.create(document.getLineStartOffset(lineNum), document.getLineEndOffset(lineNum))
         builder.appendLine("        Line $lineNum " + this.document.getText(lineRange))
 
-        lensList.visibleLens.forEach { builder.appendln("        " + it.lensToString(lensList.rangeCodeVisionModel.anchoringRange.toRdTextRange())) }
-        builder.appendln("    Hidden")
-        lensList.anchoredLens.forEach { if(!lensList.visibleLens.contains(it)) builder.appendln("        " + it.lensToString(lensList.rangeCodeVisionModel.anchoringRange.toRdTextRange()))
+        lensList.visibleLens.forEach { builder.appendLine("        " + it.lensToString(lensList.rangeCodeVisionModel.anchoringRange.toRdTextRange())) }
+        builder.appendLine("    Hidden")
+        lensList.anchoredLens.forEach { if(!lensList.visibleLens.contains(it)) builder.appendLine(
+            "        " + it.lensToString(
+                lensList.rangeCodeVisionModel.anchoringRange.toRdTextRange()
+            )
+        )
         }
     }
 

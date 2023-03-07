@@ -18,7 +18,6 @@ import com.jetbrains.rd.platform.util.idea.LifetimedService
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rd.util.lifetime.onTermination
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.build.BuildToolWindowFactory
 import com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction
