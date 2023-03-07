@@ -21,7 +21,7 @@ import java.io.PrintStream
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
+    sdkVersion = SdkVersion.LATEST_STABLE
 )
 class UnrealConfigurations : UnrealTestProject() {
     init {

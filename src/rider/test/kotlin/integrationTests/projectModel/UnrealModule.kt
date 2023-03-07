@@ -5,15 +5,14 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.env.enums.BuildTool
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
-import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
@@ -21,7 +20,7 @@ import java.time.Duration
 
 @Epic("Project Model")
 @Feature("New Unreal Module")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], buildTool = BuildTool.CPP, sdkVersion = SdkVersion.LATEST_STABLE)
 class UnrealModule : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"

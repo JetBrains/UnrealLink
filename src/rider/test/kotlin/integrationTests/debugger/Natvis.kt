@@ -13,9 +13,9 @@ import com.jetbrains.rider.diagnostics.LogTraceScenarios
 import com.jetbrains.rider.run.configurations.RiderRunConfigurationBase
 import com.jetbrains.rider.test.allure.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.env.enums.BuildTool
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
@@ -24,14 +24,13 @@ import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
-import java.io.File
 
 @Epic(Subsystem.DEBUGGER)
 @Feature("Natvis")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
+    sdkVersion = SdkVersion.LATEST_STABLE
 )
 class Natvis : UnrealTestProject() {
     init {

@@ -20,7 +20,7 @@ import testFrameworkExtentions.UnrealTestProject
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
+    sdkVersion = SdkVersion.LATEST_STABLE
 )
 @Mute(reason = "Gold difference. RIDER-88373", specificParameters = ["Uproject5_2fromSource"])
 @Test(dataProvider = "AllEngines_AllPModels")
