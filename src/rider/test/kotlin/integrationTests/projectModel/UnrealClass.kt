@@ -3,9 +3,9 @@ package integrationTests.projectModel
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
@@ -19,8 +19,8 @@ import testFrameworkExtentions.UnrealTestProject
 @Feature("New Unreal Class")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
-    toolset = ToolsetVersion.TOOLSET_16_CPP,
-    coreVersion = CoreVersion.DEFAULT
+    buildTool = BuildTool.CPP,
+    sdkVersion = SdkVersion.AUTODETECT
 )
 @Mute(reason = "Gold difference. RIDER-88373", specificParameters = ["Uproject5_2fromSource"])
 @Test(dataProvider = "AllEngines_AllPModels")

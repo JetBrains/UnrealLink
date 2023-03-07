@@ -5,9 +5,9 @@ import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.projectView.SolutionConfigurationManager
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.executeWithGold
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
@@ -20,8 +20,8 @@ import java.io.PrintStream
 @Feature("Solution Configurations")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
-    toolset = ToolsetVersion.TOOLSET_16_CPP,
-    coreVersion = CoreVersion.DEFAULT
+    buildTool = BuildTool.CPP,
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class UnrealConfigurations : UnrealTestProject() {
     init {
