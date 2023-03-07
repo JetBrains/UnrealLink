@@ -9,9 +9,9 @@ import com.jetbrains.rd.ui.bedsl.extensions.tryGetBeControlById
 import com.jetbrains.rider.actions.RiderActions
 import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
@@ -28,7 +28,9 @@ import java.io.File
 @Epic("Refactorings")
 @Feature("Rename")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.DEFAULT
+    platform = [PlatformType.WINDOWS_X64],
+    buildTool = BuildTool.CPP,
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class Rename : UnrealTestProject() {
     init {

@@ -9,9 +9,9 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
 import com.jetbrains.rider.test.scriptingApi.*
@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit
 @Feature("Installation")
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
-    toolset = ToolsetVersion.TOOLSET_16_CPP,
-    coreVersion = CoreVersion.DEFAULT
+    buildTool = BuildTool.CPP,
+    sdkVersion = SdkVersion.AUTODETECT
 )
 class UnrealLinkInstallation : UnrealTestProject() {
     init {
