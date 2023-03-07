@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 @TestEnvironment(
     platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
+    sdkVersion = SdkVersion.LATEST_STABLE
 )
 class UnrealLinkInstallation : UnrealTestProject() {
     init {

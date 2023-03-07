@@ -16,6 +16,7 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.*
 import com.jetbrains.rider.test.scriptingApi.*
 import integrationTests.refactorings.rename.CoreRedirects.Companion.renameClassFactory
@@ -46,7 +47,7 @@ import java.io.File
 @Mute("The Action 'Rename' wasn't been available at the execution time.")
 @Epic("Refactorings")
 @Feature("Rename")
-@TestEnvironment(platform = [PlatformType.WINDOWS_X64], toolset = ToolsetVersion.TOOLSET_16_CPP, coreVersion = CoreVersion.LATEST_STABLE)
+@TestEnvironment(platform = [PlatformType.WINDOWS_X64], sdkVersion = SdkVersion.LATEST_STABLE)
 class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val pmType: EngineInfo.UnrealOpenType) :
     UnrealClassProject() {
 
@@ -54,6 +55,9 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         get() = listOf(
             "#com.jetbrains.rider.test.framework.dataContextTree"
         )
+
+    override val customTempTestDirName = "RenameTempTestRunDir"
+    override val cleanTempTestDirectory = false
 
     companion object {
         @Factory
@@ -77,7 +81,7 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
         testDataDirectory.combine("additionalSource", "files", "CoreRedirectsAndFile").listFiles()?.forEach { file ->
             file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
         }
-        backupProject(File(tempDirectory).resolve("${projectDirectoryName}_backup"))
+        backupProject(tempTestDirectory.resolve("${projectDirectoryName}_backup"))
         project = openProject(pmType)
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
@@ -85,15 +89,12 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
     @AfterMethod
     fun restoreInitialProjectState() {
         restoreProject(activeSolutionDirectory,
-            File(tempDirectory).resolve("${projectDirectoryName}_backup"),
+            tempTestDirectory.resolve("${projectDirectoryName}_backup"),
             BackupRestoreProfile().apply {
                 ignoreDirs.add("Intermediate")
                 ignoreDirs.add("Logs")
             })
     }
-
-    override val testCaseNameToTempDir = "RenameTempTestRunDir"
-    override val clearCaches: Boolean = false
 
     init {
         projectDirectoryName = "TestProjectAndPlugin"

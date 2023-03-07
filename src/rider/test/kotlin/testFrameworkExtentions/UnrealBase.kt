@@ -328,7 +328,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             Pair("relative_path/", Regex("(\\.\\.[\\\\/])+"))
         )
     
-    protected fun backupProject(backupFolder: File = File(tempDirectory).resolve("${activeSolution}_backup")): File {
+    protected fun backupProject(backupFolder: File = tempTestDirectory.resolve("${activeSolution}_backup")): File {
         activeSolutionDirectory.copyRecursively(backupFolder)
         return backupFolder
     }
@@ -426,7 +426,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
      * Examples: egsOnly_AllPModels, ue5EgsOnly_AllPModels, ue4Egs_slnOnly, egsOnly_uprojectOnly, AllEngines_slnOnly
      */
 
-    @Suppress("FunctionName")
+    @Suppress("FunctionName", "TestFunctionName", "TestFunctionName")
     @DataProvider
     fun AllEngines_AllPModels(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { true }

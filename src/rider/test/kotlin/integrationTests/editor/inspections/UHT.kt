@@ -6,9 +6,8 @@ import com.jetbrains.rd.util.reactive.hasTrueValue
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.enums.CoreVersion
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.ToolsetVersion
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.executeWithGold
 import com.jetbrains.rider.test.framework.frameworkLogger
@@ -25,9 +24,8 @@ import testFrameworkExtentions.UnrealTestProject
 @Epic("Inspections")
 @Feature("UHT")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS_X64], 
-    toolset = ToolsetVersion.TOOLSET_16_CPP, 
-    coreVersion = CoreVersion.LATEST_STABLE
+    platform = [PlatformType.WINDOWS_X64],
+    sdkVersion = SdkVersion.LATEST_STABLE
 )
 class UHT : UnrealTestProject() {
     init {
