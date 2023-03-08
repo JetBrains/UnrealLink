@@ -3,12 +3,15 @@ plugins {
 }
 
 val rdLibDirectory: () -> File by rootProject.extra
+val productMonorepoDir: File? by rootProject.extra
 
 repositories {
     mavenCentral()
     maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
-    flatDir {
-        dir(rdLibDirectory())
+    if (productMonorepoDir == null) {
+        flatDir {
+            dir(rdLibDirectory())
+        }
     }
 }
 
@@ -17,6 +20,14 @@ tasks {
         sourceSets {
             main {
                 java {
+                    if (productMonorepoDir != null) {
+                        srcDir(
+                            listOf(
+                                File("$productMonorepoDir/Rider/Frontend/model/src"),
+                                File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                            )
+                        )
+                    }
                     srcDir("src/main/kotlin")
                 }
             }
@@ -26,6 +37,8 @@ tasks {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation(group = "", name = "rd-gen")
-    implementation(group = "", name = "rider-model")
+    if (productMonorepoDir == null) {
+        implementation(group = "", name = "rd-gen")
+        implementation(group = "", name = "rider-model")
+    }
 }

@@ -95,6 +95,8 @@ val monorepoPreGeneratedBackendDir by lazy {  monorepoPreGeneratedRootDir.resolv
 val monorepoPreGeneratedCppDir by lazy {  monorepoPreGeneratedRootDir.resolve("CppModel") }
 val ktOutputMonorepoRoot by lazy { monorepoPreGeneratedFrontendDir.resolve(ktOutputRelativePath) }
 
+extra["productMonorepoDir"] = productMonorepoDir
+extra["monorepoPreGeneratedFrontendDir"] = productMonorepoDir
 
 val currentBranchName = getBranchName()
 
@@ -120,7 +122,6 @@ fun getBranchName(): String {
     return "net222"
 }
 
-@Suppress("KotlinConstantConditions")
 fun getProductMonorepoRoot(): File? {
     var currentDir = repoRoot
 
@@ -133,6 +134,20 @@ fun getProductMonorepoRoot(): File? {
 
     return null
 }
+
+// Add an error on execution if it is not a monorepo.
+//  We check it because on configuration stage we should not configure tasks for a monorepo but want to throw an error.
+fun Task.checkIfMonorepoOrAddThrowingOnExecution(): Boolean {
+    if (productMonorepoDir == null) {
+        doFirst {
+            throw GradleException("Building not in monorepo")
+        }
+        return false
+    }
+
+    return true
+}
+
 
 changelog {
     version.set(project.version.toString())
@@ -160,7 +175,9 @@ intellij {
         println("Will use ${File(localPath.get(), "build.txt").readText()} from ${localPath.get()} as RiderSDK")
     } else {
         version.set("${project.property("majorVersion")}-SNAPSHOT")
-        println("Will download and use build/riderRD-${version.get()} as RiderSDK")
+        if (productMonorepoDir == null) {
+            println("Will download and use build/riderRD-${version.get()} as RiderSDK")
+        }
     }
 
     tasks {
@@ -321,7 +338,7 @@ tasks {
         }
     }
 
-    val patchUpluginVersion by creating {
+    val patchUpluginVersion by register("patchUpluginVersion") {
         val pathToUpluginTemplate = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin.template")
         val filePathToUplugin = File("${project.rootDir}/src/cpp/RiderLink/RiderLink.uplugin")
         inputs.file(pathToUpluginTemplate)
@@ -343,7 +360,7 @@ tasks {
         delete(patchUpluginVersion.outputs.files)
     }
 
-    val generateChecksum by creating {
+    val generateChecksum by register("generateChecksum") {
         dependsOn(":generateModels")
         val upluginFile = riderLinkDir.resolve("RiderLink.uplugin.template")
         val resourcesDir = riderLinkDir.resolve("Resources")
@@ -410,7 +427,9 @@ tasks {
         }
     }
 
-    fun generateUE4Lib(monorepo: Boolean) = creating(RdGenTask::class) {
+    fun generateUE4Lib(monorepo: Boolean) = register<RdGenTask>("generateUE4Lib" + if(monorepo) "Monorepo" else "") {
+        if (monorepo && !checkIfMonorepoOrAddThrowingOnExecution()) return@register
+
         val csLibraryOutput =
             if (monorepo) File(monorepoPreGeneratedBackendDir, "Library")
             else File(csOutputRoot, "Library")
@@ -441,7 +460,7 @@ tasks {
                 )
             }
             else {
-                classpath(riderModelJar)
+                classpath({riderModelJar})
                 sources("$modelDir/lib/ue4")
             }
 
@@ -480,7 +499,9 @@ tasks {
         delete(generateUE4Lib.outputs.files)
     }
 
-    fun generateRiderModel(monorepo: Boolean) = creating(RdGenTask::class) {
+    fun generateRiderModel(monorepo: Boolean) = register<RdGenTask>("generateRiderModel" + if(monorepo) "Monorepo" else "") {
+        if (monorepo && !checkIfMonorepoOrAddThrowingOnExecution()) return@register
+
         if (monorepo) dependsOn(generateUE4LibMonorepo)
         else dependsOn(generateUE4Lib)
 
@@ -508,7 +529,7 @@ tasks {
                 )
             }
             else {
-                classpath(riderModelJar)
+                classpath({riderModelJar})
                 sources("$modelDir")
             }
 
@@ -540,7 +561,9 @@ tasks {
         delete(generateRiderModel.outputs.files)
     }
 
-    fun generateEditorPluginModel(monorepo: Boolean) = creating(RdGenTask::class) {
+    fun generateEditorPluginModel(monorepo: Boolean) = register<RdGenTask>("generateEditorPluginModel" + if (monorepo) "Monorepo" else "") {
+        if (monorepo && !checkIfMonorepoOrAddThrowingOnExecution()) return@register
+
         if (monorepo) dependsOn(generateUE4LibMonorepo)
         else dependsOn(generateUE4Lib)
 
@@ -572,7 +595,7 @@ tasks {
                 )
             }
             else {
-                classpath(riderModelJar)
+                classpath({riderModelJar})
                 sources("$modelDir")
             }
 
@@ -605,7 +628,7 @@ tasks {
     }
 
     @Suppress("UNUSED_VARIABLE")
-    val generateModels by creating {
+    val generateModels by registering {
         group = "protocol"
         description = "Generates protocol models."
         dependsOn(generateEditorPluginModel)
@@ -620,7 +643,7 @@ tasks {
         dependsOn(generateRiderModelMonorepo)
     }
 
-    val getUnrealEngineProject by creating {
+    val getUnrealEngineProject by register("getUnrealEngineProject") {
         doLast {
             val ueProjectPathTxt = rootDir.resolve("UnrealEngineProjectPath.txt")
             if (ueProjectPathTxt.exists()) {
@@ -645,7 +668,7 @@ tasks {
     }
 
     @Suppress("UNUSED_VARIABLE")
-    val symlinkPluginToUnrealProject by creating {
+    val symlinkPluginToUnrealProject by registering {
         dependsOn(getUnrealEngineProject)
         dependsOn(patchUpluginVersion)
         doLast {
