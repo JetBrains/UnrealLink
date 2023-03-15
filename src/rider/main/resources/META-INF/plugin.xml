@@ -193,6 +193,7 @@ Path to old plugin:</code></pre>
                            bundle="messages.UnrealLinkBundle" key="notificationAction.UnrealEditorOutOfSync.groupId"/>
         <notificationGroup id="RiderLinkActions" displayType="BALLOON"
                            bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
+        <iconMapper mappingFile="UnrealIconMappings.json"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
