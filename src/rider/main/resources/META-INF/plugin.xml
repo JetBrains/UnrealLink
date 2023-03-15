@@ -194,6 +194,7 @@ Path to old plugin:</code></pre>
         <notificationGroup id="RiderLinkActions" displayType="BALLOON"
                            bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
         <spellchecker.bundledDictionaryProvider implementation="com.jetbrains.rider.plugins.unreal.spellchecker.UnrealBundledDictionaryProvider"/>
+        <iconMapper mappingFile="UnrealIconMappings.json"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
