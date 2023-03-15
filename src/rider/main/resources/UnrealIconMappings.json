@@ -1,0 +1,18 @@
+{
+    "Icons": {
+        "expui": {
+            "run": {
+                "unrealEngineConnected.svg": "run/unrealEngineConnected.svg",
+                "unrealEngineDisconnected.svg": "run/unrealEngineDisconnected.svg",
+                "unrealFrameSkip.svg": "run/unrealFrameSkip.svg",
+                "unrealStatusOn.svg": "run/unrealStatusOn.svg",
+                "unrealStatusPause.svg": "run/unrealStatusPause.svg",
+                "unrealStatusPlay.svg": "run/unrealStatusPlay.svg",
+                "unrealStatusStop.svg": "run/unrealStatusStop.svg"
+            },
+            "toolWindows": {
+                "toolWindowUnrealLog.svg": "toolWindows/toolWindowUnrealLog.svg"
+            }
+        }
+    }
+}
