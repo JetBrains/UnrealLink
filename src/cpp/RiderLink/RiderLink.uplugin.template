@@ -44,13 +44,6 @@
 			"Name": "RiderShaderInfo",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PostEngineInit"
-		},
-		{
-			"Name": "RiderLC",
-			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": ["Win64"],
-			"PlatformAllowList": ["Win64"]
 		}
 	]
 }
