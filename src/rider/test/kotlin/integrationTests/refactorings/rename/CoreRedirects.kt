@@ -75,7 +75,7 @@ class CoreRedirects(private val engineVersion: UnrealVersion, private val pmType
         
         prepareUnrealProject(pmType, engine)
         backupProject(tempTestDirectory.resolve("${projectDirectoryName}_backup"))
-        project = openProject(pmType)
+        project = openSolution(getProjectFile(pmType), openSolutionParams)
     }
 
     @AfterMethod

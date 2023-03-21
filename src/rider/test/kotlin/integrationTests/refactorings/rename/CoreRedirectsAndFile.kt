@@ -13,6 +13,7 @@ import com.jetbrains.rider.model.refactorings.BeRefactoringsPage
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.*
@@ -74,14 +75,13 @@ class CoreRedirectsAndFile(private val engineVersion: UnrealVersion, private val
     
     @BeforeClass(dependsOnMethods = ["putSolutionToTempDir"])
     fun prepareAndOpenSolution() {
-//        configureAndOpenUnrealProject(pmType, unrealInfo.getEngine(engineVersion), disableEnginePlugins)
         prepareUnrealProject(pmType, unrealInfo.getEngine(engineVersion))
         testDataDirectory.combine("additionalSource", "files", "CoreRedirectsAndFile").listFiles()?.forEach { file ->
             file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
         }
         backupProject(tempTestDirectory.resolve("${projectDirectoryName}_backup"))
-        project = openProject(pmType)
-        assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
+        project = openSolution(getProjectFile(pmType), openSolutionParams)
+        project.solution.unrealModel.isUnrealSolution.hasTrueValue.shouldBeTrue("This project wasn't detect as unreal project!")
     }
     
     @AfterMethod

@@ -68,7 +68,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         )
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram(configurationName = activeSolution) {
+        withRunProgram(project, configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                 { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
         }

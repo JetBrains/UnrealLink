@@ -43,7 +43,7 @@ class UHT : UnrealTestProject() {
             file.copyTo(activeSolutionDirectory.resolve("$activeSolutionDirectory/Source/$projectDirectoryName/${file.name}"))
         }
 
-        project = openProject(openSolutionWithParam)
+        project = openSolution(getProjectFile(openSolutionWithParam), openSolutionParams)
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 

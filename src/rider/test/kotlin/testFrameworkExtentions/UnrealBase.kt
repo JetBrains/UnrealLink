@@ -36,6 +36,7 @@ import java.io.File
 import java.nio.file.Files
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import kotlin.test.currentStackTrace
 import com.jetbrains.rider.test.framework.getFileWithExtension as getFileWithExtensionRd
 
 /** Class for Unreal tests.
@@ -104,7 +105,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         val openSolutionWithParam = parameters[1] as EngineInfo.UnrealOpenType
         val engineParam = parameters[2] as UnrealEngine
         frameworkLogger.info("Starting open solution (uproject)")
-        configureAndOpenUnrealProject(openSolutionWithParam, engineParam, disableEnginePlugins)
+        configureAndOpenUnrealProject(openSolutionWithParam, engineParam)
     }
 
     protected fun clearRiderLinkFromEngine() {
@@ -157,104 +158,25 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             openSolutionParams.minimalCountProjectsMustBeLoaded = null
         } else {
             openSolutionParams.minimalCountProjectsMustBeLoaded =
-                1400 // TODO: replace the magic number with something normal
+                1300 // TODO: replace the magic number with something normal
         }
     }
-    
+
     protected fun configureAndOpenUnrealProject(
         openWith: EngineInfo.UnrealOpenType,
-        engine: UnrealEngine,
-        disableEnginePlugins: Boolean
+        engine: UnrealEngine
     ) {
         prepareUnrealProject(openWith, engine)
 
-        project = openProject(openWith)
+        project = openSolution(getProjectFile(openWith), openSolutionParams)
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
-    // TODO: refactor existent openProject's function and replace
-    protected fun openProject(openWith: EngineInfo.UnrealOpenType): Project {
-        val params = openSolutionParams // TODO
-
-        // TODO create function in [BaseTestWithSolutionBase]
-        NotificationsHost.registerConsumer(solutionNotificationSequentialLifetime.next()) {
-            notificationList.add(it)
-            if (it.type in arrayOf(NotificationType.ERROR, NotificationType.WARNING)) {
-                val notificationMessage = it.title + ": " + it.content
-                frameworkLogger.warn(notificationMessage)
-            }
-            if (it.title.startsWith("Unable to locate .NET Core SDK")) {
-                frameworkLogger.error(it.title + ": " + it.content)
-            }
-            if (it.title.startsWith("Rider was unable to connect to MSBuild")) {
-                frameworkLogger.error(it.title + ". Try to delete and download again the MsBuild and .NET SDK from " + getPersistentCacheFolder())
-            }
-        }
-        return doOpenSolution(getProjectFile(openWith), params)
-    }
-
-    private fun doOpenSolution(
-        solutionFile: File,
-        params: OpenSolutionParams
-    ): Project {
-
-        frameworkLogger.info("Start opening solution: '${solutionFile.name}'")
-
-        persistSolutionCaches(params.persistCaches)
-
-        val project = requestOpenExistingSolutionOrProject(
-            solutionFile,
-            params.restoreNuGetPackages,
-            params.forceOpenInNewFrame
-        )!!
-        val encodingProjectManagerImpl = EncodingProjectManager.getInstance(project) as EncodingProjectManagerImpl
-        val bomOption =
-            if (params.addBomForNewFiles) EncodingProjectManagerImpl.BOMForNewUTF8Files.ALWAYS else EncodingProjectManagerImpl.BOMForNewUTF8Files.NEVER
-        encodingProjectManagerImpl.setBOMForNewUtf8Files(bomOption)
-        project.enableBackendAsserts()
-
-        waitForSolution(project, params)
-
-        frameworkLogger.info("Solution: '${project.name}' is opened and ready")
-
-//        if (!ProtocolManager.isResharperBackendDisabled()) {
-//            assertCurrentSolutionToolset(project)
-//        }
-
-        // dispose all timed objects to prevent dispose of them later at random point during the test
-        application.runWriteAction {
-            TimedReference.disposeTimed()
-            TimedReference.disposeTimed()
-        }
-
-        return project
-    }
-
-    private fun getProjectFile(openWith: EngineInfo.UnrealOpenType): File {
+    protected fun getProjectFile(openWith: EngineInfo.UnrealOpenType): File {
         if (openWith == EngineInfo.UnrealOpenType.Uproject)
             return uprojectFile
 
         return uprojectFile.getFileWithExtensionRd(".sln")
-    }
-
-    // TODO Take out in framework?
-    fun withRunProgram(
-        timeout: Duration = Duration.ofSeconds(30),
-        configurationName: String? = null,
-        action: (Project) -> Unit
-    ) {
-        var projectProcess: ProcessHandler? = null
-        try {
-            val runManagerEx = RunManagerEx.getInstanceEx(project)
-            if (configurationName != null)
-                runManagerEx.selectedConfiguration = runManagerEx.allSettings.single { it.name == configurationName }
-            val settings = runManagerEx.selectedConfiguration
-                ?: throw AssertionError("No configuration selected")
-            projectProcess = startRunConfigurationProcess(project, settings, timeout)
-            action(project)
-        } finally {
-            projectProcess!!.stop()
-        }
     }
 
     fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(240)) {
@@ -329,6 +251,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         )
     
     protected fun backupProject(backupFolder: File = tempTestDirectory.resolve("${activeSolution}_backup")): File {
+        backupFolder.deleteRecursively()
         activeSolutionDirectory.copyRecursively(backupFolder)
         return backupFolder
     }
@@ -426,35 +349,34 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
      * Examples: egsOnly_AllPModels, ue5EgsOnly_AllPModels, ue4Egs_slnOnly, egsOnly_uprojectOnly, AllEngines_slnOnly
      */
 
-    @Suppress("FunctionName", "TestFunctionName", "TestFunctionName")
+    @Suppress("TestFunctionName", "TestFunctionName")
     @DataProvider
     fun AllEngines_AllPModels(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { true }
     }
 
+    @Suppress("TestFunctionName", "TestFunctionName")
     @DataProvider
     fun AllEngines_slnOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlySln) { true }
     }
 
+    @Suppress("TestFunctionName", "TestFunctionName")
     @DataProvider
     fun AllEngines_uprojectOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlyUproject) { true }
     }
 
-    @Suppress("FunctionName")
     @DataProvider
     fun egsOnly_AllPModels(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { it.isInstalledBuild }
     }
 
-    @Suppress("FunctionName")
     @DataProvider
     fun egsOnly_SlnOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlySln) { it.isInstalledBuild }
     }
 
-    @Suppress("FunctionName")
     @DataProvider
     fun ue5EgsOnly_AllPModels(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(allModels) { it.isInstalledBuild && it.version.major == 5 }
@@ -470,7 +392,6 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         return generateUnrealDataProvider(onlyUproject) { !it.isInstalledBuild && it.version.major == 5 }
     }
 
-    @Suppress("FunctionName")
     @DataProvider
     fun ue5Only_slnOnly(): MutableIterator<Array<Any>> {
         return generateUnrealDataProvider(onlySln) { it.version.major == 5 }
@@ -521,7 +442,8 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
 
     protected fun <T> Array<T>.filterEngines(predicate: (T) -> Boolean): List<T> {
         return this.filter(predicate).ifEmpty {
-            frameworkLogger.error("Failed to filter engines in $this by $predicate")
+            frameworkLogger.error("Failed to filter engines in \n${this.joinToString(";\n")}\n" +
+                    "at ${currentStackTrace().slice(0..2).joinToString("\n" )}")
             listOf()
         }
     }
