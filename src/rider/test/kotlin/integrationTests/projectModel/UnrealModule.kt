@@ -57,14 +57,14 @@ class UnrealModule : UnrealTestProject() {
         )
         //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram(configurationName = activeSolution) {
+        withRunProgram(project, configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                         { activeSolutionDirectory.resolve("Saved").resolve("Logs").resolve("$activeSolution.log").exists() },
                         { "Editor wasn't run!" })
         }
     }
 
-    @Mute("Can not find requested path(s) in tree: \"Engine\". Fixed in 231.")
+    @Mute("Can not find requested path(s) in tree: \"Engine\"")
     @Test(dataProvider = "ue5SourceOnly_AllPModels")
     fun newRuntimeEngineModule(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {
