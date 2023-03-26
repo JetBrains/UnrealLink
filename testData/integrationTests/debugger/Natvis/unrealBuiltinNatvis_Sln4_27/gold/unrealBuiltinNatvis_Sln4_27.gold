@@ -17,7 +17,7 @@ TestFStringBuilder() NatvisTest.cpp:48
 
 --> NatvisTest.cpp:55$(1031) // 	nop(); // BREAK HERE
 TestFGuid() NatvisTest.cpp:55
-    +guid = {049D76F7-4303-1D2D-29AB-F28FDA132C6B}: FGuid
+    +guid = {528DCF83-42A2-DE0D-1BBC-7EBA2C64C427}: FGuid
 
 --> NatvisTest.cpp:64$(1201) // 	nop(); // BREAK HERE
 TestFText() NatvisTest.cpp:64
