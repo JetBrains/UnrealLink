@@ -11,8 +11,15 @@ public class RiderLogging : ModuleRules
 #else
 		PCHUsage = PCHUsageMode.NoSharedPCHs;
 #endif
-		
+
+#if UE_5_2_OR_LATER
+		if(Target.Platform == UnrealTargetPlatform.Mac)
+		{
+			bUseRTTI = false;
+		}
+#else
 		bUseRTTI = true;
+#endif
 
 		PrivateDependencyModuleNames.AddRange(new []
 		{
