@@ -11,6 +11,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.encoding.EncodingProjectManager
 import com.intellij.openapi.vfs.encoding.EncodingProjectManagerImpl
+import com.intellij.util.ExceptionUtil.currentStackTrace
 import com.intellij.util.TimedReference
 import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
@@ -25,6 +26,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDes
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.OpenSolutionParams
 import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getPersistentCacheFolder
@@ -36,7 +38,6 @@ import java.io.File
 import java.nio.file.Files
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-import kotlin.test.currentStackTrace
 import com.jetbrains.rider.test.framework.getFileWithExtension as getFileWithExtensionRd
 
 /** Class for Unreal tests.
@@ -443,7 +444,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     protected fun <T> Array<T>.filterEngines(predicate: (T) -> Boolean): List<T> {
         return this.filter(predicate).ifEmpty {
             frameworkLogger.error("Failed to filter engines in \n${this.joinToString(";\n")}\n" +
-                    "at ${currentStackTrace().slice(0..2).joinToString("\n" )}")
+                    "at ${currentStackTrace()}")
             listOf()
         }
     }
