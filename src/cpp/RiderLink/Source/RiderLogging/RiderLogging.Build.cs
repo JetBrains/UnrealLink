@@ -13,7 +13,7 @@ public class RiderLogging : ModuleRules
 #endif
 
 #if UE_5_2_OR_LATER
-		if(Target.Platform == UnrealTargetPlatform.Mac)
+		if(Target.Platform == UnrealTargetPlatform.Linux || Target.Platform == UnrealTargetPlatform.Mac)
 		{
 			bUseRTTI = false;
 		}
