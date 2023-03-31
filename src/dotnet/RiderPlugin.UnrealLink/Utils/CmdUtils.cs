@@ -21,9 +21,9 @@ namespace RiderPlugin.UnrealLink.Utils
         {
             switch (PlatformUtil.RuntimePlatform)
             {
-                case PlatformUtil.Platform.Windows:
+                case JetPlatform.Windows:
                     return "bat";
-                case PlatformUtil.Platform.MacOsX:
+                case JetPlatform.MacOsX:
                     return "command";
                 default:
                     return "sh";
@@ -48,13 +48,13 @@ namespace RiderPlugin.UnrealLink.Utils
 
         private static VirtualFileSystemPath GetPlatformCommand([NotNull] VirtualFileSystemPath command)
         {
-            return PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows ? GetPathToCmd() : command;
+            return PlatformUtil.RuntimePlatform == JetPlatform.Windows ? GetPathToCmd() : command;
         }
         
         private static CommandLineBuilderJet GetPlatformCommandLine([NotNull] VirtualFileSystemPath command, params string[] args)
         {
             var commandLine = new CommandLineBuilderJet();
-            if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
+            if (PlatformUtil.RuntimePlatform == JetPlatform.Windows)
             {
                 commandLine.AppendFileName(command.ToNativeFileSystemPath());
             }
@@ -64,7 +64,7 @@ namespace RiderPlugin.UnrealLink.Utils
                 commandLine.AppendSwitch(arg);
             }
 
-            if (PlatformUtil.RuntimePlatform == PlatformUtil.Platform.Windows)
+            if (PlatformUtil.RuntimePlatform == JetPlatform.Windows)
             {
                 return new CommandLineBuilderJet().AppendSwitch("/C")
                     .AppendSwitch($"\"{commandLine}\"");

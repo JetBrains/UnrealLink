@@ -37,10 +37,10 @@ namespace RiderPlugin.UnrealLink
         {
             return PlatformUtil.RuntimePlatform switch
             {
-                PlatformUtil.Platform.Windows => Path.Combine(
+                JetPlatform.Windows => Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "..", "Local", "Jetbrains",
                     "Rider", "Unreal", "Ports"),
-                PlatformUtil.Platform.MacOsX => Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Library",
+                JetPlatform.MacOsX => Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Library",
                     "Logs", "Unreal Engine", "Ports"),
                 _ => Path.Combine(Environment.GetEnvironmentVariable("HOME") ?? "", ".config",
                     "unrealEngine", "Ports")

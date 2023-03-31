@@ -85,7 +85,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return;
             }
 
-            if (PlatformUtil.RuntimePlatform != PlatformUtil.Platform.Windows) return;
+            if (PlatformUtil.RuntimePlatform != JetPlatform.Windows) return;
 
             var ueVersion = solution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.Version;
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot, ueVersion);
