@@ -16,10 +16,12 @@ public class RiderLogging : ModuleRules
 			bUseRTTI = false;
 		}
 		else
+		{
+			bUseRTTI = true;
+		}
 #endif
-        {
-		    bUseRTTI = true;
-        }
+        bUseRTTI = true;
+        
 
 		PrivateDependencyModuleNames.AddRange(new []
 		{
