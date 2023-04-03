@@ -19,8 +19,8 @@ import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
 import icons.UnrealIcons
 
 class PlaySettings : DefaultActionGroup(), DumbAware {
-    private val connectedIcon = UnrealIcons.Status.UnrealEngineConnected
-    private val disconnectedIcon = UnrealIcons.Status.UnrealEngineDisconnected
+    private val connectedIcon = UnrealIcons.ConnectionStatus.UnrealEngineConnected
+    private val disconnectedIcon = UnrealIcons.ConnectionStatus.UnrealEngineDisconnected
 
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 

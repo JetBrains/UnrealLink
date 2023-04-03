@@ -81,7 +81,7 @@ class UnrealLogColorSettingsPage : ColorSettingsPage {
         """.trimIndent()
     }
 
-    override fun getIcon(): Icon = UnrealIcons.Status.UnrealEngineLogo
+    override fun getIcon(): Icon = UnrealIcons.ConnectionStatus.UnrealEngineLogo
 
     override fun customizeColorScheme(scheme: EditorColorsScheme): EditorColorsScheme {
         return ConsoleViewUtil.updateConsoleColorScheme(scheme)
