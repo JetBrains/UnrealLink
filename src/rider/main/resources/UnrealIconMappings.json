@@ -2,16 +2,16 @@
     "Icons": {
         "expui": {
             "run": {
-                "unrealEngineConnected.svg": "run/unrealEngineConnected.svg",
-                "unrealEngineDisconnected.svg": "run/unrealEngineDisconnected.svg",
-                "unrealFrameSkip.svg": "run/unrealFrameSkip.svg",
-                "unrealStatusOn.svg": "run/unrealStatusOn.svg",
-                "unrealStatusPause.svg": "run/unrealStatusPause.svg",
-                "unrealStatusPlay.svg": "run/unrealStatusPlay.svg",
-                "unrealStatusStop.svg": "run/unrealStatusStop.svg"
+                "unrealEngineConnected.svg": "Icons/run/unrealEngineConnected.svg",
+                "unrealEngineDisconnected.svg": "Icons/run/unrealEngineDisconnected.svg",
+                "unrealFrameSkip.svg": "Icons/run/unrealFrameSkip.svg",
+                "unrealStatusOn.svg": "Icons/run/unrealStatusOn.svg",
+                "unrealStatusPause.svg": "Icons/run/unrealStatusPause.svg",
+                "unrealStatusPlay.svg": "Icons/run/unrealStatusPlay.svg",
+                "unrealStatusStop.svg": "Icons/run/unrealStatusStop.svg"
             },
             "toolWindows": {
-                "toolWindowUnrealLog.svg": "toolWindows/toolWindowUnrealLog.svg"
+                "toolWindowUnrealLog.svg": "Icons/toolWindows/toolWindowUnrealLog.svg"
             }
         }
     }

@@ -34,7 +34,7 @@ class UnrealToolWindowFactory(val project: Project)
         val toolWindow = toolWindowManager.registerToolWindow(
                 RegisterToolWindowTask(
                     id = TOOLWINDOW_ID, anchor = ToolWindowAnchor.BOTTOM,
-                    icon = UnrealIcons.Status.UnrealEngineLogo,
+                    icon = UnrealIcons.ToolWindow.UnrealToolWindow,
                     canCloseContent = false, canWorkInDumbMode = true, sideTool = false
                 )
         )
