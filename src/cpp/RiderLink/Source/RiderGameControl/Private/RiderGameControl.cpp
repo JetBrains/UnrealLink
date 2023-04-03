@@ -17,7 +17,7 @@
 #include "Misc/FeedbackContext.h"
 #include "Modules/ModuleManager.h"
 #include "Settings/LevelEditorPlaySettings.h"
-#include "UnrealEd/Public/Editor.h"
+#include "Editor.h"
 
 #include "Runtime/Launch/Resources/Version.h"
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 23
