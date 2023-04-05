@@ -64,7 +64,6 @@ class UnrealModule : UnrealTestProject() {
         }
     }
 
-    @Mute("Can not find requested path(s) in tree: \"Engine\"")
     @Test(dataProvider = "ue5SourceOnly_AllPModels")
     fun newRuntimeEngineModule(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {

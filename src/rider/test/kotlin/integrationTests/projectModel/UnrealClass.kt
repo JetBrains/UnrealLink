@@ -22,7 +22,6 @@ import testFrameworkExtentions.UnrealTestProject
     buildTool = BuildTool.CPP,
     sdkVersion = SdkVersion.AUTODETECT
 )
-@Mute(reason = "Gold difference. RIDER-88373", specificParameters = ["Uproject5_2fromSource"])
 @Test(dataProvider = "AllEngines_AllPModels")
 class UnrealClass : UnrealTestProject() {
     init {
