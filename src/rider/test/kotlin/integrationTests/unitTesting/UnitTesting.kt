@@ -28,7 +28,6 @@ class UnitTesting : UnrealTestProject() {
         disableEnginePlugins = false
     }
 
-    @Mute("RIDER-80584. Need latest RSCA from source.", specificParameters = ["Uproject5_0", "Uproject5_0fromSource"])
     @Test(dataProvider = "AllEngines_uprojectOnly")
     fun runSimpleUT(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         FileEditorManagerEx.getInstanceEx(project).closeAllFiles()
@@ -44,9 +43,6 @@ class UnitTesting : UnrealTestProject() {
         }
     }
 
-    @Mutes([Mute("RIDER-80584. Need latest RSCA from source.", specificParameters = ["Uproject5_0"]),
-            Mute("Expect CidrDebugProcess to waiting, got class com.jetbrains.rider.debugger.DotNetDebugProcess. Fixed in 231", specificParameters = ["Uproject5_0fromSource"]),
-        Mute("Session can not start for default timeout. Fixed in 231", specificParameters = ["Uproject5_2fromSource"])])
     @Test(dataProvider = "AllEngines_uprojectOnly")
     fun debugSimpleUT(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         FileEditorManagerEx.getInstanceEx(project).closeAllFiles()
@@ -72,8 +68,7 @@ class UnitTesting : UnrealTestProject() {
             dumpFullCurrentData()
         }
     }
-    
-    @Mute("RIDER-80584. Need latest RSCA from source.", specificParameters = ["Sln5_0", "Uproject5_0", "Uproject5_0fromSource"])
+
     @Test(dataProvider = "AllEngines_uprojectOnly")
     fun runComplexUT(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         FileEditorManagerEx.getInstanceEx(project).closeAllFiles()
