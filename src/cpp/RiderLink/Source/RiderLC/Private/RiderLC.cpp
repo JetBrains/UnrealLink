@@ -3,7 +3,9 @@
 #include "IRiderLink.hpp"
 #include "RdEditorModel/RdEditorModel.Generated.h"
 #include "task/RdEndpoint.h"
-#include "Windows/LiveCoding/Public/ILiveCodingModule.h"
+
+#include "Async/Async.h"
+#include "ILiveCodingModule.h"
 
 #define LOCTEXT_NAMESPACE "FRiderLCModule"
 

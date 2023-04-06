@@ -16,7 +16,6 @@
 #include <iconv.h>
 #endif
 
-
 #include <thirdparty.hpp>
 
 namespace rd
@@ -36,9 +35,16 @@ inline std::string to_string(const char* val)
 }
 
 #if defined(_MSC_VER) || defined(__APPLE__)
+template<class I, class E, class S>
+struct codecvt : std::codecvt<I, E, S>
+{
+	~codecvt()
+	{ }
+};
+
 inline std::string to_string(std::wstring const& val)
 {
-	using convert_type = std::codecvt<wchar_t, char, std::mbstate_t>;
+	using convert_type = codecvt<wchar_t, char, std::mbstate_t>;
 	std::wstring_convert<convert_type> converter;
 	return converter.to_bytes(val);
 }

@@ -107,7 +107,7 @@ abstract class PlayStateAction(text: String?, description: String?, icon: Icon?)
 class PlayInUnrealAction : PlayStateAction(
     UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.text"),
     UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.description"),
-    UnrealIcons.Status.Play
+    UnrealIcons.PIEControl.Play
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
@@ -127,7 +127,7 @@ class PlayInUnrealAction : PlayStateAction(
 class ResumeInUnrealAction : PlayStateAction(
         UnrealLinkBundle.message("action.RiderLink.ResumeInUnrealAction.text"),
         UnrealLinkBundle.message("action.RiderLink.ResumeInUnrealAction.description"),
-        UnrealIcons.Status.Play
+        UnrealIcons.PIEControl.Play
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
@@ -147,7 +147,7 @@ class ResumeInUnrealAction : PlayStateAction(
 class StopInUnrealAction : PlayStateAction(
     UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.text"),
     UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.description"),
-    UnrealIcons.Status.Stop
+    UnrealIcons.PIEControl.Stop
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
@@ -166,7 +166,7 @@ class StopInUnrealAction : PlayStateAction(
 class PauseInUnrealAction : PlayStateAction(
     UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.text"),
     UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.description"),
-    UnrealIcons.Status.Pause
+    UnrealIcons.PIEControl.Pause
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
@@ -186,7 +186,7 @@ class PauseInUnrealAction : PlayStateAction(
 class SingleStepInUnrealAction : PlayStateAction(
         UnrealLinkBundle.message("action.RiderLink.SkipFrame.text"),
         UnrealLinkBundle.message("action.RiderLink.SkipFrame.description"),
-        UnrealIcons.Status.FrameSkip
+        UnrealIcons.PIEControl.FrameSkip
 ) {
     override fun update(e: AnActionEvent) {
         super.update(e)
