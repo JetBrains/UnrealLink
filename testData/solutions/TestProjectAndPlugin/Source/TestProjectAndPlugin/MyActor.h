@@ -26,3 +26,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	uint8 bMyProperty:1;
 };
+
+USTRUCT()
+struct FMyStruct
+{
+	GENERATED_BODY()
+};
+
+UENUM()
+enum EMyEnum { Some_Field };
+
+UENUM()
+enum class EMyEnumClass : uint8 { Some_Field };

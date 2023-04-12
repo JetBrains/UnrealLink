@@ -68,7 +68,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         )
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram(configurationName = activeSolution) {
+        withRunProgram(project, configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                 { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
         }
@@ -84,9 +84,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         /**
          * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
          */
-        unrealInfo.testingEngines.filter(predicate).ifEmpty {
-            throw Exception("Failed to filter engines in ${unrealInfo.testingEngines} by $predicate")
-        }.forEach { engine ->
+        unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
             arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
                 arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
                     // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?

@@ -5,15 +5,14 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.env.enums.BuildTool
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.TemplateType.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
-import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
@@ -58,14 +57,13 @@ class UnrealModule : UnrealTestProject() {
         )
         //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram(configurationName = activeSolution) {
+        withRunProgram(project, configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                         { activeSolutionDirectory.resolve("Saved").resolve("Logs").resolve("$activeSolution.log").exists() },
                         { "Editor wasn't run!" })
         }
     }
 
-    @Mute("Can not find requested path(s) in tree: \"Engine\". Fixed in 231.")
     @Test(dataProvider = "ue5SourceOnly_AllPModels")
     fun newRuntimeEngineModule(caseName: String, openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
         testProjectModel(testGoldFile, project) {

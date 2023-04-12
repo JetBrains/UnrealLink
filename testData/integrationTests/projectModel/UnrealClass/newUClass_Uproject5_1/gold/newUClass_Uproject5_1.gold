@@ -52,6 +52,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -78,6 +79,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -104,6 +106,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -189,6 +192,7 @@ Project [Name:EmptyUProject, GUID:GUID]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -215,6 +219,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -241,6 +246,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -267,6 +273,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -293,6 +300,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -319,6 +327,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -345,6 +354,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -371,6 +381,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -397,6 +408,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -423,6 +435,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -449,6 +462,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -475,6 +489,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 ]
@@ -501,6 +516,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -527,6 +543,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -553,6 +570,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -579,6 +597,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -605,6 +624,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -631,6 +651,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -657,6 +678,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -683,6 +705,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -709,6 +732,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -735,6 +759,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -761,6 +786,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -787,6 +813,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -813,6 +840,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -839,6 +867,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -865,6 +894,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
@@ -891,6 +921,7 @@ NONE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 CLCOMPILE ]
@@ -917,6 +948,7 @@ CLCOMPILE ]
   CppLanguageStandard :Unspecified
   CLanguageStandard :Default
   ConformanceMode :False
+  ConformantPreprocessor :False
   HasCompilerTool: False
   ExcludedFromBuild: False
 NONE ]
