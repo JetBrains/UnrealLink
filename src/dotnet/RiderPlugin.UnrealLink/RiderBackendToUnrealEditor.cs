@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
+using JetBrains.HabitatDetector;
 using JetBrains.Lifetimes;
 using JetBrains.Platform.RdFramework.Impl;
 using JetBrains.ProjectModel;
