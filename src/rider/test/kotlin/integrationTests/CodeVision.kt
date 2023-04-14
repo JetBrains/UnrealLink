@@ -48,9 +48,6 @@ class CodeVision : UnrealTestProject() {
             activeSolutionDirectory.resolve("Source")
                 .resolve(activeSolution).resolve("MyActor.h").absolutePath
         ) {
-            installGlobalDaemonWatcher()
-            waitForLenses()
-
             executeWithGold(testGoldFile, "_actor") {
                 it.println(this.virtualFile.name)
                 it.print(dumpULenses())
@@ -62,9 +59,6 @@ class CodeVision : UnrealTestProject() {
                                       activeSolutionDirectory.resolve("Source")
                                           .resolve(activeSolution).resolve("MyAnimInstance.h").absolutePath
         ) {
-            installGlobalDaemonWatcher()
-            waitForLenses()
-
             executeWithGold(testGoldFile, "_animInst") {
                 it.print(dumpULenses())
             }
