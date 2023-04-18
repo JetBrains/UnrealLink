@@ -13,6 +13,12 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 
+## [2023.1.0.188]
+
+### Fixed
+
+- Navigating from Rider to Unreal Editor for DataAssets
+
 ### Changed
 
 - Add option to specify intermediate folder for building RiderLink plugin (File | Settings | Languages & Frameworks | Unreal Engine). 

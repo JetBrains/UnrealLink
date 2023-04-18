@@ -106,8 +106,7 @@ void FRiderLoggingModule::StartupModule()
 	ModuleLifetimeDef.lifetime->bracket(
 	[this]()
 	{
-		OutputDevice.onSerializeMessage.BindLambda(
-		[this](const TCHAR* msg, ELogVerbosity::Type Type, const class FName& Name, TOptional<double> Time)
+		OutputDevice.Setup([this](const TCHAR* msg, ELogVerbosity::Type Type, const FName& Name, TOptional<double> Time)
 		{
 			if (Type > ELogVerbosity::All) return;
 
@@ -118,6 +117,7 @@ void FRiderLoggingModule::StartupModule()
 			}
 			const FString PlainName = Name.GetPlainNameString();
 			const JetBrains::EditorPlugin::LogMessageInfo MessageInfo{Type, PlainName, DateTime};
+			
 			LoggingScheduler->queue([Msg = FString(msg), MessageInfo]() mutable
 			{
 				LoggingExtensionImpl::ScheduledSendMessage(&Msg, MessageInfo);
@@ -126,8 +126,7 @@ void FRiderLoggingModule::StartupModule()
 	},
 	[this]()
 	{
-		if (OutputDevice.onSerializeMessage.IsBound())
-			OutputDevice.onSerializeMessage.Unbind();
+		OutputDevice.TearDown();
 	});
 
 	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("STARTUP FINISH"));
