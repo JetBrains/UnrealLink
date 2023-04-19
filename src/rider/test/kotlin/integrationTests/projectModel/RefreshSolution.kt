@@ -15,6 +15,8 @@ import io.qameta.allure.Feature
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
+import java.io.File
+import java.time.Duration
 
 @Epic("UnrealLink")
 @Feature("Refresh Solution")
@@ -37,7 +39,21 @@ class RefreshSolution : UnrealTestProject() {
 
             dump("Init") {}
             dump("Invoking refresh solution") {
+                createUnrealPlugin(project, "TestNewPluginProject",
+                    calculateRootPathInSolutionExplorer(activeSolution, openWith),
+                    PluginTemplateType.UNREAL_PLUGIN_BLANK)
+
                 project.solution.rdRiderModel.refreshProjects.fire()
+                // Crutch. TODO: Replace with true waiting for UBT to complete it's job
+                if (engine.isInstalledBuild)
+                    waitPumping(Duration.ofSeconds(8))
+                else
+                    waitPumping(Duration.ofSeconds(15))
+
+                waitForProjectModelReady(project)
+                val vcxprojFiltersReader = File(tempTestDirectory, "$projectDirectoryName/Intermediate/ProjectFiles/$activeSolution.vcxproj.filters")
+
+                assert(vcxprojFiltersReader.readText().contains("TestNewPluginProject"))
             }
         }
     }
