@@ -45,7 +45,7 @@ class RiderLinkInstallService(
         val currentContext = context
         if (currentContext != null)
             return currentContext
-        val toolWindow = buildToolWindowFactory.getOrRegisterToolWindow()
+        val toolWindow = buildToolWindowFactory.getOrRegisterToolWindow(project)
         val contentManager = toolWindow.contentManager
 
         val panel = RiderLinkInstallPanel(project, serviceLifetime)
