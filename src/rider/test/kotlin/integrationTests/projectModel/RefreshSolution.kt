@@ -36,6 +36,7 @@ class RefreshSolution : UnrealTestProject() {
         testProjectModel(testGoldFile, project) {
             profile.customPathsToMask = unrealPathsToMask
             profile.customRegexToMask = unrealRegexToMask
+            profile.fileNames.add("$activeSolution.vcxproj.filters")
 
             dump("Init") {}
             dump("Invoking refresh solution") {
@@ -46,14 +47,14 @@ class RefreshSolution : UnrealTestProject() {
                 project.solution.rdRiderModel.refreshProjects.fire()
                 // Crutch. TODO: Replace with true waiting for UBT to complete it's job
                 if (engine.isInstalledBuild)
-                    waitPumping(Duration.ofSeconds(8))
+                    waitPumping(Duration.ofSeconds(10))
                 else
                     waitPumping(Duration.ofSeconds(15))
 
                 waitForProjectModelReady(project)
-                val vcxprojFiltersReader = File(tempTestDirectory, "$projectDirectoryName/Intermediate/ProjectFiles/$activeSolution.vcxproj.filters")
+                val vcxprojFilters = File(tempTestDirectory, "$projectDirectoryName/Intermediate/ProjectFiles/$activeSolution.vcxproj.filters")
 
-                assert(vcxprojFiltersReader.readText().contains("TestNewPluginProject"))
+                assert(vcxprojFilters.readText().contains("TestNewPluginProject"))
             }
         }
     }
@@ -64,7 +65,7 @@ class RefreshSolution : UnrealTestProject() {
         checkIndex: Boolean = false,
         action: () -> Unit
     ) {
-        dump(caption, project, activeSolutionDirectory, checkSlnFile, checkIndex, action)
+        dump(caption, project, activeSolutionDirectory.resolve("Intermediate/ProjectFiles"), checkSlnFile, checkIndex, action)
     }
 
 }
