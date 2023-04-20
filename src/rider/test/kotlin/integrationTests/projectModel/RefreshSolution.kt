@@ -2,6 +2,7 @@ package integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.util.reactive.fire
+import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
@@ -15,7 +16,6 @@ import io.qameta.allure.Feature
 import org.testng.annotations.Test
 import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
-import java.io.File
 import java.time.Duration
 
 @Epic("UnrealLink")
@@ -45,16 +45,12 @@ class RefreshSolution : UnrealTestProject() {
                     PluginTemplateType.UNREAL_PLUGIN_BLANK)
 
                 project.solution.rdRiderModel.refreshProjects.fire()
-                // Crutch. TODO: Replace with true waiting for UBT to complete it's job
-                if (engine.isInstalledBuild)
-                    waitPumping(Duration.ofSeconds(10))
-                else
-                    waitPumping(Duration.ofSeconds(15))
-
                 waitForProjectModelReady(project)
-                val vcxprojFilters = File(tempTestDirectory, "$projectDirectoryName/Intermediate/ProjectFiles/$activeSolution.vcxproj.filters")
 
-                assert(vcxprojFilters.readText().contains("TestNewPluginProject"))
+                val waitForUBTTimeout = Duration.ofSeconds(30)
+                waitAndPump(waitForUBTTimeout,
+                    { !project.solution.rdRiderModel.refreshInProgress.value},
+                    {"Response from UBT took longer than expected time"})
             }
         }
     }
