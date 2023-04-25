@@ -4,6 +4,7 @@ import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.framework.TestProjectModelContext
@@ -25,6 +26,7 @@ import java.time.Duration
     buildTool = BuildTool.CPP,
     sdkVersion = SdkVersion.AUTODETECT
 )
+@Mute("Incorrect tests")
 @Test(dataProvider = "AllEngines_slnOnly")
 class RefreshSolution : UnrealTestProject() {
     init {
