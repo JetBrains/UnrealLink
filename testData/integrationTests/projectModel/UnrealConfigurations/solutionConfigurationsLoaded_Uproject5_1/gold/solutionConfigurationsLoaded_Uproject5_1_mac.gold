@@ -1,7 +1,0 @@
-Count: 5
-RdConfigurationAndPlatform(configuration=DebugGame Editor, platform=Mac)
-RdConfigurationAndPlatform(configuration=Development Editor, platform=Mac)
-RdConfigurationAndPlatform(configuration=DebugGame, platform=Mac)
-RdConfigurationAndPlatform(configuration=Development, platform=Mac)
-RdConfigurationAndPlatform(configuration=Shipping, platform=Mac)
-

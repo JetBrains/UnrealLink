@@ -1,6 +1,0 @@
--ROOT
- -EmptyUProject
-  -Source
-   -EmptyUProject
-    -DefaultNamespace
-     SimpleUnitTest
