@@ -1,6 +1,7 @@
 #include "RiderOutputDevice.hpp"
 
 #include "CoreGlobals.h"
+#include "ScopeLock.h"
 #include "Misc/OutputDeviceRedirector.h"
 
 void FRiderOutputDevice::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category)
