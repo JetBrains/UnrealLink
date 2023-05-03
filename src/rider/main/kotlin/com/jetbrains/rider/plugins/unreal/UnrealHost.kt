@@ -2,6 +2,7 @@ package com.jetbrains.rider.plugins.unreal
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.jetbrains.rd.framework.protocolOrThrow
 import com.jetbrains.rd.util.reactive.IProperty
 import com.jetbrains.rd.util.reactive.Property
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
@@ -40,7 +41,7 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.isInstallInfoAvailable.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
-        model.protocol.scheduler.invokeOrQueue {
+        model.protocolOrThrow.scheduler.invokeOrQueue {
             action(model)
         }
     }
