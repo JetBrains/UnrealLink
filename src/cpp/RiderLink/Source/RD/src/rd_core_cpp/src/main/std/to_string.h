@@ -44,9 +44,16 @@ struct codecvt : std::codecvt<I, E, S>
 
 inline std::string to_string(std::wstring const& val)
 {
+#if defined(__APPLE__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
 	using convert_type = codecvt<wchar_t, char, std::mbstate_t>;
 	std::wstring_convert<convert_type> converter;
 	return converter.to_bytes(val);
+#if defined(__APPLE__)
+#pragma clang diagnostic pop
+#endif
 }
 #else
 const std::string conv_error("Conversion Error");
