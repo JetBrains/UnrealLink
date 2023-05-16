@@ -9,6 +9,11 @@ public class RiderShaderInfo : ModuleRules
 #else
 		PCHUsage = PCHUsageMode.NoSharedPCHs;
 #endif
+
+#if UE_5_2_OR_LATER
+		bDisableStaticAnalysis = true;
+#endif
+
 		PrivateDependencyModuleNames.AddRange(new string[] { "Core",  "Projects", "RenderCore" });
 	}
 }
