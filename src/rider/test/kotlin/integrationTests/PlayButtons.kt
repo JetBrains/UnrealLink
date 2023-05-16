@@ -1,10 +1,6 @@
 package integrationTests
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.actionSystem.impl.ActionManagerImpl
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.pumpMessages
@@ -40,11 +36,11 @@ class PlayButtons : UnrealTestProject() {
     private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
     private val context: DataContext get() = SimpleDataContext.getSimpleContext(CommonDataKeys.PROJECT, project)
-    private val startAction: AnAction get() = ActionManagerImpl.getInstance().getAction("RiderLink.StartUnreal")
-    private val stepAction: AnAction get() = ActionManagerImpl.getInstance().getAction("RiderLink.SingleStepUnreal")
-    private val pauseAction: AnAction get() = ActionManagerImpl.getInstance().getAction("RiderLink.PauseUnreal")
-    private val resumeAction: AnAction get() = ActionManagerImpl.getInstance().getAction("RiderLink.ResumeUnreal")
-    private val stopAction: AnAction get() = ActionManagerImpl.getInstance().getAction("RiderLink.StopUnreal")
+    private val startAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StartUnreal")
+    private val stepAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.SingleStepUnreal")
+    private val pauseAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.PauseUnreal")
+    private val resumeAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.ResumeUnreal")
+    private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
     @Test(dataProvider = "AllEngines_AllPModels")
     fun endToEndTest(
