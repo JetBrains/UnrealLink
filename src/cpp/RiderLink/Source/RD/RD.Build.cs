@@ -9,6 +9,10 @@ public class RD : ModuleRules
 		bUseRTTI = true;
 
 #if UE_5_2_OR_LATER
+		bDisableStaticAnalysis = true;
+#endif
+
+#if UE_5_2_OR_LATER
 		IWYUSupport = IWYUSupport.KeepAsIs;
 #else
 		bEnforceIWYU = false;
