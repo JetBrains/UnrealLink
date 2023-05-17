@@ -26,7 +26,7 @@ import java.time.Duration
     buildTool = BuildTool.CPP,
     sdkVersion = SdkVersion.AUTODETECT
 )
-//@Mute("Incorrect tests")
+
 @Test(dataProvider = "AllEngines_slnOnly")
 class RefreshSolution : UnrealTestProject() {
     init {
