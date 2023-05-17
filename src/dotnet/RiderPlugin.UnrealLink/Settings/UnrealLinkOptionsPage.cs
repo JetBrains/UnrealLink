@@ -53,6 +53,7 @@ namespace RiderPlugin.UnrealLink.Settings
     [OptionsPage(PID, Name, typeof(CppThemedIcons.Unreal), Sequence = 0.02,
         ParentId = CodeEditingPage.PID, SearchTags = new []{"Unreal Engine", "UnrealLink", "RiderLink"},
         NameResourceType = typeof(Strings),
+        HelpKeyword = "Settings_Languages_Unreal_Engine",
         NameResourceName = nameof(Strings.UnrealLinkPluginSettings_Title_Text))]
     public class UnrealLinkOptionsPage : BeSimpleOptionsPage
     {
