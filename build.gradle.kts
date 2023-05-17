@@ -13,6 +13,7 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 buildscript {
     repositories {
         maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2") }
+        mavenLocal()
     }
     dependencies {
         classpath("com.jetbrains.rd:rd-gen:2023.2.1")
