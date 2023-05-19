@@ -10,8 +10,15 @@ with a "Rider:" prefix are specific to Rider, while changes for the Unreal Edito
 Editor:" prefix. No prefix means that the change is common to both Rider and ReSharper.
 
 The plugin is always bundled with Rider.
-
 ## [Unreleased]
+
+## [2023.1.0.282]
+
+### Fixed
+
+- [RIDER-93789](https://youtrack.jetbrains.com/issue/RIDER-93789)
+
+## [2022.3.0.200]
 
 ### Changed
 
