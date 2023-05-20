@@ -13,11 +13,19 @@ The plugin is always bundled with Rider.
 
 ## [Unreleased]
 
+## [2023.1.0.282]
+
+### Fixed
+
+- [RIDER-93789](https://youtrack.jetbrains.com/issue/RIDER-93789)
+
 ## [2023.1.0.188]
 
 ### Fixed
 
 - Navigating from Rider to Unreal Editor for DataAssets
+
+## [2022.3.0.200]
 
 ### Changed
 
