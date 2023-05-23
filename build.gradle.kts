@@ -30,7 +30,7 @@ plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.intellij") version "1.13.3"
-    id("io.qameta.allure") version "2.11.0"
+    id("io.qameta.allure") version "2.11.2"
 }
 
 dependencies {
@@ -241,11 +241,11 @@ tasks {
         return@lazy jarFile.canonicalPath
     }
 
-    withType<RunIdeTask> {
+    withType<RunIdeTask>().configureEach {
         maxHeapSize = "4096m"
     }
 
-    withType<Test> {
+    withType<Test>().configureEach {
         maxHeapSize = "4096m"
         if (project.hasProperty("ignoreFailures")) { ignoreFailures = true }
         useTestNG {
@@ -258,7 +258,7 @@ tasks {
         }
     }
 
-    withType<KotlinCompile> {
+    withType<KotlinCompile>().configureEach {
         dependsOn("generateModels")
         kotlinOptions {
             jvmTarget = "17"
