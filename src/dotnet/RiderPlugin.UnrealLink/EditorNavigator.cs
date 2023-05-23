@@ -34,14 +34,14 @@ namespace RiderPlugin.UnrealLink
             _classCache.GetOrCreate(name, s =>
             {
                 var symbolsByShortName = _cppSymbolNameCache.SymbolNameCache.GetSymbolsByShortName(s);
-                var classSymbol = symbolsByShortName.OfType<CppClassSymbol>().SingleOrNull();
+                var classSymbol = symbolsByShortName.ToEnumerable().OfType<CppClassSymbol>().SingleOrNull();
                 return classSymbol;
             });
 
         private CppDeclaratorSymbol GetMethodSymbol(CppClassSymbol classSymbol, string method) =>
             _methodCache.GetOrCreate(method, s =>
             {
-                return classSymbol.Children.OfType<CppDeclaratorSymbol>()
+                return classSymbol.Children.ToEnumerable().OfType<CppDeclaratorSymbol>()
                     .Where(symbol => s == symbol.Name.Name.ToString()).SingleOrNull();
             });
 
