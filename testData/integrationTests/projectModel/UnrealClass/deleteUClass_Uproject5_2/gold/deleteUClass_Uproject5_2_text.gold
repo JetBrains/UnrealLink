@@ -1,0 +1,249 @@
+===================
+Init Remove UClass test
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[SomeActor.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SomeActor.h"
+
+
+// Sets default values
+ASomeActor::ASomeActor()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+// Called when the game starts or when spawned
+void ASomeActor::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void ASomeActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+
+
+[SomeActor.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "SomeActor.generated.h"
+
+UCLASS()
+class EMPTYUPROJECT_API ASomeActor : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	// Sets default values for this actor's properties
+	ASomeActor();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+};
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+===================
+Deleting .h and .cpp
+
+[EmptyUProject.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectTarget : TargetRules
+{
+	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
+[EmptyUProject.Build.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+
+public class EmptyUProject : ModuleRules
+{
+	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.NoPCHs;
+	
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+}
+
+
+[EmptyUProject.cpp]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "EmptyUProject.h"
+#include "Modules/ModuleManager.h"
+
+#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
+#include "GameFramework/Character.h"
+#include "UObject/Interface.h"
+#include "GameFramework/Pawn.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Styling/SlateWidgetStyle.h"
+#include "Styling/SlateWidgetStyleContainerBase.h"
+#include "Sound/SoundEffectSource.h"
+#include "Sound/SoundEffectSubmix.h"
+#include "Components/SynthComponent.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
+
+
+[EmptyUProject.h]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+
+
+[EmptyUProjectEditor.Target.cs]
+// Fill out your copyright notice in the Description page of Project Settings.
+
+using UnrealBuildTool;
+using System.Collections.Generic;
+
+public class EmptyUProjectEditorTarget : TargetRules
+{
+	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
+	{
+		Type = TargetType.Editor;
+		DefaultBuildSettings = BuildSettingsVersion.V2;
+
+		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
+	}
+}
+
+
