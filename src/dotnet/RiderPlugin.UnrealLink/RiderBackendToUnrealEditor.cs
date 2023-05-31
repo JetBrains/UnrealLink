@@ -199,7 +199,6 @@ namespace RiderPlugin.UnrealLink
         {
             myUnrealHost.PerformModelAction(riderModel =>
             {
-                UE4Library.RegisterDeclaredTypesSerializers(protocol.Serializers);
                 riderModel.EditorId.SetValue(riderModel.EditorId.Value + 1);
             });
 

@@ -6,6 +6,7 @@ using JetBrains.ProjectModel;
 using JetBrains.Rd.Base;
 using JetBrains.ReSharper.Feature.Services.Protocol;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
+using RiderPlugin.UnrealLink.Model;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
@@ -34,6 +35,11 @@ namespace RiderPlugin.UnrealLink
                 myModel.IsUproject.Set(args.New && solutionDetector.SupportRiderProjectModel == CppUE4ProjectModelSupportMode.UprojectOpened);
                 myModel.IsPreBuiltEngine.Set(args.New && !solutionDetector.UnrealContext.Value.IsBuiltFromSource);
             });
+            
+            if (myModel.TryGetProto() is {} protocol)
+            {
+                UE4Library.RegisterDeclaredTypesSerializers(protocol.Serializers);
+            }
         }
 
         public void PerformModelAction(Action<RdRiderModel> action)
