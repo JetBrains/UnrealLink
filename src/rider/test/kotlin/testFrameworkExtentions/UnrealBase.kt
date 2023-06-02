@@ -2,23 +2,15 @@ package testFrameworkExtentions
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.intellij.execution.RunManagerEx
-import com.intellij.execution.process.ProcessHandler
 import com.intellij.ide.GeneralSettings
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.encoding.EncodingProjectManager
-import com.intellij.openapi.vfs.encoding.EncodingProjectManagerImpl
 import com.intellij.util.ExceptionUtil.currentStackTrace
-import com.intellij.util.TimedReference
-import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.hasTrueValue
-import com.jetbrains.rdclient.notifications.NotificationsHost
 import com.jetbrains.rdclient.util.idea.toIOFile
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
@@ -29,7 +21,6 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.OpenSolutionParams
 import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
 import com.jetbrains.rider.test.framework.frameworkLogger
-import com.jetbrains.rider.test.framework.getPersistentCacheFolder
 import com.jetbrains.rider.test.scriptingApi.*
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
@@ -199,14 +190,20 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         uprojectFile.writeText(uprojectText)
     }
 
-  protected fun generateSolutionFromUProject(uprojectFile: File, currentEngine: UnrealEngine, timeout: Duration = Duration.ofSeconds(90)) {
-    val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
-    val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
-    val ubtCommand = "${currentEngine.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " + "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
-    frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
-    ProcessBuilder(*(ubtCommand).split(" ").toTypedArray()).redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(
-      ProcessBuilder.Redirect.INHERIT).start().waitFor(timeout.seconds, TimeUnit.SECONDS)
-  }
+    protected fun generateSolutionFromUProject(
+        uprojectFile: File,
+        currentEngine: UnrealEngine,
+        timeout: Duration = Duration.ofSeconds(90)
+    ) {
+        val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
+        val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
+        val ubtCommand = "${currentEngine.path.replace(" ", "\\ ")}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool"
+        val ubtParams = "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
+        frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
+        ProcessBuilder(ubtCommand, *(ubtParams).split(" ").toTypedArray()).redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(
+            ProcessBuilder.Redirect.INHERIT
+        ).start().waitFor(timeout.seconds, TimeUnit.SECONDS)
+    }
 
     fun calculateRootPathInSolutionExplorer(
         projectName: String,
@@ -411,15 +408,16 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         }
 
     protected open fun generateUnrealDataProvider(
-        unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
-        predicate: (UnrealEngine) -> Boolean
+        unrealPmTypes: Array<EngineInfo.UnrealOpenType>, predicate: (UnrealEngine) -> Boolean
     ): MutableIterator<Array<Any>> {
+        val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+
         val result: ArrayList<Array<Any>> = arrayListOf()
         /**
          * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
          */
         unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
-            unrealPmTypes.forEach { type ->
+            types.forEach { type ->
                 result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
             }
         }

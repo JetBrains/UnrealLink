@@ -1,5 +1,6 @@
 package testFrameworkExtentions
 
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.application
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.ide.model.UnrealVersion
@@ -20,12 +21,17 @@ object UnrealConstants {
      * Only major and minor are important, the patch version is discarded when filtering engines.
      * See `fun UnrealVersion.basicallyEquals`
      */
-    val testingVersions: Array<UnrealVersion> = arrayOf(
-        UnrealVersion(4, 27, 2),
-        UnrealVersion(5, 0, 3),
-        UnrealVersion(5, 1, 0),
-        UnrealVersion(5, 2, 0)
-    )
+    val testingVersions: Array<UnrealVersion> by lazy {
+        if (SystemInfo.isMac)
+            return@lazy arrayOf(UnrealVersion(5, 1, 1),
+                UnrealVersion(5, 2, 0))
+        return@lazy arrayOf(
+            UnrealVersion(4, 27, 2),
+            UnrealVersion(5, 0, 3),
+            UnrealVersion(5, 1, 1),
+            UnrealVersion(5, 2, 0)
+        )
+    }
 
     val projectModelTypes: Array<EngineInfo.UnrealOpenType> = arrayOf(
         EngineInfo.UnrealOpenType.Sln,
