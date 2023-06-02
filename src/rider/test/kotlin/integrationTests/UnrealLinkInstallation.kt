@@ -1,5 +1,6 @@
 package integrationTests
 
+import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
@@ -9,9 +10,8 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.env.enums.BuildTool
-import com.jetbrains.rider.test.enums.PlatformType
+import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
 import com.jetbrains.rider.test.scriptingApi.*
@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit
 @Epic("UnrealLink")
 @Feature("Installation")
 @TestEnvironment(
-    platform = [PlatformType.WINDOWS_X64],
     buildTool = BuildTool.CPP,
     sdkVersion = SdkVersion.AUTODETECT
 )
@@ -71,6 +70,7 @@ class UnrealLinkInstallation : UnrealTestProject() {
         withRunProgram(project, configurationName = activeSolution) {
             waitAndPump(runProgramTimeout,
                 { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
+            waitPumping(Duration.ofSeconds(15))
         }
     }
 
@@ -80,13 +80,15 @@ class UnrealLinkInstallation : UnrealTestProject() {
      */
     override fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
                                              predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+        val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+
         val result: ArrayList<Array<Any>> = arrayListOf()
         /**
          * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
          */
         unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
             arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
-                arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
+                types.forEach { type ->
                     // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
                     if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
                     result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
