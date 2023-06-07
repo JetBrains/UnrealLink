@@ -49,6 +49,8 @@ import com.jetbrains.rider.test.framework.getFileWithExtension as getFileWithExt
 abstract class UnrealBase : BaseTestWithSolutionBase() {
     private var myProject: Project? = null
 
+
+    override val cleanTempTestDirectory: Boolean = false
     var project: Project
         get() = this.myProject!!
         set(value) {
@@ -155,7 +157,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(600)
 
         if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
+            generateSolutionFromUProject(uprojectFile, unrealInfo.currentEngine!!)
             openSolutionParams.minimalCountProjectsMustBeLoaded = null
         } else {
             openSolutionParams.minimalCountProjectsMustBeLoaded =
@@ -169,7 +171,21 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     ) {
         prepareUnrealProject(openWith, engine)
 
+        frameworkLogger.info("<Debug> Before open project")
+        frameworkLogger.info("<Debug> Open with $openWith, engine $engine, uproject ${uprojectFile.absolutePath}")
+        frameworkLogger.info("<Debug> Uproject content: ${uprojectFile.readText()}")
+        frameworkLogger.info("<Debug> Get project file: ${getProjectFile(openWith)}")
+        frameworkLogger.info("<Debug> TestRunTempPath: ${testRunTempDirectory.absolutePath}")
+        frameworkLogger.info("<Debug> TempTestDirPath ${tempTestDirectory.absolutePath}")
+//        
+//        val destPath = testRunTempDirectory.parentFile.parentFile
+//        frameworkLogger.info("<Debug> Copy project for manual investigating to $destPath")
+//        testRunTempDirectory.resolve(projectDirectoryName).copyRecursively(destPath)
+//        frameworkLogger.info("<Debug> Now in destination path: ${destPath.list()}")
+        
         project = openSolution(getProjectFile(openWith), openSolutionParams)
+        frameworkLogger.info("<Debug> After open project")
+        frameworkLogger.info("<Debug> Project: $project")
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
@@ -199,27 +215,13 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         uprojectFile.writeText(uprojectText)
     }
 
-    protected fun generateSolutionFromUProject(uprojectFile: File, timeout: Duration = Duration.ofSeconds(90)) {
-        val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool/" else ""
-        val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
-        val ubtExecutable = "UnrealBuildTool${if (SystemInfo.isWindows) ".exe" else ""}"
-        val ubtBuildTool =
-            unrealInfo.currentEnginePath!!.resolve("Engine/Binaries/DotNET/${ue5specific}/${ubtExecutable}").absolutePath
-        logger.info("Unreal Engine Build Tool Path: $ubtBuildTool")
-        val ubtCommand = listOf(
-            ubtBuildTool,
-            "-ProjectFiles",
-            "-game",
-            "-progress",
-            engineType,
-            "-project=\"${uprojectFile.absolutePath}\""
-        )
-
-        ProcessBuilder(ubtCommand)
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor(timeout.seconds, TimeUnit.SECONDS)
+    protected fun generateSolutionFromUProject(uprojectFile: File, currentEngine: UnrealEngine, timeout: Duration = Duration.ofSeconds(90)) {
+        val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
+        val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
+        val ubtCommand = "${currentEngine.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " + "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
+        frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
+        ProcessBuilder(*(ubtCommand).split(" ").toTypedArray()).redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(
+                ProcessBuilder.Redirect.INHERIT).start().waitFor(timeout.seconds, TimeUnit.SECONDS)
     }
 
     fun calculateRootPathInSolutionExplorer(
