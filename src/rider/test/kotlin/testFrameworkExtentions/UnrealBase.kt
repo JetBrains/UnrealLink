@@ -155,7 +155,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(600)
 
         if (openWith == EngineInfo.UnrealOpenType.Sln) {
-            generateSolutionFromUProject(uprojectFile)
+            generateSolutionFromUProject(uprojectFile, unrealInfo.currentEngine!!)
             openSolutionParams.minimalCountProjectsMustBeLoaded = null
         } else {
             openSolutionParams.minimalCountProjectsMustBeLoaded =
@@ -199,28 +199,14 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         uprojectFile.writeText(uprojectText)
     }
 
-    protected fun generateSolutionFromUProject(uprojectFile: File, timeout: Duration = Duration.ofSeconds(90)) {
-        val ue5specific = if (unrealInfo.currentEngine!!.version.major > 4) "UnrealBuildTool/" else ""
-        val engineType = if (unrealInfo.currentEngine!!.isInstalledBuild) "-rocket" else "-engine"
-        val ubtExecutable = "UnrealBuildTool${if (SystemInfo.isWindows) ".exe" else ""}"
-        val ubtBuildTool =
-            unrealInfo.currentEnginePath!!.resolve("Engine/Binaries/DotNET/${ue5specific}/${ubtExecutable}").absolutePath
-        logger.info("Unreal Engine Build Tool Path: $ubtBuildTool")
-        val ubtCommand = listOf(
-            ubtBuildTool,
-            "-ProjectFiles",
-            "-game",
-            "-progress",
-            engineType,
-            "-project=\"${uprojectFile.absolutePath}\""
-        )
-
-        ProcessBuilder(ubtCommand)
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor(timeout.seconds, TimeUnit.SECONDS)
-    }
+  protected fun generateSolutionFromUProject(uprojectFile: File, currentEngine: UnrealEngine, timeout: Duration = Duration.ofSeconds(90)) {
+    val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
+    val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
+    val ubtCommand = "${currentEngine.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " + "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
+    frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
+    ProcessBuilder(*(ubtCommand).split(" ").toTypedArray()).redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(
+      ProcessBuilder.Redirect.INHERIT).start().waitFor(timeout.seconds, TimeUnit.SECONDS)
+  }
 
     fun calculateRootPathInSolutionExplorer(
         projectName: String,
