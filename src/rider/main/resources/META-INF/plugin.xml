@@ -182,9 +182,11 @@ Path to old plugin:</code></pre>
         <projectService
                 serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
-                                 instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"/>
+                                 instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
+                                 key="configurable.UnrealLink.settings.title"/>
         <projectConfigurable groupId="tools" id="UnrealLogSettings" bundle="messages.UnrealLinkBundle"
-                             instance="com.jetbrains.rider.settings.UnrealLogSettingsConfigurable"/>
+                             instance="com.jetbrains.rider.settings.UnrealLogSettingsConfigurable"
+                             key="configurable.UnrealLog.settings.title"/>
         <colorSettingsPage implementation="com.jetbrains.rider.settings.UnrealLogColorSettingsPage" id="unreal_log"/>
 
         <consoleActionsPostProcessor
