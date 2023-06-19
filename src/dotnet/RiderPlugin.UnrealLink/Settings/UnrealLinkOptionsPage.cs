@@ -47,6 +47,11 @@ namespace RiderPlugin.UnrealLink.Settings
             typeof(Strings),
             nameof(Strings.DefaultBehaviorForRiderLinkUpdate_Text))]
         public InstallOrExtract DefaultUpdateRiderLinkBehavior;
+
+        [SettingsEntry(PluginInstallLocation.Engine,
+            typeof(Strings),
+            nameof(Strings.DefaultLocationForRiderLinkInstallation_Text))]
+        public InstallOrExtract DefaultLocationForRiderLink;
     }
     
 
@@ -87,6 +92,12 @@ namespace RiderPlugin.UnrealLink.Settings
                     new RadioOptionPoint(InstallOrExtract.Install, Strings.BuildAndInstall_RadioButton_Text),
                     new RadioOptionPoint(InstallOrExtract.Extract, Strings.ExtractOnly_RadioButton_Text));
                 AddCommentText(Strings.InstallOrExtractRadio_Comment_Text);
+                AddRadioOption(
+                    (UnrealLinkSettings s) => s.DefaultLocationForRiderLink,
+                    /*Localized*/ string.Empty,
+                    new RadioOptionPoint(PluginInstallLocation.Engine, Strings.InstallInEngine_Text),
+                    new RadioOptionPoint(PluginInstallLocation.Game, Strings.InstallInGame_Text));
+
             }
         }
 

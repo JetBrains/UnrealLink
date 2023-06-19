@@ -90,7 +90,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             if(myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.AutoUpdateRiderLinkPlugin))
             {
-                QueueAutoUpdate(unrealPluginInstallInfo);
+                var installLocation = unrealPluginInstallInfo.Location;
+                if (installLocation == PluginInstallLocation.NotInstalled)
+                {
+                    installLocation = GetInstallLocationFromSettings();
+                }
+                QueueAutoUpdate(installLocation);
                 return;
             }
 
@@ -102,15 +107,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             });
         }
 
-        private void QueueAutoUpdate(UnrealPluginInstallInfo unrealPluginInstallInfo)
+        private void QueueAutoUpdate(PluginInstallLocation installLocation)
         {
             var entry = myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.DefaultUpdateRiderLinkBehavior);
             var shouldBeBuilt = (entry == InstallOrExtract.Install) ||
-                                (!mySolution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.IsBuiltFromSource && unrealPluginInstallInfo.Location == PluginInstallLocation.Engine);
+                                (!mySolution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.IsBuiltFromSource && installLocation == PluginInstallLocation.Engine);
             mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                 "UnrealPluginInstaller.InstallPluginIfRequired",
                 () => HandleManualInstallPlugin(
-                    new InstallPluginDescription(unrealPluginInstallInfo.Location, ForceInstall.No, shouldBeBuilt)
+                    new InstallPluginDescription(installLocation, ForceInstall.No, shouldBeBuilt)
                 ));
         }
 
@@ -536,16 +541,27 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myUnrealHost.myModel.RiderLinkInstallPanelInit();
                 await lifetime.StartBackground(() =>
                 {
-                    if (installPluginDescription.Location == PluginInstallLocation.Engine)
+                    switch (installPluginDescription.Location)
                     {
-                        InstallPluginInEngine(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
-                    }
-                    else
-                    {
-                        InstallPluginInGame(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
+                        case PluginInstallLocation.Engine:
+                            InstallPluginInEngine(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
+                            break;
+                        case PluginInstallLocation.Game:
+                            InstallPluginInGame(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
+                            break;
+                        case PluginInstallLocation.NotInstalled:
+                        default:
+                            myLogger.Error("UnrealLink: Invalid location set for installing RiderLink plugin");
+                            break;
                     }
                 });
             });
+        }
+
+        private PluginInstallLocation GetInstallLocationFromSettings()
+        {
+            var entry = myBoundSettingsStore.Schema.GetScalarEntry((UnrealLinkSettings s) => s.DefaultLocationForRiderLink);
+            return (PluginInstallLocation)myBoundSettingsStore.GetValue(entry, null);
         }
 
         private void BindToNotificationFixAction()
