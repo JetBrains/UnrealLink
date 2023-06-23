@@ -4,6 +4,7 @@
 #include "Containers/Ticker.h"
 #include "lifetime/LifetimeDefinition.h"
 #include "Modules/ModuleManager.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderLCModule, Log, All);
 
@@ -18,8 +19,11 @@ public:
 private:
 	bool Tick(float X);
 	
+	rd::LifetimeDefinition ModuleLifetimeDef;
 	FTickerDelegate TickDelegate;
+#if ENGINE_MAJOR_VERSION < 5
+	FDelegateHandle TickDelegateHandle;
+#else
 	FTSTicker::FDelegateHandle TickDelegateHandle;
-    FDelegateHandle PatchCompleteHandle;
-    rd::LifetimeDefinition ModuleLifetimeDef;
+#endif
 };

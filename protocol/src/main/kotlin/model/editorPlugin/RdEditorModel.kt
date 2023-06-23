@@ -56,6 +56,5 @@ object RdEditorModel : Ext(RdEditorRoot) {
         call("LC_IsEnabledForSession", void, bool)
         call("LC_CanEnableForSession", void, bool)
         source("LC_EnableForSession", bool)
-        sink("LC_OnPatchComplete", void)
     }
 }

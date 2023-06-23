@@ -12,7 +12,6 @@ class LiveCodingHotReloadModeProvider : BuildButtonModeProvider {
     override fun isApplicable(project: Project): Boolean {
         val host = UnrealHost.getInstance(project)
         return host.isUnrealEngineSolution && host.isLiveCodingAvailable
-        // TODO: Should also check that configuration is "correct" (built&run Unreal project)?
     }
 
     override fun getButtonActionId(): String {
