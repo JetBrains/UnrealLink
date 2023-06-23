@@ -39,6 +39,10 @@ class UnrealHost(project: Project) : LifetimedProjectComponent(project) {
         get() = model.isUproject.value
     val isInstallInfoAvailable:Boolean
         get() = model.isInstallInfoAvailable.value
+    val isLiveCodingAvailable: Boolean
+        get() = model.isLiveCodingAvailable.value
+    val isLiveCodingCompiling: Boolean
+        get() = model.isLiveCodingCompiling.value
 
     fun <R> performModelAction(action:(RdRiderModel)->R) {
         model.protocolOrThrow.scheduler.invokeOrQueue {

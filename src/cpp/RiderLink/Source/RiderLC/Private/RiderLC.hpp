@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Ticker.h"
 #include "lifetime/LifetimeDefinition.h"
 #include "Modules/ModuleManager.h"
 
@@ -15,6 +16,10 @@ public:
 	void SetupLiveCodingBinds();
 	
 private:
+	bool Tick(float X);
+	
+	FTickerDelegate TickDelegate;
+	FTSTicker::FDelegateHandle TickDelegateHandle;
     FDelegateHandle PatchCompleteHandle;
     rd::LifetimeDefinition ModuleLifetimeDef;
 };
