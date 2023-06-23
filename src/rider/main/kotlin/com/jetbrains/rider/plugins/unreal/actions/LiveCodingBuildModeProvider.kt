@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rider.build.actions.BuildButtonModeProvider
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 
-class LiveCodingHotReloadModeProvider : BuildButtonModeProvider {
+class LiveCodingBuildModeProvider : BuildButtonModeProvider {
     override fun getPriority(): Int {
         return 10000
     }
@@ -15,6 +15,6 @@ class LiveCodingHotReloadModeProvider : BuildButtonModeProvider {
     }
 
     override fun getButtonActionId(): String {
-        return "UnrealLink.LiveCodingHotReload"
+        return "UnrealLink.LiveCodingBuild"
     }
 }
