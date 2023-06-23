@@ -119,5 +119,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("isInstallInfoAvailable", false)
 
         source("CancelRiderLinkInstall", void)
+
+        property("IsLiveCodingAvailable", false).readonly
+        property("isLiveCodingCompiling", false).readonly
+        signal("TriggerLiveCodingBuild", void)
     }
 }

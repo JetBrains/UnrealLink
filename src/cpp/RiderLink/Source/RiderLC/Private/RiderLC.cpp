@@ -6,6 +6,7 @@
 
 #include "Async/Async.h"
 #include "ILiveCodingModule.h"
+#include "Containers/Ticker.h"
 
 #define LOCTEXT_NAMESPACE "FRiderLCModule"
 
@@ -26,7 +27,7 @@ void WrapRDCall(rd::RdEndpoint<rd::Void, bool, rd::Polymorphic<rd::Void>, rd::Po
 }
 
 void FRiderLCModule::SetupLiveCodingBinds()
-{	
+{
 	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
 	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
 	PatchCompleteHandle = LiveCoding.GetOnPatchCompleteDelegate().AddLambda([this, &RiderLinkModule]
@@ -69,16 +70,6 @@ void FRiderLCModule::SetupLiveCodingBinds()
 			}			
 		});
 		
-		WrapRDCall(RdEditorModel.get_lC_HasStarted(), [](const ILiveCodingModule& LiveCodingModule)
-		{
-			return LiveCodingModule.HasStarted();
-		});
-		
-		WrapRDCall(RdEditorModel.get_lC_IsCompiling(), [](const ILiveCodingModule& LiveCodingModule)
-		{
-			return LiveCodingModule.IsCompiling();
-		});
-		
 		WrapRDCall(RdEditorModel.get_lC_IsEnabledByDefault(), [](const ILiveCodingModule& LiveCodingModule)
 		{
 			return LiveCodingModule.IsEnabledByDefault();
@@ -93,7 +84,22 @@ void FRiderLCModule::SetupLiveCodingBinds()
 		{
 			return LiveCodingModule.CanEnableForSession();
 		});
+
+		RdEditorModel.get_lC_IsModuleStarted().fire(true);
 	});
+}
+
+bool FRiderLCModule::Tick(float Delta)
+{
+	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
+	RiderLinkModule.QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
+	{
+		const ILiveCodingModule& LiveCodingModule = FModuleManager::GetModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+		RdEditorModel.get_lC_IsAvailable().set(LiveCodingModule.HasStarted());
+		RdEditorModel.get_lC_IsCompiling().set(LiveCodingModule.IsCompiling());
+	});
+
+	return true;
 }
 
 void FRiderLCModule::StartupModule()
@@ -103,6 +109,8 @@ void FRiderLCModule::StartupModule()
 	const IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
 	ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
 	SetupLiveCodingBinds();
+	TickDelegate = FTickerDelegate::CreateRaw(this, &FRiderLCModule::Tick);
+	TickDelegateHandle = FTSTicker::GetCoreTicker().AddTicker(TickDelegate);
 	
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC STARTUP FINISH"));
 }
@@ -110,7 +118,8 @@ void FRiderLCModule::StartupModule()
 void FRiderLCModule::ShutdownModule()
 {
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN START"));
-	
+
+	FTSTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
 	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
 	LiveCoding.GetOnPatchCompleteDelegate().Remove(PatchCompleteHandle);
 	ModuleLifetimeDef.terminate();
