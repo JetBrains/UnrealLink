@@ -6,7 +6,6 @@
 
 #include "Async/Async.h"
 #include "ILiveCodingModule.h"
-#include "Containers/Ticker.h"
 
 #define LOCTEXT_NAMESPACE "FRiderLCModule"
 
@@ -28,16 +27,7 @@ void WrapRDCall(rd::RdEndpoint<rd::Void, bool, rd::Polymorphic<rd::Void>, rd::Po
 
 void FRiderLCModule::SetupLiveCodingBinds()
 {
-	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
 	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-	PatchCompleteHandle = LiveCoding.GetOnPatchCompleteDelegate().AddLambda([this, &RiderLinkModule]
-	{
-		RiderLinkModule.QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
-		{
-			RdEditorModel.get_lC_OnPatchComplete().fire();
-		});
-	});
-
 	RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime, [](rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
 	{
 		RdEditorModel.get_lC_Compile().advise(Lifetime, []
@@ -95,7 +85,7 @@ bool FRiderLCModule::Tick(float Delta)
 	RiderLinkModule.QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
 	{
 		const ILiveCodingModule& LiveCodingModule = FModuleManager::GetModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-		RdEditorModel.get_lC_IsAvailable().set(LiveCodingModule.HasStarted());
+		RdEditorModel.get_lC_IsAvailable().set(LiveCodingModule.HasStarted() && LiveCodingModule.IsEnabledForSession());
 		RdEditorModel.get_lC_IsCompiling().set(LiveCodingModule.IsCompiling());
 	});
 
@@ -110,7 +100,11 @@ void FRiderLCModule::StartupModule()
 	ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
 	SetupLiveCodingBinds();
 	TickDelegate = FTickerDelegate::CreateRaw(this, &FRiderLCModule::Tick);
+#if ENGINE_MAJOR_VERSION < 5
+	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
+#else
 	TickDelegateHandle = FTSTicker::GetCoreTicker().AddTicker(TickDelegate);
+#endif
 	
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC STARTUP FINISH"));
 }
@@ -119,9 +113,11 @@ void FRiderLCModule::ShutdownModule()
 {
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN START"));
 
+#if ENGINE_MAJOR_VERSION < 5
+	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+#else
 	FTSTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
-	ILiveCodingModule& LiveCoding = FModuleManager::LoadModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-	LiveCoding.GetOnPatchCompleteDelegate().Remove(PatchCompleteHandle);
+#endif
 	ModuleLifetimeDef.terminate();
 	
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN FINISH"));
