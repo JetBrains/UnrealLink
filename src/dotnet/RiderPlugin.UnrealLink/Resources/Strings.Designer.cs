@@ -90,5 +90,8 @@
     public static string Settings_AutoUpdate_Header_Text => ResourceManager.GetString("Settings_AutoUpdate_Header_Text");
     public static string Settings_General_Header_Text => ResourceManager.GetString("Settings_General_Header_Text");
     public static string Settings_ManualInstallation_Header_Text => ResourceManager.GetString("Settings_ManualInstallation_Header_Text");
+    public static string DefaultLocationForRiderLinkInstallation_Text => ResourceManager.GetString("DefaultLocationForRiderLinkInstallation_Text");
+    public static string InstallInEngine_Text => ResourceManager.GetString("InstallInEngine_Text");
+    public static string InstallInGame_Text => ResourceManager.GetString("InstallInGame_Text");
   }
 }

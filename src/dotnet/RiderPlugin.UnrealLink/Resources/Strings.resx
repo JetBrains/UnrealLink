@@ -181,4 +181,17 @@ You need to manually enable RiderLink in UnrealEditor</value>
         <comment>Option Page: Name
         </comment>
     </data>
+    <data name="DefaultLocationForRiderLinkInstallation_Text" xml:space="preserve">
+        <value>Default location for RiderLink installation</value>
+    </data>
+    <data name="InstallInEngine_Text" xml:space="preserve">
+        <value>Install in Engine</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
+    <data name="InstallInGame_Text" xml:space="preserve">
+        <value>Install in Game</value>
+        <comment>Option Page: Name
+        </comment>
+    </data>
 </root>
