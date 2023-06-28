@@ -46,15 +46,9 @@ object RdEditorModel : Ext(RdEditorRoot) {
         sink("PlayModeFromEditor", int)
         source("PlayModeFromRider", int)
 
-        sink("LC_IsModuleStarted", bool)
-        property("LC_IsAvailable", false).readonly
-        property("LC_IsCompiling", false).readonly
-        source("LC_Compile", void)
-
-        call("LC_IsEnabledByDefault", void, bool)
-        source("LC_EnableByDefault", bool)
-        call("LC_IsEnabledForSession", void, bool)
-        call("LC_CanEnableForSession", void, bool)
-        source("LC_EnableForSession", bool)
+        // Hot Reload here is not Unreal's HotReload but generic Hot Reload mechanism which can be either Unreal's HotReload or Unreal's LiveCoding
+        property("IsHotReloadAvailable", false).readonly
+        property("IsHotReloadCompiling", false).readonly
+        source("TriggerHotReload", void)
     }
 }

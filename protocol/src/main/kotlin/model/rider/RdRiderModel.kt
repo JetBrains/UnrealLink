@@ -120,8 +120,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         source("CancelRiderLinkInstall", void)
 
-        property("IsLiveCodingAvailable", false).readonly
-        property("isLiveCodingCompiling", false).readonly
-        signal("TriggerLiveCodingBuild", void)
+        // Hot Reload here is not Unreal's HotReload but generic Hot Reload mechanism which can be either Unreal's HotReload or Unreal's LiveCoding
+        property("IsHotReloadAvailable", false).readonly
+        property("IsHotReloadCompiling", false).readonly
+        signal("TriggerHotReload", void)
     }
 }
