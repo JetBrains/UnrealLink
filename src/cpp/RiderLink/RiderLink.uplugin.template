@@ -48,9 +48,7 @@
 		{
 			"Name": "RiderLC",
 			"Type": "EditorNoCommandlet",
-			"LoadingPhase": "PostEngineInit",
-			"WhitelistPlatforms": ["Win64"],
-			"PlatformAllowList": ["Win64"]
+			"LoadingPhase": "PostEngineInit"
 		}
 	]
 }

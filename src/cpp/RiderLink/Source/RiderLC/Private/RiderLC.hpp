@@ -17,7 +17,7 @@ public:
 	void SetupLiveCodingBinds();
 	
 private:
-	bool Tick(float X);
+	bool Tick(float DeltaTime);
 	
 	rd::LifetimeDefinition ModuleLifetimeDef;
 	FTickerDelegate TickDelegate;
