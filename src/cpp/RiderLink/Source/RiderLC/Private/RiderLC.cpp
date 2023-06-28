@@ -52,31 +52,30 @@ void FRiderLCModule::SetupLiveCodingBinds()
 
 bool FRiderLCModule::Tick(float DeltaTime)
 {
-	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-	RiderLinkModule.QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
-	{
-		bool bIsAvailable = false;
-		bool bIsCompiling = false;
+    bool bIsAvailable = false;
+    bool bIsCompiling = false;
 #if WITH_LIVE_CODING
-		const ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-		if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
-		{
-			bIsAvailable = true;
-			bIsCompiling = LiveCoding->IsCompiling();
-		}
-		else
+    const ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+    if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
+    {
+        bIsAvailable = true;
+        bIsCompiling = LiveCoding->IsCompiling();
+    }
+    else
 #endif
-		{
+    {
 #if WITH_HOT_RELOAD
-			const IHotReloadInterface* HotReload = FModuleManager::GetModulePtr<IHotReloadInterface>(HotReloadModule);
-			if (HotReload != nullptr)
-			{
-				bIsAvailable = true;
-				bIsCompiling = HotReload->IsCurrentlyCompiling();
-			}
+        const IHotReloadInterface* HotReload = FModuleManager::GetModulePtr<IHotReloadInterface>(HotReloadModule);
+        if (HotReload != nullptr)
+        {
+            bIsAvailable = true;
+            bIsCompiling = HotReload->IsCurrentlyCompiling();
+        }
 #endif
-		}
-
+    }
+  	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
+	RiderLinkModule.QueueModelAction([bIsAvailable, bIsCompiling](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
+	{
 		RdEditorModel.get_isHotReloadAvailable().set(bIsAvailable);
 		RdEditorModel.get_isHotReloadCompiling().set(bIsCompiling);
 	});
