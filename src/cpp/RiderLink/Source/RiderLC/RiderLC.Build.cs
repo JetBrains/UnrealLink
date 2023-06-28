@@ -24,9 +24,13 @@ public class RiderLC : ModuleRules
                 "Core",
                 "Engine",
                 "RiderLink",
-                "LiveCoding",
                 "RD"
             }
         );
+        
+        if (Target.bWithLiveCoding)
+        {
+            PrivateIncludePathModuleNames.Add("LiveCoding");
+        }
     }
 }

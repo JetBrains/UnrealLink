@@ -2,91 +2,83 @@
 
 #include "IRiderLink.hpp"
 #include "RdEditorModel/RdEditorModel.Generated.h"
-#include "task/RdEndpoint.h"
 
 #include "Async/Async.h"
+#if WITH_LIVE_CODING
 #include "ILiveCodingModule.h"
+#endif
+#include "Misc/HotReloadInterface.h"
 
 #define LOCTEXT_NAMESPACE "FRiderLCModule"
 
 DEFINE_LOG_CATEGORY(FLogRiderLCModule);
 
-
-void WrapRDCall(rd::RdEndpoint<rd::Void, bool, rd::Polymorphic<rd::Void>, rd::Polymorphic<bool>> const & Call, TFunction<bool(const ILiveCodingModule&)> LocalCall)
-{
-	Call.set([LocalCall](rd::Void const&)-> bool
-	{
-		const ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-		if(LiveCodingModule != nullptr)
-		{
-			return LocalCall(*LiveCodingModule);
-		}
-		return false;
-	});
-}
+const FName HotReloadModule("HotReload");
 
 void FRiderLCModule::SetupLiveCodingBinds()
 {
 	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
-	RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime, [](rd::Lifetime Lifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
+	RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime, [](const rd::Lifetime& Lifetime, JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
 	{
-		RdEditorModel.get_lC_Compile().advise(Lifetime, []
+		RdEditorModel.get_triggerHotReload().advise(Lifetime, []
 		{
 			AsyncTask(ENamedThreads::GameThread, []
 			{
-				ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-				if(LiveCodingModule != nullptr)
+#if WITH_LIVE_CODING
+				ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+				if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
 				{
-					LiveCodingModule->Compile();
-				}				
+					LiveCoding->EnableForSession(true);
+					if (LiveCoding->IsEnabledForSession())
+					{
+						LiveCoding->Compile();
+					}
+				}
+				else
+#endif
+				{
+#if WITH_HOT_RELOAD
+					IHotReloadInterface* HotReload = FModuleManager::GetModulePtr<IHotReloadInterface>(HotReloadModule);
+					if (HotReload != nullptr && !HotReload->IsCurrentlyCompiling())
+					{
+						HotReload->DoHotReloadFromEditor(EHotReloadFlags::None);
+					}
+#endif
+				}
 			});
 		});
-
-		RdEditorModel.get_lC_EnableByDefault().advise(Lifetime, [](bool Enable)
-		{
-			ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-			if(LiveCodingModule != nullptr)
-			{
-				LiveCodingModule->EnableByDefault(Enable);
-			}			
-		});
-
-		RdEditorModel.get_lC_EnableForSession().advise(Lifetime, [](bool Enable)
-		{
-			ILiveCodingModule* LiveCodingModule = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-			if(LiveCodingModule != nullptr)
-			{
-				LiveCodingModule->EnableForSession(Enable);
-			}			
-		});
-		
-		WrapRDCall(RdEditorModel.get_lC_IsEnabledByDefault(), [](const ILiveCodingModule& LiveCodingModule)
-		{
-			return LiveCodingModule.IsEnabledByDefault();
-		});
-		
-		WrapRDCall(RdEditorModel.get_lC_IsEnabledForSession(), [](const ILiveCodingModule& LiveCodingModule)
-		{
-			return LiveCodingModule.IsEnabledForSession();
-		});
-		
-		WrapRDCall(RdEditorModel.get_lC_CanEnableForSession(), [](const ILiveCodingModule& LiveCodingModule)
-		{
-			return LiveCodingModule.CanEnableForSession();
-		});
-
-		RdEditorModel.get_lC_IsModuleStarted().fire(true);
 	});
 }
 
-bool FRiderLCModule::Tick(float Delta)
+bool FRiderLCModule::Tick(float DeltaTime)
 {
 	IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
 	RiderLinkModule.QueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& RdEditorModel)
 	{
-		const ILiveCodingModule& LiveCodingModule = FModuleManager::GetModuleChecked<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
-		RdEditorModel.get_lC_IsAvailable().set(LiveCodingModule.HasStarted() && LiveCodingModule.IsEnabledForSession());
-		RdEditorModel.get_lC_IsCompiling().set(LiveCodingModule.IsCompiling());
+		bool bIsAvailable = false;
+		bool bIsCompiling = false;
+#if WITH_LIVE_CODING
+		const ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+		if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
+		{
+			bIsAvailable = true;
+			bIsCompiling = LiveCoding->IsCompiling();
+		}
+		else
+#endif
+		{
+#if WITH_HOT_RELOAD
+			const IHotReloadInterface* HotReload = FModuleManager::GetModulePtr<IHotReloadInterface>(HotReloadModule);
+			if (HotReload != nullptr)
+			{
+				bIsAvailable = true;
+				bIsCompiling = HotReload->IsCurrentlyCompiling();
+			}
+#endif
+		}
+
+		RdEditorModel.get_isHotReloadAvailable().set(bIsAvailable);
+		RdEditorModel.get_isHotReloadCompiling().set(bIsCompiling);
 	});
 
 	return true;
@@ -121,7 +113,6 @@ void FRiderLCModule::ShutdownModule()
 	ModuleLifetimeDef.terminate();
 	
 	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN FINISH"));
-    
 }
 
 #undef LOCTEXT_NAMESPACE
