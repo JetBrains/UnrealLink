@@ -23,7 +23,7 @@ tasks {
                     if (productMonorepoDir != null) {
                         srcDir(
                             listOf(
-                                File("$productMonorepoDir/Rider/Frontend/model/src"),
+                                File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
                                 File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
                             )
                         )
