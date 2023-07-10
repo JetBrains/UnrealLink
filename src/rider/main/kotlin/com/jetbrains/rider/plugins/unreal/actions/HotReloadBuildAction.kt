@@ -1,6 +1,5 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAwareAction
@@ -8,8 +7,9 @@ import com.intellij.util.application
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import icons.RiderIcons
 
-class HotReloadBuildAction : DumbAwareAction(AllIcons.Actions.Refresh) {
+class HotReloadBuildAction : DumbAwareAction(RiderIcons.Actions.CompileLive) {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
