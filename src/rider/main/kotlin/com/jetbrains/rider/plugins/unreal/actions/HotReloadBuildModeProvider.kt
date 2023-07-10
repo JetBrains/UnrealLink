@@ -2,7 +2,7 @@ package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.rider.build.actions.BuildButtonModeProvider
-import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.*
 
 class HotReloadBuildModeProvider : BuildButtonModeProvider {
     override fun getPriority(): Int {
@@ -11,7 +11,8 @@ class HotReloadBuildModeProvider : BuildButtonModeProvider {
 
     override fun isApplicable(project: Project): Boolean {
         val host = UnrealHost.getInstance(project)
-        return host.isUnrealEngineSolution && host.isHotReloadAvailable
+        val settings: UnrealLinkSettings = UnrealLinkSettings.getInstance(project)
+        return host.isUnrealEngineSolution && host.isHotReloadAvailable && settings.replaceWithHotReload
     }
 
     override fun getButtonActionId(): String {
