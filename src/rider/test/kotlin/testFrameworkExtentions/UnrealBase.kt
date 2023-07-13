@@ -199,13 +199,21 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         uprojectFile.writeText(uprojectText)
     }
 
-  protected fun generateSolutionFromUProject(uprojectFile: File, currentEngine: UnrealEngine, timeout: Duration = Duration.ofSeconds(90)) {
+  protected fun generateSolutionFromUProject(
+    uprojectFile: File,
+    currentEngine: UnrealEngine,
+    timeout: Duration = Duration.ofSeconds(90)
+  ) {
     val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
     val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
-    val ubtCommand = "${currentEngine.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool.exe " + "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
+    val ubtCommand = "${currentEngine.path.replace(" ", "\\ ")}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool"
+    val ubtParams = "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
     frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
-    ProcessBuilder(*(ubtCommand).split(" ").toTypedArray()).redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(
-      ProcessBuilder.Redirect.INHERIT).start().waitFor(timeout.seconds, TimeUnit.SECONDS)
+    ProcessBuilder(ubtCommand, *(ubtParams).split(" ").toTypedArray())
+      .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+      .redirectError(ProcessBuilder.Redirect.INHERIT)
+      .start()
+      .waitFor(timeout.seconds, TimeUnit.SECONDS)
   }
 
     fun calculateRootPathInSolutionExplorer(
@@ -410,22 +418,21 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             else "$baseString${engine.id.replace('.', '_')}"
         }
 
-    protected open fun generateUnrealDataProvider(
-        unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
-        predicate: (UnrealEngine) -> Boolean
-    ): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        /**
-         * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
-         */
-        unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
-            unrealPmTypes.forEach { type ->
-                result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
-            }
-        }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
+  protected open fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
+                                                predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+    val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+    val result: ArrayList<Array<Any>> = arrayListOf()
+    /**
+     * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
+     */
+    unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
+      types.forEach { type ->
+        result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
+      }
     }
+    frameworkLogger.debug("Data Provider was generated: $result")
+    return result.iterator()
+  }
 
     protected fun <T> Array<T>.filterEngines(predicate: (T) -> Boolean): List<T> {
         return this.filter(predicate).ifEmpty {
