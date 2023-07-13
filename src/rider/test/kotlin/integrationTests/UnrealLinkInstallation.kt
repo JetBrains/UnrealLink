@@ -1,5 +1,6 @@
 package integrationTests
 
+import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
@@ -25,11 +26,7 @@ import java.util.concurrent.TimeUnit
 
 @Epic("UnrealLink")
 @Feature("Installation")
-@TestEnvironment(
-    platform = [PlatformType.WINDOWS_X64],
-    buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
-)
+@TestEnvironment(buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
 class UnrealLinkInstallation : UnrealTestProject() {
     init {
         projectDirectoryName = "EmptyUProject"
@@ -68,10 +65,10 @@ class UnrealLinkInstallation : UnrealTestProject() {
         )
 //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
-        withRunProgram(project, configurationName = activeSolution) {
-            waitAndPump(runProgramTimeout,
-                { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
-        }
+      withRunProgram(project, configurationName = activeSolution) {
+        waitAndPump(runProgramTimeout, { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
+        waitPumping(Duration.ofSeconds(15))
+      }
     }
 
     /**
@@ -79,22 +76,24 @@ class UnrealLinkInstallation : UnrealTestProject() {
      * data provider generating.
      */
     override fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
-                                             predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-        val result: ArrayList<Array<Any>> = arrayListOf()
-        /**
-         * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
-         */
-        unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
-            arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
-                arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject).forEach { type ->
-                    // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
-                    if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
-                    result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
-                }
-            }
+                                            predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+      val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+
+      val result: ArrayList<Array<Any>> = arrayListOf()
+      /**
+       * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
+       */
+      unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
+        arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
+          types.forEach { type ->
+            // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
+            if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
+            result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
+          }
         }
-        frameworkLogger.debug("Data Provider was generated: $result")
-        return result.iterator()
+      }
+      frameworkLogger.debug("Data Provider was generated: $result")
+      return result.iterator()
     }
 
     override val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
