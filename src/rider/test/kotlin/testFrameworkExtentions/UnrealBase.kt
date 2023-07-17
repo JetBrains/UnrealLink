@@ -206,7 +206,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
   ) {
     val ue5specific = if (currentEngine.version.major > 4) "UnrealBuildTool\\" else ""
     val engineType = if (currentEngine.isInstalledBuild) "-rocket" else "-engine"
-    val ubtCommand = "${currentEngine.path.replace(" ", "\\ ")}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool"
+    val ubtCommand = "${currentEngine.path}\\Engine\\Binaries\\DotNET\\${ue5specific}UnrealBuildTool"
     val ubtParams = "-ProjectFiles -game -progress $engineType -project=\"${uprojectFile.absolutePath}\""
     frameworkLogger.info("Generating project files. UBT command: $ubtCommand")
     ProcessBuilder(ubtCommand, *(ubtParams).split(" ").toTypedArray())
