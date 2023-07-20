@@ -5,13 +5,13 @@ import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.suplementary.TestSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -30,7 +30,7 @@ import java.time.Duration
 @Test(dataProvider = "AllEngines_slnOnly")
 class RefreshSolution : UnrealTestProject() {
     init {
-        projectDirectoryName = "EmptyUProject"
+        projectDirectoryName = TestSolution.Unreal.EmptyUProject
     }
 
     fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,

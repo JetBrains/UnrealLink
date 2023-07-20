@@ -15,6 +15,7 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.suplementary.TestSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -30,7 +31,7 @@ import java.time.Duration
 )
 class PlayButtons : UnrealTestProject() {
     init {
-        projectDirectoryName = "EmptyUProject"
+        projectDirectoryName = TestSolution.Unreal.EmptyUProject
         disableEnginePlugins = false
     }
     private val runProgramTimeout: Duration = Duration.ofMinutes(10)

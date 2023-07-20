@@ -11,6 +11,7 @@ import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
+import com.jetbrains.rider.test.suplementary.TestSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -26,7 +27,7 @@ import java.time.Duration
 )
 class RiderLinkNotification : UnrealTestProject() {
     init {
-        projectDirectoryName = "EmptyUProject"
+        projectDirectoryName = TestSolution.Unreal.EmptyUProject
     }
     @Test(dataProvider = "AllEngines_AllPModels")
     fun installNotification(

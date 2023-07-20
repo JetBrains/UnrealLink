@@ -12,10 +12,10 @@ import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.env.enums.BuildTool
-import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
 import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.suplementary.TestSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 @TestEnvironment(buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
 class UnrealLinkInstallation : UnrealTestProject() {
     init {
-        projectDirectoryName = "EmptyUProject"
+        projectDirectoryName = TestSolution.Unreal.EmptyUProject
         disableEnginePlugins = false
     }
     private val runProgramTimeout: Duration = Duration.ofMinutes(10)
