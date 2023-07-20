@@ -587,18 +587,15 @@ tasks {
 
             // *** Classpath and sources ***
             if (monorepo) {
-                sources(
-                    listOf(
-                        File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
-                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
-                        modelDir
-                    )
-                )
+                classpath({
+                    val riderModelClassPathFile: String by project
+                    File(riderModelClassPathFile).readLines()
+                })
             }
             else {
                 classpath({riderModelJar})
-                sources("$modelDir")
             }
+            sources(modelDir)
 
             hashFolder = "$hashBaseDir/editorPlugin"
             packages = "model.editorPlugin"
