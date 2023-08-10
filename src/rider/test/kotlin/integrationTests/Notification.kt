@@ -11,7 +11,6 @@ import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
-import com.jetbrains.rider.test.suplementary.TestSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -22,33 +21,34 @@ import java.time.Duration
 @Epic("UnrealLink")
 @Feature("Notification")
 @TestEnvironment(
-    buildTool = BuildTool.CPP,
-    sdkVersion = SdkVersion.AUTODETECT
+  buildTool = BuildTool.CPP,
+  sdkVersion = SdkVersion.AUTODETECT
 )
 class RiderLinkNotification : UnrealTestProject() {
-    init {
-        projectDirectoryName = "EmptyUProject"
-    }
-    @Test(dataProvider = "AllEngines_AllPModels")
-    fun installNotification(
-        @Suppress("UNUSED_PARAMETER") caseName: String,
-        openWith: EngineInfo.UnrealOpenType,
-        engine: UnrealEngine
-    ) {
-        val notification = NotificationsManager.getNotificationsManager().getNotificationsOfType(Notification::class.java, project)
-                .single { it.groupId == "OutOfSyncConnection" }
-        notification.type.shouldBe(NotificationType.WARNING)
-        notification.title.shouldBe("RiderLink plugin is required")
-        notification.actions.size.shouldBe(2)
-        notification.actions.any { it.templateText.equals("Install plugin in Engine") }.shouldNotBeNull()
-        notification.actions.any { it.templateText.equals("Install plugin in Game") }.shouldNotBeNull()
+  init {
+    projectDirectoryName = "EmptyUProject"
+  }
 
-        unrealInfo.needInstallRiderLink = true
-        installRiderLink(unrealInfo.placeToInstallRiderLink)
+  @Test(dataProvider = "AllEngines_AllPModels")
+  fun installNotification(
+    @Suppress("UNUSED_PARAMETER") caseName: String,
+    openWith: EngineInfo.UnrealOpenType,
+    engine: UnrealEngine
+  ) {
+    val notification = NotificationsManager.getNotificationsManager()
+      .getNotificationsOfType(Notification::class.java, project).single { it.groupId == "OutOfSyncConnection" }
+    notification.type.shouldBe(NotificationType.WARNING)
+    notification.title.shouldBe("RiderLink plugin is required")
+    notification.actions.size.shouldBe(2)
+    notification.actions.any { it.templateText.equals("Install plugin in Engine") }.shouldNotBeNull()
+    notification.actions.any { it.templateText.equals("Install plugin in Game") }.shouldNotBeNull()
 
-        
-        reopenSolution(project, Duration.ofMinutes(3))
+    unrealInfo.needInstallRiderLink = true
+    installRiderLink(unrealInfo.placeToInstallRiderLink)
 
-        NotificationsManager.getNotificationsManager().getNotificationsOfType(Notification::class.java, project).none { it.groupId == "OutOfSyncConnection" }.shouldBeTrue()
-    }
+    reopenSolution(project, Duration.ofMinutes(3))
+
+    NotificationsManager.getNotificationsManager().getNotificationsOfType(Notification::class.java,
+                                                                          project).none { it.groupId == "OutOfSyncConnection" }.shouldBeTrue()
+  }
 }
