@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit
 @TestEnvironment(buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
 class UnrealLinkInstallation : UnrealTestProject() {
     init {
-        projectDirectoryName = TestSolution.Unreal.EmptyUProject
+        projectDirectoryName = "EmptyUProject"
         disableEnginePlugins = false
-    }
+    } 
     private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
     @Mute("RIDER-86732", specificParameters = [

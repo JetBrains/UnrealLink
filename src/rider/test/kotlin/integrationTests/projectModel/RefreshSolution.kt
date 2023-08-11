@@ -30,7 +30,7 @@ import java.time.Duration
 @Test(dataProvider = "AllEngines_slnOnly")
 class RefreshSolution : UnrealTestProject() {
     init {
-        projectDirectoryName = TestSolution.Unreal.EmptyUProject
+        projectDirectoryName = "EmptyUProject"
     }
 
     fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,

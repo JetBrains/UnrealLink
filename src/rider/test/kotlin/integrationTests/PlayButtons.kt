@@ -31,7 +31,7 @@ import java.time.Duration
 )
 class PlayButtons : UnrealTestProject() {
     init {
-        projectDirectoryName = TestSolution.Unreal.EmptyUProject
+        projectDirectoryName = "EmptyUProject"
         disableEnginePlugins = false
     }
     private val runProgramTimeout: Duration = Duration.ofMinutes(10)

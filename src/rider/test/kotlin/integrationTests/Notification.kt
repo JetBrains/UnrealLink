@@ -27,7 +27,7 @@ import java.time.Duration
 )
 class RiderLinkNotification : UnrealTestProject() {
     init {
-        projectDirectoryName = TestSolution.Unreal.EmptyUProject
+        projectDirectoryName = "EmptyUProject"
     }
     @Test(dataProvider = "AllEngines_AllPModels")
     fun installNotification(
