@@ -196,6 +196,7 @@ Path to old plugin:</code></pre>
         <notificationGroup id="RiderLinkActions" displayType="BALLOON"
                            bundle="messages.UnrealLinkBundle" key="notification.RiderLink.ReplyFromEditor.groupId"/>
         <spellchecker.bundledDictionaryProvider implementation="com.jetbrains.rider.plugins.unreal.spellchecker.UnrealBundledDictionaryProvider"/>
+        <rider.buildButtonModeProvider implementation="com.jetbrains.rider.plugins.unreal.actions.HotReloadBuildModeProvider"/>
         <iconMapper mappingFile="UnrealIconMappings.json"/>
     </extensions>
 
@@ -283,5 +284,8 @@ Path to old plugin:</code></pre>
                 class="com.jetbrains.rider.plugins.unreal.actions.EnableAutoUpdatePlugin"/>
         <action id="UnrealLink.CancelRiderLinkInstallAction"
                 class="com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction"/>
+
+        <action id="UnrealLink.HotReloadBuild"
+                class="com.jetbrains.rider.plugins.unreal.actions.HotReloadBuildAction"/>
     </actions>
 </idea-plugin>

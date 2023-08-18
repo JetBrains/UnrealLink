@@ -263,6 +263,18 @@ namespace RiderPlugin.UnrealLink
                 riderModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
             });
 
+            unrealModel.IsHotReloadAvailable.Advise(lf, myUnrealHost.myModel.IsHotReloadAvailable.Set);
+            unrealModel.IsHotReloadCompiling.Advise(lf, myUnrealHost.myModel.IsHotReloadCompiling.Set);
+            myUnrealHost.PerformModelAction(riderModel =>
+            {
+                riderModel.TriggerHotReload.Advise(lf, _ => unrealModel.TriggerHotReload());
+                riderModel.IsConnectedToUnrealEditor.WhenFalse(lf, _ =>
+                {
+                    riderModel.IsHotReloadAvailable.Set(false);
+                    riderModel.IsHotReloadCompiling.Set(false);
+                });
+            });
+
             return unrealModel;
         }
 
