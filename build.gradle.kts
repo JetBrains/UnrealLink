@@ -16,7 +16,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2023.2.2-preview1")
+        classpath("com.jetbrains.rd:rd-gen:2023.3.2-preview2")
     }
 }
 

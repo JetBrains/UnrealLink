@@ -169,12 +169,10 @@ Path to old plugin:</code></pre>
             <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class>
         </component>
         <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager
-            </implementation-class>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class>
         </component>
         <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification
-            </implementation-class>
+            <implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class>
         </component>
     </project-components>
 
