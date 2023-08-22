@@ -324,8 +324,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(title, ContentType.Normal));
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Normal));
 
-            var notification = new NotificationModel(title, text, true, RdNotificationEntryType.INFO,
-                new List<NotificationHyperlink>());
+            var notification = new NotificationModel(mySolution.GetRdProjectId(), title, text, true,
+              RdNotificationEntryType.INFO, new List<NotificationHyperlink>());
 
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });
@@ -433,8 +433,8 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(title, ContentType.Normal));
             myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(text, ContentType.Normal));
 
-            var notification = new NotificationModel(title, text, true, RdNotificationEntryType.INFO,
-                new List<NotificationHyperlink>());
+            var notification = new NotificationModel(mySolution.GetRdProjectId(), title, text, true,
+              RdNotificationEntryType.INFO, new List<NotificationHyperlink>());
 
             mySolution.Locks.ExecuteOrQueue(Lifetime, "UnrealLink.InstallPlugin",
                 () => { myNotificationsModel.Notification(notification); });

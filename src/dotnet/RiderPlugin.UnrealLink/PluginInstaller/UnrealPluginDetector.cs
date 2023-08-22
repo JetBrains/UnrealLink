@@ -8,6 +8,7 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.ProjectModel.UE4;
+using JetBrains.ReSharper.Feature.Services.Protocol;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.Rider.Model.Notifications;
@@ -42,8 +43,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         private readonly JetHashSet<string> EXCLUDED_PROJECTS = new() {"UnrealLaunchDaemon"};
 
 
-        public UnrealPluginDetector(Lifetime lifetime, ILogger logger, ICppUE4SolutionDetector solutionDetector,
-            IShellLocks locks, ISolutionLoadTasksScheduler scheduler, CppUE4ProjectsTracker projectsTracker)
+        public UnrealPluginDetector(Lifetime lifetime, ILogger logger, ISolution solution, 
+          ICppUE4SolutionDetector solutionDetector, IShellLocks locks, ISolutionLoadTasksScheduler scheduler,
+          CppUE4ProjectsTracker projectsTracker)
         {
             myLifetime = lifetime;
             InstallInfoProperty =
@@ -69,6 +71,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                                     {
                                         var notification =
                                                 new NotificationModel(
+                                                    solution.GetRdProjectId(),
                                                     Strings.UnrealEngine_Version_IsRequired_Title.Format(myMinimalSupportedVersion.ToString()), 
                                             Strings.UnrealEngine_Version_IsRequired_Message.Format(myMinimalSupportedVersion),
                                             true,
