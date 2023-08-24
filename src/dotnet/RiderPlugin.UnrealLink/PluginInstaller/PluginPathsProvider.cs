@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Reflection;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
+using JetBrains.Application.Environment.Components;
 using JetBrains.Extension;
 using JetBrains.Util;
 using Newtonsoft.Json.Linq;
@@ -23,22 +24,25 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         public static readonly byte[] NullChecksum = { 0 };
 
         public PluginPathsProvider(ApplicationPackages applicationPackages,
-            IDeployedPackagesExpandLocationResolver resolver, ILogger logger)
+            IDeployedPackagesExpandLocationResolver resolver, ProductSettingsLocation productSettingsLocation,
+            ILogger logger)
         {
             myApplicationPackages = applicationPackages;
             myResolver = resolver;
             myLogger = logger;
-            PathToPackedPlugin = GetEditorPluginPathFile();
+            PathToPackedPlugin = GetEditorPluginPathFile(productSettingsLocation);
             CurrentPluginChecksum = GetCurrentPluginChecksum();
         }
 
-        private FileSystemPath GetEditorPluginPathFile()
+        private FileSystemPath GetEditorPluginPathFile(ProductSettingsLocation productSettingsLocation)
         {
             var assembly = Assembly.GetExecutingAssembly();
             var package = myApplicationPackages.FindPackageWithAssembly(assembly, OnError.LogException);
             var installDirectory = myResolver.GetDeployedPackageDirectory(package);
-            var editorPluginPathFile = installDirectory.Parent.Combine($@"EditorPlugin/{EditorPluginFile}");
-            return editorPluginPathFile;
+            var editorPluginPathDirectory = installDirectory != productSettingsLocation.InstallDir
+              ? installDirectory.Parent.Combine("EditorPlugin")
+              : installDirectory;
+            return editorPluginPathDirectory.Combine(EditorPluginFile);
         }
 
         private byte[] GetCurrentPluginChecksum()
