@@ -32,7 +32,7 @@ class RefreshSolution : UnrealTestProject() {
     projectDirectoryName = "EmptyUProject"
   }
 
-  fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
+  fun refreshS   olution(@Suppress("UNUSED_PARAMETER") caseName: String,
                       openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
     testProjectModel(testGoldFile, project) {
       profile.customPathsToMask = unrealPathsToMask
