@@ -23,9 +23,14 @@ namespace Plugins.UnrealLink.src.cpp.BuildScript
       if (allass.FindSubplatformByClass<GenerateRiderLinkZip>() is SubplatformOnSources subplatform)
       {
         FileSystemPath dirRiderLink = homedir.ProductHomeDir / subplatform.Name.RelativePath / "RiderLink";
+        FileSystemPath dirModel = dirRiderLink.Parent.Parent.Parent.Parent / "_UnrealLink.Pregenerated" / "CppModel";
 
         IList<ImmutableFileItem> files = dirRiderLink.GetChildFiles(flags: PathSearchFlags.RecurseIntoSubdirectories)
           .OrderBy().Select(file => ImmutableFileItem.CreateFromDisk(file).WithRelativePath(file.MakeRelativeTo(dirRiderLink))).ToList();
+
+        IList<ImmutableFileItem> models = dirModel.GetChildFiles(flags: PathSearchFlags.RecurseIntoSubdirectories)
+          .OrderBy().Select(file => ImmutableFileItem.CreateFromDisk(file).WithRelativePath((RelativePath)"Source" / "RiderLink" / "Public" / "Model" / file.MakeRelativeTo(dirModel))).ToList();
+        files.AddRange(models);
 
         ImmutableFileItem fiUpluginTemplate = files.Single(fi => fi.RelativePath == "RiderLink.uplugin.template");
         StreamEx.TextAndEncoding taeUpluginTemplate = fiUpluginTemplate.FileContent.ReadTextFromFile();
