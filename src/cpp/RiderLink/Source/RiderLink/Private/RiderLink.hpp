@@ -10,7 +10,7 @@
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleManager.h"
 
-#include "RdEditorModel/RdEditorModel.Generated.h"
+#include "RdEditorModel/RdEditorModel.Pregenerated.h"
 
 class ProtocolFactory;
 

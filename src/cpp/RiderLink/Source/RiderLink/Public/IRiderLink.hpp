@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "RdEditorModel/RdEditorModel.Generated.h"
+#include "RdEditorModel/RdEditorModel.Pregenerated.h"
 #include "lifetime/LifetimeDefinition.h"
 
 #include "Modules/ModuleInterface.h"

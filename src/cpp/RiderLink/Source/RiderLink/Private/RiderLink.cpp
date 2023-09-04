@@ -1,7 +1,7 @@
 #include "RiderLink.hpp"
 
 #include "ProtocolFactory.h"
-#include "UE4Library/UE4Library.Generated.h"
+#include "UE4Library/UE4Library.Pregenerated.h"
 
 #include "Async/Async.h"
 #include "Misc/App.h"
