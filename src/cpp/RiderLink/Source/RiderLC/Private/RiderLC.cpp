@@ -1,7 +1,7 @@
 ﻿#include "RiderLC.hpp"
 
 #include "IRiderLink.hpp"
-#include "RdEditorModel/RdEditorModel.Generated.h"
+#include "RdEditorModel/RdEditorModel.Pregenerated.h"
 
 #include "Async/Async.h"
 #if WITH_LIVE_CODING

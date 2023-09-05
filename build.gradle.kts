@@ -472,7 +472,7 @@ tasks {
                 transform = "symmetric"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$csLibraryOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -480,7 +480,7 @@ tasks {
                 transform = "reversed"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$cppLibraryOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -488,7 +488,7 @@ tasks {
                 transform = "asis"
                 root = "model.lib.ue4.UE4Library"
                 directory = "$ktLibraryOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
         }
     }
@@ -542,7 +542,7 @@ tasks {
                 transform = "asis"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
                 directory = "$ktRiderOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -550,7 +550,7 @@ tasks {
                 transform = "reversed"
                 root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
                 directory = "$csRiderOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
         }
     }
@@ -605,7 +605,7 @@ tasks {
                 transform = "asis"
                 root = "model.editorPlugin.RdEditorRoot"
                 directory = "$csEditorOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
 
             generator {
@@ -613,7 +613,7 @@ tasks {
                 transform = "reversed"
                 root = "model.editorPlugin.RdEditorRoot"
                 directory = "$cppEditorOutput"
-                if (monorepo) generatedFileSuffix = ".Pregenerated"
+                generatedFileSuffix = ".Pregenerated"
             }
         }
     }

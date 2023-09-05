@@ -2,9 +2,9 @@
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
-#include "Model/Library/UE4Library/LogMessageInfo.Generated.h"
-#include "Model/Library/UE4Library/StringRange.Generated.h"
-#include "Model/Library/UE4Library/UnrealLogEvent.Generated.h"
+#include "Model/Library/UE4Library/LogMessageInfo.Pregenerated.h"
+#include "Model/Library/UE4Library/StringRange.Pregenerated.h"
+#include "Model/Library/UE4Library/UnrealLogEvent.Pregenerated.h"
 
 #include "Internationalization/Regex.h"
 #include "Misc/DateTime.h"

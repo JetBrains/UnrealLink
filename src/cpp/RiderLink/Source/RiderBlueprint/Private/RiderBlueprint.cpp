@@ -2,7 +2,7 @@
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
-#include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Generated.h"
+#include "Model/RdEditorProtocol/RdEditorModel/RdEditorModel.Pregenerated.h"
 
 
 #include "Engine/Blueprint.h"
