@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 
 @Service(Service.Level.PROJECT)
 @State(name = "UnrealLinkSettings", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
-class UnrealLinkSettings(project: Project) : SimplePersistentStateComponent<UnrealLinkSettings.State>(State(project)) {
+class UnrealLinkSettings : SimplePersistentStateComponent<UnrealLinkSettings.State>(State()) {
     companion object {
         fun getInstance(project: Project): UnrealLinkSettings = project.service()
     }
@@ -16,8 +16,7 @@ class UnrealLinkSettings(project: Project) : SimplePersistentStateComponent<Unre
             state.replaceWithHotReload = value
         }
 
-    class State(val project: Project) : BaseState() {
-
+    class State : BaseState() {
         var replaceWithHotReload by property(defaultValue = true)
     }
 }
