@@ -1,4 +1,4 @@
-package integrationTests
+package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.ide.model.UnrealEngine

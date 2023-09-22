@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="Rider Tests Unreal Integration">
+  <test name="Main Tests Unreal Integration">
+    <packages>
+      <package name="com.jetbrains.rider.plugins.unreal.test.cases.integrationTests.*"/>
+    </packages>
+  </test>
+</suite>
+

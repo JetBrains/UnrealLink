@@ -1,4 +1,4 @@
-package integrationTests.projectModel
+package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.util.reactive.fire

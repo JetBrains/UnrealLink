@@ -1,4 +1,4 @@
-package integrationTests
+package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext

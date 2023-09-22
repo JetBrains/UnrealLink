@@ -1,4 +1,4 @@
-package integrationTests
+package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
