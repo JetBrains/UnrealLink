@@ -1,0 +1,14 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "",
+	"Category": "",
+	"Description": "",
+	"DisableEnginePluginsByDefault": true,
+	"Modules": [
+		{
+			"Name": "EmptyUProject",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
