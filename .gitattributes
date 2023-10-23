@@ -1,5 +1,8 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
+# Keep LF in shell scripts
+*.sh text eol=lf
+
 # Preserve line endings in gradle scripts
 gradlew* -text diff
