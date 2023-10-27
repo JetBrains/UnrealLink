@@ -9,6 +9,7 @@ import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
@@ -44,6 +45,7 @@ class PlayButtons : UnrealTestProject() {
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
   @Test(dataProvider = "AllEngines_AllPModels")
+  @Mute(reason = "RIDER-100705", specificParameters = ["Uproject5_1"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: EngineInfo.UnrealOpenType,
