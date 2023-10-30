@@ -8,13 +8,17 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLoc
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
+import com.jetbrains.rider.test.annotations.Mutes
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.framework.getLoadedProjects
-import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.scriptingApi.buildWithChecks
+import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
+import com.jetbrains.rider.test.scriptingApi.waitPumping
+import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
@@ -34,9 +38,12 @@ class UnrealLinkInstallation : UnrealTestProject() {
 
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
-  @Mute("RIDER-86732", specificParameters = [
-    "SlnEngine5_1_Src", "UprojectEngine5_1_Src", "SlnGame5_1_Src", "UprojectGame5_1_Src",
-    "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"])
+  @Mutes([
+           Mute("RIDER-86732", specificParameters = [
+             "SlnEngine5_1_Src", "UprojectEngine5_1_Src", "SlnGame5_1_Src", "UprojectGame5_1_Src",
+             "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"]),
+           Mute("RIDER-100705", specificParameters = ["UprojectGame5_1"])
+         ])
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(
