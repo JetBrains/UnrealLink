@@ -11,6 +11,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
@@ -19,7 +20,6 @@ import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
@@ -48,7 +48,7 @@ class PlayButtons : UnrealTestProject() {
   @Mute(reason = "RIDER-100705", specificParameters = ["Uproject5_1"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
-    openWith: EngineInfo.UnrealOpenType,
+    openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine
   ) {
     unrealInfo.placeToInstallRiderLink = PluginInstallLocation.Game

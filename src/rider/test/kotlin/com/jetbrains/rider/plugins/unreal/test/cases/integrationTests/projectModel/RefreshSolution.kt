@@ -6,6 +6,7 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
@@ -14,7 +15,6 @@ import com.jetbrains.rider.test.scriptingApi.*
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
@@ -33,7 +33,7 @@ class RefreshSolution : UnrealTestProject() {
   }
 
   fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
-                      openWith: EngineInfo.UnrealOpenType, engine: UnrealEngine) {
+                      openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {
     testProjectModel(testGoldFile, project) {
       profile.customPathsToMask = unrealPathsToMask
       profile.customRegexToMask = unrealRegexToMask

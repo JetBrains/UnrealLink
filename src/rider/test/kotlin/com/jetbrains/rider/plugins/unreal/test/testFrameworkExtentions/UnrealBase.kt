@@ -18,8 +18,11 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.OpenSolutionParams
 import com.jetbrains.rider.test.base.BaseTestWithSolutionBase
+import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.unreal.UnrealTestingEngineList.installedEngineList
+import com.jetbrains.rider.test.unreal.UnrealTestingEngineList.testingEngines
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import java.io.File
@@ -74,7 +77,8 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     @BeforeClass(alwaysRun = true)
     fun suiteSetup() {
         unrealInfo = EngineInfo()
-        frameworkLogger.info("Found installed engines:\n${unrealInfo.installedEngineList.joinToString("\n")}")
+
+        frameworkLogger.info("Found installed engines:\n${installedEngineList.joinToString("\n")}")
         GeneralSettings.getInstance().isConfirmExit = false
     }
 
@@ -90,9 +94,15 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     }
 
     open fun prepareAndOpenSolution(parameters: Array<Any>) {
-        val openSolutionWithParam = parameters[1] as EngineInfo.UnrealOpenType
+        val openSolutionWithParam = parameters[1] as UnrealTestContext.UnrealProjectModelType
         val engineParam = parameters[2] as UnrealEngine
-        frameworkLogger.info("Starting open solution (uproject)")
+
+        UnrealTestContext().apply {
+          projectModelType = openSolutionWithParam
+          currentEngine = engineParam
+        }
+
+        frameworkLogger.info("Starting opening solution (uproject)")
         configureAndOpenUnrealProject(openSolutionWithParam, engineParam)
     }
 
@@ -127,7 +137,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     }
 
     protected fun prepareUnrealProject(
-        openWith: EngineInfo.UnrealOpenType,
+        openWith: UnrealTestContext.UnrealProjectModelType,
         engine: UnrealEngine
     ) {
         unrealInfo.currentEngine = engine
@@ -141,7 +151,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         else
             openSolutionParams.backendLoadedTimeout = Duration.ofSeconds(600)
 
-        if (openWith == EngineInfo.UnrealOpenType.Sln) {
+        if (openWith == UnrealTestContext.UnrealProjectModelType.Sln) {
             generateSolutionFromUProject(uprojectFile, unrealInfo.currentEngine!!)
             openSolutionParams.minimalCountProjectsMustBeLoaded = null
         } else {
@@ -151,7 +161,7 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     }
 
     protected fun configureAndOpenUnrealProject(
-        openWith: EngineInfo.UnrealOpenType,
+        openWith: UnrealTestContext.UnrealProjectModelType,
         engine: UnrealEngine
     ) {
         prepareUnrealProject(openWith, engine)
@@ -160,8 +170,8 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         assert(project.solution.unrealModel.isUnrealSolution.hasTrueValue)
     }
 
-    protected fun getProjectFile(openWith: EngineInfo.UnrealOpenType): File {
-        if (openWith == EngineInfo.UnrealOpenType.Uproject)
+    protected fun getProjectFile(openWith: UnrealTestContext.UnrealProjectModelType): File {
+        if (openWith == UnrealTestContext.UnrealProjectModelType.Uproject)
             return uprojectFile
 
         return uprojectFile.getFileWithExtensionRd(".sln")
@@ -173,22 +183,22 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
         project.solution.rdRiderModel.installEditorPlugin.fire(
             InstallPluginDescription(place, ForceInstall.Yes)
         )
-        waitAndPump(timeout, { riderLinkInstalled }, { "RiderLink did not install" })
+        waitAndPump(timeout, { riderLinkInstalled }, { "RiderLink has not been installed" })
     }
 
     fun calculateRootPathInSolutionExplorer(
         projectName: String,
-        openWith: EngineInfo.UnrealOpenType
+        openWith: UnrealTestContext.UnrealProjectModelType
     ): Array<String> {
         return mutableListOf(projectName).apply {
-            if (openWith == EngineInfo.UnrealOpenType.Sln) add("Games")
+            if (openWith == UnrealTestContext.UnrealProjectModelType.Sln) add("Games")
             add(projectName)
         }.toTypedArray()
     }
 
     fun calculateProjectPathInSolutionExplorer(
         projectName: String,
-        openWith: EngineInfo.UnrealOpenType
+        openWith: UnrealTestContext.UnrealProjectModelType
     ): Array<String> {
         return calculateRootPathInSolutionExplorer(projectName, openWith) + "Source" + projectName
     }
@@ -378,14 +388,14 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
             else "$baseString${engine.id.replace('.', '_')}"
         }
 
-  protected open fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
+  protected open fun generateUnrealDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
                                                 predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-    val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+    val types = if (SystemInfo.isMac) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
     val result: ArrayList<Array<Any>> = arrayListOf()
     /**
      * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
      */
-    unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
+    testingEngines.filter(predicate).forEach { engine ->
       types.forEach { type ->
         result.add(arrayOf(uniqueDataString("$type", engine), type, engine))
       }
@@ -403,9 +413,9 @@ abstract class UnrealBase : BaseTestWithSolutionBase() {
     }
 
     // Just for easy calling
-    private val allModels = arrayOf(EngineInfo.UnrealOpenType.Sln, EngineInfo.UnrealOpenType.Uproject)
-    private val onlySln = arrayOf(EngineInfo.UnrealOpenType.Sln)
-    private val onlyUproject = arrayOf(EngineInfo.UnrealOpenType.Uproject)
+    private val allModels = arrayOf(UnrealTestContext.UnrealProjectModelType.Sln, UnrealTestContext.UnrealProjectModelType.Uproject)
+    private val onlySln = arrayOf(UnrealTestContext.UnrealProjectModelType.Sln)
+    private val onlyUproject = arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject)
 
     // ========== End of Data Provider section ==========
 }

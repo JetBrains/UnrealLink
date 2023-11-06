@@ -11,6 +11,7 @@ import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.Mutes
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
@@ -19,10 +20,10 @@ import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.unreal.UnrealTestingEngineList.testingEngines
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -48,13 +49,13 @@ class UnrealLinkInstallation : UnrealTestProject() {
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(
     @Suppress("UNUSED_PARAMETER") caseName: String,
-    openWith: EngineInfo.UnrealOpenType,
+    openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine,
     location: PluginInstallLocation
   ) {
     unrealInfo.placeToInstallRiderLink = location
     unrealInfo.needInstallRiderLink = true
-    println("RiderLink will install in $location")
+    println("RiderLink will be installed in $location")
 
     getLoadedProjects(project)
     waitAndPump(Duration.ofSeconds(15),
@@ -82,15 +83,15 @@ class UnrealLinkInstallation : UnrealTestProject() {
    * [UnrealLinkInstallation] have additional parameter - location ([PluginInstallLocation]), so we need to override
    * data provider generating.
    */
-  override fun generateUnrealDataProvider(unrealPmTypes: Array<EngineInfo.UnrealOpenType>,
+  override fun generateUnrealDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
                                           predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-    val types = if (SystemInfo.isMac) arrayOf(EngineInfo.UnrealOpenType.Uproject) else unrealPmTypes
+    val types = if (SystemInfo.isMac) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
 
     val result: ArrayList<Array<Any>> = arrayListOf()
     /**
      * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
      */
-    unrealInfo.testingEngines.filterEngines(predicate).forEach { engine ->
+    testingEngines.filter(predicate).forEach { engine ->
       arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
         types.forEach { type ->
           // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?

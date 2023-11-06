@@ -8,13 +8,13 @@ import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
+import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.EngineInfo
 import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
@@ -32,7 +32,7 @@ class RiderLinkNotification : UnrealTestProject() {
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(
     @Suppress("UNUSED_PARAMETER") caseName: String,
-    openWith: EngineInfo.UnrealOpenType,
+    openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine
   ) {
     val notification = NotificationsManager.getNotificationsManager()
