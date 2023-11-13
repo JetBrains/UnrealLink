@@ -28,7 +28,7 @@
 #include "EditorViewportClient.h"
 #endif
 
-#define LOCTEXT_NAMESPACE "RiderLink"
+#define LOCTEXT_NAMESPACE "RiderGameControl"
 
 DEFINE_LOG_CATEGORY(FLogRiderGameControlModule);
 
@@ -506,3 +506,5 @@ void FRiderGameControlModule::ShutdownModule()
     ActionsCache.Reset();
     UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
+
+#undef LOCTEXT_NAMESPACE
