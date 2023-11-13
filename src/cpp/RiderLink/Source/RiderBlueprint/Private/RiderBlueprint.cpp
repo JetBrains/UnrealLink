@@ -19,7 +19,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #endif
 
-#define LOCTEXT_NAMESPACE "RiderLink"
+#define LOCTEXT_NAMESPACE "RiderBlueprint"
 
 DEFINE_LOG_CATEGORY(FLogRiderBlueprintModule);
 
@@ -104,3 +104,5 @@ void FRiderBlueprintModule::ShutdownModule()
     ModuleLifetimeDef.terminate();
     UE_LOG(FLogRiderBlueprintModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
+
+#undef LOCTEXT_NAMESPACE
