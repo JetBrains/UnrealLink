@@ -6,6 +6,9 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRiderLink
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.Mutes
@@ -20,21 +23,24 @@ import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
-import com.jetbrains.rider.test.unreal.UnrealTestingEngineList.testingEngines
+import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
+import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Epic("UnrealLink")
 @Feature("Installation")
 @TestEnvironment(buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
-class UnrealLinkInstallation : UnrealTestProject() {
+class UnrealLinkInstallation : UnrealTestLevelProject() {
   init {
     projectDirectoryName = "EmptyUProject"
-    disableEnginePlugins = false
+  }
+
+  override fun updateUnrealContext(unrealContext: UnrealTestContext) {
+    unrealContext.disableEnginePlugins = false
   }
 
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
@@ -53,8 +59,8 @@ class UnrealLinkInstallation : UnrealTestProject() {
     engine: UnrealEngine,
     location: PluginInstallLocation
   ) {
-    unrealInfo.placeToInstallRiderLink = location
-    unrealInfo.needInstallRiderLink = true
+    placeToInstallRiderLink = location
+    needInstallRiderLink = true
     println("RiderLink will be installed in $location")
 
     getLoadedProjects(project)
@@ -63,13 +69,13 @@ class UnrealLinkInstallation : UnrealTestProject() {
 
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
 
-    if (unrealInfo.needInstallRiderLink) {
-      installRiderLink(unrealInfo.placeToInstallRiderLink)
+    if (needInstallRiderLink) {
+      installRiderLink(placeToInstallRiderLink)
     }
 
     buildWithChecks(
       project, BuildSolutionAction(), "Build solution",
-      useIncrementalBuild = false, timeout = buildTimeout
+      useIncrementalBuild = false, timeout = contexts.get<UnrealTestContext>().unrealBuildTimeout
     )
     //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
@@ -84,18 +90,18 @@ class UnrealLinkInstallation : UnrealTestProject() {
    * data provider generating.
    */
   override fun generateUnrealDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
-                                          predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+                                                    predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
     val types = if (SystemInfo.isMac) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
-
     val result: ArrayList<Array<Any>> = arrayListOf()
-    /**
-     * [unrealInfo] initialized in [suiteSetup]. Right before data provider invocation
-     */
-    testingEngines.filter(predicate).forEach { engine ->
-      arrayOf(PluginInstallLocation.Game, PluginInstallLocation.Engine).forEach { location ->
+
+    UnrealTestingEngineList.testingEngines.filter(predicate).forEach { engine ->
+      val locations = mutableListOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
+      //if (TestFrameworkSettings.Unreal.engineType != "egs") locations.add(PluginInstallLocation.Engine)
+
+      locations.forEach { location ->
         types.forEach { type ->
           // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
-          if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
+          // if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
           result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
         }
       }

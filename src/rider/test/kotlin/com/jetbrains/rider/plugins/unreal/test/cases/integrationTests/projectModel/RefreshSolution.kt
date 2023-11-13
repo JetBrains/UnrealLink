@@ -6,16 +6,20 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.contexts.ProjectModelTestContext
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
+import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withDump
+import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
+import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
-import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
 @Epic("UnrealLink")
@@ -25,24 +29,26 @@ import java.time.Duration
   buildTool = BuildTool.CPP,
   sdkVersion = SdkVersion.AUTODETECT
 )
-
-@Test(dataProvider = "AllEngines_slnOnly")
-class RefreshSolution : UnrealTestProject() {
+class RefreshSolution : UnrealTestLevelProject() {
   init {
     projectDirectoryName = "EmptyUProject"
   }
 
+  @BeforeMethod
+  fun dumpProjectFiles(){
+    contexts.get<ProjectModelTestContext>().profile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
+  }
+
+  @Test(dataProvider = "AllEngines_slnOnly")
   fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
                       openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {
-    testProjectModel(testGoldFile, project) {
-      profile.customPathsToMask = unrealPathsToMask
-      profile.customRegexToMask = unrealRegexToMask
-      profile.fileNames.add("$activeSolution.vcxproj.filters")
+    val pmContext = contexts.get<ProjectModelTestContext>()
 
-      dump("Init") {}
-      dump("Invoking refresh solution") {
+    withDump(contexts) {
+      dumpAfterAction("Init", pmContext) {}
+      dumpAfterAction("Invoking refresh solution", pmContext) {
         createUnrealPlugin(project, "TestNewPluginProject",
-                           calculateRootPathInSolutionExplorer(activeSolution, openWith),
+                           calculateUprojectRootPathInSolutionExplorer(activeSolution, openWith),
                            PluginTemplateType.UNREAL_PLUGIN_BLANK)
 
         project.solution.rdRiderModel.refreshProjects.fire()
@@ -55,14 +61,4 @@ class RefreshSolution : UnrealTestProject() {
       }
     }
   }
-
-  private fun TestProjectModelContext.dump(
-    caption: String,
-    checkSlnFile: Boolean = false,
-    checkIndex: Boolean = false,
-    action: () -> Unit
-  ) {
-    dump(caption, project, activeSolutionDirectory.resolve("Intermediate/ProjectFiles"), checkSlnFile, checkIndex, action)
-  }
-
 }

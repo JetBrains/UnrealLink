@@ -8,6 +8,9 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRiderLink
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
+import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
@@ -17,10 +20,10 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
 import org.testng.annotations.Test
-import testFrameworkExtentions.UnrealTestProject
 import java.time.Duration
 
 @Epic("UnrealLink")
@@ -29,10 +32,13 @@ import java.time.Duration
   buildTool = BuildTool.CPP,
   sdkVersion = SdkVersion.AUTODETECT
 )
-class PlayButtons : UnrealTestProject() {
+class PlayButtons : UnrealTestLevelProject() {
   init {
     projectDirectoryName = "EmptyUProject"
-    disableEnginePlugins = false
+  }
+
+  override fun updateUnrealContext(unrealContext: UnrealTestContext) {
+    unrealContext.disableEnginePlugins = false
   }
 
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
@@ -51,15 +57,15 @@ class PlayButtons : UnrealTestProject() {
     openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine
   ) {
-    unrealInfo.placeToInstallRiderLink = PluginInstallLocation.Game
-    unrealInfo.needInstallRiderLink = true
+    placeToInstallRiderLink = PluginInstallLocation.Game
+    needInstallRiderLink = true
 
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
-    installRiderLink(unrealInfo.placeToInstallRiderLink)
+    installRiderLink(placeToInstallRiderLink)
 
     buildWithChecks(
       project, BuildSolutionAction(), "Build solution",
-      useIncrementalBuild = false, timeout = buildTimeout
+      useIncrementalBuild = false, timeout = contexts.get<UnrealTestContext>().unrealBuildTimeout
     )
 
     checkActionsIsEnabled(mapOf(
