@@ -4,7 +4,7 @@
 #include "Delegates/Delegate.h"
 #include "Logging/LogVerbosity.h"
 
-DECLARE_DELEGATE_FourParams(FOnSerializeMessage, const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>);
+using FOnSerializeMessage = TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>), FDefaultTSDelegateUserPolicy>;
 
 class FRiderOutputDevice : public FOutputDevice {
 public:

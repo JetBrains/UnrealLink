@@ -10,7 +10,7 @@
 #include "Misc/DateTime.h"
 #include "Modules/ModuleManager.h"
 
-#define LOCTEXT_NAMESPACE "RiderLink"
+#define LOCTEXT_NAMESPACE "RiderLogging"
 
 DEFINE_LOG_CATEGORY(FLogRiderLoggingModule);
 
@@ -138,3 +138,5 @@ void FRiderLoggingModule::ShutdownModule()
 	ModuleLifetimeDef.terminate();
 	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("SHUTDOWN FINISH"));
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -13,6 +13,8 @@
 
 DEFINE_LOG_CATEGORY(FLogRiderLCModule);
 
+IMPLEMENT_MODULE(FRiderLCModule, RiderLC)
+
 const FName HotReloadModule("HotReload");
 
 void FRiderLCModule::SetupLiveCodingBinds()
@@ -115,5 +117,3 @@ void FRiderLCModule::ShutdownModule()
 }
 
 #undef LOCTEXT_NAMESPACE
-    
-IMPLEMENT_MODULE(FRiderLCModule, RiderLC)
