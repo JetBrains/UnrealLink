@@ -11,7 +11,6 @@ import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.framework.TestProjectModelContext
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withDump
@@ -35,8 +34,10 @@ class RefreshSolution : UnrealTestLevelProject() {
   }
 
   @BeforeMethod
-  fun dumpProjectFiles(){
+  fun updateDumpProfile() {
+    contexts.get<ProjectModelTestContext>().profile.dumpDirList.clear()
     contexts.get<ProjectModelTestContext>().profile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
+    contexts.get<ProjectModelTestContext>().profile.fileNames.add("$activeSolution.vcxproj.filters")
   }
 
   @Test(dataProvider = "AllEngines_slnOnly")

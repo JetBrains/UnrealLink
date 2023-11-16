@@ -1,192 +1,103 @@
 ===================
 Init
 
-[EmptyUProject.Target.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-using System.Collections.Generic;
-
-public class EmptyUProjectTarget : TargetRules
-{
-	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-
-		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
-	}
-}
-
-
-[EmptyUProject.Build.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-
-public class EmptyUProject : ModuleRules
-{
-	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.NoPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
-
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
-}
-
-
-[EmptyUProject.cpp]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "EmptyUProject.h"
-#include "Modules/ModuleManager.h"
-
-#include "UObject/Object.h"
-#include "GameFramework/Actor.h"
-#include "Components/ActorComponent.h"
-#include "GameFramework/Character.h"
-#include "UObject/Interface.h"
-#include "GameFramework/Pawn.h"
-#include "Widgets/SCompoundWidget.h"
-#include "Styling/SlateWidgetStyle.h"
-#include "Styling/SlateWidgetStyleContainerBase.h"
-#include "Sound/SoundEffectSource.h"
-#include "Sound/SoundEffectSubmix.h"
-#include "Components/SynthComponent.h"
-
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
-
-
-[EmptyUProject.h]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
-
-
-
-[EmptyUProjectEditor.Target.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-using System.Collections.Generic;
-
-public class EmptyUProjectEditorTarget : TargetRules
-{
-	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-
-		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
-	}
-}
+[EmptyUProject.vcxproj.filters]
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{41BE8EC3-36A1-3C68-B435-FBAA58FE0877}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
 
 
 ===================
 Invoking refresh solution
 
-[EmptyUProject.Target.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-using System.Collections.Generic;
-
-public class EmptyUProjectTarget : TargetRules
-{
-	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-
-		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
-	}
-}
-
-
-[EmptyUProject.Build.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-
-public class EmptyUProject : ModuleRules
-{
-	public EmptyUProject(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.NoPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
-
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
-}
-
-
-[EmptyUProject.cpp]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "EmptyUProject.h"
-#include "Modules/ModuleManager.h"
-
-#include "UObject/Object.h"
-#include "GameFramework/Actor.h"
-#include "Components/ActorComponent.h"
-#include "GameFramework/Character.h"
-#include "UObject/Interface.h"
-#include "GameFramework/Pawn.h"
-#include "Widgets/SCompoundWidget.h"
-#include "Styling/SlateWidgetStyle.h"
-#include "Styling/SlateWidgetStyleContainerBase.h"
-#include "Sound/SoundEffectSource.h"
-#include "Sound/SoundEffectSubmix.h"
-#include "Components/SynthComponent.h"
-
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, EmptyUProject, "EmptyUProject" );
-
-
-[EmptyUProject.h]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
-
-
-
-[EmptyUProjectEditor.Target.cs]
-// Fill out your copyright notice in the Description page of Project Settings.
-
-using UnrealBuildTool;
-using System.Collections.Generic;
-
-public class EmptyUProjectEditorTarget : TargetRules
-{
-	public EmptyUProjectEditorTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-
-		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
-	}
-}
+[EmptyUProject.vcxproj.filters]
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/.vsconfig" />
+    <Filter Include="Plugins">
+      <UniqueIdentifier>{BB38096A-B391-30DC-A0D4-4F3EA6B44507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\TestNewPluginProject">
+      <UniqueIdentifier>{2A05C0ED-56A6-38C2-8569-6065FCEE4691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\TestNewPluginProject\Source">
+      <UniqueIdentifier>{1954239F-EF7C-39CA-9F6C-8B907DC8E670}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject">
+      <UniqueIdentifier>{EF30121C-7DEC-3FFB-AC51-ACCE0C83137D}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\TestNewPluginProject.Build.cs">
+      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject</Filter>
+    </None>
+    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private">
+      <UniqueIdentifier>{6A5552EB-215B-3D2B-AF4A-B1DAEFE019E3}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private\TestNewPluginProject.cpp">
+      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private</Filter>
+    </ClCompile>
+    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public">
+      <UniqueIdentifier>{081F5F40-C0ED-3948-9FEB-C321D13DDF30}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public\TestNewPluginProject.h">
+      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public</Filter>
+    </ClInclude>
+    <None Include="relative_path/Plugins\TestNewPluginProject\TestNewPluginProject.uplugin">
+      <Filter>Plugins\TestNewPluginProject</Filter>
+    </None>
+    <Filter Include="Plugins\TestNewPluginProject\Resources">
+      <UniqueIdentifier>{C068ADDF-5677-304F-BE64-AC70FE9CDFB3}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Plugins\TestNewPluginProject\Resources\Icon128.png">
+      <Filter>Plugins\TestNewPluginProject\Resources</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{41BE8EC3-36A1-3C68-B435-FBAA58FE0877}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
 
 

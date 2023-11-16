@@ -33,7 +33,10 @@ import java.util.concurrent.TimeUnit
 
 @Epic("UnrealLink")
 @Feature("Installation")
-@TestEnvironment(buildTool = BuildTool.CPP, sdkVersion = SdkVersion.AUTODETECT)
+@TestEnvironment(
+  buildTool = BuildTool.CPP,
+  sdkVersion = SdkVersion.AUTODETECT
+)
 class UnrealLinkInstallation : UnrealTestLevelProject() {
   init {
     projectDirectoryName = "EmptyUProject"
@@ -49,7 +52,6 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
            Mute("RIDER-86732", specificParameters = [
              "SlnEngine5_1_Src", "UprojectEngine5_1_Src", "SlnGame5_1_Src", "UprojectGame5_1_Src",
              "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"]),
-           Mute("RIDER-100705", specificParameters = ["UprojectGame5_1"])
          ])
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
