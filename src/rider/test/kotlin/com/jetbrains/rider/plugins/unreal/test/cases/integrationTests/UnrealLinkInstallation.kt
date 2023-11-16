@@ -50,7 +50,6 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
 
   @Mutes([
            Mute("RIDER-86732", specificParameters = [
-             "SlnEngine5_1_Src", "UprojectEngine5_1_Src", "SlnGame5_1_Src", "UprojectGame5_1_Src",
              "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"]),
          ])
   @Test(dataProvider = "AllEngines_AllPModels")
@@ -93,7 +92,7 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
    */
   override fun generateUnrealDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
                                                     predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-    val types = if (SystemInfo.isMac) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
+    val types = if (!SystemInfo.isWindows) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
     val result: ArrayList<Array<Any>> = arrayListOf()
 
     UnrealTestingEngineList.testingEngines.filter(predicate).forEach { engine ->
