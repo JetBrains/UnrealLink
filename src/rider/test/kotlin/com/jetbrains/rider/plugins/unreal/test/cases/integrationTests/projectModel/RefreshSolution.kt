@@ -5,15 +5,18 @@ import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.contexts.ProjectModelTestContext
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.scriptingApi.*
+import com.jetbrains.rider.test.scriptingApi.PluginTemplateType
+import com.jetbrains.rider.test.scriptingApi.createUnrealPlugin
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withDump
+import com.jetbrains.rider.test.scriptingApi.waitForProjectModelReady
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
 import io.qameta.allure.Feature
@@ -41,6 +44,7 @@ class RefreshSolution : UnrealTestLevelProject() {
   }
 
   @Test(dataProvider = "AllEngines_slnOnly")
+  @Mute("RIDER-102094", specificParameters = ["Sln5_3"])
   fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
                       openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {
     val pmContext = contexts.get<ProjectModelTestContext>()
