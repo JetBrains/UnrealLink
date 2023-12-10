@@ -6,7 +6,9 @@
 #include "Runtime/Launch/Resources/Version.h"
 
 using FOnSerializeMessage =
-#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
+	TBaseDelegate<void, const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>>;
+#elif ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
 	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>)>;
 #else
 	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>), FDefaultTSDelegateUserPolicy>;
