@@ -48,10 +48,6 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
 
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
-  @Mutes([
-           Mute("RIDER-86732", specificParameters = [
-             "SlnEngine5_2_Src", "UprojectEngine5_2_Src", "SlnGame5_2_Src", "UprojectGame5_2_Src"]),
-         ])
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(

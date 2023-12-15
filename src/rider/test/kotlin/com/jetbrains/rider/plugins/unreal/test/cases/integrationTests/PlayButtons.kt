@@ -51,7 +51,7 @@ class PlayButtons : UnrealTestLevelProject() {
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
   @Test(dataProvider = "AllEngines_AllPModels")
-  @Mute("RIDER-102094", specificParameters = ["Sln5_3"])
+  @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,
