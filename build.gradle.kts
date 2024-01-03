@@ -90,7 +90,7 @@ val rdLibDirectory: () -> File = { file("${tasks.setupDependencies.get().idea.ge
 extra["rdLibDirectory"] = rdLibDirectory
 
 val productMonorepoDir = getProductMonorepoRoot()
-val monorepoPreGeneratedRootDir by lazy { productMonorepoDir?.resolve("Plugins/_UnrealLink.Pregenerated") ?: error("Building not in monorepo") }
+val monorepoPreGeneratedRootDir by lazy { productMonorepoDir?.resolve("dotnet/Plugins/_UnrealLink.Pregenerated") ?: error("Building not in monorepo") }
 val monorepoPreGeneratedFrontendDir by lazy {  monorepoPreGeneratedRootDir.resolve("Frontend") }
 val monorepoPreGeneratedBackendDir by lazy {  monorepoPreGeneratedRootDir.resolve("BackendModel") }
 val monorepoPreGeneratedCppDir by lazy {  monorepoPreGeneratedRootDir.resolve("CppModel") }
@@ -127,7 +127,7 @@ fun getProductMonorepoRoot(): File? {
     var currentDir = repoRoot
 
     while (currentDir.parent != null) {
-        if (currentDir.listFiles()?.any { it.name == ".vcs" } == true) {
+        if (currentDir.resolve(".ultimate.root.marker").exists()) {
             return currentDir
         }
         currentDir = currentDir.parentFile
@@ -454,8 +454,8 @@ tasks {
             if (monorepo) {
                 sources(
                     listOf(
-                        File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
-                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        File("$productMonorepoDir/rider/model/sources"),
+                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
                         modelDir.resolve("lib/ue4")
                     )
                 )
@@ -523,8 +523,8 @@ tasks {
             if (monorepo) {
                 sources(
                     listOf(
-                        File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
-                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        File("$productMonorepoDir/rider/model/sources"),
+                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
                         modelDir
                     )
                 )
