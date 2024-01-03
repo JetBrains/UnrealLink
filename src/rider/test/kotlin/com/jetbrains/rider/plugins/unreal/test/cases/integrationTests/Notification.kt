@@ -4,6 +4,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.NotificationsManager
 import com.jetbrains.rd.ide.model.UnrealEngine
+import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRiderLink
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
@@ -41,11 +42,11 @@ class RiderLinkNotification : UnrealTestLevelProject() {
     val notification = NotificationsManager.getNotificationsManager()
       .getNotificationsOfType(Notification::class.java, project).single { it.groupId == "OutOfSyncConnection" }
     notification.type.shouldBe(NotificationType.WARNING)
-    notification.title.shouldBe("RiderLink plugin is required")
+    notification.title.shouldBe(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.title.notInstalled"))
     notification.actions.size.shouldBe(2)
-    notification.actions.any { it.templateText.equals("Install plugin in Engine") }.shouldNotBeNull()
-    notification.actions.any { it.templateText.equals("Install plugin in Game") }.shouldNotBeNull()
-
+    notification.actions.any { it.templateText.equals(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInEngine.text")) }.shouldNotBeNull()
+    notification.actions.any { it.templateText.equals(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text")) }.shouldNotBeNull()
+ 
     needInstallRiderLink = true
     installRiderLink(placeToInstallRiderLink)
 

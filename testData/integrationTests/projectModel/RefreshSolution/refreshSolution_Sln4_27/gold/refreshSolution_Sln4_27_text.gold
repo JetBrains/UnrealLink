@@ -16,7 +16,40 @@ Init
       <Filter>Source</Filter>
     </None>
     <Filter Include="Source\EmptyUProject">
-      <UniqueIdentifier>{097EDB88-0C37-4AF0-B4F7-2F7F26819BC7}</UniqueIdentifier>
+      <UniqueIdentifier>{3335DA20-3D6A-49E4-92DB-B79E242EF20E}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+
+===================
+Copy TestPlugin to project
+
+[EmptyUProject.vcxproj.filters]
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{759F6781-0DD5-46C3-A3CC-3B4C8335782E}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{3335DA20-3D6A-49E4-92DB-B79E242EF20E}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
       <Filter>Source\EmptyUProject</Filter>
@@ -40,7 +73,7 @@ Invoking refresh solution
   <ItemGroup>
     <None Include="relative_path/EmptyUProject.uproject" />
     <Filter Include="Source">
-      <UniqueIdentifier>{27BBE194-EB33-4CB4-A6EB-12639FCD18DF}</UniqueIdentifier>
+      <UniqueIdentifier>{C73D2580-9E4C-4CF2-8CE5-860574C6710E}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject.Target.cs">
       <Filter>Source</Filter>
@@ -49,43 +82,43 @@ Invoking refresh solution
       <Filter>Source</Filter>
     </None>
     <Filter Include="Plugins">
-      <UniqueIdentifier>{E98AA395-F00B-48ED-92AE-DB65B4AC489A}</UniqueIdentifier>
+      <UniqueIdentifier>{B3456375-BC0E-4B57-9B9C-DCC613CF832A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Plugins\TestNewPluginProject">
-      <UniqueIdentifier>{FBE82203-E812-433F-A9DD-68A4498C0920}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin">
+      <UniqueIdentifier>{4B79D0AF-393B-4739-BC5A-E6593CB3000C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Plugins\TestNewPluginProject\Source">
-      <UniqueIdentifier>{D69E7777-E630-459B-9760-F56B2B6465E8}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin\Source">
+      <UniqueIdentifier>{72E77F4E-9AE3-4C9C-AACF-167064D93FFB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject">
-      <UniqueIdentifier>{C54D026D-7143-4592-8335-29D0582717A0}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin">
+      <UniqueIdentifier>{1C4B43A3-C856-47CF-8C7E-1310771B9966}</UniqueIdentifier>
     </Filter>
-    <None Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\TestNewPluginProject.Build.cs">
-      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject</Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\EmptyTestPlugin.Build.cs">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin</Filter>
     </None>
-    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private">
-      <UniqueIdentifier>{730C6249-3B7C-4B18-9F48-3252A55D721A}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private">
+      <UniqueIdentifier>{4DCD8F42-A395-49AC-96E1-1923AB25E6F3}</UniqueIdentifier>
     </Filter>
-    <ClCompile Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private\TestNewPluginProject.cpp">
-      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private</Filter>
+    <ClCompile Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private\EmptyTestPlugin.cpp">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private</Filter>
     </ClCompile>
-    <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public">
-      <UniqueIdentifier>{5A754D6F-1DAD-449B-83F5-5594B2C4B2EA}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public">
+      <UniqueIdentifier>{07EB0855-F096-4289-8656-6A72C63E52B6}</UniqueIdentifier>
     </Filter>
-    <ClInclude Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public\TestNewPluginProject.h">
-      <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public</Filter>
+    <ClInclude Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public\EmptyTestPlugin.h">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public</Filter>
     </ClInclude>
-    <None Include="relative_path/Plugins\TestNewPluginProject\TestNewPluginProject.uplugin">
-      <Filter>Plugins\TestNewPluginProject</Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\EmptyTestPlugin.uplugin">
+      <Filter>Plugins\EmptyTestPlugin</Filter>
     </None>
-    <Filter Include="Plugins\TestNewPluginProject\Resources">
-      <UniqueIdentifier>{745F6A24-059C-41AD-88F0-2C55D0B9FB08}</UniqueIdentifier>
+    <Filter Include="Plugins\EmptyTestPlugin\Resources">
+      <UniqueIdentifier>{5516716D-4207-4CBA-AD0C-1B1B7563584C}</UniqueIdentifier>
     </Filter>
-    <None Include="relative_path/Plugins\TestNewPluginProject\Resources\Icon128.png">
-      <Filter>Plugins\TestNewPluginProject\Resources</Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\Resources\Icon128.png">
+      <Filter>Plugins\EmptyTestPlugin\Resources</Filter>
     </None>
     <Filter Include="Source\EmptyUProject">
-      <UniqueIdentifier>{23C477C6-0111-492E-B28E-F6031A287521}</UniqueIdentifier>
+      <UniqueIdentifier>{34871754-DE07-40FD-A646-D5F305D29D9A}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
       <Filter>Source\EmptyUProject</Filter>
