@@ -57,7 +57,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolutionDetector.IsUnrealSolution.Change.Advise_When(myLifetime,
                 newValue => newValue, _ =>
                 {
-                    scheduler.EnqueueTask(new SolutionLoadTask(GetType(), "Find installed RiderLink plugins",
+                    scheduler.EnqueueTask(new SolutionLoadTask(typeof(UnrealPluginDetector),
                         SolutionLoadTaskKinds.Done,
                         () =>
                         {
