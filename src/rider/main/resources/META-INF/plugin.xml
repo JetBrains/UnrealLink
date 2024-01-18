@@ -177,8 +177,6 @@ Path to old plugin:</code></pre>
     </project-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService
-                serviceImplementation="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
                                  instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
                                  key="configurable.UnrealLink.settings.title"/>

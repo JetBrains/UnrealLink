@@ -7,6 +7,7 @@ import com.intellij.util.EventDispatcher
 import java.util.*
 
 
+@Service(Service.Level.PROJECT)
 @State(name = "UnrealLogPanelSettings", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 class UnrealLogPanelSettings(private val project: Project) : SimplePersistentStateComponent<UnrealLogPanelSettings.State>(State()) {
     companion object {
