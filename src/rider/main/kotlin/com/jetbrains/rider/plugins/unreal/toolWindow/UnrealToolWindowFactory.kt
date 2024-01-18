@@ -19,7 +19,7 @@ import com.jetbrains.rider.ui.toolWindow.RiderOnDemandToolWindowFactory
 import icons.UnrealIcons
 
 @Suppress("UnstableApiUsage")
-@Service
+@Service(Service.Level.PROJECT)
 class UnrealToolWindowFactory(val project: Project)
     : RiderOnDemandToolWindowFactory<String>(project, TOOLWINDOW_ID, { it }, ::UnrealLogPanel, { it }) {
 
