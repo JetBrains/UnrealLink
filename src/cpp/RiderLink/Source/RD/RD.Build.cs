@@ -74,7 +74,7 @@ public class RD : ModuleRules
 			, "thirdparty", "thirdparty/ordered-map/include"
 			, "thirdparty/optional/tl", "thirdparty/variant/include"
 			, "thirdparty/string-view-lite/include", "thirdparty/spdlog/include"
-			, "thirdparty/clsocket/src", "thirdparty/CTPL/include"
+			, "thirdparty/clsocket/src", "thirdparty/CTPL/include", "thirdparty/utf-cpp/include"
 		};
 
 		foreach (var Item in Paths)
