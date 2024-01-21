@@ -17,6 +17,17 @@ void FRiderOutputDevice::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity
 	onSerializeMessage.ExecuteIfBound(V, Verbosity, Category, {Time});
 }
 
+FRiderOutputDevice::~FRiderOutputDevice()
+{
+	// At shutdown, GLog may already be null
+	// This should be out of scoped lock, because it'll implicitly try take a lock in OutputDeviceRedirector
+	// And Serialize is already holding that lock, so we'll have a deadlock here
+	if (GLog != nullptr)
+	{
+		GLog->RemoveOutputDevice(this);
+	}
+}
+
 void FRiderOutputDevice::Setup(TFunction<FOnSerializeMessage::TFuncType> Callback)
 {
 	FScopeLock Lock{&CriticalSection};
@@ -30,19 +41,9 @@ void FRiderOutputDevice::Setup(TFunction<FOnSerializeMessage::TFuncType> Callbac
 
 void FRiderOutputDevice::TearDown()
 {
-	{
-		FScopeLock Lock{&CriticalSection};
-	
-		if(onSerializeMessage.IsBound() == false) return;
-	
-		onSerializeMessage.Unbind();
-	}
-	
-	// At shutdown, GLog may already be null
-	// This should be out of scoped lock, because it'll implicitly try take a lock in OutputDeviceRedirector
-	// And Serialize is already holding that lock, so we'll have a deadlock here
-	if (GLog != nullptr)
-	{
-		GLog->RemoveOutputDevice(this);
-	}
+	FScopeLock Lock{&CriticalSection};
+
+	if(onSerializeMessage.IsBound() == false) return;
+
+	onSerializeMessage.Unbind();
 }
