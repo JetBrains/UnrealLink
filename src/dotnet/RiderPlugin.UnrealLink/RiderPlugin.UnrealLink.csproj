@@ -18,6 +18,14 @@
     <NoWarn>NU1603</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1603</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;NU1603</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
     <Compile Update="Resources\Strings.Designer.cs">
