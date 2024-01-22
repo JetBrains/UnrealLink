@@ -26,10 +26,10 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.9.22" // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.changelog") version "2.2.0" // https://plugins.gradle.org/plugin/org.jetbrains.changelog
+    id("org.jetbrains.intellij") version "1.17.0" // https://plugins.gradle.org/plugin/org.jetbrains.intellij
     id("io.qameta.allure") version "2.11.2"
 }
 
