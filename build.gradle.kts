@@ -13,10 +13,6 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 buildscript {
     repositories {
         maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2") }
-        mavenLocal()
-    }
-    dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2023.3.2-preview2")
     }
 }
 
@@ -26,6 +22,8 @@ repositories {
 }
 
 plugins {
+    // Version is configured in gradle.properties
+    id("com.jetbrains.rdgen")
     kotlin("jvm") version "1.8.20"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "2.0.0"
@@ -90,7 +88,7 @@ val rdLibDirectory: () -> File = { file("${tasks.setupDependencies.get().idea.ge
 extra["rdLibDirectory"] = rdLibDirectory
 
 val productMonorepoDir = getProductMonorepoRoot()
-val monorepoPreGeneratedRootDir by lazy { productMonorepoDir?.resolve("Plugins/_UnrealLink.Pregenerated") ?: error("Building not in monorepo") }
+val monorepoPreGeneratedRootDir by lazy { productMonorepoDir?.resolve("dotnet/Plugins/_UnrealLink.Pregenerated") ?: error("Building not in monorepo") }
 val monorepoPreGeneratedFrontendDir by lazy {  monorepoPreGeneratedRootDir.resolve("Frontend") }
 val monorepoPreGeneratedBackendDir by lazy {  monorepoPreGeneratedRootDir.resolve("BackendModel") }
 val monorepoPreGeneratedCppDir by lazy {  monorepoPreGeneratedRootDir.resolve("CppModel") }
@@ -127,7 +125,7 @@ fun getProductMonorepoRoot(): File? {
     var currentDir = repoRoot
 
     while (currentDir.parent != null) {
-        if (currentDir.listFiles()?.any { it.name == ".vcs" } == true) {
+        if (currentDir.resolve(".ultimate.root.marker").exists()) {
             return currentDir
         }
         currentDir = currentDir.parentFile
@@ -454,8 +452,8 @@ tasks {
             if (monorepo) {
                 sources(
                     listOf(
-                        File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
-                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        File("$productMonorepoDir/rider/model/sources"),
+                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
                         modelDir.resolve("lib/ue4")
                     )
                 )
@@ -523,8 +521,8 @@ tasks {
             if (monorepo) {
                 sources(
                     listOf(
-                        File("$productMonorepoDir/Rider/Frontend/rider/model/sources"),
-                        File("$productMonorepoDir/Rider/ultimate/remote-dev/rd-ide-model-sources"),
+                        File("$productMonorepoDir/rider/model/sources"),
+                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
                         modelDir
                     )
                 )
