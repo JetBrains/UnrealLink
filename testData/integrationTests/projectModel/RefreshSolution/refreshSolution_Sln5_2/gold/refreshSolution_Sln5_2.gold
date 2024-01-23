@@ -1,22 +1,16 @@
 ===================
 Init
 
--Project
- -EmptyUProject * 2 projects
-  -Games * 1 project
-   -EmptyUProject
-    Dependencies
-    -Source
-     -EmptyUProject
-      EmptyUProject.cpp
-      EmptyUProject.h
-      EmptyUProject.Build.cs
-     EmptyUProject.Target.cs
-     EmptyUProjectEditor.Target.cs
-    EmptyUProject.uproject
-  -Visualizers
-   Unreal.natvis
-
+-EmptyUProject
+ Dependencies
+ -Source
+  -EmptyUProject
+   EmptyUProject.cpp
+   EmptyUProject.h
+   EmptyUProject.Build.cs
+  EmptyUProject.Target.cs
+  EmptyUProjectEditor.Target.cs
+ EmptyUProject.uproject
 
 Project [Name:EmptyUProject, GUID:GUID]
   Child items:
@@ -36,35 +30,29 @@ Project [Name:EmptyUProject, GUID:GUID]
 ===================
 Invoking refresh solution
 
--Project
- -EmptyUProject * 2 projects
-  -Games * 1 project
-   -EmptyUProject
-    Dependencies
-    -Plugins
-     -TestNewPluginProject
-      Content
-      -Resources
-       Icon128.png
-      -Source
-       -TestNewPluginProject
-        -Private
-         TestNewPluginProject.cpp
-        -Public
-         TestNewPluginProject.h
-        TestNewPluginProject.Build.cs
-      TestNewPluginProject.uplugin
-    -Source
-     -EmptyUProject
-      EmptyUProject.cpp
-      EmptyUProject.h
-      EmptyUProject.Build.cs
-     EmptyUProject.Target.cs
-     EmptyUProjectEditor.Target.cs
-    EmptyUProject.uproject
-  -Visualizers
-   Unreal.natvis
-
+-EmptyUProject
+ Dependencies
+ -Plugins
+  -TestNewPluginProject
+   Content
+   -Resources
+    Icon128.png
+   -Source
+    -TestNewPluginProject
+     -Private
+      TestNewPluginProject.cpp
+     -Public
+      TestNewPluginProject.h
+     TestNewPluginProject.Build.cs
+   TestNewPluginProject.uplugin
+ -Source
+  -EmptyUProject
+   EmptyUProject.cpp
+   EmptyUProject.h
+   EmptyUProject.Build.cs
+  EmptyUProject.Target.cs
+  EmptyUProjectEditor.Target.cs
+ EmptyUProject.uproject
 
 Project [Name:EmptyUProject, GUID:GUID]
   Child items:

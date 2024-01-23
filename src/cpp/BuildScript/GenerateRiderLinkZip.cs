@@ -30,14 +30,6 @@ namespace Plugins.UnrealLink.src.cpp.BuildScript
 
         IList<ImmutableFileItem> models = dirModel.GetChildFiles(flags: PathSearchFlags.RecurseIntoSubdirectories)
           .OrderBy().Select(file => ImmutableFileItem.CreateFromDisk(file).WithRelativePath((RelativePath)"Source" / "RiderLink" / "Public" / "Model" / file.MakeRelativeTo(dirModel))).ToList();
-        models = models.Select(model =>
-        {
-          // FIXME(k15tfu): Temporarily rename *.Pregenerated.* to *.Generated.* models
-          StreamEx.TextAndEncoding taeModel = model.FileContent.ReadTextFromFile();
-          string sModelContent = taeModel.Text.Replace(".Pregenerated.", ".Generated.");
-          string sModelPath = model.RelativePath.FullPath.Replace(".Pregenerated.", ".Generated.");
-          return new ImmutableFileItem(sModelPath, ImmutableByteStream.FromByteArray(taeModel.Encoding.GetBytes(sModelContent).ToImmutableArray()));
-        }).ToList();
         files.AddRange(models);
 
         ImmutableFileItem fiUpluginTemplate = files.Single(fi => fi.RelativePath == "RiderLink.uplugin.template");

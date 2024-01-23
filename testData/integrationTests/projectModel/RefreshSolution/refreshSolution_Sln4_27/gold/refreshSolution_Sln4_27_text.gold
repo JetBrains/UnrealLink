@@ -7,7 +7,7 @@ Init
   <ItemGroup>
     <None Include="relative_path/EmptyUProject.uproject" />
     <Filter Include="Source">
-      <UniqueIdentifier>{2DE99819-3B40-4D18-8039-270FE1916F88}</UniqueIdentifier>
+      <UniqueIdentifier>{0A563621-0ECB-4268-B6F8-9DA41C81C05F}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject.Target.cs">
       <Filter>Source</Filter>
@@ -16,7 +16,7 @@ Init
       <Filter>Source</Filter>
     </None>
     <Filter Include="Source\EmptyUProject">
-      <UniqueIdentifier>{546E35A9-6BEE-4B3C-B1CF-8B1939AF09A4}</UniqueIdentifier>
+      <UniqueIdentifier>{097EDB88-0C37-4AF0-B4F7-2F7F26819BC7}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
       <Filter>Source\EmptyUProject</Filter>
@@ -40,7 +40,7 @@ Invoking refresh solution
   <ItemGroup>
     <None Include="relative_path/EmptyUProject.uproject" />
     <Filter Include="Source">
-      <UniqueIdentifier>{64F3DA28-2733-464E-850F-108A4333FEAB}</UniqueIdentifier>
+      <UniqueIdentifier>{27BBE194-EB33-4CB4-A6EB-12639FCD18DF}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject.Target.cs">
       <Filter>Source</Filter>
@@ -49,28 +49,28 @@ Invoking refresh solution
       <Filter>Source</Filter>
     </None>
     <Filter Include="Plugins">
-      <UniqueIdentifier>{9AD7122A-F4E8-4771-8853-C3409555150D}</UniqueIdentifier>
+      <UniqueIdentifier>{E98AA395-F00B-48ED-92AE-DB65B4AC489A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Plugins\TestNewPluginProject">
-      <UniqueIdentifier>{F1D974DA-603D-4C40-969C-14C51D2F2F4C}</UniqueIdentifier>
+      <UniqueIdentifier>{FBE82203-E812-433F-A9DD-68A4498C0920}</UniqueIdentifier>
     </Filter>
     <Filter Include="Plugins\TestNewPluginProject\Source">
-      <UniqueIdentifier>{F51C5FDD-8A30-459E-ABCA-BADC73D1592B}</UniqueIdentifier>
+      <UniqueIdentifier>{D69E7777-E630-459B-9760-F56B2B6465E8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject">
-      <UniqueIdentifier>{31DB291E-822A-4FD8-8D90-EDB3D31FF8A4}</UniqueIdentifier>
+      <UniqueIdentifier>{C54D026D-7143-4592-8335-29D0582717A0}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\TestNewPluginProject.Build.cs">
       <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject</Filter>
     </None>
     <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private">
-      <UniqueIdentifier>{68D25987-7034-434A-8AAF-82A77B3CB2C2}</UniqueIdentifier>
+      <UniqueIdentifier>{730C6249-3B7C-4B18-9F48-3252A55D721A}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private\TestNewPluginProject.cpp">
       <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Private</Filter>
     </ClCompile>
     <Filter Include="Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public">
-      <UniqueIdentifier>{FFDA9704-B2CA-443D-9A2F-FEA8B646F0EC}</UniqueIdentifier>
+      <UniqueIdentifier>{5A754D6F-1DAD-449B-83F5-5594B2C4B2EA}</UniqueIdentifier>
     </Filter>
     <ClInclude Include="relative_path/Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public\TestNewPluginProject.h">
       <Filter>Plugins\TestNewPluginProject\Source\TestNewPluginProject\Public</Filter>
@@ -79,13 +79,13 @@ Invoking refresh solution
       <Filter>Plugins\TestNewPluginProject</Filter>
     </None>
     <Filter Include="Plugins\TestNewPluginProject\Resources">
-      <UniqueIdentifier>{8C25C7DF-3526-49AC-B1B6-ADB75457EF7A}</UniqueIdentifier>
+      <UniqueIdentifier>{745F6A24-059C-41AD-88F0-2C55D0B9FB08}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Plugins\TestNewPluginProject\Resources\Icon128.png">
       <Filter>Plugins\TestNewPluginProject\Resources</Filter>
     </None>
     <Filter Include="Source\EmptyUProject">
-      <UniqueIdentifier>{88EF0607-9D14-4BC2-B82B-F20370CAFF40}</UniqueIdentifier>
+      <UniqueIdentifier>{23C477C6-0111-492E-B28E-F6031A287521}</UniqueIdentifier>
     </Filter>
     <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
       <Filter>Source\EmptyUProject</Filter>

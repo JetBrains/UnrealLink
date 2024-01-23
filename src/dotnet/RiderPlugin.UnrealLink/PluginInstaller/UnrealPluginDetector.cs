@@ -84,7 +84,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             }
                             
                             var riderLinkFolders = myProjectsTracker.GetAllUPlugins().Where(pluginPath => pluginPath.NameWithoutExtension.Equals("RiderLink")).ToList();
-                            var gameRoots = myProjectsTracker.GetAllUProjectRoots().Where(uprojectPath => !uprojectPath.GetChildFiles().Any(path => EXCLUDED_PROJECTS.Contains(path.NameWithoutExtension)));
+                            var uprojectNames = myProjectsTracker.GetAllUprojectNames().Where(uprojectName => !EXCLUDED_PROJECTS.Contains(uprojectName));
 
                             var foundEnginePlugin = false;
                             var installInfo = new UnrealPluginInstallInfo
@@ -114,14 +114,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             }
 
                             // Gather data about Project plugins
-                            foreach (var gameRoot in gameRoots)
+                            foreach (var uprojectName in uprojectNames)
                             {
+                                var uprojectPath = myProjectsTracker.GetUProjectByName(uprojectName);
+                                var gameRoot = uprojectPath.Parent;
                                 myLogger.Info($"[UnrealLink]: Looking for plugin in {gameRoot}");
                                 var upluginFolder = riderLinkFolders.Find(path => path.StartsWith(gameRoot));
                                 var upluginPath = upluginFolder.IsNullOrEmpty()
                                     ? gameRoot.Combine(ourPathToProjectPlugin)
                                     : upluginFolder.CombineWithShortName(UPLUGIN_FILENAME);
-                                var uprojectPath = gameRoot.GetChildFiles().Single(filePath => filePath.ExtensionNoDot.Equals(UPROJECT_FILE_FORMAT));
                                 var projectPlugin = GetPluginInfo(upluginPath, uprojectPath );
                                 if (projectPlugin.IsPluginAvailable)
                                 {

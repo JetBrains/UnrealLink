@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection;
+using ICSharpCode.SharpZipLib.Zip;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
 using JetBrains.Application.Environment.Components;
 using JetBrains.Extension;
 using JetBrains.Util;
-using Newtonsoft.Json.Linq;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
@@ -47,11 +46,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         private byte[] GetCurrentPluginChecksum()
         {
-            var editorPluginPathFile = PathToPackedPlugin;
-            using var zipArchive = ZipFile.OpenRead(editorPluginPathFile.FullPath);
-            var zipArchiveEntry = zipArchive.GetEntry(UnrealPluginDetector.CHEKCSUM_ENTRY_PATH);
-            var stream = zipArchiveEntry?.Open();
-            return stream?.ReadAllBytes();
+          return PathToPackedPlugin.ReadStream(stream =>
+          {
+            using(var zip = new ZipFile(stream))
+            {
+              if(zip.GetEntry(UnrealPluginDetector.CHEKCSUM_ENTRY_PATH) is not { } zentry)
+                return null;
+              using(var streamEntry = zip.GetInputStream(zentry))
+                return streamEntry.ReadAllBytes();
+            }
+          });
         }
 
         public byte[] GetPluginChecksum(VirtualFileSystemPath checksumPath)
