@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAwareAction
 import com.jetbrains.rider.plugins.unreal.UnrealHostSetup
@@ -10,6 +11,8 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
 class InstallEditorPluginToEngineAction : DumbAwareAction() {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
@@ -23,12 +26,14 @@ class InstallEditorPluginToEngineAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        val unrealHostSetup = project.getService(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
 }
 
 class InstallEditorPluginToGameAction : DumbAwareAction() {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
@@ -42,12 +47,14 @@ class InstallEditorPluginToGameAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        val unrealHostSetup = project.getService(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
 }
 
 class ExtractEditorPluginToEngineAction : DumbAwareAction() {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
@@ -61,12 +68,14 @@ class ExtractEditorPluginToEngineAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        val unrealHostSetup = project.getService(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution && unrealHostSetup.isPreBuiltEngine.not()
     }
 }
 
 class ExtractEditorPluginToGameAction : DumbAwareAction() {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project ?: return
         project.solution.rdRiderModel.installEditorPlugin.fire(
@@ -80,7 +89,7 @@ class ExtractEditorPluginToGameAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.getComponent(UnrealHostSetup::class.java)
+        val unrealHostSetup = project.getService(UnrealHostSetup::class.java)
         e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
     }
 }

@@ -1,9 +1,10 @@
 package com.jetbrains.rider.plugins.unreal
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.rd.util.lifetime
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.framework.impl.RdTask
-import com.jetbrains.rd.platform.util.lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
@@ -19,6 +20,7 @@ import com.sun.jna.win32.StdCallLibrary
 // UnrealHost.init -> UnrealHost.model.isUnrealEngineSolution.advise -> StatusBarWidgetsManager.updateWidget -> UnrealStatusBarWidget.update ->
 // UnrealStatusBarWidget.isAvailable -> UnrealHost.model.isUnrealEngineSolution.value -> UnrealHost.init
 // We need to finish `init` first, then subscribe to changes in model
+@Service(Service.Level.PROJECT)
 class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
     var isUnrealEngineSolution = false
     var isPreBuiltEngine = false
@@ -98,12 +100,16 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
     private interface User32 : StdCallLibrary {
         fun AllowSetForegroundWindow(id: Int): Boolean
 
+        @Suppress("unused")
         fun SetForegroundWindow(hwnd: WinDef.HWND): Boolean
 
+        @Suppress("unused")
         fun EnumWindows(callback: EnumWindowsProc, intPtr: WinDef.INT_PTR): Boolean
 
+        @Suppress("unused")
         fun GetWindowThreadProcessId(hwnd: WinDef.HWND, processId: WinDef.UINTByReference): Boolean
 
+        @Suppress("unused")
         fun ShowWindow(hwnd: WinDef.HWND, nCmdShow: Int): Boolean
     }
 
@@ -112,8 +118,8 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
         fun GetLastError(): Int
     }
 
-    @Suppress("FunctionName")
     private interface EnumWindowsProc : StdCallLibrary.StdCallCallback {
+        @Suppress("unused")
         fun callback(hwnd: WinDef.HWND, intPtr: WinDef.INT_PTR): Boolean
     }
 }
