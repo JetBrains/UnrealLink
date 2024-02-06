@@ -23,7 +23,7 @@ import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
-import io.qameta.allure.Feature
+import com.jetbrains.rider.test.annotations.Feature
 import org.testng.annotations.Test
 import java.time.Duration
 

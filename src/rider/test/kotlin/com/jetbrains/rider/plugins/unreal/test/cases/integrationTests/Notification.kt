@@ -18,7 +18,7 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
-import io.qameta.allure.Feature
+import com.jetbrains.rider.test.annotations.Feature
 import org.testng.annotations.Test
 import java.time.Duration
 

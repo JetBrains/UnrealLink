@@ -25,7 +25,7 @@ import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import io.qameta.allure.Epic
-import io.qameta.allure.Feature
+import com.jetbrains.rider.test.annotations.Feature
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
