@@ -48,11 +48,11 @@ class RiderLinkInstallService(
         val toolWindow = buildToolWindowFactory.getOrRegisterToolWindow(project)
         val contentManager = toolWindow.contentManager
 
-        val panel = RiderLinkInstallPanel(project, serviceLifetime)
+        val panel = RiderLinkInstallPanel(project, this, serviceLifetime)
         val toolWindowContent = contentManager.factory.createContent(null, UnrealLinkBundle.message("RiderLink.InstallProgress.text.title"), true).apply {
             StatusBarUtil.setStatusBarInfo(project, "Install")
             component = panel
-            panel.toolbar = createToolbarPanel()
+            panel.toolbar = createToolbarPanel(panel)
             isCloseable = false
             icon = AllIcons.Actions.Install
         }
@@ -62,17 +62,17 @@ class RiderLinkInstallService(
         return ctx
     }
 
-    private fun createToolbarPanel(): JPanel {
+    private fun createToolbarPanel(mainPanel: RiderLinkInstallPanel): JPanel {
         logger.info { "[UnrealLink]: ${::createToolbarPanel.name}" }
         val buildActionGroup = DefaultActionGroup().apply {
             add(CancelRiderLinkInstallAction())
         }
-        return JPanel(BorderLayout()).apply {
-            add(
-                    ActionManager.getInstance().createActionToolbar("UnrealLink.BuildRiderLinkToolbar", buildActionGroup, false).component,
-                    BorderLayout.WEST
-            )
-        }
+        val panel = JPanel(BorderLayout())
+        val toolbar = ActionManager.getInstance().createActionToolbar("UnrealLink.BuildRiderLinkToolbar", buildActionGroup, false)
+        toolbar.targetComponent = mainPanel
+        panel.add(toolbar.component, BorderLayout.WEST)
+
+        return panel
     }
 }
 
@@ -84,6 +84,7 @@ fun ConsoleViewImpl.println(text: String, type: ConsoleViewContentType) {
 
 class RiderLinkInstallPanel(
     project: Project,
+    riderLinkInstallService: RiderLinkInstallService,
     lifetime: Lifetime
 ) : SimpleToolWindowPanel(false) {
     companion object {
@@ -95,7 +96,7 @@ class RiderLinkInstallPanel(
     init {
         logger.info { "[UnrealLink]: init" }
 
-        Disposer.register(project, console)
+        Disposer.register(riderLinkInstallService, console)
         setProvideQuickActions(true)
         container = JPanel(CardLayout()).apply {
             add(console.component, "console")
