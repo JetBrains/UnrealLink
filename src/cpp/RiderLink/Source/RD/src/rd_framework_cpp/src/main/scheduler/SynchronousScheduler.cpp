@@ -20,4 +20,10 @@ bool SynchronousScheduler::is_active() const
 {
 	return SynchronousScheduler_active_count > 0;
 }
+
+SynchronousScheduler& SynchronousScheduler::Instance()
+{
+	static SynchronousScheduler globalSynchronousScheduler;
+	return globalSynchronousScheduler;
+}
 }	 // namespace rd

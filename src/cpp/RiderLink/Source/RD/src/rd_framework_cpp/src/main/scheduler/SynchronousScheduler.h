@@ -32,11 +32,7 @@ public:
 	/**
 	 * \brief global synchronous scheduler for whole application.
 	 */
-	static SynchronousScheduler& Instance()
-	{
-		static SynchronousScheduler globalSynchronousScheduler;
-		return globalSynchronousScheduler;
-	}
+	static SynchronousScheduler& Instance();
 };
 
 }	 // namespace rd
