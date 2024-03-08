@@ -49,6 +49,18 @@
 			"Name": "RiderLC",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PostEngineInit"
+		},
+		{
+			"Name": "RiderDebuggerSupport",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [
+				"Win64"
+			],
+			"WhitelistPlatforms": [
+				"Win64"
+
+			]
 		}
 	]
 }

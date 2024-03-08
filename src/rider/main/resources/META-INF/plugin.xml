@@ -176,6 +176,10 @@ Path to old plugin:</code></pre>
         </component>
     </project-components>
 
+    <extensions defaultExtensionNs="rider.cpp">
+        <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
                                  instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
@@ -194,6 +198,9 @@ Path to old plugin:</code></pre>
         <spellchecker.bundledDictionaryProvider implementation="com.jetbrains.rider.plugins.unreal.spellchecker.UnrealBundledDictionaryProvider"/>
         <rider.buildButtonModeProvider implementation="com.jetbrains.rider.plugins.unreal.actions.HotReloadBuildModeProvider"/>
         <iconMapper mappingFile="UnrealIconMappings.json"/>
+
+        <registryKey  defaultValue="true" key="rider.cpp.enable.debugger.unreal.blueprint-callstack"
+                      description="Enable injecting of Blueprint callstack into C++ callstack" restartRequired="false" />
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
@@ -283,5 +290,18 @@ Path to old plugin:</code></pre>
 
         <action id="UnrealLink.HotReloadBuild"
                 class="com.jetbrains.rider.plugins.unreal.actions.HotReloadBuildAction"/>
+
+        <group id="XDebugger.Frames.TopToolbar" overrides="true"/>
+
+        <group id="UnrealLink.Debugger.Rider.Unreal.Frames.Popup" popup="true" icon="ReSharperIcons.Cpp.Unreal"
+               class="com.jetbrains.rider.plugins.unreal.debugger.actions.FramesPopupGroup">
+            <add-to-group group-id="XDebugger.Frames.TopToolbar" anchor="first"/>
+            <action id="UnrealLink.Debugger.Rider.Unreal.Frames.ShowBlueprintFunctions"
+                    class="com.jetbrains.rider.plugins.unreal.debugger.actions.ShowBlueprintFunctionsAction"/>
+            <action id="UnrealLink.Debugger.Rider.Unreal.Frames.HideUnrealFrames"
+                    class="com.jetbrains.rider.plugins.unreal.debugger.actions.ShowUnrealFramesAction"/>
+            <action id="UnrealLink.Debugger.Rider.Unreal.Frames.ShowOtherLibraryFrames"
+                    class="com.jetbrains.rider.plugins.unreal.debugger.actions.ShowLibraryFramesAction"/>
+        </group>
     </actions>
 </idea-plugin>

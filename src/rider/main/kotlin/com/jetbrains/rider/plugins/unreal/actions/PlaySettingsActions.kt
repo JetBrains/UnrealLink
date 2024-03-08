@@ -27,15 +27,7 @@ class PlaySettings : DefaultActionGroup(), DumbAware {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        val host = e.getUnrealHost()
-        if (host == null || !host.isUnrealEngineSolution) {
-            e.presentation.isEnabledAndVisible = false
-            return
-        }
-
-        e.presentation.isEnabled = true
-        e.presentation.isVisible = true
-        e.presentation.icon = if (host.isConnectedToUnrealEditor) connectedIcon else disconnectedIcon
+        UnrealHostOperations.updatePresentationBasedOnUnrealAvailability(e, connectedIcon, disconnectedIcon)
     }
 }
 
@@ -59,8 +51,8 @@ class ProtocolStatus : DumbAwareAction() {
         return if (host.isConnectedToUnrealEditor) {
             val info = host.connectionInfo
             if (info != null) {
-                UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.ex.text",
-                        info.projectName, info.executableName, info.processId.toString())
+                UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.ex.text", info.projectName, info.executableName,
+                                         info.processId.toString())
             } else {
                 UnrealLinkBundle.message("action.RiderLink.ProtocolStatus.connected.text")
             }

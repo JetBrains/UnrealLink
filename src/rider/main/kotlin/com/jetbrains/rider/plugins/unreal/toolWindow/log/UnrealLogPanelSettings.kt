@@ -97,6 +97,18 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
             state.showPlayButtons = value
         }
 
+    var showUnrealFrames: Boolean
+      get() = state.showUnrealFrames
+      set(value) {
+        state.showUnrealFrames = value
+      }
+
+    var showBlueprintCallstack: Boolean
+      get() = state.showBlueprintCallstack
+      set(value) {
+        state.showBlueprintCallstack = value
+      }
+
     fun interface SettingsChangedListener : EventListener {
         fun settingsChanged()
     }
@@ -127,6 +139,9 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         var categoryWidth by property(defaultValue = 25)
 
         var showPlayButtons by property(defaultValue = true)
+
+        var showBlueprintCallstack by property(defaultValue = true)
+        var showUnrealFrames by property(defaultValue = false)
     }
 }
 
