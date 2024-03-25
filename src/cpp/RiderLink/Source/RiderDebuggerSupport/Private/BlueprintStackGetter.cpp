@@ -48,7 +48,7 @@ namespace RiderDebuggerSupport
 
     static void SetLastExecutedLine(const uint16 LineNumber)
     {
-        *GJbPOperationResultCode = *GJbPOperationResultCode & 0xFFFF0000 | LineNumber;
+        *GJbPOperationResultCode = (*GJbPOperationResultCode & 0xFFFF0000) | LineNumber;
     }
 
     static void SetResultCodeFlag(const uint8 FlagOffset)
