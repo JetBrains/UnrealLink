@@ -14,18 +14,23 @@ class UnrealExternalCodeFrame(private val baseFrameEqualityObject: Any, var coll
   companion object {
     @NlsSafe
     private val myCodePrefix = "${UnrealLinkBundle.message("RiderLink.Unreal.Debugger.BlueprintCallstack.UnrealEngineCode.title")} "
+
+    @NlsSafe
+    private val myCodeSuffix = UnrealLinkBundle.message("RiderLink.Unreal.Debugger.BlueprintCallstack.UnrealEngineCode.suffix")
   }
 
   override fun getEqualityObject(): Any {
     return Pair.create(baseFrameEqualityObject, collapsedFramesCount)
   }
 
+  @Suppress("ConvertToStringTemplate")
   override fun customizePresentation(component: ColoredTextContainer) {
     component.append("[", SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
     component.append(myCodePrefix, SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
-    component.append("$collapsedFramesCount ",
+    component.append(collapsedFramesCount.toString() + " ",
                      SimpleTextAttributes(SimpleTextAttributes.STYLE_BOLD, DotNetStackFrame.ExternalCodeSecondColor))
-    component.append("${StringUtil.pluralize(RiderDebuggerBundle.message("ExternalCodeMetaFrame.frame.text"), collapsedFramesCount)}]",
+    component.append(StringUtil.pluralize(RiderDebuggerBundle.message("ExternalCodeMetaFrame.frame.text"), collapsedFramesCount) + " ",
                      SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
+    component.append(myCodeSuffix + "]", SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
   }
 }
