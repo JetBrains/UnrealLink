@@ -450,18 +450,15 @@ tasks {
 
             // *** Classpath and sources ***
             if (monorepo) {
-                sources(
-                    listOf(
-                        File("$productMonorepoDir/rider/model/sources"),
-                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
-                        modelDir.resolve("lib/ue4")
-                    )
-                )
+                classpath({
+                    val riderModelClassPathFile: String by project
+                    File(riderModelClassPathFile).readLines()
+                })
             }
             else {
                 classpath({riderModelJar})
-                sources("$modelDir/lib/ue4")
             }
+            sources(modelDir.resolve("lib/ue4"))
 
             hashFolder = "$hashBaseDir/lib/ue4"
             packages = "model.lib.ue4"
@@ -519,18 +516,15 @@ tasks {
 
             // *** Classpath and sources ***
             if (monorepo) {
-                sources(
-                    listOf(
-                        File("$productMonorepoDir/rider/model/sources"),
-                        File("$productMonorepoDir/remote-dev/rd-ide-model-sources"),
-                        modelDir
-                    )
-                )
+                classpath({
+                              val riderModelClassPathFile: String by project
+                              File(riderModelClassPathFile).readLines()
+                          })
             }
             else {
                 classpath({riderModelJar})
-                sources("$modelDir")
             }
+            sources(modelDir)
 
             packages = "model.rider"
             hashFolder = "$hashBaseDir/rider"
