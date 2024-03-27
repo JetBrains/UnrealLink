@@ -141,7 +141,7 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         var showPlayButtons by property(defaultValue = true)
 
         var showBlueprintCallstack by property(defaultValue = true)
-        var showUnrealFrames by property(defaultValue = false)
+        var showUnrealFrames by property(defaultValue = true)
     }
 }
 
