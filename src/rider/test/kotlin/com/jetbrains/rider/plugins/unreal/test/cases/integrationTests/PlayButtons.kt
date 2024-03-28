@@ -12,8 +12,8 @@ import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRi
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Feature
 import com.jetbrains.rider.test.annotations.Mute
-import com.jetbrains.rider.test.annotations.Mutes
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
@@ -23,7 +23,6 @@ import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
-import com.jetbrains.rider.test.annotations.Feature
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -52,10 +51,7 @@ class PlayButtons : UnrealTestLevelProject() {
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
   @Test(dataProvider = "AllEngines_AllPModels")
-  @Mutes([
-           Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"]),
-           Mute("RIDER-103727 UnrealLink tests fails while try to run game with sln project model", specificParameters = ["Sln4_27", "Sln5_2"])
-  ])
+  @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,

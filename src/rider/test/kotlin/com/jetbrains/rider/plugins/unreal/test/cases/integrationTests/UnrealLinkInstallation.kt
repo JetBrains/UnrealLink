@@ -10,7 +10,7 @@ import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRi
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
 import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.annotations.Mute
+import com.jetbrains.rider.test.annotations.Feature
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.contexts.UnrealTestContext
@@ -25,7 +25,6 @@ import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import io.qameta.allure.Epic
-import com.jetbrains.rider.test.annotations.Feature
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -49,8 +48,6 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
 
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
-  @Mute("RIDER-103727 UnrealLink tests fails while try to run game with sln project model",
-        specificParameters = ["SlnEngine4_27", "SlnGame4_27", "SlnEngine5_2", "SlnGame5_2", "SlnEngine5_3", "SlnGame5_3"])
   fun ul(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,
