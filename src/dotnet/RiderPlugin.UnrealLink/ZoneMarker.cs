@@ -9,6 +9,7 @@ namespace RiderPlugin.UnrealLink
     [ZoneMarker]
     public class ZoneMarker :
         IRequire<ILanguageCppZone>,
+        IRequire<IUnrealEngineZone>,
         IRequire<DaemonZone>,
         IRequire<IRiderFeatureZone>,
         IRequire<IRiderProductEnvironmentZone>
