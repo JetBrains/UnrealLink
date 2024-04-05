@@ -18,8 +18,20 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
+    <data name="DeletingRiderLinkPlugin_Text" xml:space="preserve">
+        <value>Deleting RiderLink plugin</value>
+    </data>
+    <data name="FailedToBuildRiderLinkPlugin_Text" xml:space="preserve">
+        <value>Failed to build RiderLink plugin</value>
+    </data>
+    <data name="FailedToDeleteRiderLink_Text" xml:space="preserve">
+        <value>Failed to delete RiderLink</value>
+    </data>
     <data name="IfThisOptionIsEnabledTheRiderLinkEditor_Text" xml:space="preserve">
         <value>If this option is enabled, the RiderLink editor plugin will be automatically updated.</value>
+    </data>
+    <data name="RiderLinkIsDeleted_Text" xml:space="preserve">
+        <value>RiderLink is deleted</value>
     </data>
     <data name="UnrealLinkPluginSettings_Text" xml:space="preserve">
         <value>UnrealLink plugin settings</value>

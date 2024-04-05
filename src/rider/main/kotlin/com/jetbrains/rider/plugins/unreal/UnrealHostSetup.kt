@@ -1,14 +1,17 @@
 package com.jetbrains.rider.plugins.unreal
 
+import com.intellij.openapi.client.ClientProjectSession
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.components.service
 import com.intellij.openapi.rd.util.lifetime
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.framework.impl.RdTask
+import com.jetbrains.rd.protocol.SolutionExtListener
+import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
-import com.jetbrains.rdclient.util.idea.LifetimedProjectComponent
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
 import com.jetbrains.rider.plugins.unreal.model.PlayState
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 import com.sun.jna.LastErrorException
 import com.sun.jna.Native
 import com.sun.jna.platform.win32.WinDef
@@ -21,15 +24,13 @@ import com.sun.jna.win32.StdCallLibrary
 // UnrealStatusBarWidget.isAvailable -> UnrealHost.model.isUnrealEngineSolution.value -> UnrealHost.init
 // We need to finish `init` first, then subscribe to changes in model
 @Service(Service.Level.PROJECT)
-class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
+class UnrealHostSetup {
     var isUnrealEngineSolution = false
     var isPreBuiltEngine = false
 
-    init {
-        val unrealHost = UnrealHost.getInstance(project)
-
-        unrealHost.performModelAction {
-            it.allowSetForegroundWindow.set { _, id ->
+    class ProtocolListener : SolutionExtListener<RdRiderModel> {
+        override fun extensionCreated(lifetime: Lifetime, session: ClientProjectSession, model: RdRiderModel) {
+            model.allowSetForegroundWindow.set { _, id ->
                 if (SystemInfo.isWindows) {
                     return@set if (!user32!!.AllowSetForegroundWindow(id)) {
                         val lastError = kernel32!!.GetLastError()
@@ -40,86 +41,79 @@ class UnrealHostSetup(project: Project) : LifetimedProjectComponent(project) {
                 }
                 RdTask.fromResult(true)
             }
-        }
 
-        unrealHost.performModelAction {
-            it.isUnrealEngineSolution.change.advise(project.lifetime) { isUnrealEngineSolution ->
-                this.isUnrealEngineSolution = isUnrealEngineSolution
+            val project = session.project
+            model.isUnrealEngineSolution.change.advise(lifetime) { isUnrealEngineSolution ->
+                val host = project.service<UnrealHostSetup>()
+                host.isUnrealEngineSolution = isUnrealEngineSolution
             }
-            it.isPreBuiltEngine.change.advise(project.lifetime) { isPreBuiltEngine ->
-                this.isPreBuiltEngine = isPreBuiltEngine
+            model.isPreBuiltEngine.change.advise(project.lifetime) { isPreBuiltEngine ->
+                val host = project.service<UnrealHostSetup>()
+                host.isPreBuiltEngine = isPreBuiltEngine
             }
-        }
 
-        unrealHost.performModelAction {
-            it.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
+
+            model.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
                 if (!connected) {
-                    unrealHost.playStateModel.set(PlayState.Idle)
+                    project.service<UnrealHost>().playStateModel.set(PlayState.Idle)
                 }
                 forceTriggerUIUpdate()
             }
-        }
 
-        unrealHost.performModelAction {
-            it.riderLinkInstallPanelInit.advise(project.lifetime) {
+
+            model.riderLinkInstallPanelInit.advise(project.lifetime) {
                 val riderLinkInstallContext =
-                        RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
+                    RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
                 riderLinkInstallContext.clear()
                 riderLinkInstallContext.showToolWindowIfHidden()
             }
-            it.riderLinkInstallMessage.advise(project.lifetime) { message ->
+            model.riderLinkInstallMessage.advise(project.lifetime) { message ->
                 RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(message)
             }
-        }
 
 //  Update state of Unreal actions on toolbar
-        unrealHost.performModelAction {
-            it.playStateFromEditor.adviseNotNull(project.lifetime) { newState ->
-                unrealHost.playStateModel.set(newState)
+            model.playStateFromEditor.adviseNotNull(project.lifetime) { newState ->
+                project.service<UnrealHost>().playStateModel.set(newState)
             }
-        }
 
-        unrealHost.performModelAction {
-            it.playModeFromEditor.adviseNotNull(project.lifetime) { mode ->
-                unrealHost.playMode = mode
+            model.playModeFromEditor.adviseNotNull(project.lifetime) { mode ->
+                project.service<UnrealHost>().playMode = mode
+                forceTriggerUIUpdate()
+            }
+
+            model.isGameControlModuleInitialized.adviseNotNull(project.lifetime) {
                 forceTriggerUIUpdate()
             }
         }
 
-        unrealHost.performModelAction {
-            it.isGameControlModuleInitialized.adviseNotNull(project.lifetime) {
-                forceTriggerUIUpdate()
-            }
+        private val user32 = if (SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
+        private val kernel32 = if (SystemInfo.isWindows) Native.load("kernel32", Kernel32::class.java) else null
+
+        @Suppress("FunctionName")
+        private interface User32 : StdCallLibrary {
+            fun AllowSetForegroundWindow(id: Int): Boolean
+
+            @Suppress("unused")
+            fun SetForegroundWindow(hwnd: WinDef.HWND): Boolean
+
+            @Suppress("unused")
+            fun EnumWindows(callback: EnumWindowsProc, intPtr: WinDef.INT_PTR): Boolean
+
+            @Suppress("unused")
+            fun GetWindowThreadProcessId(hwnd: WinDef.HWND, processId: WinDef.UINTByReference): Boolean
+
+            @Suppress("unused")
+            fun ShowWindow(hwnd: WinDef.HWND, nCmdShow: Int): Boolean
         }
-    }
 
-    private val user32 = if (SystemInfo.isWindows) Native.load("user32", User32::class.java) else null
-    private val kernel32 = if (SystemInfo.isWindows) Native.load("kernel32", Kernel32::class.java) else null
+        @Suppress("FunctionName")
+        private interface Kernel32 : StdCallLibrary {
+            fun GetLastError(): Int
+        }
 
-    @Suppress("FunctionName")
-    private interface User32 : StdCallLibrary {
-        fun AllowSetForegroundWindow(id: Int): Boolean
-
-        @Suppress("unused")
-        fun SetForegroundWindow(hwnd: WinDef.HWND): Boolean
-
-        @Suppress("unused")
-        fun EnumWindows(callback: EnumWindowsProc, intPtr: WinDef.INT_PTR): Boolean
-
-        @Suppress("unused")
-        fun GetWindowThreadProcessId(hwnd: WinDef.HWND, processId: WinDef.UINTByReference): Boolean
-
-        @Suppress("unused")
-        fun ShowWindow(hwnd: WinDef.HWND, nCmdShow: Int): Boolean
-    }
-
-    @Suppress("FunctionName")
-    private interface Kernel32 : StdCallLibrary {
-        fun GetLastError(): Int
-    }
-
-    private interface EnumWindowsProc : StdCallLibrary.StdCallCallback {
-        @Suppress("unused")
-        fun callback(hwnd: WinDef.HWND, intPtr: WinDef.INT_PTR): Boolean
+        private interface EnumWindowsProc : StdCallLibrary.StdCallCallback {
+            @Suppress("unused")
+            fun callback(hwnd: WinDef.HWND, intPtr: WinDef.INT_PTR): Boolean
+        }
     }
 }
