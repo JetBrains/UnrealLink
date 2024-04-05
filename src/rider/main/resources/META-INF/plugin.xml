@@ -163,12 +163,6 @@ Path to old plugin:</code></pre>
 
     <project-components>
         <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHost</implementation-class>
-        </component>
-        <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.UnrealHostSetup</implementation-class>
-        </component>
-        <component>
             <implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class>
         </component>
         <component>
@@ -181,6 +175,9 @@ Path to old plugin:</code></pre>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <rd.solutionExtListener endpoint="IDE Frontend"
+                                listener="com.jetbrains.rider.plugins.unreal.UnrealHostSetup$ProtocolListener"/>
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
                                  instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
                                  key="configurable.UnrealLink.settings.title"/>
@@ -201,6 +198,7 @@ Path to old plugin:</code></pre>
 
         <registryKey  defaultValue="true" key="rider.cpp.enable.debugger.unreal.blueprint-callstack"
                       description="Enable injecting of Blueprint callstack into C++ callstack" restartRequired="false" />
+
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
@@ -272,6 +270,10 @@ Path to old plugin:</code></pre>
             <add-to-group group-id="RightToolbarSideGroup" anchor="first"/>
             <add-to-group group-id="RightToolbarSideGroupXamarin" anchor="first"/>
         </group>
+
+        <action id="UnrealLink.DeleteRiderLinkPluginAction"
+                class="com.jetbrains.rider.plugins.unreal.actions.DeleteRiderLinkPluginAction" text="Delete RiderLink Plugin"
+                description="Delete RiderLink plugin from the project"/>
 
         <action id="UnrealLink.InstallEditorPluginToEngineAction"
                 class="com.jetbrains.rider.plugins.unreal.actions.InstallEditorPluginToEngineAction"/>

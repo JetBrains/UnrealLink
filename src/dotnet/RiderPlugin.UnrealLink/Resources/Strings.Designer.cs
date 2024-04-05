@@ -7,6 +7,7 @@
   using JetBrains.Lifetimes;
   using JetBrains.Util;
   using JetBrains.Util.Logging;
+  using JetBrains.Application.I18n.Plurals;
   
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
   [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -50,7 +51,18 @@
       }
     }
 
+    public static string Choice(string format, params object[] args)
+    {
+        var formatter = ResourceManager.ChoiceFormatter;
+        if (formatter == null) return "???";
+        return string.Format(formatter, format, args);
+    }
+
+    public static string DeletingRiderLinkPlugin_Text => ResourceManager.GetString("DeletingRiderLinkPlugin_Text");
+    public static string FailedToBuildRiderLinkPlugin_Text => ResourceManager.GetString("FailedToBuildRiderLinkPlugin_Text");
+    public static string FailedToDeleteRiderLink_Text => ResourceManager.GetString("FailedToDeleteRiderLink_Text");
     public static string IfThisOptionIsEnabledTheRiderLinkEditor_Text => ResourceManager.GetString("IfThisOptionIsEnabledTheRiderLinkEditor_Text");
+    public static string RiderLinkIsDeleted_Text => ResourceManager.GetString("RiderLinkIsDeleted_Text");
     public static string UnrealLinkPluginSettings_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Text");
     public static string UnrealLinkPluginSettings_Title_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Title_Text");
     public static string InstallRiderLinkInEngine_Text => ResourceManager.GetString("InstallRiderLinkInEngine_Text");
