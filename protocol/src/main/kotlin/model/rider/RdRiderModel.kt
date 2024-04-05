@@ -124,5 +124,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("IsHotReloadAvailable", false).readonly
         property("IsHotReloadCompiling", false).readonly
         signal("TriggerHotReload", void)
+        signal("DeletePlugin", void)
     }
 }
