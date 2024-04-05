@@ -9,6 +9,7 @@ using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Diagnostics;
+using JetBrains.HabitatDetector;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
@@ -377,6 +378,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
             var pluginTmpDir = CreateTempDirectory();
             if (pluginTmpDir.IsNullOrEmpty()) return false;
+            if (PlatformUtil.RuntimePlatform == JetPlatform.Windows && pluginTmpDir.FullPath.Any(c => c >= 128))
+            {
+                string nonAsciiCharactersText = Strings.NonASCIICharactersInTheBuildDirectory_Text;
+
+                myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(nonAsciiCharactersText, ContentType.Error));
+            }
             
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
