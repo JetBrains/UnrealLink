@@ -20,7 +20,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     {
         private static readonly ILogger OurLogger = Logger.GetLogger(typeof(UnrealProjectsRefresher));
 
-        public static void RefreshProjects(Lifetime parentLifetime, CppUE4Version myUnrealVersion,
+        public static void RefreshProjects(Lifetime parentLifetime,
             [NotNull] ISolution solution,
             [NotNull] UnrealPluginInstallInfo installInfo)
         {
