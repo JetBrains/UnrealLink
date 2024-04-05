@@ -62,6 +62,8 @@
     public static string FailedToBuildRiderLinkPlugin_Text => ResourceManager.GetString("FailedToBuildRiderLinkPlugin_Text");
     public static string FailedToDeleteRiderLink_Text => ResourceManager.GetString("FailedToDeleteRiderLink_Text");
     public static string IfThisOptionIsEnabledTheRiderLinkEditor_Text => ResourceManager.GetString("IfThisOptionIsEnabledTheRiderLinkEditor_Text");
+    public static string NonASCIICharactersInTheBuildDirectory_Text => ResourceManager.GetString("NonASCIICharactersInTheBuildDirectory_Text");
+    public static string PathContainsNonASCIICharactersBuild_Text => ResourceManager.GetString("PathContainsNonASCIICharactersBuild_Text");
     public static string RiderLinkIsDeleted_Text => ResourceManager.GetString("RiderLinkIsDeleted_Text");
     public static string UnrealLinkPluginSettings_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Text");
     public static string UnrealLinkPluginSettings_Title_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Title_Text");

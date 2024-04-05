@@ -30,6 +30,12 @@
     <data name="IfThisOptionIsEnabledTheRiderLinkEditor_Text" xml:space="preserve">
         <value>If this option is enabled, the RiderLink editor plugin will be automatically updated.</value>
     </data>
+    <data name="NonASCIICharactersInTheBuildDirectory_Text" xml:space="preserve">
+        <value>Non-ASCII characters in the build directory for RiderLink. If build fails, try changing temporary path in File | Settings | Languages &amp; Frameworks | Unreal Engine</value>
+    </data>
+    <data name="PathContainsNonASCIICharactersBuild_Text" xml:space="preserve">
+        <value>Path contains non-ASCII characters, build might fail. Change temp directory, or use "Extract RiderLink" action</value>
+    </data>
     <data name="RiderLinkIsDeleted_Text" xml:space="preserve">
         <value>RiderLink is deleted</value>
     </data>

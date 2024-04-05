@@ -5,6 +5,7 @@ using JetBrains.Application.UI.Options;
 using JetBrains.Application.UI.Options.OptionsDialog;
 using JetBrains.Application.UI.Options.OptionsDialog.SimpleOptions.ViewModel;
 using JetBrains.DataFlow;
+using JetBrains.HabitatDetector;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Extensions.PathActions;
@@ -128,9 +129,20 @@ namespace RiderPlugin.UnrealLink.Settings
                 commonFileDialogs,
                 null,
                 null,
-                new[] { (BeSimplePathValidationRules.SHOULD_BE_ABSOLUTE, ValidationStates.validationWarning) });
+                new[] { (BeSimplePathValidationRules.SHOULD_BE_ABSOLUTE, ValidationStates.validationWarning) },
+                path => CheckForNonAsciiSymbols(path));
       
             AddCommentText(Strings.BuildingRiderLinkMightFailWithNonASCIISymbols_Text);
+        }
+
+        private (string, ValidationStates) CheckForNonAsciiSymbols(FileSystemPath path)
+        {
+            if (PlatformUtil.RuntimePlatform == JetPlatform.Windows && path.FullPath.Any(c => c >= 128))
+            {
+                return (Strings.PathContainsNonASCIICharactersBuild_Text, ValidationStates.validationWarning);
+            }
+            
+            return ("", ValidationStates.validationPassed);
         }
 
         private void SetupInstallButtons()
