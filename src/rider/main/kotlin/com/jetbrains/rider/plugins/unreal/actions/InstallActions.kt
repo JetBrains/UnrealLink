@@ -109,6 +109,6 @@ class DeleteRiderLinkPluginAction : DumbAwareAction() {
             return
         }
         val unrealHost = UnrealHost.getInstance(project)
-        e.presentation.isEnabledAndVisible = unrealHost.isUnrealEngineSolution
+        e.presentation.isEnabledAndVisible = unrealHost.isInstallInfoAvailable
     }
 }
