@@ -6,7 +6,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.UnrealHost
-import com.jetbrains.rider.plugins.unreal.UnrealHostSetup
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.*
 import com.jetbrains.rider.projectView.solution
 
@@ -26,8 +25,8 @@ class InstallEditorPluginToEngineAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.service<UnrealHostSetup>()
-        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
+        val unrealHost = project.service<UnrealHost>()
+        e.presentation.isEnabledAndVisible = unrealHost.isUnrealEngineSolution
     }
 }
 
@@ -47,8 +46,8 @@ class InstallEditorPluginToGameAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.service<UnrealHostSetup>()
-        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
+        val unrealHost = project.service<UnrealHost>()
+        e.presentation.isEnabledAndVisible = unrealHost.isUnrealEngineSolution
     }
 }
 
@@ -68,8 +67,8 @@ class ExtractEditorPluginToEngineAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.service<UnrealHostSetup>()
-        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution && unrealHostSetup.isPreBuiltEngine.not()
+        val unrealHost = project.service<UnrealHost>()
+        e.presentation.isEnabledAndVisible = unrealHost.isUnrealEngineSolution && unrealHost.isPreBuiltEngine.not()
     }
 }
 
@@ -89,8 +88,8 @@ class ExtractEditorPluginToGameAction : DumbAwareAction() {
             e.presentation.isEnabledAndVisible = false
             return
         }
-        val unrealHostSetup = project.service<UnrealHostSetup>()
-        e.presentation.isEnabledAndVisible = unrealHostSetup.isUnrealEngineSolution
+        val unrealHost = project.service<UnrealHost>()
+        e.presentation.isEnabledAndVisible = unrealHost.isUnrealEngineSolution
     }
 }
 
