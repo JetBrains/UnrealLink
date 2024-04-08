@@ -177,7 +177,7 @@ Path to old plugin:</code></pre>
     <extensions defaultExtensionNs="com.intellij">
 
         <rd.solutionExtListener endpoint="IDE Frontend"
-                                listener="com.jetbrains.rider.plugins.unreal.UnrealHostSetup$ProtocolListener"/>
+                                listener="com.jetbrains.rider.plugins.unreal.UnrealHost$ProtocolListener"/>
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
                                  instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
                                  key="configurable.UnrealLink.settings.title"/>
