@@ -5,7 +5,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.rd.util.lifetime
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.framework.protocolOrThrow
@@ -14,11 +13,13 @@ import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.IProperty
 import com.jetbrains.rd.util.reactive.Property
 import com.jetbrains.rd.util.reactive.adviseNotNull
+import com.jetbrains.rd.util.reactive.whenTrue
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
 import com.jetbrains.rider.plugins.unreal.model.ConnectionInfo
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
+import com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory
 import com.jetbrains.rider.projectView.solution
 import com.sun.jna.LastErrorException
 import com.sun.jna.Native
@@ -78,42 +79,46 @@ class UnrealHost(val project: Project) {
                 val host = project.service<UnrealHost>()
                 host.isUnrealEngineSolution = isUnrealEngineSolution
             }
-            model.isPreBuiltEngine.change.advise(project.lifetime) { isPreBuiltEngine ->
+            model.isPreBuiltEngine.change.advise(lifetime) { isPreBuiltEngine ->
                 val host = project.service<UnrealHost>()
                 host.isPreBuiltEngine = isPreBuiltEngine
             }
 
-
-            model.isConnectedToUnrealEditor.change.advise(project.lifetime) { connected ->
+            model.isConnectedToUnrealEditor.change.advise(lifetime) { connected ->
                 if (!connected) {
                     project.service<UnrealHost>().playStateModel.set(PlayState.Idle)
                 }
                 forceTriggerUIUpdate()
             }
 
-
-            model.riderLinkInstallPanelInit.advise(project.lifetime) {
+            model.riderLinkInstallPanelInit.advise(lifetime) {
                 val riderLinkInstallContext =
                     RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext()
                 riderLinkInstallContext.clear()
                 riderLinkInstallContext.showToolWindowIfHidden()
             }
-            model.riderLinkInstallMessage.advise(project.lifetime) { message ->
+
+            model.riderLinkInstallMessage.advise(lifetime) { message ->
                 RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(message)
             }
 
 //  Update state of Unreal actions on toolbar
-            model.playStateFromEditor.adviseNotNull(project.lifetime) { newState ->
+            model.playStateFromEditor.adviseNotNull(lifetime) { newState ->
                 project.service<UnrealHost>().playStateModel.set(newState)
             }
 
-            model.playModeFromEditor.adviseNotNull(project.lifetime) { mode ->
+            model.playModeFromEditor.adviseNotNull(lifetime) { mode ->
                 project.service<UnrealHost>().playMode = mode
                 forceTriggerUIUpdate()
             }
 
-            model.isGameControlModuleInitialized.adviseNotNull(project.lifetime) {
+            model.isGameControlModuleInitialized.adviseNotNull(lifetime) {
                 forceTriggerUIUpdate()
+            }
+
+            model.isConnectedToUnrealEditor.whenTrue(lifetime) {
+                val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
+                toolWindowsFactory.showTabForNewSession()
             }
         }
 
