@@ -161,12 +161,6 @@ Path to old plugin:</code></pre>
     ]]>
     </description>
 
-    <project-components>
-        <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class>
-        </component>
-    </project-components>
-
     <extensions defaultExtensionNs="rider.cpp">
         <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>
     </extensions>
@@ -175,6 +169,8 @@ Path to old plugin:</code></pre>
 
         <rd.solutionExtListener endpoint="IDE Frontend"
                                 listener="com.jetbrains.rider.plugins.unreal.UnrealHost$ProtocolListener"/>
+        <rd.solutionExtListener endpoint="IDE Frontend"
+                                listener="com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncPluginProtocolListener"/>
         <applicationConfigurable groupId="language" id="UnrealLinkOptionsId" bundle="messages.UnrealLinkBundle"
                                  instance="com.jetbrains.rider.settings.UnrealLinkSettingsConfigurable"
                                  key="configurable.UnrealLink.settings.title"/>
