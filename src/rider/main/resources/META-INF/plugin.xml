@@ -163,9 +163,6 @@ Path to old plugin:</code></pre>
 
     <project-components>
         <component>
-            <implementation-class>com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowManager</implementation-class>
-        </component>
-        <component>
             <implementation-class>com.jetbrains.rider.plugins.unreal.notifications.OutOfSyncEditorNotification</implementation-class>
         </component>
     </project-components>
@@ -198,6 +195,8 @@ Path to old plugin:</code></pre>
 
         <registryKey  defaultValue="true" key="rider.cpp.enable.debugger.unreal.blueprint-callstack"
                       description="Enable injecting of Blueprint callstack into C++ callstack" restartRequired="false" />
+
+        <rdStartUpSerializerRegistrar implementation="com.jetbrains.rider.plugins.unreal.UE4LibraryStartUpSerializerRegistrar"/>
 
     </extensions>
 
