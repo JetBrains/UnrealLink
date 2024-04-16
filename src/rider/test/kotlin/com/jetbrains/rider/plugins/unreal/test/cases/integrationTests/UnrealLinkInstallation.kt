@@ -84,8 +84,8 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
    * [UnrealLinkInstallation] have additional parameter - location ([PluginInstallLocation]), so we need to override
    * data provider generating.
    */
-  override fun generateUnrealDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
-                                                    predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
+  override fun generateUnrealFullDataProvider(unrealPmTypes: Array<UnrealTestContext.UnrealProjectModelType>,
+                                              predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
     val types = if (!SystemInfo.isWindows) arrayOf(UnrealTestContext.UnrealProjectModelType.Uproject) else unrealPmTypes
     val result: ArrayList<Array<Any>> = arrayListOf()
 
