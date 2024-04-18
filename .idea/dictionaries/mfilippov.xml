@@ -2,8 +2,11 @@
   <dictionary name="mfilippov">
     <words>
       <w>filippov</w>
+      <w>fsutil</w>
+      <w>maxdepth</w>
       <w>pregenerated</w>
       <w>qameta</w>
+      <w>reparsepoint</w>
     </words>
   </dictionary>
 </component>
