@@ -9,11 +9,11 @@ import java.security.MessageDigest
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    kotlin("jvm")
-    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.intellij") version "1.13.3"
     id("io.qameta.allure") version "2.11.2"
+    id("me.filippov.gradle.jvm.wrapper")
+    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.intellij")
+    kotlin("jvm")
 }
 
 repositories {
@@ -209,14 +209,6 @@ tasks {
         println(".NET SDK path: $sdkPath")
 
         return@lazy sdkPath.canonicalPath
-    }
-
-    val riderModelJar by lazy {
-        val rdLib = setupDependencies.get().idea.get().classes.resolve("lib").resolve("rd")
-        assert(rdLib.isDirectory)
-        val jarFile = File(rdLib, "rider-model.jar")
-        assert(jarFile.isFile)
-        return@lazy jarFile.canonicalPath
     }
 
     withType<RunIdeTask>().configureEach {
@@ -495,5 +487,10 @@ tasks {
                 println(stdOut.toString().trim())
             }
         }
+    }
+
+    wrapper {
+        gradleVersion = "8.7"
+        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
     }
 }
