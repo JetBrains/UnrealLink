@@ -6,9 +6,6 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRiderLink
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Feature
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
@@ -17,12 +14,7 @@ import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
-import com.jetbrains.rider.test.framework.getLoadedProjects
-import com.jetbrains.rider.test.scriptingApi.buildWithChecks
-import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
-import com.jetbrains.rider.test.scriptingApi.waitPumping
-import com.jetbrains.rider.test.scriptingApi.withRunProgram
-import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
+import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import io.qameta.allure.Epic
 import org.testng.annotations.Test
@@ -35,7 +27,7 @@ import java.util.concurrent.TimeUnit
   buildTool = BuildTool.CPP,
   sdkVersion = SdkVersion.AUTODETECT
 )
-class UnrealLinkInstallation : UnrealTestLevelProject() {
+class UnrealLinkInstallation : UnrealLinkBase() {
   init {
     projectDirectoryName = "EmptyUProject"
   }
@@ -54,19 +46,9 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
     engine: UnrealEngine,
     location: PluginInstallLocation
   ) {
-    placeToInstallRiderLink = location
-    needInstallRiderLink = true
-    println("RiderLink will be installed in $location")
-
-    getLoadedProjects(project)
-    waitAndPump(Duration.ofSeconds(15),
-                { project.solution.rdRiderModel.isUnrealEngineSolution.value }, { "This is not unreal solution" })
-
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
-
-    if (needInstallRiderLink) {
-      installRiderLink(placeToInstallRiderLink)
-    }
+    
+    installRiderLink(location)
 
     buildWithChecks(
       project, BuildSolutionAction(), "Build solution",
@@ -91,8 +73,6 @@ class UnrealLinkInstallation : UnrealTestLevelProject() {
 
     UnrealTestingEngineList.testingEngines.filter(predicate).forEach { engine ->
       val locations = mutableListOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
-      //if (TestFrameworkSettings.Unreal.engineType != "egs") locations.add(PluginInstallLocation.Engine)
-
       locations.forEach { location ->
         types.forEach { type ->
           // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?

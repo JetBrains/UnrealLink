@@ -633,7 +633,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
             else
             {
-                myLogger.Error($"[UnrealLink]: Failed to delete RiderLink");
+                myLogger.Warn($"[UnrealLink]: Failed to delete RiderLink");
                 
                 var title = Strings.DeletingRiderLinkPlugin_Text;
                 var text = Strings.FailedToDeleteRiderLink_Text;
@@ -664,7 +664,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     }
                     catch (Exception)
                     {
-                        myLogger.Error($"[UnrealLink]: Failed to delete RiderLink from {description.UnrealPluginRootFolder}");
+                        myLogger.Warn($"[UnrealLink]: Failed to delete RiderLink from {description.UnrealPluginRootFolder}");
                         return false;
                     }
                     description.IsPluginAvailable = false;

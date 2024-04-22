@@ -8,9 +8,6 @@ import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.installRiderLink
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.needInstallRiderLink
-import com.jetbrains.rider.plugins.unreal.test.testFrameworkExtentions.placeToInstallRiderLink
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Feature
 import com.jetbrains.rider.test.annotations.Mute
@@ -21,7 +18,6 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
-import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
 import org.testng.annotations.Test
 import java.time.Duration
@@ -32,7 +28,7 @@ import java.time.Duration
   buildTool = BuildTool.CPP,
   sdkVersion = SdkVersion.AUTODETECT
 )
-class PlayButtons : UnrealTestLevelProject() {
+class PlayButtons : UnrealLinkBase() {
   init {
     projectDirectoryName = "EmptyUProject"
   }
@@ -57,11 +53,8 @@ class PlayButtons : UnrealTestLevelProject() {
     openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine
   ) {
-    placeToInstallRiderLink = PluginInstallLocation.Game
-    needInstallRiderLink = true
-
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
-    installRiderLink(placeToInstallRiderLink)
+    installRiderLink(PluginInstallLocation.Game)
 
     buildWithChecks(
       project, BuildSolutionAction(), "Build solution",
