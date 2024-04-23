@@ -44,6 +44,7 @@ kotlin {
 
 sourceSets {
     main {
+        kotlin.srcDir("src/rider/generated/kotlin")
         resources.srcDir("src/rider/main/resources")
     }
 }

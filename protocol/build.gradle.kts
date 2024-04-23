@@ -29,10 +29,11 @@ data class UnrealLinkGeneratorSettings(
     val riderModelCsOutput: File,
     val riderModelKtOutput: File,
     val csEditorOutput: File,
-    val cppEditorOutput: File
+    val cppEditorOutput: File,
+    val fileSuffix: String
 )
 
-val ktOutputRelativePath = "src/rider/main/kotlin/com/jetbrains/rider/model"
+val ktOutputRelativePath = "src/rider/generated/kotlin/com/jetbrains/rider/model"
 
 val unrealLinkGeneratorSettings = if (isMonorepo) {
     val monorepoRoot =
@@ -53,7 +54,8 @@ val unrealLinkGeneratorSettings = if (isMonorepo) {
         monorepoPreGeneratedBackendDir.resolve("RdRiderProtocol"),
         ktOutputMonorepoRoot.resolve("RdRiderProtocol"),
         monorepoPreGeneratedBackendDir.resolve("RdEditorProtocol"),
-        monorepoPreGeneratedCppDir.resolve("RdEditorProtocol")
+        monorepoPreGeneratedCppDir.resolve("RdEditorProtocol"),
+        ".Pregenerated"
     )
 } else {
     val csOutputRoot = File(unrealLinkRepoRoot, "src/dotnet/RiderPlugin.UnrealLink/obj/model")
@@ -66,7 +68,8 @@ val unrealLinkGeneratorSettings = if (isMonorepo) {
         csOutputRoot.resolve("RdRiderProtocol"),
         ktOutputRoot.resolve("RdRiderProtocol"),
         csOutputRoot.resolve("RdEditorProtocol"),
-        cppOutputRoot.resolve("RdEditorProtocol")
+        cppOutputRoot.resolve("RdEditorProtocol"),
+        ".Generated"
     )
 }
 
@@ -79,7 +82,7 @@ rdgen {
         transform = "symmetric"
         root = "model.lib.ue4.UE4Library"
         directory = unrealLinkGeneratorSettings.ue4LibCsLibraryOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -87,7 +90,7 @@ rdgen {
         transform = "reversed"
         root = "model.lib.ue4.UE4Library"
         directory = unrealLinkGeneratorSettings.ue4LibCppLibraryOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -95,7 +98,7 @@ rdgen {
         transform = "asis"
         root = "model.lib.ue4.UE4Library"
         directory = unrealLinkGeneratorSettings.ue4LibKtLibraryOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -103,7 +106,7 @@ rdgen {
         transform = "reversed"
         root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
         directory = unrealLinkGeneratorSettings.riderModelCsOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -111,7 +114,7 @@ rdgen {
         transform = "asis"
         root = "com.jetbrains.rider.model.nova.ide.IdeRoot"
         directory = unrealLinkGeneratorSettings.riderModelKtOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -119,7 +122,7 @@ rdgen {
         transform = "asis"
         root = "model.editorPlugin.RdEditorRoot"
         directory = unrealLinkGeneratorSettings.csEditorOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 
     generator {
@@ -127,7 +130,7 @@ rdgen {
         transform = "reversed"
         root = "model.editorPlugin.RdEditorRoot"
         directory = unrealLinkGeneratorSettings.cppEditorOutput.absolutePath
-        generatedFileSuffix = ".Pregenerated"
+        generatedFileSuffix = unrealLinkGeneratorSettings.fileSuffix
     }
 }
 
