@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using JetBrains.Application.Help;
 using JetBrains.Application.Settings;
 using JetBrains.Application.UI.Controls.FileSystem;
 using JetBrains.Application.UI.Options;
@@ -59,11 +60,11 @@ namespace RiderPlugin.UnrealLink.Settings
     [OptionsPage(PID, Name, typeof(CppThemedIcons.Unreal), Sequence = 0.02,
         ParentId = CodeEditingPage.PID, SearchTags = new []{"Unreal Engine", "UnrealLink", "RiderLink"},
         NameResourceType = typeof(Strings),
-        HelpKeyword = "Settings_Languages_Unreal_Engine",
+        HelpKeyword = HelpId.Settings_Languages_Unreal_Engine,
         NameResourceName = nameof(Strings.UnrealLinkPluginSettings_Title_Text))]
     public class UnrealLinkOptionsPage : BeSimpleOptionsPage
     {
-        // Keep these in sync with the values in the front end!
+      // Keep these in sync with the values in the front end!
         public const string PID = "UnrealLinkOptions";
         public const string Name = "Unreal Engine";
 
