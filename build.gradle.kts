@@ -1,10 +1,14 @@
+import com.jetbrains.plugin.structure.base.utils.isFile
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
+import org.jetbrains.intellij.platform.gradle.Constants
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
@@ -12,7 +16,7 @@ plugins {
     id("io.qameta.allure") version "2.11.2"
     id("me.filippov.gradle.jvm.wrapper")
     id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.intellij")
+    id("org.jetbrains.intellij.platform")
     kotlin("jvm")
 }
 
@@ -21,6 +25,9 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
     maven("https://cache-redirector.jetbrains.com/intellij-repository/snapshots")
     maven("https://cache-redirector.jetbrains.com/maven-central")
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
@@ -50,8 +57,8 @@ sourceSets {
 }
 
 project.version = "${property("majorVersion")}." +
-        "${property("minorVersion")}." +
-        "${property("buildCounter")}"
+                  "${property("minorVersion")}." +
+                  "${property("buildCounter")}"
 
 if (System.getenv("TEAMCITY_VERSION") != null) {
     logger.lifecycle("##teamcity[buildNumber '${project.version}']")
@@ -127,21 +134,33 @@ changelog {
     itemPrefix.set("-")
 }
 
-intellij {
-    type.set("RD")
-    instrumentCode.set(false)
-    downloadSources.set(false)
+dependencies {
+    intellijPlatform {
+        with(file("build/rider")) {
+            when {
+                exists() -> {
+                    logger.lifecycle("*** Using Rider SDK from local path $this")
+                    local(this)
+                }
 
-    plugins.set(listOf("com.jetbrains.rider-cpp"))
+                else -> {
+                    logger.lifecycle("*** Using Rider SDK from intellij-snapshots repository")
+                    rider("${project.property("majorVersion")}-SNAPSHOT")
+                }
+            }
+        }
 
-    val dependencyPath = File(projectDir, "dependencies")
-    if (dependencyPath.exists()) {
-        localPath.set(dependencyPath.canonicalPath)
-        println("Will use ${File(localPath.get(), "build.txt").readText()} from ${localPath.get()} as RiderSDK")
-    } else {
-        version.set("${project.property("majorVersion")}-SNAPSHOT")
+        instrumentationTools()
+
+        // Workaround for https://youtrack.jetbrains.com/issue/IDEA-179607
+        bundledPlugin("rider.intellij.plugin.appender")
+
+        bundledPlugin("com.intellij.cidr.debugger")
+        bundledPlugin("com.jetbrains.rider-cpp")
     }
+}
 
+intellijPlatform {
     tasks {
         val currentReleaseNotesAsHtml = """
             <body>
@@ -192,24 +211,23 @@ val riderModel: Configuration by configurations.creating {
 
 artifacts {
     add(riderModel.name, provider {
-        val sdkRoot = tasks.setupDependencies.get().idea.get().classes
-        sdkRoot.resolve("lib/rd/rider-model.jar").also {
+        intellijPlatform.platformPath.resolve("lib/rd/rider-model.jar").also {
             check(it.isFile) {
                 "rider-model.jar is not found at $riderModel"
             }
         }
     }) {
-        builtBy(tasks.setupDependencies)
+        builtBy(Constants.Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
     }
 }
 
 tasks {
     val dotNetSdkPath by lazy {
-        val sdkPath = setupDependencies.get().idea.get().classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
-        assert(sdkPath.isDirectory)
+        val sdkPath = intellijPlatform.platformPath.resolve("lib/DotNetSdkForRdPlugins").absolute()
+        assert(sdkPath.isDirectory())
         println(".NET SDK path: $sdkPath")
 
-        return@lazy sdkPath.canonicalPath
+        return@lazy sdkPath.toRealPath()
     }
 
     withType<RunIdeTask>().configureEach {
@@ -240,7 +258,7 @@ tasks {
         group = "RiderBackend"
         val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
 
-        inputs.property("dotNetSdkFile", { dotNetSdkPath })
+        inputs.property("dotNetSdkFile", { dotNetSdkPath.toString() })
         outputs.file(generatedFile)
 
         doLast {
@@ -259,7 +277,7 @@ tasks {
         dependsOn(prepareRiderBuildProps)
 
         val generatedFile = project.projectDir.resolve("NuGet.Config")
-        inputs.property("dotNetSdkFile", { dotNetSdkPath })
+        inputs.property("dotNetSdkFile", { dotNetSdkPath.toString() })
         outputs.file(generatedFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
@@ -384,12 +402,12 @@ tasks {
         )
 
         dllFiles.forEach {
-            from(it) { into("${intellij.pluginName.get()}/dotnet") }
+            from(it) { into("${intellijPlatform.projectName.get()}/dotnet") }
         }
 
 
         from(packCppSide.get().archiveFile) {
-            into("${intellij.pluginName.get()}/EditorPlugin")
+            into("${intellijPlatform.projectName.get()}/EditorPlugin")
         }
 
         doLast {

@@ -43,6 +43,7 @@ src/cpp/RiderLink/Source/RD/**/doxygen.conf
 # Local setup specific files
 UnrealEngineProjectPath.txt
 dependencies/*
+/.intellijPlatform/
 
 # Tmp release files
 release_notes.md
