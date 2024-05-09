@@ -189,9 +189,6 @@ Path to old plugin:</code></pre>
         <rider.buildButtonModeProvider implementation="com.jetbrains.rider.plugins.unreal.actions.HotReloadBuildModeProvider"/>
         <iconMapper mappingFile="UnrealIconMappings.json"/>
 
-        <registryKey  defaultValue="true" key="rider.cpp.enable.debugger.unreal.blueprint-callstack"
-                      description="Enable injecting of Blueprint callstack into C++ callstack" restartRequired="false" />
-
         <rdStartUpSerializerRegistrar implementation="com.jetbrains.rider.plugins.unreal.UE4LibraryStartUpSerializerRegistrar"/>
 
         <toolWindowAllowlist id="UnrealLink" />
