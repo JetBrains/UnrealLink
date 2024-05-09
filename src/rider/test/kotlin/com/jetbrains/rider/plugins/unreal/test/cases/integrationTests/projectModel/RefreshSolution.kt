@@ -22,6 +22,7 @@ import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import io.qameta.allure.Epic
 import com.jetbrains.rider.test.annotations.Feature
+import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.time.Duration
@@ -53,8 +54,7 @@ class RefreshSolution : UnrealTestLevelProject() {
     withDump(contexts) {
       dumpAfterAction("Init", pmContext) {}
       dumpAfterAction("Copy TestPlugin to project", pmContext) {
-        TestDataStorage.defaultTestDataDirectory.combine("additionalSource", "EmptyTestPlugin")
-          .copyRecursively(activeSolutionDirectory.resolve("Plugins").resolve("EmptyTestPlugin"))
+        copyAdditionalPluginToProject("EmptyTestPlugin")
        }
 
       dumpAfterAction("Invoking refresh solution", pmContext) {
