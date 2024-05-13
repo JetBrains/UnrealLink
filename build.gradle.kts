@@ -13,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.Constants
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    id("io.qameta.allure") version "2.11.2"
     id("me.filippov.gradle.jvm.wrapper")
     id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.intellij.platform")
@@ -238,7 +237,6 @@ tasks {
         maxHeapSize = "4096m"
         if (project.hasProperty("ignoreFailures")) { ignoreFailures = true }
         useTestNG {
-            listeners.add("com.jetbrains.rider.test.allure.AllureListener")
         }
         testLogging {
             showStandardStreams = true

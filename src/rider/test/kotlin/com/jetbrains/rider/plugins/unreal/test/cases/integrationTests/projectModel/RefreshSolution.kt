@@ -20,14 +20,14 @@ import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAf
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
-import io.qameta.allure.Epic
 import com.jetbrains.rider.test.annotations.Feature
+import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.time.Duration
 
-@Epic("UnrealLink")
+@Subsystem("UnrealLink")
 @Feature("Refresh Solution")
 @TestEnvironment(
   platform = [PlatformType.WINDOWS_X64],

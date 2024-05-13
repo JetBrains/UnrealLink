@@ -7,6 +7,7 @@ import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.Feature
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.TestEnvironment
@@ -16,12 +17,11 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.*
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
-import io.qameta.allure.Epic
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-@Epic("UnrealLink")
+@Subsystem("UnrealLink")
 @Feature("Installation")
 @TestEnvironment(
   buildTool = BuildTool.CPP,
