@@ -1,4 +1,4 @@
-﻿namespace RiderPlugin.UnrealLink.Resources
+namespace RiderPlugin.UnrealLink.Resources
 {
   using System;
   using JetBrains.Application.I18n;
@@ -17,9 +17,10 @@
 
     static Strings()
     {
-      CultureContextComponent.Instance.WhenNotNull(Lifetime.Eternal, (lifetime, instance) =>
+      CultureContextComponent.Instance.Change.Advise(Lifetime.Eternal, args =>
       {
-        lifetime.Bracket(() =>
+          var instance = args.HasNew ? args.New : null;
+          if (instance != null)
           {
             ourResourceManager = new Lazy<JetResourceManager>(
               () =>
@@ -27,11 +28,11 @@
                 return instance
                   .CreateResourceManager("RiderPlugin.UnrealLink.Resources.Strings", typeof(Strings).Assembly);
               });
-          },
-          () =>
+          }
+          else
           {
             ourResourceManager = null;
-          });
+          };
       });
     }
     
