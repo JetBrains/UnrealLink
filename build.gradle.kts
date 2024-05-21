@@ -136,18 +136,15 @@ changelog {
 
 dependencies {
     intellijPlatform {
-        with(file("build/rider")) {
-            when {
-                exists() -> {
-                    logger.lifecycle("*** Using Rider SDK from local path $this")
-                    local(this)
-                }
-
-                else -> {
-                    logger.lifecycle("*** Using Rider SDK from intellij-snapshots repository")
-                    rider("${project.property("majorVersion")}-SNAPSHOT")
-                }
-            }
+        val dependencyPath = File(projectDir, "dependencies")
+        if (dependencyPath.exists()) {
+            val localPath = dependencyPath.canonicalPath
+            local(localPath)
+            logger.lifecycle("Will use ${File(localPath, "build.txt").readText()} from $localPath as RiderSDK")
+        } else {
+            val version = "${project.property("majorVersion")}-SNAPSHOT"
+            logger.lifecycle("*** Using Rider SDK $version from intellij-snapshots repository")
+            rider(version)
         }
 
         jetbrainsRuntime()
