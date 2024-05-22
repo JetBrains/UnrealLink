@@ -1,4 +1,5 @@
 using System.Linq;
+using JetBrains.Application.Parts;
 using JetBrains.Metadata.Reader.API;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Navigation;
@@ -14,7 +15,7 @@ using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {
-    [SolutionComponent]
+    [SolutionComponent(Instantiation.DemandAnyThread)]
     public class EditorNavigator
     {
         private readonly CppGlobalSymbolCache _cppSymbolNameCache;

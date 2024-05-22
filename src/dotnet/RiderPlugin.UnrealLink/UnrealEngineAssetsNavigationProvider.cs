@@ -1,3 +1,4 @@
+using JetBrains.Application.Parts;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Search;
 using JetBrains.Util;
@@ -5,7 +6,7 @@ using RiderPlugin.UnrealLink.Model;
 
 namespace RiderPlugin.UnrealLink
 {
-	[SolutionComponent]
+	[SolutionComponent(Instantiation.DemandAnyThread)]
 	public class UnrealEngineAssetsNavigationProvider : IUnrealEngineNavigationProvider
 	{
 		private readonly RiderBackendToUnrealEditor myBackendToUnrealEditor;
