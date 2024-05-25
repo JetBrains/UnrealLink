@@ -6,7 +6,7 @@ using RiderPlugin.UnrealLink.Model;
 
 namespace RiderPlugin.UnrealLink
 {
-	[SolutionComponent(Instantiation.DemandAnyThread)]
+	[SolutionComponent(Instantiation.DemandAnyThreadUnsafe)]
 	public class UnrealEngineAssetsNavigationProvider : IUnrealEngineNavigationProvider
 	{
 		private readonly RiderBackendToUnrealEditor myBackendToUnrealEditor;

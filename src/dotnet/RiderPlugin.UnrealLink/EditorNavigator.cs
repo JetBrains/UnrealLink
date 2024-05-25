@@ -15,7 +15,7 @@ using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {
-    [SolutionComponent(Instantiation.DemandAnyThread)]
+    [SolutionComponent(Instantiation.DemandAnyThreadUnsafe)]
     public class EditorNavigator
     {
         private readonly CppGlobalSymbolCache _cppSymbolNameCache;
