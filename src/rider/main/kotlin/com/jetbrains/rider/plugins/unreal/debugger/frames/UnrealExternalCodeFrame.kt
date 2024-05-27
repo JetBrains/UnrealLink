@@ -2,7 +2,6 @@ package com.jetbrains.rider.plugins.unreal.debugger.frames
 
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.Pair
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.ColoredTextContainer
 import com.intellij.ui.SimpleTextAttributes
 import com.jetbrains.rider.UnrealLinkBundle
@@ -29,7 +28,10 @@ class UnrealExternalCodeFrame(private val baseFrameEqualityObject: Any, var coll
     component.append(myCodePrefix, SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
     component.append(collapsedFramesCount.toString() + " ",
                      SimpleTextAttributes(SimpleTextAttributes.STYLE_BOLD, DotNetStackFrame.ExternalCodeSecondColor))
-    component.append(StringUtil.pluralize(RiderDebuggerBundle.message("ExternalCodeMetaFrame.frame.text"), collapsedFramesCount) + " ",
+    component.append((if (collapsedFramesCount == 1)
+                                RiderDebuggerBundle.message("ExternalCodeMetaFrame.single.frame.text")
+                              else
+                                RiderDebuggerBundle.message("ExternalCodeMetaFrame.multiple.frames.text")) + " ",
                      SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
     component.append(myCodeSuffix + "]", SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, DotNetStackFrame.ExternalCodeSecondColor))
   }
