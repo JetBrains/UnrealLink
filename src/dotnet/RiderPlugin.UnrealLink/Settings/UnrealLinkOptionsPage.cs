@@ -22,6 +22,7 @@ using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 using RiderPlugin.UnrealLink.PluginInstaller;
 using RiderPlugin.UnrealLink.Resources;
+using Strings = RiderPlugin.UnrealLink.Resources.Strings;
 
 namespace RiderPlugin.UnrealLink.Settings
 {
