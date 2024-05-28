@@ -12,7 +12,11 @@ extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char* L
 
 #endif
 
-void RiderDebuggerSupport::SendLogToDebugger(const char* FormatStr, ...)
+void RiderDebuggerSupport::SendLogToDebugger(
+#if !JB_DEBUG_MODE
+    [[maybe_unused]]
+#endif
+    const char* FormatStr, ...)
 {
 #if JB_DEBUG_MODE
 
