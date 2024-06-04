@@ -7,6 +7,8 @@ import com.jetbrains.rider.ideaInterop.vfs.VfsWriteOperationsHost
 import com.jetbrains.rider.model.RdFsRefreshRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Feature
+import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.contexts.ProjectModelTestContext
 import com.jetbrains.rider.test.contexts.UnrealTestContext
@@ -14,15 +16,12 @@ import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.combine
-import com.jetbrains.rider.test.framework.testData.TestDataStorage
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
+import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
-import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withDump
+import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withUnrealDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
-import com.jetbrains.rider.test.annotations.Feature
-import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.time.Duration
@@ -51,7 +50,7 @@ class RefreshSolution : UnrealTestLevelProject() {
                       openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {
     val pmContext = contexts.get<ProjectModelTestContext>()
 
-    withDump(contexts) {
+    withUnrealDump(contexts) {
       dumpAfterAction("Init", pmContext) {}
       dumpAfterAction("Copy TestPlugin to project", pmContext) {
         copyAdditionalPluginToProject("EmptyTestPlugin")
