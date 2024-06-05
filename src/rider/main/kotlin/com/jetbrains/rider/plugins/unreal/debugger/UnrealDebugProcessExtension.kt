@@ -25,7 +25,7 @@ class UnrealDebugProcessExtension : com.jetbrains.rider.cpp.debugger.RiderCppDeb
 
     val isSupportModuleAvailable = process.getUserData(mySupportModuleIsAvailableKey) ?: false
 
-    return BlueprintExecutionStack(process, thread, frame, current, cause, returnValue, isSupportModuleAvailable, BluePrintStackTransformer())
+    return BlueprintExecutionStack(process, thread, frame, current, cause, returnValue, isSupportModuleAvailable)
   }
 
   override fun handleModulesLoaded(debugProcess: RiderCppDebugProcess, changedModules: MutableList<LLModule>) {

@@ -190,6 +190,7 @@ Path to old plugin:</code></pre>
         <rdStartUpSerializerRegistrar implementation="com.jetbrains.rider.plugins.unreal.UE4LibraryStartUpSerializerRegistrar"/>
 
         <toolWindowAllowlist id="UnrealLink" />
+        <statistics.counterUsagesCollector implementationClass="com.jetbrains.rider.plugins.unreal.UnrealPluginUsagesCollector"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">

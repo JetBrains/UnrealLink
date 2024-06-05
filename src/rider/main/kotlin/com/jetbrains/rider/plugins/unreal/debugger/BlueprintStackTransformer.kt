@@ -1,5 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.debugger
 
+import com.intellij.internal.statistic.StructuredIdeActivity
+import com.intellij.openapi.diagnostic.debug
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.SystemInfo
@@ -9,18 +11,25 @@ import com.jetbrains.cidr.execution.debugger.CidrDebugProcess
 import com.jetbrains.cidr.execution.debugger.CidrStackFrame
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rider.UnrealLinkBundle
+import com.jetbrains.rider.plugins.unreal.UnrealPluginUsagesCollector
 import com.jetbrains.rider.plugins.unreal.debugger.frames.BlueprintFrame
 import com.jetbrains.rider.plugins.unreal.debugger.frames.StubBlueprintFrame
 import com.jetbrains.rider.plugins.unreal.debugger.frames.UnrealExternalCodeFrame
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.projectView.solution
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 
-class BluePrintStackTransformer {
+class BlueprintStackTransformer {
+  companion object {
+    private val myInstanceCounter: AtomicInteger = AtomicInteger(0)
+  }
 
+  private var myOverallTransformActivity: StructuredIdeActivity? = null
+  private var myBatchNumber: Int = 0
   private var myRiderModuleIsAvailable: Boolean? = null
   private var myProcess: CidrDebugProcess? = null
-  private var previousFrame: XStackFrame? = null
+  private var myPreviousFrame: XStackFrame? = null
   private var myObsolescent: Obsolescent? = null
   private var myProject: Project? = null
   private var myCachedBlueprintCallstack: MutableList<BlueprintCallFrame>? = null
@@ -32,11 +41,16 @@ class BluePrintStackTransformer {
 
   private var myLastCollapsedFrame: UnrealExternalCodeFrame? = null
 
-  fun beginTransformation(obsolescent: Obsolescent,
-                          project: Project,
-                          process: CidrDebugProcess,
-                          isSupportModuleAvailable: Boolean) {
-    previousFrame = null
+  private val myInstanceNumber: Int = myInstanceCounter.incrementAndGet()
+
+  fun beginTransformation(obsolescent: Obsolescent, project: Project, process: CidrDebugProcess, isSupportModuleAvailable: Boolean) {
+    UnrealDebuggerLogger.logger.debug {
+      "Begin transformation of blueprint stack frames. Project: ${project.name}" +
+      " process: ${process.runParameters}" +
+      " isSupportModuleAvailable: ${isSupportModuleAvailable}" +
+      " myInstanceNumber: ${myInstanceNumber}"
+    }
+    myPreviousFrame = null
     myCachedBlueprintCallstack = null
     myCachedErrorForBlueprintCallstack = null
     myTopFrame = null
@@ -49,15 +63,23 @@ class BluePrintStackTransformer {
     myProject = project
     myProcess = process
 
-
-
-
     myUnrealEngineLocation = project.solution.unrealModel.unrealEngineLocation.valueOrNull
     if (myUnrealEngineLocation == null) {
       UnrealDebuggerLogger.logger.warn("Unreal Engine location is not set, project: ${project.name}")
     }
 
     propertyInitializedInvariant()
+
+    myBatchNumber = 0
+    myOverallTransformActivity = UnrealPluginUsagesCollector.startBlueprintStackTransformActivity(project, isSupportedPlatform(),
+                                                                                                  isSupportModuleAvailable,
+                                                                                                  isBlueprintCallstackEnabled(),
+                                                                                                  isShowUnrealFramesEnabled())
+  }
+
+  fun endTransformation() {
+    UnrealDebuggerLogger.logger.debug { "End transformation of blueprint stack frames. myInstanceNumber: ${myInstanceNumber}" }
+    myOverallTransformActivity?.finished()
   }
 
   private fun propertyInitializedInvariant() {
@@ -67,9 +89,31 @@ class BluePrintStackTransformer {
   }
 
   fun transform(stackFrames: List<XStackFrame?>): CompletableFuture<List<XStackFrame?>> {
+    UnrealDebuggerLogger.logger.debug {
+      "Transforming blueprint stack frames. myInstanceNumber: ${myInstanceNumber}" +
+      " stackFrames: ${stackFrames.size}"
+    }
+
+    myBatchNumber++
+    val transformActivity = UnrealPluginUsagesCollector.startBlueprintStackTransformBatchActivity(myProject, myOverallTransformActivity,
+                                                                                                  myBatchNumber, stackFrames.size)
+
+    return transformInternalAsync(stackFrames, transformActivity).handle { okResult, exception ->
+      transformActivity?.finished()
+
+      if (exception != null) {
+        throw exception
+      }
+
+      okResult
+    }
+  }
+
+  private fun transformInternalAsync(stackFrames: List<XStackFrame?>,
+                                     transformActivity: StructuredIdeActivity?): CompletableFuture<List<XStackFrame?>> {
     if (!isSupportedPlatform()) return CompletableFuture.completedFuture(stackFrames)
 
-    if (myProject == null || (!isBlueprintCallstackEnabled() && !isHideUnrealFramesEnabled())) {
+    if (myProject == null || (!isBlueprintCallstackEnabled() && isShowUnrealFramesEnabled())) {
       return CompletableFuture.completedFuture(stackFrames)
     }
 
@@ -79,12 +123,12 @@ class BluePrintStackTransformer {
       myTopFrame = stackFrames.firstOrNull()
     }
 
-    val stackWithInjectedBlueprint = injectBlueprintFunctions(stackFrames)
+    val stackWithInjectedBlueprint = injectBlueprintFunctions(stackFrames, transformActivity)
     return stackWithInjectedBlueprint.thenApply(::collapseExternalCodeFrames)
   }
 
   private fun collapseExternalCodeFrames(stackFrames: List<XStackFrame?>): List<XStackFrame?> {
-    if (!isHideUnrealFramesEnabled() || myUnrealEngineLocation == null) {
+    if (isShowUnrealFramesEnabled() || myUnrealEngineLocation == null) {
       return stackFrames
     }
     val frames = mutableListOf<XStackFrame?>()
@@ -148,7 +192,7 @@ class BluePrintStackTransformer {
     return false
   }
 
-  private fun initializeBlueprintDataForStack(frame: CidrStackFrame): CompletableFuture<Void> {
+  private fun initializeBlueprintDataForStack(frame: CidrStackFrame, parentActivity: StructuredIdeActivity?): CompletableFuture<Void> {
 
     var featureResult: CompletableFuture<Void> = CompletableFuture.completedFuture(null)
 
@@ -169,8 +213,16 @@ class BluePrintStackTransformer {
     featureResult = myProcess!!.postCommand { driver ->
       if (myObsolescent?.isObsolete == true) return@postCommand
 
-      val bpStackData = driver.executeInterpreterCommand(frame.threadId, frame.frameIndex,
-                                                         "jb_unreal_blueprint_get_stack ${frame.thread.tid}").trim()
+      val activity = UnrealPluginUsagesCollector.startBlueprintStackGettingDataActivity(myProject, parentActivity)
+
+      val bpStackData: String
+      try {
+        bpStackData = driver.executeInterpreterCommand(frame.threadId, frame.frameIndex,
+                                                       "jb_unreal_blueprint_get_stack ${frame.thread.tid}").trim()
+      }
+      finally {
+        activity?.finished()
+      }
 
       when {
         bpStackData.startsWith("NONE_BP_FRAMES") || bpStackData.startsWith("ERROR_BP_FRAMES") || bpStackData.isEmpty() -> {
@@ -216,7 +268,8 @@ class BluePrintStackTransformer {
     return result
   }
 
-  private fun injectBlueprintFunctions(stackFrames: List<XStackFrame?>): CompletableFuture<List<XStackFrame?>> {
+  private fun injectBlueprintFunctions(stackFrames: List<XStackFrame?>,
+                                       parentActivity: StructuredIdeActivity?): CompletableFuture<List<XStackFrame?>> {
     if (myProject == null || !isBlueprintCallstackEnabled()) {
       return CompletableFuture.completedFuture(stackFrames)
     }
@@ -226,7 +279,7 @@ class BluePrintStackTransformer {
     }
 
     if (!isProcessingNeeds(stackFrames)) {
-      previousFrame = stackFrames.lastOrNull()
+      myPreviousFrame = stackFrames.lastOrNull()
       return CompletableFuture.completedFuture(stackFrames)
     }
 
@@ -235,7 +288,7 @@ class BluePrintStackTransformer {
     val firstFrame = stackFrames.firstOrNull { it is CidrStackFrame } as? CidrStackFrame ?: return CompletableFuture.completedFuture(
       stackFrames)
 
-    return initializeBlueprintDataForStack(firstFrame).thenApply { processStackFramesSynchronously(stackFrames) }
+    return initializeBlueprintDataForStack(firstFrame, parentActivity).thenApply { processStackFramesSynchronously(stackFrames) }
   }
 
   private fun addBlueprintStubFramesToStack(stackFrames: List<XStackFrame?>): MutableList<XStackFrame?> {
@@ -306,7 +359,7 @@ class BluePrintStackTransformer {
   private fun isProcessingNeeds(stackFrames: List<XStackFrame?>): Boolean {
     if (stackFrames.isEmpty()) return false
 
-    if (BlueprintCallstackFrameCompatibilityMatcher.matchFrames(stackFrames.first(), previousFrame).isMatched) {
+    if (BlueprintCallstackFrameCompatibilityMatcher.matchFrames(stackFrames.first(), myPreviousFrame).isMatched) {
       return true
     }
 
@@ -324,10 +377,10 @@ class BluePrintStackTransformer {
     return UnrealLogPanelSettings.getInstance(myProject!!).showBlueprintCallstack
   }
 
-  private fun isHideUnrealFramesEnabled(): Boolean {
+  private fun isShowUnrealFramesEnabled(): Boolean {
     assert(myProject != null)
 
-    return !UnrealLogPanelSettings.getInstance(myProject!!).showUnrealFrames
+    return UnrealLogPanelSettings.getInstance(myProject!!).showUnrealFrames
   }
 
   private fun isSupportedPlatform(): Boolean {

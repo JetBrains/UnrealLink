@@ -13,13 +13,12 @@ class BlueprintExecutionStack(process: CidrDebugProcess,
                               current: Boolean,
                               cause: CidrSuspensionCause?,
                               returnValue: LLValue?,
-                              private val isSupportModuleAvailable: Boolean,
-                              private val bluePrintStackTransformer: BluePrintStackTransformer) : CidrExecutionStack(process, thread, frame,
-                                                                                                                     current, cause,
-                                                                                                                     returnValue) {
+                              private val isSupportModuleAvailable: Boolean) : CidrExecutionStack(process, thread, frame,
+                                                                                                  current, cause,
+                                                                                                  returnValue) {
 
   override fun computeStackFrames(firstFrameIndex: Int, container: XStackFrameContainer) {
-    val myContainer = BlueprintStackFrameContainer(container, bluePrintStackTransformer, isSupportModuleAvailable, myProcess.project,
+    val myContainer = BlueprintStackFrameContainer(container, BlueprintStackTransformer(), isSupportModuleAvailable, myProcess.project,
                                                    myProcess)
 
     super.computeStackFrames(firstFrameIndex, myContainer)
