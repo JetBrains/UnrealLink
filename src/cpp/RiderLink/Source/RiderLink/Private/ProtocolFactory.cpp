@@ -17,11 +17,17 @@
 #if PLATFORM_WINDOWS
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/AllowWindowsPlatformTypes.h"
+
+#if ENGINE_MAJOR_VERSION <5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 4)
 #include "Windows/PreWindowsApi.h"
+#endif
 
 #include "Windows/WindowsPlatformMisc.h"
 
+#if ENGINE_MAJOR_VERSION <5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 4)
 #include "Windows/PostWindowsApi.h"
+#endif
+
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Windows/HideWindowsPlatformTypes.h"
 #endif
