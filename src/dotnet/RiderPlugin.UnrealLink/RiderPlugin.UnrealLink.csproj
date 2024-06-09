@@ -10,14 +10,12 @@
     <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <AssemblyName>RiderPlugin.UnrealLink</AssemblyName>
   </PropertyGroup>
-
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
     <NoWarn>NU1603</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
     <Compile Update="Resources\Strings.Designer.cs">
@@ -27,14 +25,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Resources\Strings.resx">
       <Generator>JetResourceGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="JetBrains.HabitatDetector" />
@@ -43,7 +39,6 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Memory" />
   </ItemGroup>
-
   <Import Project="ManagedProject.Generated.Targets" Condition="$(InternalBuild)" />
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" Condition="Exists('$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props')" />
   <Import Project="Sdk.targets" Sdk="JetBrains.NET.Sdk" Version="0.0.4" Condition="$(InternalBuild)" />
