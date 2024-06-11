@@ -8,7 +8,7 @@ public class EmptyUProjectTarget : TargetRules
 	public EmptyUProjectTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
 
 		ExtraModuleNames.AddRange( new string[] { "EmptyUProject" } );
 	}
