@@ -2,11 +2,13 @@ package com.jetbrains.rider.plugins.unreal.debugger.actions
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.project.DumbAwareToggleAction
-import com.intellij.ui.popup.KeepingPopupOpenAction
 import com.jetbrains.rider.UnrealLinkBundle
 
-class ShowLibraryFramesAction : DumbAwareToggleAction(), KeepingPopupOpenAction {
+class ShowLibraryFramesAction : DumbAwareToggleAction() {
+
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+  override fun isSoftMultiChoice(): Boolean = false
+
   override fun isSelected(e: AnActionEvent): Boolean {
     return !getBaseAction().isSelected(e)
   }

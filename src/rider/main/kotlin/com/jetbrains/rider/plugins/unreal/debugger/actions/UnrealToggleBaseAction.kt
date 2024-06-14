@@ -6,19 +6,18 @@ import com.intellij.openapi.project.DumbAwareToggleAction
 import com.intellij.openapi.util.NlsActions
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.registry.Registry
-import com.intellij.ui.popup.KeepingPopupOpenAction
 import com.intellij.xdebugger.impl.XDebuggerUtilImpl
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.actions.getUnrealHost
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 
 
-abstract class UnrealToggleBaseAction : DumbAwareToggleAction(), KeepingPopupOpenAction {
+abstract class UnrealToggleBaseAction : DumbAwareToggleAction() {
   var isVisible: Boolean = true
     private set
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
-
+  override fun isSoftMultiChoice(): Boolean = false
 
   override fun update(e: AnActionEvent) {
     super.update(e)
