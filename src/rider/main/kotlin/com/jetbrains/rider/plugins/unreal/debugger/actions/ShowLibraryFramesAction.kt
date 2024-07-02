@@ -7,7 +7,6 @@ import com.jetbrains.rider.UnrealLinkBundle
 class ShowLibraryFramesAction : DumbAwareToggleAction() {
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
-  override fun isSoftMultiChoice(): Boolean = false
 
   override fun isSelected(e: AnActionEvent): Boolean {
     return !getBaseAction().isSelected(e)

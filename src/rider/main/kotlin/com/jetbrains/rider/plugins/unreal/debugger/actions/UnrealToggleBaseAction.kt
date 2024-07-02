@@ -17,7 +17,6 @@ abstract class UnrealToggleBaseAction : DumbAwareToggleAction() {
     private set
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
-  override fun isSoftMultiChoice(): Boolean = false
 
   override fun update(e: AnActionEvent) {
     super.update(e)
