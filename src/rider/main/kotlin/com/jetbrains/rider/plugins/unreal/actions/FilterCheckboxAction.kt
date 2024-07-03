@@ -1,6 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.KeepPopupOnPerform
 import com.intellij.openapi.project.DumbAwareAction
 import com.jetbrains.rdclient.usages.SelfUpdatingCheckIcon
 import kotlin.reflect.KMutableProperty0
@@ -17,7 +18,7 @@ class FilterCheckboxAction(
   init {
     templatePresentation.icon = checkboxIcon
     templatePresentation.selectedIcon = checkboxIcon
-    templatePresentation.isMultiChoice = true
+    templatePresentation.keepPopupOnPerform = KeepPopupOnPerform.IfPreferred
   }
 
   override fun actionPerformed(e: AnActionEvent) {
