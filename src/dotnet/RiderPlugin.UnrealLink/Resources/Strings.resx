@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <root>
     <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
@@ -34,7 +34,7 @@
         <value>Non-ASCII characters are found in the build directory for RiderLink. If the build fails, try changing the temporary path in 'File | Settings | Languages &amp; Frameworks | Unreal Engine'.</value>
     </data>
     <data name="PathContainsNonASCIICharactersBuild_Text" xml:space="preserve">
-        <value>The path contains non-ASCII characters, which could cause the build to fail. Change the temp directory or use the 'Extract RiderLink' action.</value>
+        <value>The path contains non-ASCII characters, which could cause the build to fail. Change the temp directory or use the 'Extract RiderLink…' action.</value>
     </data>
     <data name="RiderLinkIsDeleted_Text" xml:space="preserve">
         <value>RiderLink is deleted</value>
