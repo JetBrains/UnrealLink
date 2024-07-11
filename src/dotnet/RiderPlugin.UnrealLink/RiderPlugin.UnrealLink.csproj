@@ -7,14 +7,12 @@
   <Import Project="Sdk.props" Sdk="JetBrains.NET.Sdk" Version="0.0.4" Condition="$(InternalBuild)" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="!$(InternalBuild)" />
   <PropertyGroup>
-    <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <AssemblyName>RiderPlugin.UnrealLink</AssemblyName>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-    <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);RIDER</DefineConstants>
+    <IsPackable>false</IsPackable>
+    <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <NoWarn>NU1603</NoWarn>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include=".\obj\model\*\*.cs" />
