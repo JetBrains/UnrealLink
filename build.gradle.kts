@@ -1,6 +1,7 @@
 import com.jetbrains.plugin.structure.base.utils.isFile
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -10,8 +11,6 @@ import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-
-gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
     id("me.filippov.gradle.jvm.wrapper")
@@ -167,23 +166,23 @@ intellijPlatform {
         val currentReleaseNotesAsHtml = """
             <body>
             <p><b>New in "${project.version}"</b></p>
-            <p>${changelog.getLatest().toHTML()}</p>
+            <p>${changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)}</p>
             <p>See the <a href="https://github.com/JetBrains/UnrealLink/blob/$currentBranchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
 
         val currentReleaseNotesAsMarkdown = """
             ## New in ${project.version}
-            ${changelog.getLatest().toText()}
+            ${changelog.renderItem(changelog.getLatest())}
             See the [CHANGELOG](https://github.com/JetBrains/UnrealLink/blob/$currentBranchName/CHANGELOG.md) for more details and history.
         """.trimIndent()
         val dumpCurrentChangelog by registering {
-            val outputFile = File("${project.buildDir}/release_notes.md")
+            val outputFile = layout.buildDirectory.file("release_notes.md")
             outputs.file(outputFile)
-            doLast { outputFile.writeText(currentReleaseNotesAsMarkdown) }
+            doLast { file(outputFile).writeText(currentReleaseNotesAsMarkdown) }
         }
 
-        // PatchPluginXml gets latest (always Unreleased) section from current changelog and write it into plugin.xml
+        // PatchPluginXml gets the latest (always Unreleased) section from the current changelog and writes it into plugin.xml
         // dumpCurrentChangelog dumps the same section to file (for Marketplace changelog)
         // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
         // So order is important!
@@ -257,7 +256,7 @@ tasks {
 
     val prepareRiderBuildProps by registering {
         group = "RiderBackend"
-        val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
+        val generatedFile = layout.buildDirectory.file("DotNetSdkPath.generated.props")
 
         inputs.property("dotNetSdkFile", { dotNetSdkPath.toString() })
         outputs.file(generatedFile)
@@ -418,7 +417,6 @@ tasks {
         }
     }
 
-    @Suppress("UNUSED_VARIABLE")
     val generateModels by registering {
         group = "protocol"
         description = "Generates protocol models."
@@ -453,7 +451,6 @@ tasks {
         }
     }
 
-    @Suppress("UNUSED_VARIABLE")
     val symlinkPluginToUnrealProject by registering {
         dependsOn(getUnrealEngineProject)
         dependsOn(patchUpluginVersion)
