@@ -9,6 +9,7 @@ import java.security.MessageDigest
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
@@ -156,6 +157,8 @@ dependencies {
 
         bundledPlugin("com.intellij.cidr.debugger")
         bundledPlugin("com.jetbrains.rider-cpp")
+
+        testFramework(TestFrameworkType.Bundled)
     }
 }
 
