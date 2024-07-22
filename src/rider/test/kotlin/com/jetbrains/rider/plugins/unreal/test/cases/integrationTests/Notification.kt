@@ -26,9 +26,7 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class RiderLinkNotification : UnrealLinkBase() {
-  init {
-    projectDirectoryName = "EmptyUProject"
-  }
+  override val testSolution = "EmptyUProject"
 
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(

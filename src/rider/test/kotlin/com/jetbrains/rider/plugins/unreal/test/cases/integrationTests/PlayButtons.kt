@@ -29,9 +29,7 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class PlayButtons : UnrealLinkBase() {
-  init {
-    projectDirectoryName = "EmptyUProject"
-  }
+  override val testSolution = "EmptyUProject"
 
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
     unrealContext.disableEnginePlugins = false

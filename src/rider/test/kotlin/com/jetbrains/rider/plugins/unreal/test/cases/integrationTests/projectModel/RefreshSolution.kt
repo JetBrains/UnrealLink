@@ -21,6 +21,7 @@ import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withUnrealDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
@@ -34,9 +35,7 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class RefreshSolution : UnrealTestLevelProject() {
-  init {
-    projectDirectoryName = "EmptyUProject"
-  }
+  override val testSolution = RiderTestSolution.Unreal.EmptyUProject
 
   @BeforeMethod
   fun updateDumpProfile() {

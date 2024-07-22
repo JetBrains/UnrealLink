@@ -19,6 +19,7 @@ import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import org.testng.annotations.Test
@@ -32,16 +33,13 @@ import java.util.concurrent.TimeUnit
   sdkVersion = SdkVersion.AUTODETECT
 )
 class UnrealLinkInstallation : UnrealLinkBase() {
-  init {
-    projectDirectoryName = "EmptyUProject"
-  }
-
+  override val testSolution = "EmptyUProject"
+  private val runProgramTimeout: Duration = Duration.ofMinutes(10)
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
     unrealContext.disableEnginePlugins = false
   }
-
-  private val runProgramTimeout: Duration = Duration.ofMinutes(10)
-
+  
+  @TestEnvironment(solution = RiderTestSolution.ConsoleApplication.Net6, sdkVersion = SdkVersion.LATEST_STABLE)
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(
