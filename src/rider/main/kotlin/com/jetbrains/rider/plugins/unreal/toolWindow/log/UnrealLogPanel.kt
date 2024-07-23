@@ -23,7 +23,7 @@ import java.awt.BorderLayout
 import java.util.*
 import javax.swing.JPanel
 
-class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
+internal class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {
     companion object {
         private const val MAX_STORED_LOG_DATA_ITEMS = 32 * 1024
         private const val TIME_WIDTH = 29
@@ -109,15 +109,15 @@ class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Proj
     }
 
     private fun filter() {
-        val currentScroll = consoleView.editor.scrollingModel.verticalScrollOffset
+        val currentScroll = consoleView.editor!!.scrollingModel.verticalScrollOffset
         consoleView.clear()
-        // clear is not instant, it just adds an internal request in console
+        // clear is not instant; it just adds an internal request in console
         // so schedule filtered content printing on next UI update after clear had been already performed
         invokeLater {
             for (logEvent in logData) {
                 printImpl(logEvent)
             }
-            consoleView.editor.scrollingModel.scrollVertically(currentScroll)
+            consoleView.editor!!.scrollingModel.scrollVertically(currentScroll)
         }
     }
 
