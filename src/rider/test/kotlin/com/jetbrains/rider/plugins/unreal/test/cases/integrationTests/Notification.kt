@@ -7,6 +7,7 @@ import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.annotations.Feature
+import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.asserts.shouldBe
@@ -26,8 +27,7 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class RiderLinkNotification : UnrealLinkBase() {
-  override val testSolution = "EmptyUProject"
-
+  @Solution("EmptyUProject")
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(
     @Suppress("UNUSED_PARAMETER") caseName: String,

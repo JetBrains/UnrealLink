@@ -9,10 +9,7 @@ import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.annotations.Feature
-import com.jetbrains.rider.test.annotations.Mute
-import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.annotations.*
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
@@ -29,8 +26,6 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class PlayButtons : UnrealLinkBase() {
-  override val testSolution = "EmptyUProject"
-
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
     unrealContext.disableEnginePlugins = false
   }
@@ -44,6 +39,7 @@ class PlayButtons : UnrealLinkBase() {
   private val resumeAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.ResumeUnreal")
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
+  @Solution("EmptyUProject")
   @Test(dataProvider = "AllEngines_AllPModels")
   @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(

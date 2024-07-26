@@ -8,6 +8,7 @@ import com.jetbrains.rider.model.RdFsRefreshRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Feature
+import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
 import com.jetbrains.rider.test.contexts.ProjectModelTestContext
@@ -21,7 +22,6 @@ import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withUnrealDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
-import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
@@ -35,7 +35,6 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class RefreshSolution : UnrealTestLevelProject() {
-  override val testSolution = RiderTestSolution.Unreal.EmptyUProject
 
   @BeforeMethod
   fun updateDumpProfile() {
@@ -44,6 +43,7 @@ class RefreshSolution : UnrealTestLevelProject() {
     contexts.get<ProjectModelTestContext>().profile.fileNames.add("$activeSolution.vcxproj.filters")
   }
 
+  @Solution("EmptyUProject")
   @Test(dataProvider = "AllEngines_slnOnly")
   fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
                       openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {

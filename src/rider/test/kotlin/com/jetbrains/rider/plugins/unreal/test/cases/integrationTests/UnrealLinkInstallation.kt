@@ -7,10 +7,7 @@ import com.jetbrains.rider.build.actions.BuildStartupProject
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.annotations.Feature
-import com.jetbrains.rider.test.annotations.RiderTestTimeout
-import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.annotations.*
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
@@ -19,7 +16,6 @@ import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
-import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import org.testng.annotations.Test
@@ -33,13 +29,12 @@ import java.util.concurrent.TimeUnit
   sdkVersion = SdkVersion.AUTODETECT
 )
 class UnrealLinkInstallation : UnrealLinkBase() {
-  override val testSolution = "EmptyUProject"
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
     unrealContext.disableEnginePlugins = false
   }
-  
-  @TestEnvironment(solution = RiderTestSolution.ConsoleApplication.Net6, sdkVersion = SdkVersion.LATEST_STABLE)
+
+  @Solution("EmptyUProject")
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(
