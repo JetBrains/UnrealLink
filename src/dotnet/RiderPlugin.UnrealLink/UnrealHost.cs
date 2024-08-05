@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Application.Parts;
 using JetBrains.Application.Threading;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
@@ -11,7 +12,7 @@ using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
 namespace RiderPlugin.UnrealLink
 {
-    [SolutionComponent]
+    [SolutionComponent(InstantiationEx.LegacyDefault)]
     public class UnrealHost
     {
         private readonly Lifetime myLifetime;

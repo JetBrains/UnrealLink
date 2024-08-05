@@ -2,6 +2,7 @@
 using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.Application.I18n;
+using JetBrains.Application.Parts;
 using JetBrains.Application.Threading;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
@@ -18,7 +19,7 @@ using RiderPlugin.UnrealLink.Resources;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
-    [SolutionComponent]
+    [SolutionComponent(InstantiationEx.LegacyDefault)]
     public class UnrealPluginDetector
     {
         private const string UPLUGIN_FILENAME = "RiderLink.uplugin";

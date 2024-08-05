@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using JetBrains.Application.I18n;
+using JetBrains.Application.Parts;
 using JetBrains.Application.Settings;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
@@ -29,7 +30,7 @@ using RiderPlugin.UnrealLink.Utils;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
-    [SolutionComponent]
+    [SolutionComponent(InstantiationEx.LegacyDefault)]
     public class UnrealPluginInstaller
     {
         public Lifetime Lifetime { get; }

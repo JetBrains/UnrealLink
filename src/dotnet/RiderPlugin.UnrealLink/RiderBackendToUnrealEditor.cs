@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using JetBrains.Application.Parts;
 using JetBrains.Application.Threading;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
@@ -20,7 +21,7 @@ using RiderPlugin.UnrealLink.PluginInstaller;
 
 namespace RiderPlugin.UnrealLink
 {
-    [SolutionComponent]
+    [SolutionComponent(InstantiationEx.LegacyDefault)]
     public class RiderBackendToUnrealEditor
     {
         public RdEditorModel EditorModel { get; private set; }
