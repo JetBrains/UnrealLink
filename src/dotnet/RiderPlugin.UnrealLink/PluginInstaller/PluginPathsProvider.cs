@@ -5,12 +5,13 @@ using ICSharpCode.SharpZipLib.Zip;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
 using JetBrains.Application.Environment.Components;
+using JetBrains.Application.Parts;
 using JetBrains.Extension;
 using JetBrains.Util;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
-    [ShellComponent]
+    [ShellComponent(InstantiationEx.LegacyDefault)]
     public class PluginPathsProvider
     {
         private readonly ApplicationPackages myApplicationPackages;
