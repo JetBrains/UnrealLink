@@ -16,6 +16,7 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -39,7 +40,7 @@ class PlayButtons : UnrealLinkBase() {
   private val resumeAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.ResumeUnreal")
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
-  @Solution("EmptyUProject")
+  @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(

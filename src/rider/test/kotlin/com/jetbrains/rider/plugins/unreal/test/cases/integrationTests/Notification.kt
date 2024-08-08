@@ -17,6 +17,7 @@ import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -27,7 +28,7 @@ import java.time.Duration
   sdkVersion = SdkVersion.AUTODETECT
 )
 class RiderLinkNotification : UnrealLinkBase() {
-  @Solution("EmptyUProject")
+  @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(
     @Suppress("UNUSED_PARAMETER") caseName: String,

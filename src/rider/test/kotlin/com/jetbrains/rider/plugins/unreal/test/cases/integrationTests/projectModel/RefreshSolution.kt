@@ -22,6 +22,7 @@ import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
 import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withUnrealDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
@@ -43,7 +44,7 @@ class RefreshSolution : UnrealTestLevelProject() {
     contexts.get<ProjectModelTestContext>().profile.fileNames.add("$activeSolution.vcxproj.filters")
   }
 
-  @Solution("EmptyUProject")
+  @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_slnOnly")
   fun refreshSolution(@Suppress("UNUSED_PARAMETER") caseName: String,
                       openWith: UnrealTestContext.UnrealProjectModelType, engine: UnrealEngine) {

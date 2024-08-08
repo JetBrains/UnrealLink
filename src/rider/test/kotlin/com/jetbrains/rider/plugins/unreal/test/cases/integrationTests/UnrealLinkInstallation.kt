@@ -16,6 +16,7 @@ import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
 import org.testng.annotations.Test
@@ -34,7 +35,7 @@ class UnrealLinkInstallation : UnrealLinkBase() {
     unrealContext.disableEnginePlugins = false
   }
 
-  @Solution("EmptyUProject")
+  @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(30L, TimeUnit.MINUTES)
   fun ul(
