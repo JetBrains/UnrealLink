@@ -1,6 +1,5 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction
 import com.intellij.openapi.project.DumbAware
@@ -21,11 +20,6 @@ class UnrealLogVerbosityFilterComboBox(settings: UnrealLogPanelSettings) : Combo
     private val errorsCheckBox: FilterCheckboxAction =
             FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Errors.text"), settings::showErrors)
     private val popupGroup: DefaultActionGroup = VerbosityActionGroup()
-
-    override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = true
-        super.update(e)
-    }
 
     override fun createPopupActionGroup(button: JComponent?): DefaultActionGroup {
         return popupGroup

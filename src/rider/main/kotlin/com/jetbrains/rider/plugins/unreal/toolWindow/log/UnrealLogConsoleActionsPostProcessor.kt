@@ -8,6 +8,7 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.icons.AllIcons
 import com.intellij.ide.actions.NextOccurenceToolbarAction
 import com.intellij.ide.actions.PreviousOccurenceToolbarAction
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAwareAction
@@ -62,6 +63,7 @@ class UnrealLogConsoleActionsPostProcessor : ConsoleActionsPostProcessor() {
             DumbAwareAction(ExecutionBundle.messagePointer("clear.all.from.console.action.name"),
                     ExecutionBundle.messagePointer("clear.all.from.console.action.description"),
                     AllIcons.Actions.GC) {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
 
         override fun update(e: AnActionEvent) {
             val console = panel.console
