@@ -19,6 +19,7 @@ import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import org.testng.annotations.Test
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 @Subsystem("UnrealLink")
 @Feature("PlayButtons")
@@ -42,6 +43,7 @@ class PlayButtons : UnrealLinkBase() {
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
+  @RiderTestTimeout(6, TimeUnit.MINUTES)
   @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
