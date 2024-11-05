@@ -1,5 +1,6 @@
 package com.jetbrains.rider.plugins.unreal.toolWindow.log
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction
 import com.intellij.openapi.project.DumbAware
@@ -9,6 +10,8 @@ import javax.swing.JComponent
 
 class UnrealLogCategoryFilterComboBox(private val settings: UnrealLogPanelSettings,
                                       private val logFilter: UnrealLogFilter) : ComboBoxAction(), DumbAware {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
     init {
         val presentation = this.templatePresentation
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.categoriesSelection.label")
