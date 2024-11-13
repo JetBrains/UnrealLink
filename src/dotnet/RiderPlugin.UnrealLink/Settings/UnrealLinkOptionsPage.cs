@@ -150,8 +150,8 @@ namespace RiderPlugin.UnrealLink.Settings
         private void SetupInstallButtons()
         {
             AddHeader(Strings.Settings_ManualInstallation_Header_Text);
-            var owner = Shell.Instance.GetComponents<SolutionManagerBase>()
-                .FirstOrDefault(it => it.IsRealSolutionOwner && it.CurrentSolution != null);
+            var owner = Shell.Instance.GetComponents<RealSolutionManagerBase>()
+                .FirstOrDefault(it => it.CurrentSolution != null);
             var solution = owner?.CurrentSolution;
             var unrealPluginInstaller = solution?.GetComponent<UnrealPluginInstaller>();
 
