@@ -174,7 +174,7 @@ namespace RiderPlugin.UnrealLink.Settings
             var extractInEngineButton = AddButton(Strings.ExtractRiderLinkInEngine_Text, () =>
             {
                 unrealPluginInstaller?.HandleManualInstallPlugin(
-                    new InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.Yes, false)
+                    new InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.Yes, false)
                 );
             });
             AddCommentText(Strings.ExtractRiderLinkPluginInEngineDescription_Text);
