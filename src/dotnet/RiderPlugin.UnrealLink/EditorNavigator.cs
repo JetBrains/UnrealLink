@@ -53,7 +53,7 @@ namespace RiderPlugin.UnrealLink
                 return;
             var declaredElement = new CppParserSymbolDeclaredElement(_psiServices, classSymbol);
 
-            using (ReadLockCookie.Create())
+            using (NonCSharpInteropReadLockCookie.Create()) // todo: change to ordinary after updating to C# 13
             {
                 using (CompilationContextCookie.GetOrCreate(UniversalModuleReferenceContext.Instance))
                 {
@@ -65,7 +65,7 @@ namespace RiderPlugin.UnrealLink
         public void NavigateToMethod(MethodReference methodReference)
         {
             var declaredElement = MethodDeclaredElement(methodReference);
-            using (ReadLockCookie.Create())
+            using (NonCSharpInteropReadLockCookie.Create()) // todo: change to ordinary after updating to C# 13
             {
                 using (CompilationContextCookie.GetOrCreate(UniversalModuleReferenceContext.Instance))
                 {
