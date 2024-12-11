@@ -11,7 +11,7 @@ using JetBrains.Util;
 
 namespace RiderPlugin.UnrealLink.PluginInstaller
 {
-    [ShellComponent(InstantiationEx.LegacyDefault)]
+    [ShellComponent(Instantiation.DemandAnyThreadSafe)]
     public class PluginPathsProvider
     {
         private readonly ApplicationPackages myApplicationPackages;
