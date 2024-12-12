@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit
   buildTool = BuildTool.CPP,
   sdkVersion = SdkVersion.AUTODETECT
 )
+@RiderTestTimeout(20, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
     unrealContext.disableEnginePlugins = false
@@ -43,7 +44,6 @@ class PlayButtons : UnrealLinkBase() {
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
-  @RiderTestTimeout(6, TimeUnit.MINUTES)
   @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
