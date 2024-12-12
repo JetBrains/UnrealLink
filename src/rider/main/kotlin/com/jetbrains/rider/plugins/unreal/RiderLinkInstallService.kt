@@ -20,6 +20,7 @@ import com.jetbrains.rd.util.info
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.build.BuildToolWindowFactory
+import com.jetbrains.rider.build.BuildToolWindowService
 import com.jetbrains.rider.plugins.unreal.actions.CancelRiderLinkInstallAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ContentType
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallMessage
@@ -37,7 +38,7 @@ class RiderLinkInstallService(
     }
 
     private var context: RiderLinkInstallContext? = null
-    private val buildToolWindowFactory = project.getService(BuildToolWindowFactory::class.java)
+    private val buildToolWindowFactory = project.getService(BuildToolWindowService::class.java)
 
 
     fun getOrCreateRiderLinkInstallContext(): RiderLinkInstallContext {
