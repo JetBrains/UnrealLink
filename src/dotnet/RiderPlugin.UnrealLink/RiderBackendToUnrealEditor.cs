@@ -14,6 +14,7 @@ using JetBrains.Rd.Base;
 using JetBrains.Rd.Impl;
 using JetBrains.Rd.Tasks;
 using JetBrains.Util;
+using JetBrains.Util.Threading;
 using RiderPlugin.UnrealLink.Model;
 using RiderPlugin.UnrealLink.Model.BackendUnreal;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
@@ -105,7 +106,7 @@ namespace RiderPlugin.UnrealLink
                     lt.Bracket(() => { }, () => { watcher.Dispose(); });
 
                     StartWatcher(watcher);
-                });
+                }, callerInfo: CallerInfo.Create());
 
                 foreach (var projectName in projects)
                 {
