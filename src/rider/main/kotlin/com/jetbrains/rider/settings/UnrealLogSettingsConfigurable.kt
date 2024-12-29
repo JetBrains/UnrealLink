@@ -11,7 +11,7 @@ import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.UnrealLinkSettings
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 
-class UnrealLogSettingsConfigurable(private val project: Project) : DslConfigurableBase(), SearchableConfigurable {
+internal class UnrealLogSettingsConfigurable(private val project: Project) : DslConfigurableBase(), SearchableConfigurable {
     companion object {
         @NlsSafe
         const val UNREAL_LINK = "UnrealLink"
