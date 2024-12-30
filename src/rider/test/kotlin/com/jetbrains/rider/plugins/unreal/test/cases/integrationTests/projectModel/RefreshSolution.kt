@@ -19,8 +19,8 @@ import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
-import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.dumpAfterAction
-import com.jetbrains.rider.test.scriptingApi.experimental.ProjectModelExp.withUnrealDump
+import com.jetbrains.rider.test.scriptingApi.ProjectModelExp.dumpAfterAction
+import com.jetbrains.rider.test.scriptingApi.ProjectModelExp.withUnrealDump
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
