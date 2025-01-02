@@ -44,7 +44,10 @@ class PlayButtons : UnrealLinkBase() {
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
-  @Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
+  @Mutes([
+           Mute("RIDER-121226", specificParameters = ["Sln5_4, Uproject5_4"]),
+           Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
+  ])
   fun endToEndTest(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,

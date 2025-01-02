@@ -23,6 +23,7 @@ import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
+@Mute("RIDER-121226", specificParameters = ["SlnEngine5_4, SlnGame5_4, UprojectGame5_4, UprojectEngine5_4"])
 @Subsystem("UnrealLink")
 @Feature("Installation")
 @TestEnvironment(
