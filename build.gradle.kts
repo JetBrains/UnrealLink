@@ -312,10 +312,10 @@ tasks {
             val buildArguments = listOf(
                 "build",
                 dotNetSolution.canonicalPath,
+                "-consoleLoggerParameters:ErrorsOnly",
                 "/p:Configuration=$buildConfigurationProp",
                 "/p:Version=${project.version}",
                 "/p:TreatWarningsAsErrors=$warningsAsErrors",
-                "/v:${project.properties.getOrDefault("dotnetVerbosity", "minimal")}",
                 "/bl:${dotNetSolution.name}.binlog",
                 "/nologo"
             )
