@@ -427,6 +427,10 @@ tasks {
         delete(csOutputRoot, cppOutputRoot, ktOutputRoot)
     }
 
+    buildSearchableOptions {
+        jvmArgs("-Djava.security.manager=com.intellij.platform.core.nio.fs.CoreBootstrapSecurityManager")
+    }
+
     val getUnrealEngineProject by register("getUnrealEngineProject") {
         doLast {
             val ueProjectPathTxt = rootDir.resolve("UnrealEngineProjectPath.txt")
@@ -503,10 +507,6 @@ tasks {
             if (result.exitValue != 0) {
                 println(stdOut.toString().trim())
             }
-        }
-
-        buildSearchableOptions {
-            jvmArgs("-Djava.security.manager=com.intellij.platform.core.nio.fs.CoreBootstrapSecurityManager")
         }
     }
 
