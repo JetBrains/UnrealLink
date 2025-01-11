@@ -504,6 +504,10 @@ tasks {
                 println(stdOut.toString().trim())
             }
         }
+
+        buildSearchableOptions {
+            jvmArgs("-Djava.security.manager=com.intellij.platform.core.nio.fs.CoreBootstrapSecurityManager")
+        }
     }
 
     wrapper {
