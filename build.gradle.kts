@@ -427,9 +427,7 @@ tasks {
         delete(csOutputRoot, cppOutputRoot, ktOutputRoot)
     }
 
-    buildSearchableOptions {
-        jvmArgs("-Djava.security.manager=com.intellij.platform.core.nio.fs.CoreBootstrapSecurityManager")
-    }
+    buildSearchableOptions { }
 
     val getUnrealEngineProject by register("getUnrealEngineProject") {
         doLast {
