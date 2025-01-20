@@ -11,6 +11,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.*
 import com.jetbrains.rider.test.contexts.UnrealTestContext
+import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.buildWithChecks
@@ -46,6 +47,7 @@ class PlayButtons : UnrealLinkBase() {
   @Test(dataProvider = "AllEngines_AllPModels")
   @Mutes([
            Mute("RIDER-121226", specificParameters = [".*5_4"]),
+           Mute("RIDER-121226", specificParameters = [".*5_3"], platforms = [PlatformType.WINDOWS_ALL]),
            Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
   ])
   fun endToEndTest(
