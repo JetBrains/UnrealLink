@@ -427,9 +427,7 @@ tasks {
         delete(csOutputRoot, cppOutputRoot, ktOutputRoot)
     }
 
-    buildSearchableOptions {
-        enabled = false // TODO: enable back
-    }
+    buildSearchableOptions { }
 
     val getUnrealEngineProject by register("getUnrealEngineProject") {
         doLast {
