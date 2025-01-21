@@ -11,6 +11,7 @@ import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import kotlin.io.path.pathString
 
 plugins {
     id("me.filippov.gradle.jvm.wrapper")
@@ -144,7 +145,7 @@ dependencies {
         } else {
             val version = "${project.property("majorVersion")}-SNAPSHOT"
             logger.lifecycle("*** Using Rider SDK $version from intellij-snapshots repository")
-            rider(version)
+            rider(version, useInstaller = false)
         }
 
         jetbrainsRuntime()
@@ -157,7 +158,10 @@ dependencies {
         bundledPlugin("com.intellij.cidr.debugger")
         bundledPlugin("com.jetbrains.rider-cpp")
 
-        testFramework(TestFrameworkType.Bundled)
+        // TODO: Temporary I hope hope hope
+        bundledLibrary(provider {
+            project.intellijPlatform.platformPath.resolve("lib/testFramework.jar").pathString
+        })
     }
 }
 
@@ -229,6 +233,10 @@ tasks {
         println(".NET SDK path: $sdkPath")
 
         return@lazy sdkPath.toRealPath()
+    }
+
+    instrumentCode {
+        enabled = false
     }
 
     withType<RunIdeTask>().configureEach {
