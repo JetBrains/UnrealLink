@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <RootNamespace>RiderPlugin.UnrealLink</RootNamespace>
     <InternalBuild Condition="'$(SolutionFileName)' != 'UnrealLink.sln'">True</InternalBuild>
     <InternalBuild Condition="$(InternalBuild) == ''">False</InternalBuild>
   </PropertyGroup>
@@ -24,7 +25,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Strings.resx">
+    <EmbeddedResource Remove="Resources\Strings.resx"/>
+    <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>JetResourceGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
