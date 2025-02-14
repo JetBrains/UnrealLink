@@ -23,10 +23,7 @@ import java.time.Duration
 
 @Subsystem("UnrealLink")
 @Feature("Notification")
-@TestEnvironment(
-  buildTool = BuildTool.CPP,
-  sdkVersion = SdkVersion.AUTODETECT
-)
+@TestEnvironment(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class RiderLinkNotification : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")

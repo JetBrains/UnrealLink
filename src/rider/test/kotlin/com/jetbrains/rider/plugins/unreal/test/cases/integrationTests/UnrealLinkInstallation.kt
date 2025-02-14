@@ -26,10 +26,7 @@ import java.util.concurrent.TimeUnit
 @Mute("RIDER-121226", specificParameters = ["SlnEngine5_4, SlnGame5_4, UprojectGame5_4, UprojectEngine5_4"])
 @Subsystem("UnrealLink")
 @Feature("Installation")
-@TestEnvironment(
-  buildTool = BuildTool.CPP,
-  sdkVersion = SdkVersion.AUTODETECT
-)
+@TestEnvironment(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class UnrealLinkInstallation : UnrealLinkBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
