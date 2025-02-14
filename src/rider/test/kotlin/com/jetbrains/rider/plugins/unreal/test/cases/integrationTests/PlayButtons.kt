@@ -24,10 +24,7 @@ import java.util.concurrent.TimeUnit
 
 @Subsystem("UnrealLink")
 @Feature("PlayButtons")
-@TestEnvironment(
-  buildTool = BuildTool.CPP,
-  sdkVersion = SdkVersion.AUTODETECT
-)
+@TestEnvironment(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 @RiderTestTimeout(20, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
