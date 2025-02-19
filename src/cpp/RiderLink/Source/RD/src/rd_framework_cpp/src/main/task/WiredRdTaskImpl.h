@@ -47,15 +47,15 @@ public:
 		spdlog::get("logReceived")
 			->trace("call {} {} received response {} : {}", to_string(cutpoint->get_location()), to_string(rdid), to_string(rdid),
 				to_string(read_result));
-		scheduler->queue([&, result = std::move(read_result)]() mutable {
+		scheduler->queue([this, read_result = std::move(read_result)]() mutable {
 			if (this->result->has_value())
 			{
 				spdlog::get("logReceived")->trace("call {} {} response was dropped, task result is: {}", to_string(location), to_string(rdid),
-					to_string(result.unwrap()));
+					to_string(read_result.unwrap()));
 			}
 			else
 			{
-				this->result->set_if_empty(std::move(result));
+				this->result->set_if_empty(std::move(read_result));
 			}
 		});
 	}
