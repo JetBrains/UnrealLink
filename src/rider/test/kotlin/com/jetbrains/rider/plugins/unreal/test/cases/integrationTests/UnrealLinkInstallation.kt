@@ -3,7 +3,6 @@ package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
-import com.jetbrains.rider.build.actions.BuildStartupProject
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
@@ -12,7 +11,6 @@ import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
-import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
@@ -46,10 +44,7 @@ class UnrealLinkInstallation : UnrealLinkBase() {
     
     installRiderLink(location)
 
-    buildWithChecks(
-      project, BuildStartupProject(), "Build selected projects",
-      useIncrementalBuild = false, timeout = contexts.get<UnrealTestContext>().unrealBuildTimeout
-    )
+    buildStartupProject()
     //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
     withRunProgram(project, configurationName = activeSolution) {

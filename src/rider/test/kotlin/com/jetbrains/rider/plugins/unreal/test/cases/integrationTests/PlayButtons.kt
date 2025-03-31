@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.pumpMessages
 import com.jetbrains.rdclient.util.idea.waitAndPump
-import com.jetbrains.rider.build.actions.BuildSolutionAction
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
@@ -14,7 +13,6 @@ import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.env.enums.BuildTool
 import com.jetbrains.rider.test.env.enums.SdkVersion
-import com.jetbrains.rider.test.scriptingApi.buildWithChecks
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -55,10 +53,7 @@ class PlayButtons : UnrealLinkBase() {
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
     installRiderLink(PluginInstallLocation.Game)
 
-    buildWithChecks(
-      project, BuildSolutionAction(), "Build solution",
-      useIncrementalBuild = false, timeout = contexts.get<UnrealTestContext>().unrealBuildTimeout
-    )
+    buildWholeSolution()
 
     checkActionsIsEnabled(mapOf(
       startAction to false,
