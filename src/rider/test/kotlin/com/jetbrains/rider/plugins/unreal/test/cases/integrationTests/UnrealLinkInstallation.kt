@@ -33,7 +33,7 @@ class UnrealLinkInstallation : UnrealLinkBase() {
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
-  @RiderTestTimeout(30L, TimeUnit.MINUTES)
+  @RiderTestTimeout(10, TimeUnit.MINUTES)
   fun ul(
     @Suppress("UNUSED_PARAMETER") caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,
