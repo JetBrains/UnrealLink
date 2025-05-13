@@ -18,7 +18,9 @@ public class RD : ModuleRules
 		bEnforceIWYU = false;
 #endif
 
-#if UE_4_22_OR_LATER
+#if UE_5_6_OR_LATER
+		CppStandard = CppStandardVersion.Cpp20;
+#elif UE_4_22_OR_LATER
 		CppStandard = CppStandardVersion.Cpp17;
 #endif
 
