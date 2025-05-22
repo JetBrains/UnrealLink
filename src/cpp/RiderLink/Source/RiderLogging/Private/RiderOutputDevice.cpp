@@ -36,7 +36,9 @@ void FRiderOutputDevice::Setup(TFunction<FOnSerializeMessage::TFuncType> Callbac
 	
 	onSerializeMessage.BindLambda(Callback);
 	GLog->AddOutputDevice(this);
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 7)
 	GLog->SerializeBacklog(this);
+#endif
 }
 
 void FRiderOutputDevice::TearDown()
