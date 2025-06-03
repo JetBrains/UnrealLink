@@ -3,6 +3,7 @@
     <name>UnrealLink</name>
     <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
     <depends>com.intellij.modules.rider</depends>
+    <depends>com.intellij.modules.spellchecker</depends>
     <depends>com.jetbrains.rider-cpp</depends>
 
     <description><![CDATA[
