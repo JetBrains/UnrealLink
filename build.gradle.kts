@@ -2,8 +2,6 @@ import com.jetbrains.plugin.structure.base.utils.isFile
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.intellij.platform.gradle.Constants
-import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -11,6 +9,8 @@ import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
+import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import kotlin.io.path.pathString
 
 plugins {
@@ -238,13 +238,6 @@ tasks {
     instrumentCode {
         enabled = false
     }
-
-    fun JavaForkOptions.configureDotNet() {
-        systemProperty("rider.backend.dotnet.runtime.path", file("tools/dotnet.cmd").absolutePath)
-    }
-    withType<RunIdeTask>().configureEach { this.configureDotNet() }
-    withType<BuildSearchableOptionsTask>().configureEach { this.configureDotNet() }
-    withType<Test>().configureEach { this.configureDotNet() }
 
     withType<RunIdeTask>().configureEach {
         maxHeapSize = "4096m"
