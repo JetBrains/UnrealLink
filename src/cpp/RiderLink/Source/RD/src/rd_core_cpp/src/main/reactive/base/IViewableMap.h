@@ -77,7 +77,7 @@ public:
 
 	V const* get_old_value() const
 	{
-		return visit(util::make_visitor([](typename MapEvent::Add const& e) { return static_cast<V const*>(nullptr); },
+		return visit(util::make_visitor([](typename MapEvent::Add const&) { return static_cast<V const*>(nullptr); },
 						 [](typename MapEvent::Update const& e) { return e.old_value; },
 						 [](typename MapEvent::Remove const& e) { e.old_value; }),
 			v);

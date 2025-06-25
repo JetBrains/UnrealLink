@@ -30,7 +30,7 @@ public:
 		return !(rhs == lhs);
 	}
 
-	friend std::string to_string(RdSymmetricCall const& value)
+	friend std::string to_string(RdSymmetricCall const&)
 	{
 		return "RdSymmetricCall";
 	}
