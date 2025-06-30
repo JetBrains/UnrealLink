@@ -7,12 +7,6 @@ public class RD : ModuleRules
 	{
 		PublicDependencyModuleNames.Add("Core");
 		bUseRTTI = true;
-		
-		CppCompileWarningSettings.UnusedParameterWarningLevel = WarningLevel.Error;
-		CppCompileWarningSettings.UnusedWarningLevel = WarningLevel.Error;
-		CppCompileWarningSettings.UnusedValueWarningLevel = WarningLevel.Error;
-		CppCompileWarningSettings.MSVCUnusedValueWarningLevel = WarningLevel.Error;
-		
 
 #if UE_5_2_OR_LATER
 		bDisableStaticAnalysis = true;
