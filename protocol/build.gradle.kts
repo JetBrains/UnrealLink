@@ -69,7 +69,7 @@ val unrealLinkGeneratorSettings = if (isMonorepo) {
         ktOutputRoot.resolve("RdRiderProtocol"),
         csOutputRoot.resolve("RdEditorProtocol"),
         cppOutputRoot.resolve("RdEditorProtocol"),
-        ".Generated"
+        ".Pregenerated"
     )
 }
 
