@@ -9,10 +9,11 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLoc
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.*
+import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.env.enums.BuildTool
-import com.jetbrains.rider.test.env.enums.SdkVersion
+import com.jetbrains.rider.test.enums.BuildTool
+import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
