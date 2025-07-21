@@ -11,6 +11,7 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
+import com.jetbrains.rider.test.annotations.TestRequirements
 import com.jetbrains.rider.test.contexts.ProjectModelTestContext
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
@@ -30,12 +31,8 @@ import java.time.Duration
 
 @Subsystem("UnrealLink")
 @Feature("Refresh Solution")
-@TestEnvironment(
-  platform = [PlatformType.WINDOWS_X64],
-  buildTool = BuildTool.UNREAL,
-  sdkVersion = SdkVersion.DOT_NET_8,
-  additionalSdkVersions = [SdkVersion.DOT_NET_6]
-)
+@TestEnvironment(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
+@TestRequirements(platform = [PlatformType.WINDOWS_X64])
 class RefreshSolution : UnrealTestLevelProject() {
 
   @BeforeMethod
