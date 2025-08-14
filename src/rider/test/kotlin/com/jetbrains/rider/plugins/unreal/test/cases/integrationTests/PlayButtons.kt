@@ -13,6 +13,7 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.BuildTool
+import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 @Subsystem("UnrealLink")
 @Feature("PlayButtons")
-@TestSettings(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
+@TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 @RiderTestTimeout(10, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
   override fun updateUnrealContext(unrealContext: UnrealTestContext) {
