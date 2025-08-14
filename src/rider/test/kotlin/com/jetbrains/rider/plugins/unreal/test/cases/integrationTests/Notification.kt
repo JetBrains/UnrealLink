@@ -15,6 +15,7 @@ import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.BuildTool
+import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -23,7 +24,7 @@ import java.time.Duration
 
 @Subsystem("UnrealLink")
 @Feature("Notification")
-@TestSettings(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
+@TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class RiderLinkNotification : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
