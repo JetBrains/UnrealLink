@@ -106,7 +106,7 @@ namespace RiderPlugin.UnrealLink
                     lt.Bracket(() => { }, () => { watcher.Dispose(); });
 
                     StartWatcher(watcher);
-                }, callerInfo: CallerInfo.Create());
+                }, callerInfo: CallerInfo.CreateByCurrentContext());
 
                 foreach (var projectName in projects)
                 {
