@@ -258,7 +258,7 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("generateModels")
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "21"
         }
     }
 
