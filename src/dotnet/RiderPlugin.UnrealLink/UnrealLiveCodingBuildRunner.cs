@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Application.Parts;
-using JetBrains.Application.Threading.Tasks;
 using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Lifetimes;
@@ -8,7 +8,7 @@ using JetBrains.Platform.BuildEvents;
 using JetBrains.Platform.MsBuildHost.Models;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.Features.SolutionBuilders;
-using JetBrains.ProjectModel.Tasks;
+using JetBrains.ProjectModel.Tasks.Listeners;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.ReSharperCpp.RiderPlugin.Build;
@@ -22,7 +22,7 @@ public class UnrealLiveCodingBuildRunner(
     ISolution solution,
     CppUE4SolutionDetector solutionDetector,
     CppUE4UbtBuildRunner buildRunner)
-    : ISolutionBuilderRunner, ISolutionLoadTasksSolutionStructureReadyListener
+    : ISolutionBuilderRunner, ISolutionLoadTasksSolutionStructureReadyListener2
 {
     public IProperty<bool> IsAvailable { get; } = new Property<bool>("IsAvailable", false);
 
@@ -117,9 +117,9 @@ public class UnrealLiveCodingBuildRunner(
         return 0;
     }
 
-    public async Task OnSolutionLoadSolutionStructureReadyAsync(OuterLifetime loadLifetime, ISolutionLoadTasksSchedulerThreading threading)
+    IEnumerable<SolutionLoadTasksListenerExecutionStep> ISolutionLoadTasksSolutionStructureReadyListener2.OnSolutionLoadSolutionStructureReady()
     {
-        await threading.YieldToIfNeeded(loadLifetime, Scheduling.MainGuard);
+        yield return SolutionLoadTasksListenerExecutionStep.YieldToMainThreadGuarded;
         solutionDetector.IsUnrealSolution.FlowInto(lifetime, IsAvailable);
     }
 }
