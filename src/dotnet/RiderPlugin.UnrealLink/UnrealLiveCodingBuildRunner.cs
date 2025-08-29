@@ -117,7 +117,7 @@ public class UnrealLiveCodingBuildRunner(
         return 0;
     }
 
-    IEnumerable<SolutionLoadTasksListenerExecutionStep> ISolutionLoadTasksSolutionStructureReadyListener2.OnSolutionLoadSolutionStructureReady()
+    IEnumerable<SolutionLoadTasksListenerExecutionStep> ISolutionLoadTasksSolutionStructureReadyListener2.OnSolutionLoadSolutionStructureReady(OuterLifetime loadLifetime)
     {
         yield return SolutionLoadTasksListenerExecutionStep.YieldToMainThreadGuarded;
         solutionDetector.IsUnrealSolution.FlowInto(lifetime, IsAvailable);
