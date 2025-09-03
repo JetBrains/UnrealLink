@@ -40,22 +40,18 @@ class PlayButtons : UnrealLinkBase() {
   private val resumeAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.ResumeUnreal")
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
+  @Suppress("UNUSED_PARAMETER")
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
-  @Mutes([
-           Mute("RIDER-121226", specificParameters = [".*5_4"]),
-           Mute("RIDER-121226", specificParameters = [".*5_3"], platforms = [PlatformType.WINDOWS_ALL]),
-           Mute("RIDER-102094 UnrealLink tests' build fail against UE 5.3", specificParameters = ["Sln5_3"])
-  ])
   fun endToEndTest(
-    @Suppress("UNUSED_PARAMETER") caseName: String,
+    caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine
   ) {
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
     installRiderLink(PluginInstallLocation.Game)
 
-    buildWholeSolution()
+    buildStartupProject()
 
     checkActionsIsEnabled(mapOf(
       startAction to false,
