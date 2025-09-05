@@ -23,7 +23,6 @@ import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-@Mute("RIDER-121226", specificParameters = ["SlnEngine5_4, SlnGame5_4, UprojectGame5_4, UprojectEngine5_4"])
 @Subsystem("UnrealLink")
 @Feature("Installation")
 @TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
@@ -37,7 +36,7 @@ class UnrealLinkInstallation : UnrealLinkBase() {
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
   fun ul(
-    @Suppress("UNUSED_PARAMETER") caseName: String,
+    caseName: String,
     openWith: UnrealTestContext.UnrealProjectModelType,
     engine: UnrealEngine,
     location: PluginInstallLocation
