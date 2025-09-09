@@ -1,7 +1,8 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.icons.AllIcons
-import com.intellij.notification.*
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
@@ -19,7 +20,6 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.projectView.solution
 import icons.UnrealIcons
-import javax.swing.Icon
 import com.jetbrains.rider.plugins.unreal.model.NotificationType as ReplyNotificationType
 
 @Service(Service.Level.PROJECT)
@@ -73,7 +73,7 @@ class PlayStateActionStateService(val project: Project) : LifetimedService() {
         disabledUntilModelChange = true
     }
 
-    fun isDisabledUntilStateChange() = disabledUntilModelChange
+    fun isDisabledUntilStateChange(): Boolean = disabledUntilModelChange
 
     fun nextRequestID() : Int {
         currentRequestID++
@@ -81,7 +81,7 @@ class PlayStateActionStateService(val project: Project) : LifetimedService() {
     }
 }
 
-abstract class PlayStateAction(text: String?, description: String?, icon: Icon?) : DumbAwareAction(text, description, icon) {
+abstract class PlayStateAction() : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
@@ -104,14 +104,11 @@ abstract class PlayStateAction(text: String?, description: String?, icon: Icon?)
     }
 }
 
-class PlayInUnrealAction : PlayStateAction(
-    UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.text"),
-    UnrealLinkBundle.message("action.RiderLink.PlayInUnrealAction.description"),
-    UnrealIcons.PIEControl.Play
-) {
+class PlayInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
+        e.presentation.icon = UnrealIcons.PIEControl.Play
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Idle
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Idle
     }
@@ -124,14 +121,11 @@ class PlayInUnrealAction : PlayStateAction(
     }
 }
 
-class ResumeInUnrealAction : PlayStateAction(
-        UnrealLinkBundle.message("action.RiderLink.ResumeInUnrealAction.text"),
-        UnrealLinkBundle.message("action.RiderLink.ResumeInUnrealAction.description"),
-        UnrealIcons.PIEControl.Play
-) {
+class ResumeInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
+        e.presentation.icon = UnrealIcons.PIEControl.Play
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Idle
     }
@@ -144,14 +138,11 @@ class ResumeInUnrealAction : PlayStateAction(
     }
 }
 
-class StopInUnrealAction : PlayStateAction(
-    UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.text"),
-    UnrealLinkBundle.message("action.RiderLink.StopInUnrealAction.description"),
-    UnrealIcons.PIEControl.Stop
-) {
+class StopInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
+        e.presentation.icon = UnrealIcons.PIEControl.Stop
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
     }
 
@@ -163,14 +154,11 @@ class StopInUnrealAction : PlayStateAction(
     }
 }
 
-class PauseInUnrealAction : PlayStateAction(
-    UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.text"),
-    UnrealLinkBundle.message("action.RiderLink.PauseInUnrealAction.description"),
-    UnrealIcons.PIEControl.Pause
-) {
+class PauseInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
+        e.presentation.icon = UnrealIcons.PIEControl.Pause
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Play
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Pause
     }
@@ -183,14 +171,11 @@ class PauseInUnrealAction : PlayStateAction(
     }
 }
 
-class SingleStepInUnrealAction : PlayStateAction(
-        UnrealLinkBundle.message("action.RiderLink.SkipFrame.text"),
-        UnrealLinkBundle.message("action.RiderLink.SkipFrame.description"),
-        UnrealIcons.PIEControl.FrameSkip
-) {
+class SingleStepInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
+        e.presentation.icon = UnrealIcons.PIEControl.FrameSkip
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Pause
     }
@@ -203,7 +188,7 @@ class SingleStepInUnrealAction : PlayStateAction(
     }
 }
 
-class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
+class RefreshProjects : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
@@ -214,6 +199,7 @@ class RefreshProjects : DumbAwareAction(AllIcons.Actions.Refresh) {
             return
         }
 
+        e.presentation.icon = AllIcons.Actions.Refresh
         e.presentation.isVisible = host.isUnrealEngineSolution && !host.isUproject
         e.presentation.isEnabled = !host.isRefreshProjectsInProgress &&
                 !host.isRiderLinkInstallationInProgress &&
