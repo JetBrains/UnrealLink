@@ -9,6 +9,9 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
+import com.intellij.ui.icons.CachedImageIcon
+import com.intellij.ui.icons.loadIconCustomVersionOrScale
+import com.intellij.util.ui.JBUI
 import com.jetbrains.rd.platform.util.idea.LifetimedService
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.UnrealLinkBundle
@@ -20,6 +23,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.projectView.solution
 import icons.UnrealIcons
+import javax.swing.Icon
 import com.jetbrains.rider.plugins.unreal.model.NotificationType as ReplyNotificationType
 
 @Service(Service.Level.PROJECT)
@@ -108,7 +112,7 @@ class PlayInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
-        e.presentation.icon = UnrealIcons.PIEControl.Play
+        e.presentation.icon = getToolbarIconHack(UnrealIcons.PIEControl.Play)
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Idle
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Idle
     }
@@ -125,7 +129,7 @@ class ResumeInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
-        e.presentation.icon = UnrealIcons.PIEControl.Play
+        e.presentation.icon = getToolbarIconHack(UnrealIcons.PIEControl.Play)
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Idle
     }
@@ -142,7 +146,7 @@ class StopInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
-        e.presentation.icon = UnrealIcons.PIEControl.Stop
+        e.presentation.icon = getToolbarIconHack(UnrealIcons.PIEControl.Stop)
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState != PlayState.Idle
     }
 
@@ -158,7 +162,7 @@ class PauseInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
-        e.presentation.icon = UnrealIcons.PIEControl.Pause
+        e.presentation.icon = getToolbarIconHack(UnrealIcons.PIEControl.Pause)
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Play
         e.presentation.isVisible = e.presentation.isVisible && host.playState != PlayState.Pause
     }
@@ -175,7 +179,7 @@ class SingleStepInUnrealAction : PlayStateAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val host = e.getUnrealHost() ?: return
-        e.presentation.icon = UnrealIcons.PIEControl.FrameSkip
+        e.presentation.icon = getToolbarIconHack(UnrealIcons.PIEControl.FrameSkip)
         e.presentation.isEnabled = e.presentation.isEnabled && host.playState == PlayState.Pause
         e.presentation.isVisible = e.presentation.isVisible && host.playState == PlayState.Pause
     }
@@ -210,4 +214,18 @@ class RefreshProjects : DumbAwareAction() {
         val project = e.project ?: return
         project.solution.rdRiderModel.refreshProjects.fire()
     }
+}
+
+// RIDER-129158 Unreal buttons are rendered by default in the toolbar
+//
+// HeaderToolbarButtonLook#scaleAndAdjustIcon fails to preserve disabled filter on icon when loading icon of different size for dark toolbar
+// (it uses customIconUtil.kt#loadIconCustomVersionOrScale that calls loadIconCustomVersion() that, in turn,
+// doesn't preserve icon modifications if isDark != null)
+// So, we try to load icon of the correct toolbar size here, so HeaderToolbarButtonLook wouldn't have to load icon again and reset modifications
+// Remove this hack after fixing HeaderToolbarButtonLook
+private fun getToolbarIconHack(icon: Icon): Icon {
+  if (icon is CachedImageIcon) {
+    return loadIconCustomVersionOrScale(icon, size = JBUI.CurrentTheme.Toolbar.experimentalToolbarButtonIconSize())
+  }
+  return icon
 }
