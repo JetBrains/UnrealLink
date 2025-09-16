@@ -49,7 +49,7 @@ public class UnrealLiveCodingBuildRunner(
         var def = Lifetime.Define(request.Lifetime);
         request.State.Value = BuildRunState.Running;
         var parser = new CppUE4UbtBuildOutputParser();
-        var saver = new InFileBuildSessionSaver(def.Lifetime, request.EventsStoragePath,
+        var saver = new InFileBuildSessionSaver(def.Lifetime, request.EventsStoragePath.FullPath,
             InFileBuildSessionSaver.EnabledFeatures.Events | InFileBuildSessionSaver.EnabledFeatures.Projects);
 
         editorModel.IsHotReloadCompiling.Change.AdviseUntil(def.Lifetime, val =>
