@@ -1,6 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
+import com.jetbrains.rider.ijent.extensions.toRd
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.ideaInterop.vfs.VfsWriteOperationsHost
@@ -62,7 +63,7 @@ class RefreshSolution : UnrealTestLevelProject() {
                     { "Response from UBT took longer than expected time" })
 
         VfsWriteOperationsHost.getInstance(project).refreshPaths(
-          RdFsRefreshRequest(listOf(activeSolutionDirectory.combine("Intermediate", "ProjectFiles", "$activeSolution.vcxproj").path), false)
+          RdFsRefreshRequest(listOf(activeSolutionDirectory.combine("Intermediate", "ProjectFiles", "$activeSolution.vcxproj").toRd()), false)
         )
         waitPumping(Duration.ofSeconds(1))
         waitBackendAndWorkspaceModel(project)

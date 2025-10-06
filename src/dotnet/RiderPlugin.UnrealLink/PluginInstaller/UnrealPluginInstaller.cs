@@ -11,6 +11,7 @@ using JetBrains.Collections.Viewable;
 using JetBrains.DataFlow;
 using JetBrains.Diagnostics;
 using JetBrains.HabitatDetector;
+using JetBrains.IDE;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
@@ -353,7 +354,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myLogger.Verbose(actionTitle);
                 var fileSystemModel = mySolution.GetProtocolSolution().GetFileSystemModel();
                 fileSystemModel.RefreshPaths.Start(lifetime,
-                    new RdFsRefreshRequest(new List<string>{pluginRootFolder.FullPath}, true));
+                    new RdFsRefreshRequest(new List<RdPath>{pluginRootFolder.ToRd()}, true));
             });
         }
 
@@ -472,7 +473,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     myLogger.Verbose(actionTitle);
                     var fileSystemModel = mySolution.GetProtocolSolution().GetFileSystemModel();
                     fileSystemModel.RefreshPaths.Start(lifetime,
-                        new RdFsRefreshRequest(new List<string>() { pluginRootFolder.FullPath }, true));
+                        new RdFsRefreshRequest(new List<RdPath>() { pluginRootFolder.ToRd() }, true));
                 });
             }
             return true;
