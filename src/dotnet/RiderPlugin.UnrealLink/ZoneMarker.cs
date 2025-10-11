@@ -11,8 +11,8 @@ namespace RiderPlugin.UnrealLink
         IRequire<ILanguageCppZone>,
         IRequire<IUnrealEngineZone>,
         IRequire<DaemonZone>,
-        IRequire<IRiderFullFeatureZone>,
-        IRequire<IRiderProductFullEnvironmentZone>
+        IRequire<IRiderFeatureZone>,
+        IRequire<IRiderProductEnvironmentZone>
     {
     }
 }
