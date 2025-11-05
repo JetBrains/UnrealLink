@@ -1,0 +1,136 @@
+===================
+Init
+
+[EmptyUProject.vcxproj.filters]
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+
+===================
+Copy TestPlugin to project
+
+[EmptyUProject.vcxproj.filters]
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+
+===================
+Invoking refresh solution
+
+[EmptyUProject.vcxproj.filters]
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="relative_path/.vsconfig" />
+    <None Include="relative_path/EmptyUProject.uproject" />
+    <Filter Include="Plugins">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\EmptyTestPlugin">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\EmptyTestPlugin.uplugin">
+      <Filter>Plugins\EmptyTestPlugin</Filter>
+    </None>
+    <Filter Include="Plugins\EmptyTestPlugin\Resources">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\Resources\Icon128.png">
+      <Filter>Plugins\EmptyTestPlugin\Resources</Filter>
+    </None>
+    <Filter Include="Plugins\EmptyTestPlugin\Source">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\EmptyTestPlugin.Build.cs">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin</Filter>
+    </None>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private\EmptyTestPlugin.cpp">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Private</Filter>
+    </ClCompile>
+    <Filter Include="Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="relative_path/Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public\EmptyTestPlugin.h">
+      <Filter>Plugins\EmptyTestPlugin\Source\EmptyTestPlugin\Public</Filter>
+    </ClInclude>
+    <Filter Include="Source">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="relative_path/Source\EmptyUProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Source\EmptyUProject">
+      <UniqueIdentifier>{GUID}</UniqueIdentifier>
+    </Filter>
+    <None Include="relative_path/Source\EmptyUProject\EmptyUProject.Build.cs">
+      <Filter>Source\EmptyUProject</Filter>
+    </None>
+    <ClCompile Include="relative_path/Source\EmptyUProject\EmptyUProject.cpp">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClCompile>
+    <ClInclude Include="relative_path/Source\EmptyUProject\EmptyUProject.h">
+      <Filter>Source\EmptyUProject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+
