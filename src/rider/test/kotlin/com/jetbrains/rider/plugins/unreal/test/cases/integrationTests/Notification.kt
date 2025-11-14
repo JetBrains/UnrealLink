@@ -6,17 +6,17 @@ import com.intellij.notification.NotificationsManager
 import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
-import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestSettings
+import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
-import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
+import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import org.testng.annotations.Test
@@ -30,7 +30,7 @@ class RiderLinkNotification : UnrealLinkBase() {
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(
     @Suppress("UNUSED_PARAMETER") caseName: String,
-    openWith: UnrealTestContext.UnrealProjectModelType,
+    openWith: UnrealProjectModelApiFacade.PMType,
     engine: UnrealEngine
   ) {
     val notification = NotificationsManager.getNotificationsManager()
