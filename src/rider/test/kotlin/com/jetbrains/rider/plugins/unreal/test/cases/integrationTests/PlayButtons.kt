@@ -13,7 +13,6 @@ import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
@@ -21,6 +20,7 @@ import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
+import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -30,8 +30,9 @@ import java.util.concurrent.TimeUnit
 @TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 @RiderTestTimeout(10, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
-  override fun updateUnrealContext(unrealContext: UnrealTestContext) {
-    unrealContext.disableEnginePlugins = false
+  @BeforeMethod
+  fun setOpenSolutionSettings() {
+    unrealApiFacade.disableEnginePlugins = false
   }
 
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)

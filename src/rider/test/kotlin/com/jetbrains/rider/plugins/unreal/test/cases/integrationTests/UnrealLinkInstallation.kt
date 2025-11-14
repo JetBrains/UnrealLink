@@ -11,7 +11,6 @@ import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.contexts.UnrealTestContext
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
@@ -23,6 +22,7 @@ import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
 import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
+import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -32,10 +32,13 @@ import java.util.concurrent.TimeUnit
 @TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class UnrealLinkInstallation : UnrealLinkBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
-  override fun updateUnrealContext(unrealContext: UnrealTestContext) {
-    unrealContext.disableEnginePlugins = false
+
+  @BeforeMethod
+  fun setOpenSolutionSettings() {
+    unrealApiFacade.disableEnginePlugins = false
   }
 
+  @Suppress("unused")
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
