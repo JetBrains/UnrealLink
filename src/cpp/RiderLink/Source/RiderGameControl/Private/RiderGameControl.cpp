@@ -60,7 +60,9 @@ static EPlayModeType PlayModeFromInt(int ModeNumber)
     case 3: return PlayMode_InVR;
     case 4: return PlayMode_InNewProcess;
     case 5: return PlayMode_Simulate;
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 7)
     case 6: return PlayMode_InVulkanPreview;
+#endif
     }
     return PlayMode_InViewPort;
 }
@@ -77,7 +79,9 @@ static int PlayModeToInt(EPlayModeType modeType)
     case PlayMode_InVR: return 3;
     case PlayMode_InNewProcess: return 4;
     case PlayMode_Simulate: return 5;
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 7)
     case PlayMode_InVulkanPreview: return 6;
+#endif
     }
     return 0;
 }
@@ -171,7 +175,11 @@ public:
         {TEXT("PlayInEditorFloating")},
         {TEXT("PlayInMobilePreview")},
         {FName()},
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 7)
         {TEXT("PlayInVulkanPreview")},
+#else
+        {FName()},
+#endif
         {TEXT("PlayInNewProcess")},
         {TEXT("PlayInVR")},
         {TEXT("Simulate")},
