@@ -17,6 +17,8 @@ import com.jetbrains.rider.cpp.debugger.RiderCppLocalAttachDebugger
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
 import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
+import com.jetbrains.rd.ide.model.unrealModel
+import com.jetbrains.rider.projectView.solution
 import icons.UnrealIcons
 
 class PlaySettings : DefaultActionGroup(), DumbAware {
@@ -294,7 +296,7 @@ const val PLAY_MODE_MASK_SIZE = 3
 const val PLAY_MODE_MASK = (1.shl(PLAY_MODE_MASK_SIZE) - 1).shl(PLAY_MODE_MASK_OFS)
 const val PLAY_MODE_MASK_INV = PLAY_MODE_MASK.inv()
 
-class PlayMode : DumbAwareToggleAction() {
+open class PlayMode : DumbAwareToggleAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     private fun getModeIndex(playModeName: String?) = when (playModeName) {
@@ -314,11 +316,13 @@ class PlayMode : DumbAwareToggleAction() {
         return (mode and PLAY_MODE_MASK_INV) or playModeIndex.shl(PLAY_MODE_MASK_OFS)
     }
 
+    protected open fun isPlayModeSupported(project: Project?): Boolean = project != null
+
     override fun isSelected(e: AnActionEvent): Boolean {
         val host: UnrealHost = e.getUnrealHost() ?: return false
 
         val ind = getModeIndex(e.presentation.text)
-        if (ind == -1) return false
+        if (ind == -1 || !isPlayModeSupported(e.project)) return false
         return getPlayModeIndex(host.playMode) == ind
     }
 
@@ -327,7 +331,7 @@ class PlayMode : DumbAwareToggleAction() {
 
         if (isSelected) {
             val playModeIndex = getModeIndex(e.presentation.text)
-            if (playModeIndex == -1) return
+            if (playModeIndex == -1 || !isPlayModeSupported(e.project)) return
 
             host.playMode = setPlayMode(host.playMode, playModeIndex)
             host.model.playModeFromRider.fire(host.playMode)
@@ -338,7 +342,18 @@ class PlayMode : DumbAwareToggleAction() {
         super.update(e)
 
         updatePlayActionPresentation(e)
+        e.presentation.isEnabledAndVisible = e.presentation.isEnabledAndVisible && isPlayModeSupported(e.project)
     }
+}
+
+class VulkanPlayMode : PlayMode() {
+  override fun isPlayModeSupported(project: Project?): Boolean {
+    if (project == null)
+      return false
+    // Vulkan Preview is deprecated since UE 5.7
+    val version = project.solution.unrealModel.unrealVersion.valueOrNull ?: return false
+    return version.major < 5 || version.major == 5 && version.minor < 7
+  }
 }
 
 class HidePlayButtonsAction : DumbAwareToggleAction() {

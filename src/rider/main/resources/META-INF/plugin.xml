@@ -249,7 +249,7 @@ Path to old plugin:</code></pre>
                     <action id="RiderLink.VRPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
                     <action id="RiderLink.StandaloneGame" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
                     <action id="RiderLink.Simulate" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
-                    <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.PlayMode"/>
+                    <action id="RiderLink.VulkanPreview" class="com.jetbrains.rider.plugins.unreal.actions.VulkanPlayMode"/>
                 </group>
                 <action id="RiderLink.DedicatedServer"
                         class="com.jetbrains.rider.plugins.unreal.actions.DedicatedServer"/>
