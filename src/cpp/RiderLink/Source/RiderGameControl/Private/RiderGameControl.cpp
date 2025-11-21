@@ -230,7 +230,7 @@ void FRiderGameControlActionsCache::UpdatePlayWorldCommandsCache()
     const FName PlayWorldContextName = FName("PlayWorld");
     for (FCachedCommandInfo& PlayModeCommand : PlayModeCommands)
     {
-        if (PlayModeCommands->CommandName.IsNone()) continue;
+        if (PlayModeCommand.CommandName.IsNone()) continue;
         CacheCommand(PlayModeCommand, PlayWorldContextName);
     }
     CacheCommand(ResumePlaySession, PlayWorldContextName);
