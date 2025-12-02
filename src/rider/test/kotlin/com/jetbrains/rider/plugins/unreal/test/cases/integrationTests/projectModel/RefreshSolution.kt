@@ -1,10 +1,10 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests.projectModel
 
 import com.jetbrains.rd.ide.model.UnrealEngine
-import com.jetbrains.rider.ijent.extensions.toRd
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.ideaInterop.vfs.VfsWriteOperationsHost
+import com.jetbrains.rider.ijent.extensions.toRd
 import com.jetbrains.rider.model.RdFsRefreshRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
@@ -37,9 +37,9 @@ class RefreshSolution : UnrealTestLevelProject() {
   @Suppress("UNUSED_PARAMETER")
   fun refreshSolution(caseName: String, openWith: UnrealProjectModelApiFacade.PMType, engine: UnrealEngine) {
     withDump {
-      projectModelDumpProfile.dumpDirList.clear()
-      projectModelDumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
-      projectModelDumpProfile.fileNames.add("$activeSolution.vcxproj.filters")
+      dumpProfile.dumpDirList.clear()
+      dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
+      dumpProfile.fileNames.add("$activeSolution.vcxproj.filters")
 
       dumpAfterAction("Init") {}
       dumpAfterAction("Copy TestPlugin to project") {
