@@ -5,6 +5,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
 using JetBrains.Application.Environment.Components;
+using JetBrains.Application.Environment.DeployedPackages;
 using JetBrains.Application.Parts;
 using JetBrains.Extension;
 using JetBrains.Util;
