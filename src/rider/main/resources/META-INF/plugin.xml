@@ -165,6 +165,8 @@ Path to old plugin:</code></pre>
       <module name="intellij.cidr.runner"/>
       <module name="intellij.rider"/>
       <module name="intellij.rd.client"/>
+      <module name="intellij.rider.model.generated"/>
+      <module name="intellij.rider.rdclient.dotnet"/>
       <module name="intellij.spellchecker"/>
     </dependencies>
     <!-- endregion -->
