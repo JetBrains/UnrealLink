@@ -15,9 +15,10 @@ internal class UnrealLogSettingsConfigurable(private val project: Project) : Dsl
     companion object {
         @NlsSafe
         const val UNREAL_LINK = "UnrealLink"
+        const val ID = "UnrealLogSettings"
     }
 
-    override fun getId(): String = "UnrealLogSettings"
+    override fun getId(): String = ID
 
     override fun getDisplayName(): String = UNREAL_LINK
 
