@@ -1,24 +1,24 @@
 package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.execution.process.ProcessInfo
+import com.intellij.ide.actions.ShowSettingsUtilImpl
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.DumbAwareToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsActions
 import com.intellij.xdebugger.attach.LocalAttachHost
+import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration
 import com.jetbrains.rider.cpp.debugger.RiderCppLocalAttachDebugger
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings
-import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
-import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.settings.UnrealLogSettingsConfigurable
 import icons.UnrealIcons
 
 class PlaySettings : DefaultActionGroup(), DumbAware {
@@ -133,7 +133,7 @@ class OpenUnrealLinkSettings : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, UnrealLogSettingsConfigurable.UNREAL_LINK)
+        ShowSettingsUtilImpl.showSettingsDialog(project, UnrealLogSettingsConfigurable.ID, null)
     }
 }
 
@@ -147,7 +147,7 @@ class OpenRiderLinkSettings : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, "UnrealLinkOptionsId")
+        ShowSettingsUtilImpl.showSettingsDialog(project, "UnrealLinkOptionsId", null)
     }
 }
 
