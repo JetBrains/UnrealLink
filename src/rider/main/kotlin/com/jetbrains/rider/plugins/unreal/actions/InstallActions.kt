@@ -6,7 +6,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.UnrealHost
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.*
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 
 class InstallEditorPluginToEngineAction : DumbAwareAction() {

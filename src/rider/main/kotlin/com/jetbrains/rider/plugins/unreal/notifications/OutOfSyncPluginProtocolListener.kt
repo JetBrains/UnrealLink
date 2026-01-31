@@ -1,12 +1,19 @@
 package com.jetbrains.rider.plugins.unreal.notifications
 
-import com.intellij.notification.*
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.client.ClientProjectSession
 import com.jetbrains.rd.protocol.SolutionExtListener
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rider.UnrealLinkBundle
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.*
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallStatus
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 
 class OutOfSyncPluginProtocolListener : SolutionExtListener<RdRiderModel> {
     companion object {
