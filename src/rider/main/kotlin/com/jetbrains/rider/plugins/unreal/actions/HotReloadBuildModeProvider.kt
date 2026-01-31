@@ -2,7 +2,8 @@ package com.jetbrains.rider.plugins.unreal.actions
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.rider.build.actions.BuildButtonModeProvider
-import com.jetbrains.rider.plugins.unreal.*
+import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.UnrealLinkSettings
 
 class HotReloadBuildModeProvider : BuildButtonModeProvider {
     override fun getPriority(): Int {

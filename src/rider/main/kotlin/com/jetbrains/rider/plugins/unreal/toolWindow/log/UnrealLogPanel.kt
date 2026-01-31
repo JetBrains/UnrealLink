@@ -15,12 +15,18 @@ import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.BlueprintClassHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.MethodReferenceHyperLinkInfo
 import com.jetbrains.rider.plugins.unreal.filters.linkInfo.UnrealClassHyperLinkInfo
-import com.jetbrains.rider.plugins.unreal.model.*
+import com.jetbrains.rider.plugins.unreal.model.BlueprintReference
+import com.jetbrains.rider.plugins.unreal.model.FString
+import com.jetbrains.rider.plugins.unreal.model.LogMessageInfo
+import com.jetbrains.rider.plugins.unreal.model.StringRange
+import com.jetbrains.rider.plugins.unreal.model.UClass
+import com.jetbrains.rider.plugins.unreal.model.UnrealLogEvent
+import com.jetbrains.rider.plugins.unreal.model.VerbosityType
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.MethodReference
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import java.awt.BorderLayout
-import java.util.*
+import java.util.ArrayDeque
 import javax.swing.JPanel
 
 internal class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val project: Project) : SimpleToolWindowPanel(false) {

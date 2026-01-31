@@ -1,6 +1,9 @@
 package com.jetbrains.rider.plugins.unreal.debugger.actions
 
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.DumbAwareToggleAction
 import com.jetbrains.rider.UnrealLinkBundle
 
