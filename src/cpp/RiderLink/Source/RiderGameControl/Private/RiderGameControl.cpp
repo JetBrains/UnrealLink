@@ -72,7 +72,9 @@ static int PlayModeToInt(EPlayModeType modeType)
     switch (modeType)
     {
     default: break;
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 8)
     case PlayMode_InTargetedMobilePreview:
+#endif
     case PlayMode_InMobilePreview:
         return 1;
     case PlayMode_InEditorFloating: return 2;
