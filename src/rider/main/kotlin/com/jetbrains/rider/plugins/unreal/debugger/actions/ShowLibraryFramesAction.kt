@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.project.DumbAwareToggleAction
 import com.jetbrains.rider.UnrealLinkBundle
 
-class ShowLibraryFramesAction : DumbAwareToggleAction() {
+internal class ShowLibraryFramesAction : DumbAwareToggleAction() {
 
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
