@@ -9,7 +9,7 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.ui.BadgeIconSupplier
 import com.jetbrains.rider.plugins.unreal.actions.UnrealHostOperations
 
-class FramesPopupGroup : DefaultActionGroup(), DumbAware {
+internal class FramesPopupGroup : DefaultActionGroup(), DumbAware {
   private val FILTER_ICON = BadgeIconSupplier(AllIcons.General.Filter)
   private val myFilterActiveIcon = FILTER_ICON.getLiveIndicatorIcon(true)
   private val myFilterInactiveIcon = FILTER_ICON.getLiveIndicatorIcon(false)
