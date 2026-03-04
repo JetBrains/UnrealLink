@@ -2,9 +2,6 @@
     <id>unreal-link</id>
     <name>UnrealLink</name>
     <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
-    <depends>com.intellij.modules.rider</depends>
-    <depends>com.intellij.modules.spellchecker</depends>
-    <depends>com.jetbrains.rider-cpp</depends>
 
     <description><![CDATA[
   <br/>
@@ -160,6 +157,16 @@ Path to old plugin:</code></pre>
     ]]>
     </description>
 
+    <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
+    <dependencies>
+      <plugin id="com.jetbrains.rider-cpp"/>
+      <module name="intellij.cidr.debugger.backend"/>
+      <module name="intellij.cidr.debugger.core"/>
+      <module name="intellij.cidr.runner"/>
+      <module name="intellij.rider"/>
+      <module name="intellij.spellchecker"/>
+    </dependencies>
+    <!-- endregion -->
     <extensions defaultExtensionNs="rider.cpp">
         <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>
     </extensions>
