@@ -21,7 +21,7 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
+import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -53,9 +53,9 @@ class PlayButtons : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   fun endToEndTest(
-    caseName: String,
-    openWith: UnrealProjectModelApiFacade.PMType,
-    engine: UnrealEngine
+      caseName: String,
+      openMode: RiderUnrealApiFacade.OpenMode,
+      engine: UnrealEngine
   ) {
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
     installRiderLink(PluginInstallLocation.Game)

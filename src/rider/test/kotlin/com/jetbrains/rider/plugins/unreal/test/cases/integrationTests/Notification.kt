@@ -16,7 +16,7 @@ import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
+import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import org.testng.annotations.Test
@@ -29,9 +29,9 @@ class RiderLinkNotification : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_AllPModels")
   fun installNotification(
-    @Suppress("UNUSED_PARAMETER") caseName: String,
-    openWith: UnrealProjectModelApiFacade.PMType,
-    engine: UnrealEngine
+      @Suppress("UNUSED_PARAMETER") caseName: String,
+      openMode: RiderUnrealApiFacade.OpenMode,
+      engine: UnrealEngine
   ) {
     val notification = NotificationsManager.getNotificationsManager()
       .getNotificationsOfType(Notification::class.java, project).single { it.groupId == "OutOfSyncConnection" }

@@ -14,7 +14,7 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
+import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
@@ -43,10 +43,10 @@ class UnrealLinkInstallation : UnrealLinkBase() {
   @Test(dataProvider = "AllEngines_AllPModels")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
   fun ul(
-    caseName: String,
-    openWith: UnrealProjectModelApiFacade.PMType,
-    engine: UnrealEngine,
-    location: PluginInstallLocation
+      caseName: String,
+      openMode: RiderUnrealApiFacade.OpenMode,
+      engine: UnrealEngine,
+      location: PluginInstallLocation
   ) {
     setUnrealConfigurationAndPlatform(project, UnrealConstants.UnrealConfigurations.DevelopmentEditor)
     
@@ -65,9 +65,9 @@ class UnrealLinkInstallation : UnrealLinkBase() {
    * [UnrealLinkInstallation] have additional parameter - location ([PluginInstallLocation]), so we need to override
    * data provider generating.
    */
-  override fun generateUnrealFullDataProvider(unrealPmTypes: Array<UnrealProjectModelApiFacade.PMType>,
+  override fun generateUnrealFullDataProvider(unrealPmTypes: Array<RiderUnrealApiFacade.OpenMode>,
                                               predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-    val types = if (!SystemInfo.isWindows) arrayOf(UnrealProjectModelApiFacade.PMType.Uproject) else unrealPmTypes
+    val types = if (!SystemInfo.isWindows) arrayOf(RiderUnrealApiFacade.OpenMode.Uproject) else unrealPmTypes
     val result: ArrayList<Array<Any>> = arrayListOf()
 
     UnrealTestingEngineList.testingEngines.filter(predicate).forEach { engine ->
