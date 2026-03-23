@@ -16,7 +16,7 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.UnrealProjectModelApiFacade
+import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.framework.combine
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
@@ -35,7 +35,7 @@ class RefreshSolution : UnrealTestLevelProject() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "AllEngines_slnOnly")
   @Suppress("UNUSED_PARAMETER")
-  fun refreshSolution(caseName: String, openWith: UnrealProjectModelApiFacade.PMType, engine: UnrealEngine) {
+  fun refreshSolution(caseName: String, openMode: RiderUnrealApiFacade.OpenMode, engine: UnrealEngine) {
     withDump {
       dumpProfile.dumpDirList.clear()
       dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles").toFile())
