@@ -8,11 +8,13 @@ import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestSettings
+import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
+import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
@@ -27,7 +29,7 @@ import java.lang.reflect.Method
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-@Subsystem("UnrealLink")
+@Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Installation")
 @TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class UnrealLinkInstallation : UnrealLinkBase() {
@@ -65,6 +67,7 @@ class UnrealLinkInstallation : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "unrealLinkCombinations")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
+  @ChecklistItems(["UnrealLink/Installation"])
   fun ul(env: UnrealEnvironment, location: PluginInstallLocation) {
     setUnrealConfigurationAndPlatform(project, UnrealConstants.UnrealConfigurations.DevelopmentEditor)
 
