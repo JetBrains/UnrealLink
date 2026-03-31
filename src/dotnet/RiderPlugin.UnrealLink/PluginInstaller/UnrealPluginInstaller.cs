@@ -63,6 +63,23 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myPluginDetector.InstallInfoProperty.Change.Advise_NewNotNull(Lifetime, installInfo =>
             {
                 myUnrealHost.myModel.IsInstallInfoAvailable.Set(true);
+                myUnrealHost.myModel.GamePluginInstallInfos(
+                    installInfo.New.ProjectPlugins
+                        .Select(projectPlugin =>
+                        {
+                            var isPluginInstalled =
+                                UnrealPluginDetector.GetPathToUpluginFile(projectPlugin.UnrealPluginRootFolder).ExistsFile;
+                            var isPluginSynced = projectPlugin.IsPluginAvailable &&
+                                                 projectPlugin.PluginChecksum != null &&
+                                                 projectPlugin.PluginChecksum.SequenceEqual(myPathsProvider.CurrentPluginChecksum);
+                            return new GamePluginInstallInfo(
+                                projectPlugin.ProjectName,
+                                projectPlugin.UprojectPath.FullPath,
+                                isPluginInstalled,
+                                isPluginSynced
+                            );
+                        })
+                        .ToList());
                 mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                     "UnrealPluginInstaller.CheckAllProjectsIfAutoInstallEnabled",
                     () => { HandleAutoUpdatePlugin(installInfo.New); });
@@ -84,9 +101,10 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             if (unrealPluginInstallInfo.Location == PluginInstallLocation.Game)
             {
                 status = PluginInstallStatus.InGame;
-                outOfSync = unrealPluginInstallInfo.ProjectPlugins.Any(description =>
-                    !description.PluginChecksum.SequenceEqual(myPathsProvider.CurrentPluginChecksum)
-                    );
+                var hasSyncedProjectPlugin = unrealPluginInstallInfo.ProjectPlugins.Any(description =>
+                    description.IsPluginAvailable &&
+                    description.PluginChecksum.SequenceEqual(myPathsProvider.CurrentPluginChecksum));
+                outOfSync = !hasSyncedProjectPlugin;
             }
 
             if (!outOfSync) return;
@@ -118,7 +136,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             mySolution.Locks.ExecuteOrQueueReadLockEx(Lifetime,
                 "UnrealPluginInstaller.InstallPluginIfRequired",
                 () => HandleManualInstallPlugin(
-                    new InstallPluginDescription(installLocation, ForceInstall.No, shouldBeBuilt)
+                    ModelUtils.CreateInstallPluginDescription(installLocation, ForceInstall.No, shouldBeBuilt)
                 ));
         }
 
@@ -135,8 +153,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 TMP_PREFIX);
         }
 
-        private void InstallPluginInGame(Lifetime lifetime, UnrealPluginInstallInfo unrealPluginInstallInfo,
-            Property<double> progress, bool buildRequired)
+        private void InstallPluginInGame(
+            Lifetime lifetime,
+            UnrealPluginInstallInfo unrealPluginInstallInfo,
+            Property<double> progress,
+            bool buildRequired,
+            IReadOnlyList<UnrealPluginInstallInfo.InstallDescription> projectPluginsToInstall,
+            IReadOnlyList<UnrealPluginInstallInfo.InstallDescription> projectPluginsToDelete)
         {
             myLogger.Verbose("[UnrealLink]: Installing plugin in Game");
             var backupDir = CreateTempDirectory();
@@ -146,12 +169,20 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             var backupAllPlugins = BackupAllPlugins(unrealPluginInstallInfo);
             var success = true;
-            var size = unrealPluginInstallInfo.ProjectPlugins.Count;
+            var cppUe4SolutionDetector = mySolution.GetComponent<ICppUE4SolutionDetector>();
+            var isSln = cppUe4SolutionDetector.SupportRiderProjectModel != CppUE4ProjectModelSupportMode.UprojectOpened;
+            foreach (var installDescription in projectPluginsToDelete)
+            {
+                success &= DeletePluginUsingDescription(installDescription, isSln);
+                if (!success) break;
+            }
+
+            var size = Math.Max(projectPluginsToInstall.Count, 1);
             var range = 1.0 / size;
-            for (int i = 0; i < unrealPluginInstallInfo.ProjectPlugins.Count; i++)
+            for (int i = 0; success && i < projectPluginsToInstall.Count; i++)
             {
                 progress.Value = range * i;
-                var installDescription = unrealPluginInstallInfo.ProjectPlugins[i];
+                var installDescription = projectPluginsToInstall[i];
                 myLogger.Verbose($"[UnrealLink]: Installing plugin for {installDescription.ProjectName}");
                 try
                 {
@@ -166,7 +197,6 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 }
 
                 success = false;
-                break;
             }
 
             if (success)
@@ -182,6 +212,15 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             myUnrealHost.myModel.InstallPluginFinished(success);
+        }
+
+        private static Dictionary<string, UnrealPluginInstallInfo.InstallDescription> BuildProjectPluginsByUprojectPath(
+            UnrealPluginInstallInfo unrealPluginInstallInfo)
+        {
+            return unrealPluginInstallInfo.ProjectPlugins
+                .Where(it => !it.UprojectPath.IsNullOrEmpty())
+                .GroupBy(it => it.UprojectPath.FullPath, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(it => it.Key, it => it.First(), StringComparer.OrdinalIgnoreCase);
         }
 
         private List<BackupDir> BackupAllPlugins(UnrealPluginInstallInfo unrealPluginInstallInfo)
@@ -566,7 +605,33 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                             InstallPluginInEngine(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
                             break;
                         case PluginInstallLocation.Game:
-                            InstallPluginInGame(lifetime, unrealPluginInstallInfo, progress, installPluginDescription.BuildRequired);
+                            var projectPluginsByUprojectPath = BuildProjectPluginsByUprojectPath(unrealPluginInstallInfo);
+                            var selectedProjectPlugins = installPluginDescription.SelectedUprojectPaths.Count == 0
+                                ? unrealPluginInstallInfo.ProjectPlugins
+                                : installPluginDescription.SelectedUprojectPaths
+                                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                                    .Select(path => projectPluginsByUprojectPath.TryGetValue(path, out var description) ? description : null)
+                                    .Where(description => description != null)
+                                    .Select(description => description!)
+                                    .ToList();
+                            var selectedSet = selectedProjectPlugins
+                                .Select(it => it.UprojectPath.FullPath)
+                                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                            var unselectedProjectPlugins = installPluginDescription.UnselectedUprojectPaths
+                                .Distinct(StringComparer.OrdinalIgnoreCase)
+                                .Select(path => projectPluginsByUprojectPath.TryGetValue(path, out var description) ? description : null)
+                                .Where(description => description != null)
+                                .Select(description => description!)
+                                .Where(it => !selectedSet.Contains(it.UprojectPath.FullPath))
+                                .ToList();
+
+                            InstallPluginInGame(
+                                lifetime,
+                                unrealPluginInstallInfo,
+                                progress,
+                                installPluginDescription.BuildRequired,
+                                selectedProjectPlugins,
+                                unselectedProjectPlugins);
                             break;
                         case PluginInstallLocation.NotInstalled:
                         default:
@@ -587,8 +652,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
         {
             myUnrealHost.PerformModelAction(model =>
             {
-                model.InstallEditorPlugin.Advise(Lifetime,
-                    installPluginDescription => HandleManualInstallPlugin(installPluginDescription));
+                model.InstallEditorPlugin.Advise(Lifetime,  HandleManualInstallPlugin);
                 model.DeletePlugin.Advise(Lifetime, DeletePlugin);
                 model.EnableAutoupdatePlugin.AdviseNotNull(Lifetime,
                     unit =>
@@ -610,11 +674,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             UnrealPluginInstallInfo.InstallDescription description = installInfo.EnginePlugin;
             bool result = true;
-            result &= DeletePluginUsingDescription(description);
+            result &= DeletePluginUsingDescription(description, isSln);
             foreach (var installInfoProjectPlugin in installInfo.ProjectPlugins)
             {
                 description = installInfoProjectPlugin;
-                result &= DeletePluginUsingDescription(installInfoProjectPlugin);
+                result &= DeletePluginUsingDescription(installInfoProjectPlugin, isSln);
             }
 
             if (result)
@@ -654,30 +718,29 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 RefreshSlnProjectFiles(description, installInfo.EngineRoot);
             }
-            return;
+        }
 
-            bool DeletePluginUsingDescription(UnrealPluginInstallInfo.InstallDescription description)
+        private bool DeletePluginUsingDescription(UnrealPluginInstallInfo.InstallDescription description, bool isSln)
+        {
+            if (description.IsPluginAvailable)
             {
-                if (description.IsPluginAvailable)
+                try
                 {
-                    try
-                    {
-                        description.UnrealPluginRootFolder.Delete();
-                    }
-                    catch (Exception)
-                    {
-                        myLogger.Warn($"[UnrealLink]: Failed to delete RiderLink from {description.UnrealPluginRootFolder}");
-                        return false;
-                    }
-                    description.IsPluginAvailable = false;
-                    if (!isSln)
-                    {
-                        RefreshUprojectProjectFiles(Lifetime, description.UnrealPluginRootFolder);
-                    }
+                    description.UnrealPluginRootFolder.Delete();
                 }
-
-                return true;
+                catch (Exception)
+                {
+                    myLogger.Warn($"[UnrealLink]: Failed to delete RiderLink from {description.UnrealPluginRootFolder}");
+                    return false;
+                }
+                description.IsPluginAvailable = false;
+                if (!isSln)
+                {
+                    RefreshUprojectProjectFiles(Lifetime, description.UnrealPluginRootFolder);
+                }
             }
+
+            return true;
         }
 
         private bool BuildPlugin(Lifetime lifetime, VirtualFileSystemPath upluginPath,

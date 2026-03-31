@@ -27,7 +27,7 @@ open class UnrealLinkBase: UnrealTestLevelProject() {
     var riderLinkInstalled = false
     project.solution.rdRiderModel.installPluginFinished.advise(Lifetime.Eternal) { riderLinkInstalled = true }
     project.solution.rdRiderModel.installEditorPlugin.fire(
-      InstallPluginDescription(place, ForceInstall.Yes)
+      InstallPluginDescription(place, ForceInstall.Yes, true, emptyList(), emptyList())
     )
     waitAndPump(timeout, { riderLinkInstalled }, { "RiderLink has not been installed" })
   }
