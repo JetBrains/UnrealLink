@@ -9,6 +9,7 @@ import com.jetbrains.rd.protocol.SolutionExtListener
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rider.UnrealLinkBundle
+import com.jetbrains.rider.plugins.unreal.actions.installOrExtractPluginInGame
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
@@ -46,14 +47,12 @@ class OutOfSyncPluginProtocolListener : SolutionExtListener<RdRiderModel> {
                         addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInEngine.text")) {
                             expire()
                             model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
+                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No, true, emptyList(), emptyList())
                             )
                         })
                         if (it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text")) {
                             expire()
-                            model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)
-                            )
+                            installOrExtractPluginInGame(session.project, ForceInstall.No, buildRequired = true)
                         })
                     }
                 }
@@ -62,14 +61,12 @@ class OutOfSyncPluginProtocolListener : SolutionExtListener<RdRiderModel> {
                         addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInEngine.text.update")) {
                             expire()
                             model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
+                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No, true, emptyList(), emptyList())
                             )
                         })
                         if (it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.move")) {
                             expire()
-                            model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)
-                            )
+                            installOrExtractPluginInGame(session.project, ForceInstall.No, buildRequired = true)
                         })
                     }
                 }
@@ -78,14 +75,12 @@ class OutOfSyncPluginProtocolListener : SolutionExtListener<RdRiderModel> {
                         addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInEngine.text.move")) {
                             expire()
                             model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No)
+                                InstallPluginDescription(PluginInstallLocation.Engine, ForceInstall.No, true, emptyList(), emptyList())
                             )
                         })
                         if (it.isGameAvailable) addAction(NotificationAction.createSimple(UnrealLinkBundle.message("notificationAction.UnrealEditorOutOfSync.installPluginInGame.text.update")) {
                             expire()
-                            model.installEditorPlugin.fire(
-                                InstallPluginDescription(PluginInstallLocation.Game, ForceInstall.No)
-                            )
+                            installOrExtractPluginInGame(session.project, ForceInstall.No, buildRequired = true)
                         })
                     }
                 }

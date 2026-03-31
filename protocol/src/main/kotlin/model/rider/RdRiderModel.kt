@@ -71,6 +71,15 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
             +"No"
         })
         field("buildRequired", bool).default(true)
+        field("selectedUprojectPaths", immutableList(string))
+        field("unselectedUprojectPaths", immutableList(string))
+    }
+
+    private val GamePluginInstallInfo = structdef("GamePluginInstallInfo") {
+        field("projectName", string)
+        field("uprojectPath", string)
+        field("isPluginAvailable", bool)
+        field("isPluginSynced", bool)
     }
 
     init {
@@ -117,6 +126,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("RefreshInProgress", false)
         property("IsUproject", false)
         property("isInstallInfoAvailable", false)
+        sink("gamePluginInstallInfos", immutableList(GamePluginInstallInfo))
 
         source("CancelRiderLinkInstall", void)
 

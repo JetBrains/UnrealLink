@@ -17,6 +17,7 @@ import com.jetbrains.rd.util.reactive.whenTrue
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
 import com.jetbrains.rider.plugins.unreal.model.ConnectionInfo
 import com.jetbrains.rider.plugins.unreal.model.PlayState
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.GamePluginInstallInfo
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.plugins.unreal.toolWindow.UnrealToolWindowFactory
@@ -51,6 +52,7 @@ class UnrealHost(val project: Project) {
         get() = model.isUproject.value
     val isInstallInfoAvailable:Boolean
         get() = model.isInstallInfoAvailable.value
+    var gamePluginInstallInfos: List<GamePluginInstallInfo> = emptyList()
     val isHotReloadAvailable: Boolean
         get() = model.isHotReloadAvailable.value
     val isHotReloadCompiling: Boolean
@@ -100,6 +102,9 @@ class UnrealHost(val project: Project) {
 
             model.riderLinkInstallMessage.advise(lifetime) { message ->
                 RiderLinkInstallService.getInstance(project).getOrCreateRiderLinkInstallContext().writeMessage(message)
+            }
+            model.gamePluginInstallInfos.advise(lifetime) { gamePluginInstallInfos ->
+                project.service<UnrealHost>().gamePluginInstallInfos = gamePluginInstallInfos
             }
 
 //  Update state of Unreal actions on toolbar
