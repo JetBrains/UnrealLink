@@ -202,6 +202,8 @@ Path to old plugin:</code></pre>
 
         <toolWindowAllowlist id="UnrealLink" />
         <statistics.counterUsagesCollector implementationClass="com.jetbrains.rider.plugins.unreal.UnrealPluginUsagesCollector"/>
+        <projectSettings service="com.jetbrains.rider.plugins.unreal.UnrealLinkSettings"/>
+        <projectSettings service="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
