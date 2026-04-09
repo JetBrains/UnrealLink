@@ -17,7 +17,7 @@ import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
-import com.jetbrains.rider.test.framework.combine
+import com.jetbrains.rider.test.scriptingApi.combine
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.waitPumping
