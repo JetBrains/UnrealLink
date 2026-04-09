@@ -8,6 +8,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import javax.inject.Inject
+import org.gradle.process.ExecOperations
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 import org.jetbrains.intellij.platform.gradle.Constants
@@ -15,10 +17,20 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import kotlin.io.path.pathString
 
 plugins {
-    id("me.filippov.gradle.jvm.wrapper")
+    id("me.filippov.gradle.jvm.wrapper") version "0.16.0"
     id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.intellij.platform")
     kotlin("jvm")
+}
+
+interface Injected {
+    @get:Inject val exec: ExecOperations
+}
+val injected = objects.newInstance<Injected>()
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 repositories {
@@ -95,15 +107,14 @@ fun TaskContainerScope.setupCleanup(task: Task) {
 }
 
 fun getBranchName(): String {
-    val stdOut = ByteArrayOutputStream()
-    val result = project.exec {
+    val execResult = providers.exec {
         executable = "git"
-        args = listOf("rev-parse", "--abbrev-ref", "HEAD")
+        args("rev-parse", "--abbrev-ref", "HEAD")
         workingDir = projectDir
-        standardOutput = stdOut
+        isIgnoreExitValue = true
     }
-    if (result.exitValue == 0) {
-        val output = stdOut.toString().trim()
+    if (execResult.result.get().exitValue == 0) {
+        val output = execResult.standardOutput.asText.get().trim()
         if (output.isNotEmpty())
             return output
     }
@@ -150,8 +161,6 @@ dependencies {
         }
 
         jetbrainsRuntime()
-
-        instrumentationTools()
 
         // Workaround for https://youtrack.jetbrains.com/issue/IDEA-179607
         bundledPlugin("rider.intellij.plugin.appender")
@@ -259,7 +268,7 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("generateModels")
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 
@@ -329,7 +338,7 @@ tasks {
                 "/nologo"
             )
             logger.info("call dotnet.cmd with '{}'", buildArguments)
-            project.exec {
+            injected.exec.exec {
                 executable = "$rootDir/tools/dotnet.cmd"
                 args = buildArguments
                 workingDir = dotNetSolution.parentFile
@@ -472,7 +481,7 @@ tasks {
             if(targetDir.exists()) {
                 val stdOut = ByteArrayOutputStream()
                 // Check if it's Junction
-                val result = exec {
+                val result = injected.exec.exec {
                     commandLine = if(isWindows)
                         listOf("cmd.exe", "/c", "fsutil", "reparsepoint", "query", targetDir.absolutePath, "|", "find", "Print Name:")
                     else
@@ -503,7 +512,7 @@ tasks {
 
             targetDir.parentFile.mkdirs()
             val stdOut = ByteArrayOutputStream()
-            val result = exec {
+            val result = injected.exec.exec {
                 commandLine = if(isWindows)
                     listOf("cmd.exe", "/c", "mklink", "/J", targetDir.absolutePath, riderLinkDir.absolutePath)
                 else
@@ -518,7 +527,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "8.7"
+        gradleVersion = "9.4.1"
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
     }
 }
