@@ -1,7 +1,5 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
-import com.intellij.openapi.util.SystemInfo
-import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
@@ -14,16 +12,18 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
-import com.jetbrains.rider.test.unreal.UnrealTestingEngineList
+import com.jetbrains.rider.test.unreal.UnrealEnvironment
+import com.jetbrains.rider.test.unreal.UnrealTestCombinations
 import org.testng.annotations.BeforeMethod
+import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
+import java.lang.reflect.Method
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -33,61 +33,48 @@ import java.util.concurrent.TimeUnit
 class UnrealLinkInstallation : UnrealLinkBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
+  /**
+   * Extends standard [UnrealTestCombinations] with an additional [PluginInstallLocation] dimension.
+   * Produces (env, location) pairs — engine and openMode are applied automatically by
+   * [com.jetbrains.rider.test.unreal.UnrealBase.applyDataProviderCombination], only location is
+   * test-specific.
+   */
+  @DataProvider(name = "unrealLinkCombinations")
+  fun unrealLinkCombinations(method: Method): Array<Array<Any>> {
+    val combinations = UnrealTestCombinations.combinations(method)
+    val locations = listOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
+
+    val result = combinations.flatMap { (engine, openMode) ->
+      locations.map { location ->
+        arrayOf(UnrealEnvironment(engine, openMode) as Any, location as Any)
+      }
+    }.toTypedArray()
+
+    frameworkLogger.info("unrealLinkCombinations for ${method.name}:" +
+            "combinations=${combinations.size}, " +
+            "locations=${locations.size}, total=${result.size}")
+
+    return result
+  }
+
   @BeforeMethod
   fun setOpenSolutionSettings() {
     unrealApiFacade.disableEnginePlugins = false
   }
 
-  @Suppress("unused")
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "AllEngines_AllPModels")
+  @Test(dataProvider = "unrealLinkCombinations")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
-  fun ul(
-      caseName: String,
-      openMode: RiderUnrealApiFacade.OpenMode,
-      engine: UnrealEngine,
-      location: PluginInstallLocation
-  ) {
+  fun ul(env: UnrealEnvironment, location: PluginInstallLocation) {
     setUnrealConfigurationAndPlatform(project, UnrealConstants.UnrealConfigurations.DevelopmentEditor)
-    
+
     installRiderLink(location)
 
     buildStartupProject()
-    //        checkThatBuildArtifactsExist(project)  // TODO create checker for unreal projects
 
     withRunProgram(project, configurationName = activeSolution) {
       waitAndPump(runProgramTimeout, { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
       waitPumping(Duration.ofSeconds(15))
     }
-  }
-
-  /**
-   * [UnrealLinkInstallation] have additional parameter - location ([PluginInstallLocation]), so we need to override
-   * data provider generating.
-   */
-  override fun generateUnrealFullDataProvider(unrealPmTypes: Array<RiderUnrealApiFacade.OpenMode>,
-                                              predicate: (UnrealEngine) -> Boolean): MutableIterator<Array<Any>> {
-    val types = if (!SystemInfo.isWindows) arrayOf(RiderUnrealApiFacade.OpenMode.Uproject) else unrealPmTypes
-    val result: ArrayList<Array<Any>> = arrayListOf()
-
-    UnrealTestingEngineList.testingEngines.filter(predicate).forEach { engine ->
-      val locations = mutableListOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
-      locations.forEach { location ->
-        types.forEach { type ->
-          // Install RL in UE5 in Engine breaks project build. See https://jetbrains.slack.com/archives/CH506NL5P/p1622199704007800 TODO?
-          // if ((engine.version.major == 5) && engine.isInstalledBuild && location == PluginInstallLocation.Engine) return@forEach
-          result.add(arrayOf(uniqueDataString("$type$location", engine), type, engine, location))
-        }
-      }
-    }
-    frameworkLogger.debug("Data Provider was generated: $result")
-    return result.iterator()
-  }
-
-  override val uniqueDataString: (String, UnrealEngine) -> String = { baseString: String, engine: UnrealEngine ->
-    // If we use engine from source, it's ID is GUID, so we replace it by 'normal' id plus ".fromSouce" string
-    // else just replace dots in engine version, 'cause of part after last dot will be parsed as file type.
-    if (engine.id.matches(guidRegex)) "$baseString${engine.version.major}_${engine.version.minor}_Src"
-    else "$baseString${engine.id.replace('.', '_')}"
   }
 }

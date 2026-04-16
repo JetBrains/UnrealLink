@@ -1,6 +1,5 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests.projectModel
 
-import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
 import com.jetbrains.rider.ideaInterop.vfs.VfsWriteOperationsHost
@@ -16,12 +15,13 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.scriptingApi.combine
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
+import com.jetbrains.rider.test.unreal.SlnOnly
+import com.jetbrains.rider.test.unreal.UnrealEnvironment
 import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import org.testng.annotations.Test
 import java.time.Duration
@@ -32,10 +32,10 @@ import java.time.Duration
 @TestEnvironment(platform = [PlatformType.WINDOWS_X64])
 class RefreshSolution : UnrealTestLevelProject() {
 
+  @SlnOnly
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "AllEngines_slnOnly")
-  @Suppress("UNUSED_PARAMETER")
-  fun refreshSolution(caseName: String, openMode: RiderUnrealApiFacade.OpenMode, engine: UnrealEngine) {
+  @Test(dataProvider = "unrealCombinations")
+  fun refreshSolution(e: UnrealEnvironment) {
     withDump {
       dumpProfile.dumpDirList.clear()
       dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles").toFile())
