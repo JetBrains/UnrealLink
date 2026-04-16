@@ -3,7 +3,6 @@ package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.NotificationsManager
-import com.jetbrains.rd.ide.model.UnrealEngine
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.annotations.Solution
@@ -16,9 +15,9 @@ import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.Mono
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
+import com.jetbrains.rider.test.unreal.UnrealEnvironment
 import org.testng.annotations.Test
 import java.time.Duration
 
@@ -27,12 +26,8 @@ import java.time.Duration
 @TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class RiderLinkNotification : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "AllEngines_AllPModels")
-  fun installNotification(
-      @Suppress("UNUSED_PARAMETER") caseName: String,
-      openMode: RiderUnrealApiFacade.OpenMode,
-      engine: UnrealEngine
-  ) {
+  @Test(dataProvider = "unrealCombinations")
+  fun installNotification(e: UnrealEnvironment) {
     val notification = NotificationsManager.getNotificationsManager()
       .getNotificationsOfType(Notification::class.java, project).single { it.groupId == "OutOfSyncConnection" }
     notification.type.shouldBe(NotificationType.WARNING)
