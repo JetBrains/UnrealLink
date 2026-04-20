@@ -1,7 +1,7 @@
 <idea-plugin>
     <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
     <dependencies>
-        <plugin id="unreal-link"/>
+      <plugin id="unreal-link"/>
       <module name="intellij.rider.test.framework"/>
       <module name="intellij.rider.test.framework.integration.testng"/>
       <module name="intellij.rider.test.framework.integration.testng.tests"/>
@@ -12,10 +12,11 @@
       <module name="intellij.libraries.kotlinx.coroutines.core"/>
       <module name="intellij.platform.core"/>
       <module name="intellij.platform.core.ui"/>
+      <module name="intellij.platform.editor.ui"/>
       <module name="intellij.platform.ide.core"/>
       <module name="intellij.platform.ide.impl"/>
       <module name="intellij.platform.lang.impl"/>
-        <module name="intellij.rd.client"/>
+      <module name="intellij.rd.client"/>
       <module name="intellij.rider.languages"/>
     </dependencies>
     <!-- endregion -->
