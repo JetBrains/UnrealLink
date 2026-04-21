@@ -38,7 +38,7 @@ class RefreshSolution : UnrealTestLevelProject() {
   fun refreshSolution(e: UnrealEnvironment) {
     withDump {
       dumpProfile.dumpDirList.clear()
-      dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles").toFile())
+      dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
       dumpProfile.fileNames.add("$activeSolution.vcxproj.filters")
 
       dumpAfterAction("Init") {}
