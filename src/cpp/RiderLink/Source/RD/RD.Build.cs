@@ -66,6 +66,7 @@ public class RD : ModuleRules
 		PrivateDefinitions.Add("rd_core_cpp_EXPORTS");
 		PrivateDefinitions.Add("spdlog_EXPORTS");
 		PrivateDefinitions.Add("FMT_EXPORT");
+		PrivateDefinitions.Add("_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR");
 
 		PublicDefinitions.Add("SPDLOG_NO_EXCEPTIONS");
 		PublicDefinitions.Add("SPDLOG_COMPILED_LIB");
