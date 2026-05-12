@@ -57,7 +57,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myNotificationsModel = notificationsModel;
             myBackgroundProgressManager = backgroundProgressManager;
             myBoundSettingsStore =
-                settingsStore.BindToContextLive(Lifetime, ContextRange.Smart(solution.ToDataContext()));
+                settingsStore.BindToContextLive(Lifetime, ContextRange.Smart(solution.ToDataContext2()));
             myPluginDetector = pluginDetector;
 
             myPluginDetector.InstallInfoProperty.Change.Advise_NewNotNull(Lifetime, installInfo =>
