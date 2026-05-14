@@ -28,10 +28,10 @@ class UnrealGameEngineAssetIndexProvider : IGameEngineAssetIndexProvider {
         return response.assets.map { GameEngineAssetInfo(it.assetPath, it.assetName, it.baseClass) }
     }
 
-    override suspend fun getClassHierarchy(project: Project, baseClass: String): List<GameEngineClassInfo> {
+    override suspend fun getClassHierarchy(project: Project, baseClass: String, limit: Int): List<GameEngineClassInfo> {
         val model = UnrealHost.getInstance(project).model
         val response = model.getBlueprintHierarchy.startSuspending(
-            UnrealBlueprintHierarchyRequest(baseClass = baseClass)
+            UnrealBlueprintHierarchyRequest(baseClass = baseClass, limit = limit)
         )
         return response.blueprints.map { GameEngineClassInfo(it.name, it.assetPath) }
     }
