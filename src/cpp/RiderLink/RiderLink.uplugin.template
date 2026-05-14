@@ -61,6 +61,11 @@
 				"Win64"
 
 			]
+		},
+		{
+			"Name": "RiderAgentTools",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }
