@@ -7,6 +7,17 @@
 
 static const int32 MAX_OUTPUT_CHARS = 10000;
 
+static FString JoinLogOutput(const TArray<FPythonLogOutputEntry>& Entries)
+{
+    TArray<FString> Lines;
+    Lines.Reserve(Entries.Num());
+    for (const FPythonLogOutputEntry& Entry : Entries)
+    {
+        Lines.Add(Entry.Output);
+    }
+    return FString::Join(Lines, TEXT("\n"));
+}
+
 static FString CapString(const FString& Str)
 {
     if (Str.Len() <= MAX_OUTPUT_CHARS) return Str;
@@ -42,7 +53,7 @@ static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCa
 
         const bool bSuccess = PythonPlugin->ExecPythonCommandEx(Cmd);
         const FString Output = Cmd.LogOutput.Num() > 0
-            ? CapString(FString::Join(Cmd.LogOutput, TEXT("\n")))
+            ? CapString(JoinLogOutput(Cmd.LogOutput))
             : FString(TEXT(""));
         const FString Result = CapString(Cmd.CommandResult);
         const FString Error = bSuccess ? FString(TEXT("")) : CapString(Cmd.CommandError);
@@ -99,7 +110,7 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
                             && PythonPlugin->ExecPythonCommandEx(Cmd);
 
                         const FString Output = Cmd.LogOutput.Num() > 0
-                            ? CapString(FString::Join(Cmd.LogOutput, TEXT("\n")))
+                            ? CapString(JoinLogOutput(Cmd.LogOutput))
                             : FString(TEXT(""));
                         const FString Result = CapString(Cmd.CommandResult);
                         const FString Error = bSuccess ? FString(TEXT("")) : CapString(Cmd.CommandError);
