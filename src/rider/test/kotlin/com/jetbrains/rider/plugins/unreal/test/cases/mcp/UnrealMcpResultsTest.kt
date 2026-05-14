@@ -6,7 +6,6 @@ import com.jetbrains.rider.plugins.unreal.mcp.UnrealLogResult
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class UnrealMcpResultsTest {
@@ -23,7 +22,7 @@ class UnrealMcpResultsTest {
     }
 
     @Test
-    fun `UnrealLogResult omits null fields`() {
+    fun `UnrealLogResult serializes entries`() {
         val result = UnrealLogResult(entries = listOf(
             UnrealLogEntry(verbosity = "Log", category = "LogTemp", message = "Hello", timestampMs = 0L)
         ))

@@ -4,6 +4,7 @@ import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class UnrealHealthResult(
     val connected: Boolean,
@@ -16,7 +17,6 @@ data class UnrealPlayStateResult(
     val state: String,  // "Idle" | "Play" | "Pause"
 )
 
-@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class UnrealLogEntry(
     val verbosity: String,
