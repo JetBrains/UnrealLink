@@ -135,6 +135,40 @@ class UnrealMcpToolset : McpToolset {
 
     @McpTool
     @McpDescription("""
+        |Query recent log entries streamed from Unreal Editor.
+        |Requires Unreal Editor to be connected; the buffer accumulates entries while connected.
+        |category: filter by log category name (e.g. "LogTemp", "LogBlueprintUserMessages"). Omit for all.
+        |minVerbosity: minimum severity to include: "Fatal" | "Error" | "Warning" | "Display" | "Log" | "Verbose" | "VeryVerbose". Omit for all.
+        |count: maximum entries to return (most recent). Default 200, max 1000.
+        |sinceTimestampMs: only return entries with timestamp >= this value (epoch milliseconds). Omit for no time filter.
+        |Returns entries ordered oldest-first.
+    """)
+    suspend fun ue_get_logs(
+        @McpDescription("Log category name to filter by, e.g. LogTemp. Omit for all categories.")
+        category: String? = null,
+        @McpDescription("Minimum verbosity: Fatal | Error | Warning | Display | Log | Verbose | VeryVerbose")
+        minVerbosity: String? = null,
+        @McpDescription("Maximum number of entries to return (most recent). Default 200.")
+        count: Int = 200,
+        @McpDescription("Epoch milliseconds — return only entries at or after this timestamp.")
+        sinceTimestampMs: Long? = null,
+    ): UnrealLogResult {
+        currentCoroutineContext().reportToolActivity("Querying Unreal logs")
+        val project = currentCoroutineContext().project
+        if (count !in 1..1000) mcpFail("count must be between 1 and 1000")
+        val entries = UnrealLogBuffer.getInstance(project).query(
+            LogFilter(
+                category = category,
+                minVerbosity = minVerbosity,
+                count = count,
+                sinceTimestampMs = sinceTimestampMs,
+            )
+        )
+        return UnrealLogResult(entries = entries)
+    }
+
+    @McpTool
+    @McpDescription("""
         |Open a Blueprint asset in Unreal Editor's visual graph editor.
         |path must be a valid Unreal asset path, e.g. "/Game/Blueprints/BP_MyActor.BP_MyActor".
         |The editor window is brought to focus after opening.
