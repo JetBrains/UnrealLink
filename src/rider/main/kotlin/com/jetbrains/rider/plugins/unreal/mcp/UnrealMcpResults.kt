@@ -42,3 +42,18 @@ data class UnrealBlueprintUsage(
 data class UnrealBlueprintUsagesResult(
     val usages: List<UnrealBlueprintUsage>,
 )
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+data class UnrealScriptResult(
+    val success: Boolean,
+    val output: String,
+    val result: String,
+    @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val error: String? = null,
+)
+
+@Serializable
+data class UnrealBatchScriptResult(
+    val results: List<UnrealScriptResult>,
+    val lastSuccessfulIndex: Int,
+)

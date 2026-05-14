@@ -32,4 +32,11 @@ class UnrealMcpToolsetTest {
             "ue_find_blueprint_usages must have @McpTool"
         )
     }
+
+    @Test
+    fun `ue_execute_python tool is declared`() {
+        val methods = UnrealMcpToolset::class.java.declaredMethods
+        assertTrue(methods.any { it.name == "ue_execute_python" }, "ue_execute_python must exist")
+        assertTrue(methods.any { it.name == "ue_execute_python_batch" }, "ue_execute_python_batch must exist")
+    }
 }
