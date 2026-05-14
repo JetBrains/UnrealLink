@@ -187,4 +187,40 @@ class UnrealMcpToolset : McpToolset {
         )
         return "Blueprint open requested: $path"
     }
+
+    @McpTool
+    @McpDescription("""
+        |Find Blueprint assets and file paths that reference a given C++ symbol or Blueprint path string.
+        |Uses Rider's ReSharper backend Blueprint indexing (powered by RiderLink) to resolve links.
+        |symbol: the string to look up, e.g. a C++ class name, method name, or Blueprint asset path.
+        |Returns a list of resolved usages with full asset paths and text ranges.
+        |Empty result means no Blueprint references were found — the symbol may be C++-only.
+        |Requires the editor to be connected because the backend uses IsBlueprintPathName from RiderLink.
+    """)
+    suspend fun ue_find_blueprint_usages(
+        @McpDescription("C++ symbol name or Blueprint asset path string to look up.")
+        symbol: String,
+    ): UnrealBlueprintUsagesResult {
+        currentCoroutineContext().reportToolActivity("Finding Blueprint usages of: $symbol")
+        val host = requireConnected()
+        val responses = host.model.filterLinkCandidates.startSuspending(
+            listOf(LinkRequest(data = FString(symbol)))
+        )
+        val usages = responses.mapNotNull { response ->
+            when (response) {
+                is LinkResponseBlueprint -> UnrealBlueprintUsage(
+                    fullPath = response.fullPath.data,
+                    rangeStart = response.range.first,
+                    rangeEnd = response.range.last,
+                )
+                is LinkResponseFilePath -> UnrealBlueprintUsage(
+                    fullPath = response.fullPath.data,
+                    rangeStart = response.range.first,
+                    rangeEnd = response.range.last,
+                )
+                else -> null
+            }
+        }
+        return UnrealBlueprintUsagesResult(usages = usages)
+    }
 }
