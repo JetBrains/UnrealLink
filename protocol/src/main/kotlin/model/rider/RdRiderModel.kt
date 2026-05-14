@@ -82,6 +82,53 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("isPluginSynced", bool)
     }
 
+    private val UnrealAssetInfo = structdef("UnrealAssetInfo") {
+        field("assetPath", string)
+        field("assetName", string)
+        field("baseClass", string.nullable)
+    }
+    private val UnrealAssetSearchRequest = structdef("UnrealAssetSearchRequest") {
+        field("query", string.nullable)
+        field("baseClass", string.nullable)
+        field("limit", int).default(200)
+    }
+    private val UnrealAssetSearchResponse = structdef("UnrealAssetSearchResponse") {
+        field("assets", immutableList(UnrealAssetInfo))
+    }
+    private val UnrealBlueprintInfo = structdef("UnrealBlueprintInfo") {
+        field("name", string)
+        field("assetPath", string)
+    }
+    private val UnrealBlueprintHierarchyRequest = structdef("UnrealBlueprintHierarchyRequest") {
+        field("baseClass", string)
+    }
+    private val UnrealBlueprintHierarchyResponse = structdef("UnrealBlueprintHierarchyResponse") {
+        field("blueprints", immutableList(UnrealBlueprintInfo))
+    }
+    private val UnrealGameplayTagInfo = structdef("UnrealGameplayTagInfo") {
+        field("tagName", string)
+        field("assetPath", string)
+    }
+    private val UnrealGameplayTagsRequest = structdef("UnrealGameplayTagsRequest") {
+        field("prefix", string.nullable)
+        field("limit", int).default(500)
+    }
+    private val UnrealGameplayTagsResponse = structdef("UnrealGameplayTagsResponse") {
+        field("tags", immutableList(UnrealGameplayTagInfo))
+    }
+    private val UnrealAssetPropertyInfo = structdef("UnrealAssetPropertyInfo") {
+        field("name", string)
+        field("typeName", string)
+        field("value", string)
+    }
+    private val UnrealAssetPropertiesRequest = structdef("UnrealAssetPropertiesRequest") {
+        field("assetPath", string)
+    }
+    private val UnrealAssetPropertiesResponse = structdef("UnrealAssetPropertiesResponse") {
+        field("objectName", string.nullable)
+        field("properties", immutableList(UnrealAssetPropertyInfo))
+    }
+
     init {
         property("editorId", 0).readonly.async
 
@@ -139,5 +186,11 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         // Python execution — Rider→UE direction; C# backend forwards to RdEditorModel
         call("executeScript", UE4Library.ScriptRequest, UE4Library.ScriptResult).async
         call("executeBatchScripts", UE4Library.BatchScriptRequest, UE4Library.BatchScriptResult).async
+
+        // Asset index queries — Rider PSI only, no editor connection required
+        call("searchUnrealAssets",    UnrealAssetSearchRequest,        UnrealAssetSearchResponse).async
+        call("getBlueprintHierarchy", UnrealBlueprintHierarchyRequest, UnrealBlueprintHierarchyResponse).async
+        call("searchGameplayTags",    UnrealGameplayTagsRequest,       UnrealGameplayTagsResponse).async
+        call("getAssetProperties",    UnrealAssetPropertiesRequest,    UnrealAssetPropertiesResponse).async
     }
 }
