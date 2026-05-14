@@ -15,6 +15,7 @@ import com.jetbrains.rd.util.reactive.Property
 import com.jetbrains.rd.util.reactive.adviseNotNull
 import com.jetbrains.rd.util.reactive.whenTrue
 import com.jetbrains.rider.plugins.unreal.actions.forceTriggerUIUpdate
+import com.jetbrains.rider.plugins.unreal.mcp.UnrealLogBuffer
 import com.jetbrains.rider.plugins.unreal.model.ConnectionInfo
 import com.jetbrains.rider.plugins.unreal.model.PlayState
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.GamePluginInstallInfo
@@ -81,6 +82,8 @@ class UnrealHost(val project: Project) {
                 val host = project.service<UnrealHost>()
                 host.isUnrealEngineSolution = isUnrealEngineSolution
             }
+            // Wire log buffer for MCP log queries
+            UnrealLogBuffer.getInstance(project).attach(lifetime, model)
             model.isPreBuiltEngine.change.advise(lifetime) { isPreBuiltEngine ->
                 val host = project.service<UnrealHost>()
                 host.isPreBuiltEngine = isPreBuiltEngine
