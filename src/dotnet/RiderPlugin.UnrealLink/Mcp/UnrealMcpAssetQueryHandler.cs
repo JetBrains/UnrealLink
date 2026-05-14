@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.Application.Parts;
 using JetBrains.ProjectModel;
@@ -22,23 +23,40 @@ public class UnrealMcpAssetQueryHandler
         unrealHost.PerformModelAction(model =>
         {
             model.SearchUnrealAssets.SetAsync((lt, request) =>
-                RdTask.Successful(SearchAssets(assetsCache, request)));
+            {
+                try { return RdTask.Successful(SearchAssets(assetsCache, request)); }
+                catch (Exception ex) { return RdTask.Faulted<UnrealAssetSearchResponse>(ex); }
+            });
 
             model.GetBlueprintHierarchy.SetAsync((lt, request) =>
-                RdTask.Successful(GetBlueprintHierarchy(assetsCache, request)));
+            {
+                try { return RdTask.Successful(GetBlueprintHierarchy(assetsCache, request)); }
+                catch (Exception ex) { return RdTask.Faulted<UnrealBlueprintHierarchyResponse>(ex); }
+            });
 
             model.SearchGameplayTags.SetAsync((lt, request) =>
-                RdTask.Successful(SearchGameplayTags(assetsCache, request)));
+            {
+                try { return RdTask.Successful(SearchGameplayTags(assetsCache, request)); }
+                catch (Exception ex) { return RdTask.Faulted<UnrealGameplayTagsResponse>(ex); }
+            });
 
             model.GetAssetProperties.SetAsync((lt, request) =>
-                RdTask.Successful(GetAssetProperties(assetsCache, request)));
+            {
+                var rdTask = new RdTask<UnrealAssetPropertiesResponse>();
+                Task.Run(() =>
+                {
+                    try { rdTask.Set(GetAssetProperties(assetsCache, request)); }
+                    catch (Exception ex) { rdTask.Set(ex); }
+                });
+                return rdTask;
+            });
         });
     }
 
     [NotNull]
     private static UnrealAssetSearchResponse SearchAssets([NotNull] UE4AssetsCache cache, [NotNull] UnrealAssetSearchRequest request)
     {
-        var limit = request.Limit;
+        var limit = Math.Max(1, Math.Min(request.Limit, 5000));
         var results = new List<UnrealAssetInfo>();
 
         if (request.BaseClass != null)
@@ -71,7 +89,7 @@ public class UnrealMcpAssetQueryHandler
     {
         var baseClassNames = cache.GetBaseClassesByShortName(request.BaseClass);
         var blueprints = UE4SearchUtil.GetDerivedBlueprintClasses(baseClassNames, cache, uniqueNames: true)
-            .Take(1000)
+            .Take(Math.Max(1, Math.Min(request.Limit, 5000)))
             .Where(c => c.ContainingFile.IsValid())
             .Select(c => new UnrealBlueprintInfo(c.Name, c.ContainingFile.GetLocation().FullPath))
             .ToList();
@@ -114,19 +132,11 @@ public class UnrealMcpAssetQueryHandler
             var properties = cdoExport.ReadProperties();
             propertyInfos = properties
                 .Where(p => p.ValuePresentation != null)
-                .Select(p => new UnrealAssetPropertyInfo(p.Name, GetPropertyTypeName(p), p.ValuePresentation))
+                .Select(p => new UnrealAssetPropertyInfo(p.Name, p.TypeName, p.ValuePresentation))
                 .ToList();
         }
 
         return new UnrealAssetPropertiesResponse(objectName, propertyInfos);
     }
 
-    private static string GetPropertyTypeName([NotNull] IUEProperty prop)
-    {
-        var typeName = prop.GetType().Name;
-        var backtick = typeName.IndexOf('`');
-        if (backtick >= 0)
-            typeName = typeName.Substring(0, backtick);
-        return typeName.StartsWith("UE", StringComparison.Ordinal) ? typeName.Substring(2) : typeName;
-    }
 }

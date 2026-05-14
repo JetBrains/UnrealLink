@@ -101,6 +101,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     }
     private val UnrealBlueprintHierarchyRequest = structdef("UnrealBlueprintHierarchyRequest") {
         field("baseClass", string)
+        field("limit", int).default(1000)
     }
     private val UnrealBlueprintHierarchyResponse = structdef("UnrealBlueprintHierarchyResponse") {
         field("blueprints", immutableList(UnrealBlueprintInfo))
