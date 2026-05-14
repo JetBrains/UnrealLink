@@ -176,6 +176,10 @@ Path to old plugin:</code></pre>
         <mcpToolset implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealMcpToolset"/>
     </extensions>
 
+    <extensions defaultExtensionNs="com.intellij.rider">
+        <gameEngineAssetIndexProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineAssetIndexProvider"/>
+    </extensions>
+
     <extensions defaultExtensionNs="rider.cpp">
         <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>
     </extensions>
