@@ -223,4 +223,71 @@ class UnrealMcpToolset : McpToolset {
         }
         return UnrealBlueprintUsagesResult(usages = usages)
     }
+
+    @McpTool
+    @McpDescription("""
+        |Execute a Python script inside Unreal Editor using the built-in Python plugin.
+        |The script runs on the editor's game thread with full access to Unreal Python API.
+        |script: valid Python code as a string. Multi-line scripts are supported.
+        |isolated: if true, the script runs in EvaluateStatement mode (returns expression value). Default false.
+        |Returns stdout output, expression result, and any error messages.
+        |Output is capped at 10,000 characters to avoid context overflow.
+        |Reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/
+    """)
+    suspend fun ue_execute_python(
+        @McpDescription("Python code to execute inside Unreal Editor.")
+        script: String,
+        @McpDescription("Run in isolated scope (EvaluateStatement mode, returns expression value). Default false.")
+        isolated: Boolean = false,
+    ): UnrealScriptResult {
+        currentCoroutineContext().reportToolActivity("Executing Python in UE")
+        val host = requireConnected()
+        val result = host.model.executeScript.startSuspending(
+            com.jetbrains.rider.plugins.unreal.model.ScriptRequest(
+                script = FString(script),
+                isolated = isolated,
+            )
+        )
+        return UnrealScriptResult(
+            success = result.success,
+            output = result.output.data,
+            result = result.result.data,
+            error = result.error.data.takeIf { it.isNotEmpty() },
+        )
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Execute multiple Python scripts sequentially in Unreal Editor with resume-on-failure support.
+        |scripts: list of Python code strings to execute in order.
+        |startFrom: resume from this 0-based index (use lastSuccessfulIndex + 1 from a previous failed call).
+        |Stops on the first failure and returns lastSuccessfulIndex.
+        |To resume after a partial failure: call again with startFrom = lastSuccessfulIndex + 1.
+    """)
+    suspend fun ue_execute_python_batch(
+        @McpDescription("List of Python scripts to execute sequentially.")
+        scripts: List<String>,
+        @McpDescription("0-based index to resume from (default 0 = start from beginning).")
+        startFrom: Int = 0,
+    ): UnrealBatchScriptResult {
+        currentCoroutineContext().reportToolActivity("Executing Python batch in UE")
+        val host = requireConnected()
+        val result = host.model.executeBatchScripts.startSuspending(
+            com.jetbrains.rider.plugins.unreal.model.BatchScriptRequest(
+                scripts = scripts.map { FString(it) },
+                startFrom = startFrom,
+            )
+        )
+        return UnrealBatchScriptResult(
+            results = result.results.map { r ->
+                UnrealScriptResult(
+                    success = r.success,
+                    output = r.output.data,
+                    result = r.result.data,
+                    error = r.error.data.takeIf { it.isNotEmpty() },
+                )
+            },
+            lastSuccessfulIndex = result.lastSuccessfulIndex,
+        )
+    }
 }
