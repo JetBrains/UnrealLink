@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
+import org.jetbrains.annotations.TestOnly
 
 data class LogFilter(
     val category: String? = null,
@@ -13,22 +14,29 @@ data class LogFilter(
     val sinceTimestampMs: Long? = null,
 )
 
-/** Verbosity ordering matching UE's ELogVerbosity — lower ordinal = more severe. */
+/**
+ * Severity ordering for the user-facing verbosity filter — lower value = more severe.
+ * Mirrors the meaningful subset of UE's `ELogVerbosity` (`VerbosityType` enum).
+ * `NoLogging`, `All`, `BreakOnLog`, and `NumVerbosity` are intentionally absent —
+ * entries with those verbosities are dropped when any `minVerbosity` filter is active
+ * (they get fallback value `Int.MAX_VALUE` and fail the `<=` comparison).
+ */
 private val VERBOSITY_ORDER = mapOf(
     "Fatal" to 0, "Error" to 1, "Warning" to 2,
     "Display" to 3, "Log" to 4, "Verbose" to 5, "VeryVerbose" to 6,
 )
 
 @Service(Service.Level.PROJECT)
-class UnrealLogBuffer(private val project: Project? = null) {  // null only in tests
+class UnrealLogBuffer {
 
     companion object {
-        private const val MAX_ENTRIES = 32 * 1024
+        const val MAX_ENTRIES = 32 * 1024
 
         fun getInstance(project: Project): UnrealLogBuffer = project.service()
 
         /** For unit tests only — creates a disconnected buffer without project DI. */
-        fun createForTest(): UnrealLogBuffer = UnrealLogBuffer(null)
+        @TestOnly
+        fun createForTest(): UnrealLogBuffer = UnrealLogBuffer()
     }
 
     private val buffer = ArrayDeque<UnrealLogEntry>(MAX_ENTRIES + 1)
@@ -70,6 +78,7 @@ class UnrealLogBuffer(private val project: Project? = null) {  // null only in t
     }
 
     // Test helpers — only called from UnrealLogBufferTest
+    @TestOnly
     fun addForTest(verbosity: String, category: String, message: String) {
         val entry = UnrealLogEntry(verbosity, category, message, System.currentTimeMillis())
         synchronized(buffer) {
