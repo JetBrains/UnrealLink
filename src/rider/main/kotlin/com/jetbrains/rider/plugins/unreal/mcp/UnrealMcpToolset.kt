@@ -40,9 +40,10 @@ class UnrealMcpToolset : McpToolset {
         currentCoroutineContext().reportToolActivity("Checking Unreal Editor connection")
         val project = currentCoroutineContext().project
         val host = UnrealHost.getInstance(project)
-        val info = host.connectionInfo
+        val connected = host.isConnectedToUnrealEditor
+        val info = if (connected) host.connectionInfo else null
         return UnrealHealthResult(
-            connected = host.isConnectedToUnrealEditor,
+            connected = connected,
             projectName = info?.projectName,
             processId = info?.processId,
         )
