@@ -277,6 +277,16 @@ namespace RiderPlugin.UnrealLink
                 });
             });
 
+            // Bridge Python execution: RdRiderModel.ExecuteScript → RdEditorModel.ExecuteScript
+            myUnrealHost.PerformModelAction(riderModel =>
+            {
+                riderModel.ExecuteScript.SetAsync((lt, request) =>
+                    unrealModel.ExecuteScript.Start(lt, request));
+
+                riderModel.ExecuteBatchScripts.SetAsync((lt, request) =>
+                    unrealModel.ExecuteBatchScripts.Start(lt, request));
+            });
+
             return unrealModel;
         }
 
