@@ -135,5 +135,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         property("IsHotReloadCompiling", false).readonly
         signal("TriggerHotReload", void)
         signal("DeletePlugin", void)
+
+        // Python execution — Rider→UE direction; C# backend forwards to RdEditorModel
+        call("executeScript", UE4Library.ScriptRequest, UE4Library.ScriptResult).async
+        call("executeBatchScripts", UE4Library.BatchScriptRequest, UE4Library.BatchScriptResult).async
     }
 }

@@ -50,5 +50,9 @@ object RdEditorModel : Ext(RdEditorRoot) {
         property("IsHotReloadAvailable", false).readonly
         property("IsHotReloadCompiling", false).readonly
         source("TriggerHotReload", void)
+
+        // Python execution — C# calls these after forwarding from RdRiderModel; C++ implements handlers
+        call("executeScript", UE4Library.ScriptRequest, UE4Library.ScriptResult).async
+        call("executeBatchScripts", UE4Library.BatchScriptRequest, UE4Library.BatchScriptResult).async
     }
 }

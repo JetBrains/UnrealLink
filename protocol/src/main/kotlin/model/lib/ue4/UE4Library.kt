@@ -211,5 +211,29 @@ object UE4Library : Root() {
         field("executableName", string)
         field("processId", int)
     }
+
+    // ── Python execution shared types ─────────────────────────────────────────
+
+    val ScriptRequest = structdef("ScriptRequest") {
+        field("script", FString)
+        field("isolated", bool).default(false)
+    }
+
+    val ScriptResult = structdef("ScriptResult") {
+        field("success", bool)
+        field("output", FString)
+        field("result", FString)
+        field("error", FString)
+    }
+
+    val BatchScriptRequest = structdef("BatchScriptRequest") {
+        field("scripts", immutableList(FString))
+        field("startFrom", int).default(0)
+    }
+
+    val BatchScriptResult = structdef("BatchScriptResult") {
+        field("results", immutableList(ScriptResult))
+        field("lastSuccessfulIndex", int)
+    }
 }
 
