@@ -160,6 +160,7 @@ Path to old plugin:</code></pre>
     <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
     <dependencies>
       <plugin id="com.jetbrains.rider-cpp"/>
+      <plugin id="com.intellij.mcpServer"/>
       <module name="intellij.cidr.debugger.backend"/>
       <module name="intellij.cidr.debugger.core"/>
       <module name="intellij.cidr.runner"/>
@@ -171,6 +172,10 @@ Path to old plugin:</code></pre>
       <module name="intellij.spellchecker"/>
     </dependencies>
     <!-- endregion -->
+    <extensions defaultExtensionNs="com.intellij.mcpServer">
+        <mcpToolset implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealMcpToolset"/>
+    </extensions>
+
     <extensions defaultExtensionNs="rider.cpp">
         <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>
     </extensions>
@@ -205,6 +210,7 @@ Path to old plugin:</code></pre>
         <statistics.counterUsagesCollector implementationClass="com.jetbrains.rider.plugins.unreal.UnrealPluginUsagesCollector"/>
         <projectSettings service="com.jetbrains.rider.plugins.unreal.UnrealLinkSettings"/>
         <projectSettings service="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
+        <projectService serviceImplementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealLogBuffer"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">

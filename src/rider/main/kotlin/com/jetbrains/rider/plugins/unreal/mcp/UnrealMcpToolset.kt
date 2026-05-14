@@ -1,0 +1,156 @@
+package com.jetbrains.rider.plugins.unreal.mcp
+
+import com.intellij.mcpserver.McpToolset
+import com.intellij.mcpserver.annotations.McpDescription
+import com.intellij.mcpserver.annotations.McpTool
+import com.intellij.mcpserver.mcpFail
+import com.intellij.mcpserver.project
+import com.intellij.mcpserver.reportToolActivity
+import com.jetbrains.rd.util.reactive.fire
+import com.jetbrains.rider.plugins.unreal.UnrealHost
+import com.jetbrains.rider.plugins.unreal.actions.PlayStateActionStateService
+import com.jetbrains.rider.plugins.unreal.model.BlueprintReference
+import com.jetbrains.rider.plugins.unreal.model.FString
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ILinkResponse
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkRequest
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkResponseBlueprint
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkResponseFilePath
+import kotlinx.coroutines.currentCoroutineContext
+
+class UnrealMcpToolset : McpToolset {
+
+    override fun isExperimental(): Boolean = false
+
+    private suspend fun requireConnected(): UnrealHost {
+        val project = currentCoroutineContext().project
+        val host = UnrealHost.getInstance(project)
+        if (!host.isConnectedToUnrealEditor) {
+            mcpFail("Unreal Editor is not connected. Open a .uproject in Rider and ensure RiderLink is installed.")
+        }
+        return host
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Check whether Unreal Editor is connected to Rider via RiderLink.
+        |Returns connection status and, if connected, the project name and editor process ID.
+        |Call this before any other ue_* tool to confirm the editor is reachable.
+    """)
+    suspend fun ue_health(): UnrealHealthResult {
+        currentCoroutineContext().reportToolActivity("Checking Unreal Editor connection")
+        val project = currentCoroutineContext().project
+        val host = UnrealHost.getInstance(project)
+        val info = host.connectionInfo
+        return UnrealHealthResult(
+            connected = host.isConnectedToUnrealEditor,
+            projectName = info?.projectName,
+            processId = info?.processId,
+        )
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Get the current PIE (Play In Editor) state.
+        |Returns one of: "Idle" (not playing), "Play" (playing), "Pause" (paused).
+        |Use before ue_play_control to check whether play/pause/stop is valid.
+    """)
+    suspend fun ue_get_play_state(): UnrealPlayStateResult {
+        currentCoroutineContext().reportToolActivity("Getting play state")
+        val host = requireConnected()
+        return UnrealPlayStateResult(state = host.playState.name)
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Control PIE (Play In Editor) in Unreal Editor.
+        |action must be one of: "play", "pause", "resume", "stop", "frame_skip".
+        |"play" starts PIE in the currently configured mode.
+        |"pause" freezes a running session; "resume" unfreezes it.
+        |"stop" ends the PIE session.
+        |"frame_skip" advances one frame while paused.
+        |Returns the action that was requested.
+    """)
+    suspend fun ue_play_control(
+        @McpDescription("One of: play | pause | resume | stop | frame_skip")
+        action: String,
+    ): String {
+        currentCoroutineContext().reportToolActivity("Play control: $action")
+        val host = requireConnected()
+        val model = host.model
+        val stateService = PlayStateActionStateService.getInstance(currentCoroutineContext().project)
+        val requestId = stateService.nextRequestID()
+        when (action.lowercase()) {
+            "play"       -> model.requestPlayFromRider.fire(requestId)
+            "pause"      -> model.requestPauseFromRider.fire(requestId)
+            "resume"     -> model.requestResumeFromRider.fire(requestId)
+            "stop"       -> model.requestStopFromRider.fire(requestId)
+            "frame_skip" -> model.requestFrameSkipFromRider.fire(requestId)
+            else         -> mcpFail("Unknown action '$action'. Use: play | pause | resume | stop | frame_skip")
+        }
+        return "Requested: $action (requestId=$requestId)"
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Set the PIE play mode before calling ue_play_control("play").
+        |mode: 0=Viewport(default), 1=MobilePreview, 2=EditorFloating, 3=VR, 4=StandaloneProcess, 5=Simulate.
+        |players: number of player windows (1-4). Default 1.
+        |dedicatedServer: if true, launches a dedicated server alongside clients. Default false.
+        |spawnAtPlayerStart: if true, spawns player at PlayerStart actor. Default false.
+    """)
+    suspend fun ue_set_play_mode(
+        @McpDescription("Play mode index: 0=Viewport 1=MobilePreview 2=FloatingWindow 3=VR 4=Standalone 5=Simulate")
+        mode: Int = 0,
+        @McpDescription("Number of player windows (1-4)") players: Int = 1,
+        @McpDescription("Launch a dedicated server alongside clients") dedicatedServer: Boolean = false,
+        @McpDescription("Spawn player at PlayerStart actor") spawnAtPlayerStart: Boolean = false,
+    ): String {
+        currentCoroutineContext().reportToolActivity("Setting play mode $mode")
+        val host = requireConnected()
+        if (mode !in 0..5) mcpFail("mode must be 0-5")
+        if (players !in 1..4) mcpFail("players must be 1-4")
+        val encoded = mode or ((players - 1) and 3) or
+                      (if (spawnAtPlayerStart) 4 else 0) or
+                      (if (dedicatedServer) 8 else 0)
+        host.model.playModeFromRider.fire(encoded)
+        return "Play mode set (encoded=$encoded)"
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Trigger a Hot Reload or Live Coding compile in Unreal Editor.
+        |Compiles changed C++ modules without restarting the editor.
+        |Returns immediately; monitor the editor for compilation progress.
+        |Fails if Unreal Editor is not connected or Hot Reload is not available.
+    """)
+    suspend fun ue_trigger_build(): String {
+        currentCoroutineContext().reportToolActivity("Triggering Hot Reload / Live Coding")
+        val host = requireConnected()
+        if (!host.isHotReloadAvailable) {
+            mcpFail("Hot Reload / Live Coding is not available. Ensure the project has C++ modules.")
+        }
+        host.model.triggerHotReload.fire()
+        return "Build triggered"
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Open a Blueprint asset in Unreal Editor's visual graph editor.
+        |path must be a valid Unreal asset path, e.g. "/Game/Blueprints/BP_MyActor.BP_MyActor".
+        |The editor window is brought to focus after opening.
+    """)
+    suspend fun ue_open_blueprint(
+        @McpDescription("Unreal asset path to the Blueprint, e.g. /Game/Blueprints/BP_MyActor.BP_MyActor")
+        path: String,
+    ): String {
+        currentCoroutineContext().reportToolActivity("Opening Blueprint: $path")
+        val host = requireConnected()
+        host.model.openBlueprint.fire(
+            BlueprintReference(
+                pathName = FString(path),
+                guid = FString(""),
+            )
+        )
+        return "Blueprint open requested: $path"
+    }
+}
