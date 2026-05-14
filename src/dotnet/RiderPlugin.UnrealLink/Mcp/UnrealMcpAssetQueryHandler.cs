@@ -6,6 +6,7 @@ using JetBrains.Application.Parts;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset;
+using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Reader;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Reader.Entities.Properties;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Search;
@@ -123,8 +124,9 @@ public class UnrealMcpAssetQueryHandler
     private static string GetPropertyTypeName([NotNull] IUEProperty prop)
     {
         var typeName = prop.GetType().Name;
-        if (typeName.Contains('`'))
-            typeName = typeName[..typeName.IndexOf('`')];
-        return typeName.StartsWith("UE", StringComparison.Ordinal) ? typeName[2..] : typeName;
+        var backtick = typeName.IndexOf('`');
+        if (backtick >= 0)
+            typeName = typeName.Substring(0, backtick);
+        return typeName.StartsWith("UE", StringComparison.Ordinal) ? typeName.Substring(2) : typeName;
     }
 }
