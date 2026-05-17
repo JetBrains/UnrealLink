@@ -67,6 +67,43 @@ class UnrealLogBufferTest {
     }
 
     @Test
+    fun `pattern filter matches regex against message`() {
+        val buffer = UnrealLogBuffer.createForTest()
+        buffer.addForTest("Log", "LogTemp", "PIE started for level Lyra_Default")
+        buffer.addForTest("Log", "LogAI", "AI tick budget exceeded")
+        buffer.addForTest("Warning", "LogTemp", "Cleanup of PIE world complete")
+
+        val pieOnly = buffer.query(LogFilter(pattern = Regex("PIE")))
+        assertEquals(2, pieOnly.size)
+        assertTrue(pieOnly.all { "PIE" in it.message })
+
+        val caseInsensitive = buffer.query(LogFilter(pattern = Regex("pie", RegexOption.IGNORE_CASE)))
+        assertEquals(2, caseInsensitive.size)
+
+        val anchored = buffer.query(LogFilter(pattern = Regex("^Cleanup")))
+        assertEquals(1, anchored.size)
+        assertEquals("Cleanup of PIE world complete", anchored[0].message)
+    }
+
+    @Test
+    fun `pattern combines with category and verbosity filters via AND`() {
+        val buffer = UnrealLogBuffer.createForTest()
+        buffer.addForTest("Log", "LogTemp", "alpha frame 1")
+        buffer.addForTest("Warning", "LogTemp", "alpha frame 2")
+        buffer.addForTest("Warning", "LogAI", "alpha tick")
+
+        val result = buffer.query(
+            LogFilter(
+                category = "LogTemp",
+                minVerbosity = "Warning",
+                pattern = Regex("alpha"),
+            )
+        )
+        assertEquals(1, result.size)
+        assertEquals("alpha frame 2", result[0].message)
+    }
+
+    @Test
     fun `buffer evicts oldest entries when MAX_ENTRIES exceeded`() {
         val buffer = UnrealLogBuffer.createForTest()
         val overflow = 5

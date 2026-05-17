@@ -46,6 +46,12 @@ object RdEditorModel : Ext(RdEditorRoot) {
         sink("PlayModeFromEditor", int)
         source("PlayModeFromRider", int)
 
+        // Structured PIE settings — supersedes the packed-int signals above for callers
+        // that need PlayNetMode / RunUnderOneProcess. Old int signals are kept for the
+        // legacy editor UI handlers.
+        sink("PlaySettingsFromEditor", UE4Library.PlaySettings)
+        source("PlaySettingsFromRider", UE4Library.PlaySettings)
+
         // Hot Reload here is not Unreal's HotReload but generic Hot Reload mechanism which can be either Unreal's HotReload or Unreal's LiveCoding
         property("IsHotReloadAvailable", false).readonly
         property("IsHotReloadCompiling", false).readonly

@@ -9,13 +9,15 @@ import com.intellij.mcpserver.reportToolActivity
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.actions.PlayStateActionStateService
-import com.jetbrains.rider.plugins.unreal.model.BlueprintReference
+import com.jetbrains.rider.plugins.unreal.model.BatchScriptRequest
 import com.jetbrains.rider.plugins.unreal.model.FString
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ILinkResponse
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkRequest
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkResponseBlueprint
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.LinkResponseFilePath
+import com.jetbrains.rider.plugins.unreal.model.PlayNetMode
+import com.jetbrains.rider.plugins.unreal.model.PlaySettings
+import com.jetbrains.rider.plugins.unreal.model.ScriptRequest
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 class UnrealMcpToolset : McpToolset {
 
@@ -54,97 +56,150 @@ class UnrealMcpToolset : McpToolset {
 
     @McpTool
     @McpDescription("""
-        |Get the current PIE (Play In Editor) state.
-        |Returns one of: "Idle" (not playing), "Play" (playing), "Pause" (paused).
-        |Use before ue_play_control to check whether play/pause/stop is valid.
+        |Query or control PIE (Play In Editor).
+        |action: "state" | "play" | "pause" | "resume" | "stop" | "frame_skip".
+        |  "state" reads the current state without firing any signal.
+        |  "play" applies all the optional parameters below, then starts PIE. UE persists these values to
+        |  the editor's PIE settings (SaveConfig) so subsequent plays inherit them unless overridden.
+        |  "pause"/"resume"/"stop"/"frame_skip" act on a running session; mode parameters are ignored.
+        |Mode parameter values (mapping matches UE's EPlayModeType):
+        |  0 = Viewport (selected viewport, default)
+        |  1 = MobilePreview
+        |  2 = EditorFloating (new editor window)
+        |  3 = VR
+        |  4 = Standalone (new process)
+        |  5 = Simulate
+        |Mode-string aliases for `mode` (case-insensitive): "viewport", "mobile" / "mobilepreview",
+        |"floating" / "editorfloating" / "new-window", "vr", "standalone" / "newprocess", "simulate".
+        |Net mode aliases for `netMode` (case-insensitive):
+        |  "standalone" (default) — no networking, each PIE world independent.
+        |  "listen" / "listenserver" — first client window also hosts the listen server.
+        |  "client" — all PIE worlds are clients; pair with `dedicatedServer=true` to spawn a server too.
+        |`runUnderOneProcess` controls whether all client/server PIE instances share the editor process
+        |(default true) or are launched as separate processes.
+        |Returns the state observed before the requested action (state transitions are async) and which action
+        |was requested. For action="state", `requested` is omitted.
     """)
-    suspend fun ue_get_play_state(): UnrealPlayStateResult {
-        currentCoroutineContext().reportToolActivity("Getting play state")
-        val host = requireConnected()
-        return UnrealPlayStateResult(state = host.playState.name)
-    }
-
-    @McpTool
-    @McpDescription("""
-        |Control PIE (Play In Editor) in Unreal Editor.
-        |action must be one of: "play", "pause", "resume", "stop", "frame_skip".
-        |"play" starts PIE in the currently configured mode.
-        |"pause" freezes a running session; "resume" unfreezes it.
-        |"stop" ends the PIE session.
-        |"frame_skip" advances one frame while paused.
-        |Returns the action that was requested.
-    """)
-    suspend fun ue_play_control(
-        @McpDescription("One of: play | pause | resume | stop | frame_skip")
+    suspend fun ue_play(
+        @McpDescription("One of: state | play | pause | resume | stop | frame_skip")
         action: String,
-    ): String {
-        currentCoroutineContext().reportToolActivity("Play control: $action")
+        @McpDescription("Play mode (only for action=play). Either int 0..5 or a name alias — see tool description.")
+        mode: String = "0",
+        @McpDescription("Number of player windows (1-4). Only used for action=play.")
+        players: Int = 1,
+        @McpDescription("Net mode (only for action=play): standalone | listen | client.")
+        netMode: String = "standalone",
+        @McpDescription("Launch a dedicated server alongside clients. Only used for action=play.")
+        dedicatedServer: Boolean = false,
+        @McpDescription("Spawn player at PlayerStart actor. Only used for action=play.")
+        spawnAtPlayerStart: Boolean = false,
+        @McpDescription("Trigger a code compile before launching PIE. Only used for action=play.")
+        compileBeforeRun: Boolean = false,
+        @McpDescription("Run all PIE instances (server + clients) inside the editor process. Default true.")
+        runUnderOneProcess: Boolean = true,
+    ): UnrealPlayResult {
+        currentCoroutineContext().reportToolActivity("Play action: $action")
         val host = requireConnected()
+        val normalized = action.lowercase()
+        if (normalized == "state") {
+            return UnrealPlayResult(state = host.playState.name)
+        }
         val model = host.model
         val stateService = PlayStateActionStateService.getInstance(currentCoroutineContext().project)
         val requestId = stateService.nextRequestID()
-        when (action.lowercase()) {
-            "play"       -> model.requestPlayFromRider.fire(requestId)
+        when (normalized) {
+            "play" -> {
+                val modeInt = parsePlayMode(mode)
+                val net = parseNetMode(netMode)
+                if (players !in 1..4) mcpFail("players must be 1-4")
+                // New structured signal — superset of the packed-int form. The editor's RiderGameControl
+                // reads playSettingsFromRider AND playModeFromRider; sending the struct alone is enough.
+                model.playSettingsFromRider.fire(
+                    PlaySettings(
+                        playMode = modeInt,
+                        numberOfClients = players,
+                        netMode = net,
+                        dedicatedServer = dedicatedServer,
+                        spawnAtPlayerStart = spawnAtPlayerStart,
+                        compileBeforeRun = compileBeforeRun,
+                        runUnderOneProcess = runUnderOneProcess,
+                    )
+                )
+                model.requestPlayFromRider.fire(requestId)
+            }
             "pause"      -> model.requestPauseFromRider.fire(requestId)
             "resume"     -> model.requestResumeFromRider.fire(requestId)
             "stop"       -> model.requestStopFromRider.fire(requestId)
             "frame_skip" -> model.requestFrameSkipFromRider.fire(requestId)
-            else         -> mcpFail("Unknown action '$action'. Use: play | pause | resume | stop | frame_skip")
+            else         -> mcpFail("Unknown action '$action'. Use: state | play | pause | resume | stop | frame_skip")
         }
-        return "Requested: $action (requestId=$requestId)"
+        return UnrealPlayResult(state = host.playState.name, requested = normalized)
     }
 
-    @McpTool
-    @McpDescription("""
-        |Set the PIE play mode before calling ue_play_control("play").
-        |mode: 0=Viewport(default), 1=MobilePreview, 2=EditorFloating, 3=VR, 4=StandaloneProcess, 5=Simulate.
-        |players: number of player windows (1-4). Default 1.
-        |dedicatedServer: if true, launches a dedicated server alongside clients. Default false.
-        |spawnAtPlayerStart: if true, spawns player at PlayerStart actor. Default false.
-    """)
-    suspend fun ue_set_play_mode(
-        @McpDescription("Play mode index: 0=Viewport 1=MobilePreview 2=FloatingWindow 3=VR 4=Standalone 5=Simulate")
-        mode: Int = 0,
-        @McpDescription("Number of player windows (1-4)") players: Int = 1,
-        @McpDescription("Launch a dedicated server alongside clients") dedicatedServer: Boolean = false,
-        @McpDescription("Spawn player at PlayerStart actor") spawnAtPlayerStart: Boolean = false,
-    ): String {
-        currentCoroutineContext().reportToolActivity("Setting play mode $mode")
-        val host = requireConnected()
-        if (mode !in 0..5) mcpFail("mode must be 0-5")
-        if (players !in 1..4) mcpFail("players must be 1-4")
-        val encoded = mode or ((players - 1) and 3) or
-                      (if (spawnAtPlayerStart) 4 else 0) or
-                      (if (dedicatedServer) 8 else 0)
-        host.model.playModeFromRider.fire(encoded)
-        return "Play mode set (encoded=$encoded)"
-    }
-
-    @McpTool
-    @McpDescription("""
-        |Trigger a Hot Reload or Live Coding compile in Unreal Editor.
-        |Compiles changed C++ modules without restarting the editor.
-        |Returns immediately; monitor the editor for compilation progress.
-        |Fails if Unreal Editor is not connected or Hot Reload is not available.
-    """)
-    suspend fun ue_trigger_build(): String {
-        currentCoroutineContext().reportToolActivity("Triggering Hot Reload / Live Coding")
-        val host = requireConnected()
-        if (!host.isHotReloadAvailable) {
-            mcpFail("Hot Reload / Live Coding is not available. Ensure the project has C++ modules.")
+    private fun parsePlayMode(raw: String): Int {
+        val trimmed = raw.trim()
+        trimmed.toIntOrNull()?.let { n ->
+            if (n !in 0..5) mcpFail("mode must be 0-5")
+            return n
         }
-        host.model.triggerHotReload.fire()
-        return "Build triggered"
+        return when (trimmed.lowercase()) {
+            "viewport", "selected", "selectedviewport"               -> 0
+            "mobile", "mobilepreview"                                -> 1
+            "floating", "editorfloating", "new-window", "newwindow"  -> 2
+            "vr"                                                     -> 3
+            "standalone", "newprocess", "process"                    -> 4
+            "simulate", "simulation"                                 -> 5
+            else -> mcpFail("Unknown mode '$raw'. Use 0-5 or one of: viewport, mobile, floating, vr, standalone, simulate.")
+        }
+    }
+
+    private fun parseNetMode(raw: String): PlayNetMode = when (raw.trim().lowercase()) {
+        "standalone", "single", "" -> PlayNetMode.Standalone
+        "listen", "listenserver", "host" -> PlayNetMode.ListenServer
+        "client" -> PlayNetMode.Client
+        else -> mcpFail("Unknown netMode '$raw'. Use: standalone | listen | client.")
+    }
+
+    private fun buildLogFilter(
+        category: String?,
+        minVerbosity: String?,
+        count: Int,
+        sinceTimestampMs: Long?,
+        pattern: String?,
+    ): LogFilter {
+        if (count !in 1..1000) mcpFail("count must be between 1 and 1000")
+        val regex = pattern?.let {
+            try {
+                Regex(it)
+            } catch (e: Throwable) {
+                mcpFail("Invalid regex pattern: ${e.message ?: e::class.simpleName}")
+            }
+        }
+        return LogFilter(
+            category = category,
+            minVerbosity = minVerbosity,
+            count = count,
+            sinceTimestampMs = sinceTimestampMs,
+            pattern = regex,
+        )
     }
 
     @McpTool
     @McpDescription("""
-        |Query recent log entries streamed from Unreal Editor.
-        |Requires Unreal Editor to be connected; the buffer accumulates entries while connected.
-        |category: filter by log category name (e.g. "LogTemp", "LogBlueprintUserMessages"). Omit for all.
-        |minVerbosity: minimum severity to include: "Fatal" | "Error" | "Warning" | "Display" | "Log" | "Verbose" | "VeryVerbose". Omit for all.
-        |count: maximum entries to return (most recent). Default 200, max 1000.
-        |sinceTimestampMs: only return entries with timestamp >= this value (epoch milliseconds). Omit for no time filter.
+        |Query log entries streamed from Unreal Editor. Requires Unreal Editor to be connected; the buffer
+        |accumulates entries while connected.
+        |Filters (all optional, combined with AND):
+        |  category         — exact category name match (e.g. "LogTemp").
+        |  minVerbosity     — "Fatal" | "Error" | "Warning" | "Display" | "Log" | "Verbose" | "VeryVerbose".
+        |  count            — max entries returned (most recent). Default 200, max 1000.
+        |  sinceTimestampMs — epoch ms cutoff (entries with timestamp >= cutoff). Useful for resumable follow.
+        |  pattern          — regex (Java/Kotlin syntax) matched against entry.message (substring match).
+        |Streaming:
+        |  follow=true      — long-poll: the call blocks server-side until at least one matching entry lands,
+        |                     or `followTimeoutMs` elapses. On timeout an empty batch is returned and the caller
+        |                     should poll again with the same `sinceTimestampMs` (use the last received entry's
+        |                     timestampMs + 1 to avoid duplicates).
+        |  follow=false     — default; one-shot snapshot of the current buffer.
         |Returns entries ordered oldest-first.
     """)
     suspend fun ue_get_logs(
@@ -156,142 +211,139 @@ class UnrealMcpToolset : McpToolset {
         count: Int = 200,
         @McpDescription("Epoch milliseconds — return only entries at or after this timestamp.")
         sinceTimestampMs: Long? = null,
+        @McpDescription("Regex (Kotlin syntax) matched against entry.message — substring match. Omit for no pattern filter.")
+        pattern: String? = null,
+        @McpDescription("Long-poll: block until at least one matching entry lands, or followTimeoutMs elapses. Default false.")
+        follow: Boolean = false,
+        @McpDescription("Maximum time to wait in follow mode, in milliseconds. Default 30000.")
+        followTimeoutMs: Long = 30_000L,
     ): UnrealLogResult {
-        currentCoroutineContext().reportToolActivity("Querying Unreal logs")
+        currentCoroutineContext().reportToolActivity(if (follow) "Following Unreal logs" else "Querying Unreal logs")
         val project = currentCoroutineContext().project
-        if (count !in 1..1000) mcpFail("count must be between 1 and 1000")
-        val entries = UnrealLogBuffer.getInstance(project).query(
-            LogFilter(
-                category = category,
-                minVerbosity = minVerbosity,
-                count = count,
-                sinceTimestampMs = sinceTimestampMs,
-            )
-        )
-        return UnrealLogResult(entries = entries)
-    }
+        val filter = buildLogFilter(category, minVerbosity, count, sinceTimestampMs, pattern)
+        val buffer = UnrealLogBuffer.getInstance(project)
 
-    @McpTool
-    @McpDescription("""
-        |Open a Blueprint asset in Unreal Editor's visual graph editor.
-        |path must be a valid Unreal asset path, e.g. "/Game/Blueprints/BP_MyActor.BP_MyActor".
-        |The editor window is brought to focus after opening.
-    """)
-    suspend fun ue_open_blueprint(
-        @McpDescription("Unreal asset path to the Blueprint, e.g. /Game/Blueprints/BP_MyActor.BP_MyActor")
-        path: String,
-    ): String {
-        currentCoroutineContext().reportToolActivity("Opening Blueprint: $path")
-        val host = requireConnected()
-        host.model.openBlueprint.fire(
-            BlueprintReference(
-                pathName = FString(path),
-                guid = FString(""),
-            )
-        )
-        return "Blueprint open requested: $path"
-    }
-
-    @McpTool
-    @McpDescription("""
-        |Find Blueprint assets and file paths that reference a given C++ symbol or Blueprint path string.
-        |Uses Rider's ReSharper backend Blueprint indexing (powered by RiderLink) to resolve links.
-        |symbol: the string to look up, e.g. a C++ class name, method name, or Blueprint asset path.
-        |Returns a list of resolved usages with full asset paths and text ranges.
-        |Empty result means no Blueprint references were found — the symbol may be C++-only.
-        |Requires the editor to be connected because the backend uses IsBlueprintPathName from RiderLink.
-    """)
-    suspend fun ue_find_blueprint_usages(
-        @McpDescription("C++ symbol name or Blueprint asset path string to look up.")
-        symbol: String,
-    ): UnrealBlueprintUsagesResult {
-        currentCoroutineContext().reportToolActivity("Finding Blueprint usages of: $symbol")
-        val host = requireConnected()
-        val responses = host.model.filterLinkCandidates.startSuspending(
-            listOf(LinkRequest(data = FString(symbol)))
-        )
-        val usages = responses.mapNotNull { response ->
-            when (response) {
-                is LinkResponseBlueprint -> UnrealBlueprintUsage(
-                    fullPath = response.fullPath.data,
-                    rangeStart = response.range.first,
-                    rangeEnd = response.range.last,
-                )
-                is LinkResponseFilePath -> UnrealBlueprintUsage(
-                    fullPath = response.fullPath.data,
-                    rangeStart = response.range.first,
-                    rangeEnd = response.range.last,
-                )
-                else -> null
-            }
+        if (!follow) {
+            return UnrealLogResult(entries = buffer.query(filter))
         }
-        return UnrealBlueprintUsagesResult(usages = usages)
+
+        if (followTimeoutMs !in 1L..600_000L) mcpFail("followTimeoutMs must be between 1 and 600000")
+        val polled: List<UnrealLogEntry>? = withTimeoutOrNull(followTimeoutMs.milliseconds) {
+            var snapshot = buffer.query(filter)
+            while (snapshot.isEmpty()) {
+                delay(250)
+                snapshot = buffer.query(filter)
+            }
+            snapshot
+        }
+        return UnrealLogResult(entries = polled ?: emptyList())
     }
 
     @McpTool
     @McpDescription("""
-        |Execute a Python script inside Unreal Editor using the built-in Python plugin.
-        |The script runs on the editor's game thread with full access to Unreal Python API.
-        |script: valid Python code as a string. Multi-line scripts are supported.
-        |isolated: if true, the script runs in EvaluateStatement mode (returns expression value). Default false.
-        |Returns stdout output, expression result, and any error messages.
-        |Output is capped at 10,000 characters to avoid context overflow.
+        |One-stop status read for the connected Unreal Editor — combines health + PIE state + recent logs.
+        |If the editor isn't connected, only `connected: false` is returned; all other fields are omitted.
+        |When connected, returns projectName, processId, current PIE state ("Idle" | "Play" | "Pause"),
+        |and the most recent `count` log entries matching the optional category / minVerbosity / pattern /
+        |sinceTimestampMs filters (same semantics as ue_get_logs but always one-shot, never follow).
+        |Use this when you want a single round-trip pulse instead of separate ue_health + ue_play(state) + ue_get_logs calls.
+    """)
+    suspend fun ue_status(
+        @McpDescription("Maximum recent log entries to include. Default 50.")
+        count: Int = 50,
+        @McpDescription("Log category name to filter by. Omit for all categories.")
+        category: String? = null,
+        @McpDescription("Minimum verbosity for the log slice: Fatal | Error | Warning | Display | Log | Verbose | VeryVerbose")
+        minVerbosity: String? = null,
+        @McpDescription("Regex (Kotlin syntax) matched against entry.message — substring match. Omit for no pattern filter.")
+        pattern: String? = null,
+        @McpDescription("Epoch milliseconds — only entries at or after this timestamp.")
+        sinceTimestampMs: Long? = null,
+    ): UnrealStatusResult {
+        currentCoroutineContext().reportToolActivity("Querying Unreal status")
+        val project = currentCoroutineContext().project
+        val host = UnrealHost.getInstance(project)
+        val info = host.connectionInfo
+        val processAlive = info?.processId?.let { pid ->
+            ProcessHandle.of(pid.toLong()).map { it.isAlive }.orElse(false)
+        } ?: false
+        val connected = host.isConnectedToUnrealEditor && processAlive
+        if (!connected) {
+            return UnrealStatusResult(connected = false)
+        }
+        val filter = buildLogFilter(category, minVerbosity, count, sinceTimestampMs, pattern)
+        val logs = UnrealLogBuffer.getInstance(project).query(filter)
+        return UnrealStatusResult(
+            connected = true,
+            projectName = info?.projectName,
+            processId = info?.processId,
+            playState = host.playState.name,
+            recentLogs = logs,
+        )
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Execute one or more Python scripts inside Unreal Editor using the built-in Python plugin.
+        |Scripts run on the editor's game thread with full access to the Unreal Python API.
+        |Provide EXACTLY one of:
+        |  script  — a single Python source string. `isolated=true` runs it in EvaluateStatement mode
+        |            (returns expression value).
+        |  scripts — a list of Python sources to execute sequentially with resume-on-failure.
+        |            `startFrom` resumes from a 0-based index (use lastSuccessfulIndex+1 from a previous
+        |            failed call). `isolated` is ignored for batch.
+        |Always returns a batch-shaped result; a single-script call returns a 1-item batch.
+        |Output of each script is capped at 10,000 characters to avoid context overflow.
         |Reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/
     """)
     suspend fun ue_execute_python(
-        @McpDescription("Python code to execute inside Unreal Editor.")
-        script: String,
-        @McpDescription("Run in isolated scope (EvaluateStatement mode, returns expression value). Default false.")
+        @McpDescription("Single Python source to execute. Mutually exclusive with `scripts`.")
+        script: String? = null,
+        @McpDescription("List of Python sources to execute sequentially. Mutually exclusive with `script`.")
+        scripts: List<String>? = null,
+        @McpDescription("0-based index to resume the batch from (default 0). Ignored when `script` is set.")
+        startFrom: Int = 0,
+        @McpDescription("Run a single script in isolated scope (EvaluateStatement mode). Ignored for batch.")
         isolated: Boolean = false,
-    ): UnrealScriptResult {
+    ): UnrealBatchScriptResult {
         currentCoroutineContext().reportToolActivity("Executing Python in UE")
         val host = requireConnected()
-        val result = host.model.executeScript.startSuspending(
-            com.jetbrains.rider.plugins.unreal.model.ScriptRequest(
-                script = FString(script),
-                isolated = isolated,
+        if ((script == null) == (scripts == null)) {
+            mcpFail("Provide exactly one of `script` or `scripts`.")
+        }
+        return if (script != null) {
+            val result = host.model.executeScript.startSuspending(
+                ScriptRequest(script = FString(script), isolated = isolated)
             )
-        )
-        return UnrealScriptResult(
-            success = result.success,
-            output = result.output.data,
-            result = result.result.data,
-            error = result.error.data.takeIf { it.isNotEmpty() },
-        )
-    }
-
-    @McpTool
-    @McpDescription("""
-        |Execute multiple Python scripts sequentially in Unreal Editor with resume-on-failure support.
-        |scripts: list of Python code strings to execute in order.
-        |startFrom: resume from this 0-based index (use lastSuccessfulIndex + 1 from a previous failed call).
-        |Stops on the first failure and returns lastSuccessfulIndex.
-        |To resume after a partial failure: call again with startFrom = lastSuccessfulIndex + 1.
-    """)
-    suspend fun ue_execute_python_batch(
-        @McpDescription("List of Python scripts to execute sequentially.")
-        scripts: List<String>,
-        @McpDescription("0-based index to resume from (default 0 = start from beginning).")
-        startFrom: Int = 0,
-    ): UnrealBatchScriptResult {
-        currentCoroutineContext().reportToolActivity("Executing Python batch in UE")
-        val host = requireConnected()
-        val result = host.model.executeBatchScripts.startSuspending(
-            com.jetbrains.rider.plugins.unreal.model.BatchScriptRequest(
-                scripts = scripts.map { FString(it) },
-                startFrom = startFrom,
+            UnrealBatchScriptResult(
+                results = listOf(
+                    UnrealScriptResult(
+                        success = result.success,
+                        output = result.output.data,
+                        result = result.result.data,
+                        error = result.error.data.takeIf { it.isNotEmpty() },
+                    )
+                ),
+                lastSuccessfulIndex = if (result.success) 0 else -1,
             )
-        )
-        return UnrealBatchScriptResult(
-            results = result.results.map { r ->
-                UnrealScriptResult(
-                    success = r.success,
-                    output = r.output.data,
-                    result = r.result.data,
-                    error = r.error.data.takeIf { it.isNotEmpty() },
+        } else {
+            val batch = host.model.executeBatchScripts.startSuspending(
+                BatchScriptRequest(
+                    scripts = scripts!!.map { FString(it) },
+                    startFrom = startFrom,
                 )
-            },
-            lastSuccessfulIndex = result.lastSuccessfulIndex,
-        )
+            )
+            UnrealBatchScriptResult(
+                results = batch.results.map { r ->
+                    UnrealScriptResult(
+                        success = r.success,
+                        output = r.output.data,
+                        result = r.result.data,
+                        error = r.error.data.takeIf { it.isNotEmpty() },
+                    )
+                },
+                lastSuccessfulIndex = batch.lastSuccessfulIndex,
+            )
+        }
     }
 }

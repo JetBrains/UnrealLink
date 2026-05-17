@@ -235,5 +235,27 @@ object UE4Library : Root() {
         field("results", immutableList(ScriptResult))
         field("lastSuccessfulIndex", int)
     }
+
+    // ── PIE settings ─────────────────────────────────────────────────────────
+    // Replaces the legacy packed-int playModeFromRider/Editor signals with a
+    // structured representation so the new fields (netMode, runUnderOneProcess)
+    // don't need bit-packing tricks. Legacy signals stay in the models for the
+    // existing UI handlers in PlaySettingsActions.kt.
+
+    val PlayNetMode = enum("PlayNetMode") {
+        +"Standalone"      // EPlayNetMode::PIE_Standalone (0)
+        +"ListenServer"    // EPlayNetMode::PIE_ListenServer (1)
+        +"Client"          // EPlayNetMode::PIE_Client (2)
+    }
+
+    val PlaySettings = structdef("PlaySettings") {
+        field("playMode", int)             // EPlayModeType index 0..6 (Viewport=0, Floating=2, NewProcess=4, Simulate=5, …)
+        field("numberOfClients", int)      // 1..4
+        field("netMode", PlayNetMode)
+        field("dedicatedServer", bool)
+        field("spawnAtPlayerStart", bool)
+        field("compileBeforeRun", bool)
+        field("runUnderOneProcess", bool)
+    }
 }
 
