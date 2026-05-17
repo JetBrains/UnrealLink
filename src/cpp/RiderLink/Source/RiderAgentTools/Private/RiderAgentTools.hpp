@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
 #include "lifetime/LifetimeDefinition.h"
 

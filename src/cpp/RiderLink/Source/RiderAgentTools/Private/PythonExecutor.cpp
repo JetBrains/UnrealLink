@@ -27,6 +27,21 @@ static FString CapString(const FString& Str)
 
 using FScriptCallback = TFunction<void(JetBrains::EditorPlugin::ScriptResult)>;
 
+// UE 5.7 dropped FPythonCommandEx::CommandError; failure traces are written to CommandResult.
+static void SplitResultOrError(const FPythonCommandEx& Cmd, bool bSuccess, FString& OutResult, FString& OutError)
+{
+    if (bSuccess)
+    {
+        OutResult = CapString(Cmd.CommandResult);
+        OutError = FString();
+    }
+    else
+    {
+        OutResult = FString();
+        OutError = CapString(Cmd.CommandResult);
+    }
+}
+
 static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCallback Callback)
 {
     AsyncTask(ENamedThreads::GameThread, [Script, bIsolated, Callback = MoveTemp(Callback)]()
@@ -52,15 +67,16 @@ static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCa
             : EPythonCommandExecutionMode::ExecuteStatement;
 
         const bool bSuccess = PythonPlugin->ExecPythonCommandEx(Cmd);
-        const FString Output = Cmd.LogOutput.Num() > 0
+        FString Output = Cmd.LogOutput.Num() > 0
             ? CapString(JoinLogOutput(Cmd.LogOutput))
             : FString(TEXT(""));
-        const FString Result = CapString(Cmd.CommandResult);
-        const FString Error = bSuccess ? FString(TEXT("")) : CapString(Cmd.CommandError);
+        FString Result;
+        FString Error;
+        SplitResultOrError(Cmd, bSuccess, Result, Error);
 
         CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 
-        Callback(ScriptResult(bSuccess, FString(Output), FString(Result), FString(Error)));
+        Callback(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error)));
     });
 }
 
@@ -68,28 +84,28 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 {
     using namespace JetBrains::EditorPlugin;
 
-    Model.get_executeScript().set(ModelLifetime,
-        [](ScriptRequest const& Request) -> rd::RdTask<ScriptResult>
+    Model.get_executeScript().set(
+        [](rd::Lifetime, ScriptRequest const& Request) -> rd::RdTask<ScriptResult>
         {
-            auto Task = rd::RdTask<ScriptResult>::create();
+            rd::RdTask<ScriptResult> Task;
             ExecuteOnGameThread(
-                Request.get_script().data,
+                Request.get_script(),
                 Request.get_isolated(),
                 [Task](ScriptResult Result) mutable { Task.set(MoveTemp(Result)); }
             );
             return Task;
         });
 
-    Model.get_executeBatchScripts().set(ModelLifetime,
-        [](BatchScriptRequest const& Request) -> rd::RdTask<BatchScriptResult>
+    Model.get_executeBatchScripts().set(
+        [](rd::Lifetime, BatchScriptRequest const& Request) -> rd::RdTask<BatchScriptResult>
         {
-            auto Task = rd::RdTask<BatchScriptResult>::create();
-            const auto Scripts = Request.get_scripts();
+            rd::RdTask<BatchScriptResult> Task;
+            const TArray<FString> Scripts = Request.get_scripts();
             const int32 StartFrom = Request.get_startFrom();
 
-            if (Scripts.empty() || StartFrom >= static_cast<int32>(Scripts.size()))
+            if (Scripts.Num() == 0 || StartFrom >= Scripts.Num())
             {
-                Task.set(BatchScriptResult({}, StartFrom - 1));
+                Task.set(BatchScriptResult(TArray<rd::Wrapper<ScriptResult>>(), StartFrom - 1));
                 return Task;
             }
 
@@ -97,27 +113,29 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
                 [Scripts, StartFrom, Task]() mutable
                 {
                     auto* PythonPlugin = IPythonScriptPlugin::Get();
-                    std::vector<ScriptResult> Results;
+                    TArray<rd::Wrapper<ScriptResult>> Results;
+                    Results.Reserve(Scripts.Num() - StartFrom);
                     int32 LastSuccessful = StartFrom - 1;
 
-                    for (int32 i = StartFrom; i < static_cast<int32>(Scripts.size()); ++i)
+                    for (int32 i = StartFrom; i < Scripts.Num(); ++i)
                     {
                         FPythonCommandEx Cmd;
-                        Cmd.Command = Scripts[i].data;
+                        Cmd.Command = Scripts[i];
                         Cmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteStatement;
 
-                        bool bSuccess = PythonPlugin && PythonPlugin->IsPythonAvailable()
+                        const bool bSuccess = PythonPlugin && PythonPlugin->IsPythonAvailable()
                             && PythonPlugin->ExecPythonCommandEx(Cmd);
 
-                        const FString Output = Cmd.LogOutput.Num() > 0
+                        FString Output = Cmd.LogOutput.Num() > 0
                             ? CapString(JoinLogOutput(Cmd.LogOutput))
                             : FString(TEXT(""));
-                        const FString Result = CapString(Cmd.CommandResult);
-                        const FString Error = bSuccess ? FString(TEXT("")) : CapString(Cmd.CommandError);
+                        FString Result;
+                        FString Error;
+                        SplitResultOrError(Cmd, bSuccess, Result, Error);
 
                         CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 
-                        Results.emplace_back(bSuccess, FString(Output), FString(Result), FString(Error));
+                        Results.Emplace(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error)));
 
                         if (!bSuccess)
                         {

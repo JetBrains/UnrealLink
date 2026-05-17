@@ -52,6 +52,18 @@ namespace rd {
         size_t operator()(const TArray<T>& value) const noexcept;
     };
 
+    // rd's generic contentDeepHashCode SFINAE in util/gen_util.h relies on ADL `begin(T{})`,
+    // which TArray (global namespace) doesn't provide as a free function. Supply a non-template
+    // overload for TArray<FString> so generated hashCode bodies that hash list-of-FString fields
+    // (e.g. UE4Library::BatchScriptRequest) compile.
+    inline size_t contentDeepHashCode(TArray<FString> const& value) noexcept {
+        size_t result = 1;
+        for (auto const& x : value) {
+            result = 31 * result + hash<FString>()(x);
+        }
+        return result;
+    }
+
     template <typename T>
     Wrapper<T> ToRdWrapper(TUniquePtr<T>&& Ptr) {
         Wrapper<T> Result;
