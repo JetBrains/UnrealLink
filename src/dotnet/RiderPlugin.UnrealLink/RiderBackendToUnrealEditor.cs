@@ -220,6 +220,7 @@ namespace RiderPlugin.UnrealLink
             unrealModel.PlayStateFromEditor.Advise(lf, myUnrealHost.myModel.PlayStateFromEditor);
 
             unrealModel.PlayModeFromEditor.Advise(lf, myUnrealHost.myModel.PlayModeFromEditor);
+            unrealModel.PlaySettingsFromEditor.Advise(lf, myUnrealHost.myModel.PlaySettingsFromEditor);
 
             unrealModel.NotificationReplyFromEditor.Advise(lf, myUnrealHost.myModel.NotificationReplyFromEditor);
 
@@ -263,6 +264,7 @@ namespace RiderPlugin.UnrealLink
                 riderModel.RequestStopFromRider.Advise(lf, unrealModel.RequestStopFromRider);
                 riderModel.RequestFrameSkipFromRider.Advise(lf, unrealModel.RequestFrameSkipFromRider);
                 riderModel.PlayModeFromRider.Advise(lf, unrealModel.PlayModeFromRider);
+                riderModel.PlaySettingsFromRider.Advise(lf, unrealModel.PlaySettingsFromRider);
             });
 
             unrealModel.IsHotReloadAvailable.Advise(lf, myUnrealHost.myModel.IsHotReloadAvailable.Set);
@@ -281,10 +283,10 @@ namespace RiderPlugin.UnrealLink
             myUnrealHost.PerformModelAction(riderModel =>
             {
                 riderModel.ExecuteScript.SetAsync((lt, request) =>
-                    unrealModel.ExecuteScript.Start(lt, request));
+                    unrealModel.ExecuteScript.Start(lt, request).AsTask());
 
                 riderModel.ExecuteBatchScripts.SetAsync((lt, request) =>
-                    unrealModel.ExecuteBatchScripts.Start(lt, request));
+                    unrealModel.ExecuteBatchScripts.Start(lt, request).AsTask());
             });
 
             return unrealModel;

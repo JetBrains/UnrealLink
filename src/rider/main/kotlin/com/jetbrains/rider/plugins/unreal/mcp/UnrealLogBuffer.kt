@@ -12,6 +12,7 @@ data class LogFilter(
     val minVerbosity: String? = null,  // "Log" | "Warning" | "Error" | "Fatal"
     val count: Int = 200,
     val sinceTimestampMs: Long? = null,
+    val pattern: Regex? = null,        // regex matched against entry.message
 )
 
 /**
@@ -66,13 +67,15 @@ class UnrealLogBuffer {
     fun query(filter: LogFilter): List<UnrealLogEntry> {
         val minOrder = filter.minVerbosity?.let { VERBOSITY_ORDER[it] } ?: Int.MAX_VALUE
         val sinceMs = filter.sinceTimestampMs
+        val pattern = filter.pattern
 
         val snapshot = synchronized(buffer) { buffer.toList() }
         return snapshot
             .filter { entry ->
                 (filter.category == null || entry.category == filter.category) &&
                 (filter.minVerbosity == null || (VERBOSITY_ORDER[entry.verbosity] ?: Int.MAX_VALUE) <= minOrder) &&
-                (sinceMs == null || entry.timestampMs >= sinceMs)
+                (sinceMs == null || entry.timestampMs >= sinceMs) &&
+                (pattern == null || pattern.containsMatchIn(entry.message))
             }
             .takeLast(filter.count)
     }

@@ -96,6 +96,10 @@ struct FPlaySettings
     int32 NumberOfClients;
     bool bNetDedicated;
     bool bSpawnAtPlayerStart;
+    // Newer fields driven by RdPlaySettings signal — legacy packed-int callers leave them at defaults.
+    EPlayNetMode NetMode = EPlayNetMode::PIE_Standalone;
+    bool bRunUnderOneProcess = true;
+    bool bApplyNetMode = false;             // only write NetMode/RunUnderOneProcess if set via struct path
 
     static FPlaySettings UnpackFromMode(int32_t mode)
     {
@@ -105,6 +109,20 @@ struct FPlaySettings
             DedicatedServer(mode),
             SpawnAtPlayerStart(mode),
         };
+        return settings;
+    }
+
+    static FPlaySettings FromRdStruct(const JetBrains::EditorPlugin::PlaySettings& rd)
+    {
+        FPlaySettings settings;
+        settings.PlayMode = PlayModeFromInt(rd.get_playMode());
+        settings.NumberOfClients = rd.get_numberOfClients();
+        settings.bNetDedicated = rd.get_dedicatedServer();
+        settings.bSpawnAtPlayerStart = rd.get_spawnAtPlayerStart();
+        // rd::PlayNetMode { Standalone=0, ListenServer=1, Client=2 } maps to EPlayNetMode {PIE_Standalone=0, PIE_ListenServer=1, PIE_Client=2}.
+        settings.NetMode = static_cast<EPlayNetMode>(static_cast<int>(rd.get_netMode()));
+        settings.bRunUnderOneProcess = rd.get_runUnderOneProcess();
+        settings.bApplyNetMode = true;
         return settings;
     }
 
@@ -138,7 +156,7 @@ static FPlaySettings RetrieveSettings(const ULevelEditorPlaySettings* PlayInSett
 static void UpdateSettings(ULevelEditorPlaySettings* PlayInSettings, const FPlaySettings& settings)
 {
     check(PlayInSettings);
-    
+
     PlayInSettings->SetPlayNumberOfClients(settings.NumberOfClients);
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 24
     PlayInSettings->SetPlayNetDedicated(settings.bNetDedicated);
@@ -150,6 +168,15 @@ static void UpdateSettings(ULevelEditorPlaySettings* PlayInSettings, const FPlay
             ? PlayLocation_DefaultPlayerStart
             : PlayLocation_CurrentCameraLocation;
     PlayInSettings->LastExecutedPlayModeType = settings.PlayMode;
+
+    // Only apply NetMode/RunUnderOneProcess when the caller went through the structured
+    // RdPlaySettings path. Legacy int-packed callers leave bApplyNetMode=false so we don't
+    // clobber the user's editor-config values with our defaults.
+    if (settings.bApplyNetMode)
+    {
+        PlayInSettings->SetPlayNetMode(settings.NetMode);
+        PlayInSettings->SetRunUnderOneProcess(settings.bRunUnderOneProcess);
+    }
 
     PlayInSettings->PostEditChange();
     PlayInSettings->SaveConfig();
@@ -444,6 +471,17 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlu
                              = GetMutableDefault<ULevelEditorPlaySettings>();
                          check(PlayInSettings);
                          const FPlaySettings NewSettings = FPlaySettings::UnpackFromMode(mode);
+                         UpdateSettings(PlayInSettings, NewSettings);
+                     }
+             );
+
+        Model.get_playSettingsFromRider()
+             .advise(Lifetime, [this](JetBrains::EditorPlugin::PlaySettings const& rdSettings)
+                     {
+                         ULevelEditorPlaySettings* PlayInSettings
+                             = GetMutableDefault<ULevelEditorPlaySettings>();
+                         check(PlayInSettings);
+                         const FPlaySettings NewSettings = FPlaySettings::FromRdStruct(rdSettings);
                          UpdateSettings(PlayInSettings, NewSettings);
                      }
              );

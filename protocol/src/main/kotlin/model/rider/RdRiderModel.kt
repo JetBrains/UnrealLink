@@ -167,6 +167,11 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         sink("PlayModeFromEditor", int)
         source("PlayModeFromRider", int)
 
+        // Structured PIE settings — supersedes the packed-int signals above for callers
+        // that need PlayNetMode / RunUnderOneProcess.
+        sink("PlaySettingsFromEditor", UE4Library.PlaySettings)
+        source("PlaySettingsFromRider", UE4Library.PlaySettings)
+
         sink("RiderLinkInstallPanelInit", void)
         sink("RiderLinkInstallMessage", InstallMessage).async
         sink("InstallPluginFinished", bool).async

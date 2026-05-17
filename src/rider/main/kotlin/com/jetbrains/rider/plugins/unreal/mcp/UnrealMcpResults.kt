@@ -12,9 +12,11 @@ data class UnrealHealthResult(
     @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val processId: Int? = null,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class UnrealPlayStateResult(
+data class UnrealPlayResult(
     val state: String,  // "Idle" | "Play" | "Pause"
+    @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val requested: String? = null,
 )
 
 @Serializable
@@ -31,16 +33,14 @@ data class UnrealLogResult(
     val total: Int = entries.size,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class UnrealBlueprintUsage(
-    val fullPath: String,
-    val rangeStart: Int,
-    val rangeEnd: Int,
-)
-
-@Serializable
-data class UnrealBlueprintUsagesResult(
-    val usages: List<UnrealBlueprintUsage>,
+data class UnrealStatusResult(
+    val connected: Boolean,
+    @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val projectName: String? = null,
+    @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val processId: Int? = null,
+    @EncodeDefault(mode = EncodeDefault.Mode.NEVER) val playState: String? = null,  // omitted when disconnected
+    val recentLogs: List<UnrealLogEntry> = emptyList(),
 )
 
 @OptIn(ExperimentalSerializationApi::class)
