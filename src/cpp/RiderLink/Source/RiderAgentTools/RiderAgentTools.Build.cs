@@ -4,11 +4,22 @@ public class RiderAgentTools : ModuleRules
 {
     public RiderAgentTools(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+#if UE_4_22_OR_LATER
+        PCHUsage = PCHUsageMode.NoPCHs;
+#else
+        PCHUsage = PCHUsageMode.NoSharedPCHs;
+#endif
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core" });
+        bUseRTTI = true;
 
-        PrivateDependencyModuleNames.AddRange(new string[] {
+#if UE_5_2_OR_LATER
+        bDisableStaticAnalysis = true;
+#endif
+
+        PublicDependencyModuleNames.Add("RD");
+
+        PrivateDependencyModuleNames.AddRange(new[] {
+            "Core",
             "CoreUObject",
             "Engine",
             "Json",
