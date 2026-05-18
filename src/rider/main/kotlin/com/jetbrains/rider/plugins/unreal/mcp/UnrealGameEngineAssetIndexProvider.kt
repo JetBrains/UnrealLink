@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.jetbrains.rider.gameEngine.mcp.GameEngineAssetInfo
 import com.jetbrains.rider.gameEngine.mcp.GameEngineAssetPropertiesInfo
 import com.jetbrains.rider.gameEngine.mcp.GameEngineClassInfo
+import com.jetbrains.rider.gameEngine.mcp.GameEngineDefaultOverrideInfo
 import com.jetbrains.rider.gameEngine.mcp.GameEnginePropertyInfo
 import com.jetbrains.rider.gameEngine.mcp.GameEngineTagInfo
 import com.jetbrains.rider.gameEngine.mcp.IGameEngineAssetIndexProvider
@@ -11,6 +12,7 @@ import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.UnrealAssetPropertiesRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.UnrealAssetSearchRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.UnrealBlueprintHierarchyRequest
+import com.jetbrains.rider.plugins.unreal.model.frontendBackend.UnrealDefaultOverridesRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.UnrealGameplayTagsRequest
 
 class UnrealGameEngineAssetIndexProvider : IGameEngineAssetIndexProvider {
@@ -51,5 +53,20 @@ class UnrealGameEngineAssetIndexProvider : IGameEngineAssetIndexProvider {
         )
         val properties = response.properties.map { GameEnginePropertyInfo(it.name, it.typeName, it.value) }
         return GameEngineAssetPropertiesInfo(objectName = response.objectName, properties = properties)
+    }
+
+    override suspend fun findDefaultOverrides(
+        project: Project,
+        className: String,
+        fieldName: String,
+        limit: Int,
+    ): List<GameEngineDefaultOverrideInfo> {
+        val model = UnrealHost.getInstance(project).model
+        val response = model.findDefaultOverrides.startSuspending(
+            UnrealDefaultOverridesRequest(className = className, fieldName = fieldName, limit = limit)
+        )
+        return response.overrides.map {
+            GameEngineDefaultOverrideInfo(it.assetPath, it.instanceName, it.typeName, it.value)
+        }
     }
 }
