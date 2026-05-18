@@ -1,6 +1,7 @@
 <idea-plugin>
     <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
     <dependencies>
+      <plugin id="com.intellij.mcpServer"/>
       <plugin id="unreal-link"/>
       <module name="intellij.rider.test.framework"/>
       <module name="intellij.rider.test.framework.integration.testng"/>
@@ -10,6 +11,8 @@
       <module name="intellij.libraries.gson"/>
       <module name="intellij.libraries.kotlin.reflect"/>
       <module name="intellij.libraries.kotlinx.coroutines.core"/>
+      <module name="intellij.libraries.kotlinx.serialization.core"/>
+      <module name="intellij.libraries.kotlinx.serialization.json"/>
       <module name="intellij.libraries.teamcity.service.messages"/>
       <module name="intellij.libraries.xz"/>
       <module name="intellij.platform.analysis.impl"/>
