@@ -129,6 +129,20 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("objectName", string.nullable)
         field("properties", immutableList(UnrealAssetPropertyInfo))
     }
+    private val UnrealDefaultOverrideInfo = structdef("UnrealDefaultOverrideInfo") {
+        field("assetPath", string)
+        field("instanceName", string)
+        field("typeName", string)
+        field("value", string)
+    }
+    private val UnrealDefaultOverridesRequest = structdef("UnrealDefaultOverridesRequest") {
+        field("className", string)
+        field("fieldName", string)
+        field("limit", int).default(200)
+    }
+    private val UnrealDefaultOverridesResponse = structdef("UnrealDefaultOverridesResponse") {
+        field("overrides", immutableList(UnrealDefaultOverrideInfo))
+    }
 
     init {
         property("editorId", 0).readonly.async
@@ -198,5 +212,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         call("getBlueprintHierarchy", UnrealBlueprintHierarchyRequest, UnrealBlueprintHierarchyResponse).async
         call("searchGameplayTags",    UnrealGameplayTagsRequest,       UnrealGameplayTagsResponse).async
         call("getAssetProperties",    UnrealAssetPropertiesRequest,    UnrealAssetPropertiesResponse).async
+        call("findDefaultOverrides",  UnrealDefaultOverridesRequest,   UnrealDefaultOverridesResponse).async
     }
 }
