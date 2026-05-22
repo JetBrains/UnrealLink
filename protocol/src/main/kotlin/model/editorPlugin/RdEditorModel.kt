@@ -60,5 +60,9 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // Python execution — C# calls these after forwarding from RdRiderModel; C++ implements handlers
         call("executeScript", UE4Library.ScriptRequest, UE4Library.ScriptResult).async
         call("executeBatchScripts", UE4Library.BatchScriptRequest, UE4Library.BatchScriptResult).async
+
+        // Live asset search — C# forwards from RdRiderModel.searchUnrealAssetsLive;
+        // C++ binds in AssetRegistrySearcher and queries IAssetRegistry on the game thread.
+        call("searchAssetsLive", UE4Library.AssetLiveSearchRequest, UE4Library.AssetLiveSearchResponse).async
     }
 }

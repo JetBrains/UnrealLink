@@ -90,10 +90,29 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     private val UnrealAssetSearchRequest = structdef("UnrealAssetSearchRequest") {
         field("query", string.nullable)
         field("baseClass", string.nullable)
+        field("packagePath", string.nullable)
         field("limit", int).default(200)
     }
     private val UnrealAssetSearchResponse = structdef("UnrealAssetSearchResponse") {
         field("assets", immutableList(UnrealAssetInfo))
+    }
+    // Live-path-only asset info: the editor knows the asset's own class
+    // ("Blueprint", "AnimBlueprint", "World", …) without parsing the .uasset
+    // header, so we carry it through. The cache path leaves this null.
+    private val UnrealAssetLiveInfo = structdef("UnrealAssetLiveInfo") {
+        field("assetPath", string)
+        field("assetName", string)
+        field("baseClass", string.nullable)
+        field("assetClass", string.nullable)
+    }
+    private val UnrealAssetLiveSearchRequest = structdef("UnrealAssetLiveSearchRequest") {
+        field("query", string.nullable)
+        field("baseClass", string.nullable)
+        field("packagePath", string.nullable)
+        field("limit", int).default(200)
+    }
+    private val UnrealAssetLiveSearchResponse = structdef("UnrealAssetLiveSearchResponse") {
+        field("assets", immutableList(UnrealAssetLiveInfo))
     }
     private val UnrealBlueprintInfo = structdef("UnrealBlueprintInfo") {
         field("name", string)
@@ -209,6 +228,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         // Asset index queries — Rider PSI only, no editor connection required
         call("searchUnrealAssets",    UnrealAssetSearchRequest,        UnrealAssetSearchResponse).async
+        // Live asset query — forwards to UE Editor's AssetRegistry; requires a connected editor.
+        call("searchUnrealAssetsLive", UnrealAssetLiveSearchRequest,   UnrealAssetLiveSearchResponse).async
         call("getBlueprintHierarchy", UnrealBlueprintHierarchyRequest, UnrealBlueprintHierarchyResponse).async
         call("searchGameplayTags",    UnrealGameplayTagsRequest,       UnrealGameplayTagsResponse).async
         call("getAssetProperties",    UnrealAssetPropertiesRequest,    UnrealAssetPropertiesResponse).async
