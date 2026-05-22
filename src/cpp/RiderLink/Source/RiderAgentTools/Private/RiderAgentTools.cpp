@@ -1,4 +1,5 @@
 #include "RiderAgentTools.hpp"
+#include "AssetRegistrySearcher.hpp"
 #include "PythonExecutor.hpp"
 #include "IRiderLink.hpp"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
@@ -17,6 +18,7 @@ void FRiderAgentToolsModule::StartupModule()
         [](rd::Lifetime ModelLifetime, JetBrains::EditorPlugin::RdEditorModel const& Model)
         {
             PythonExecutor::BindTo(ModelLifetime, Model);
+            AssetRegistrySearcher::BindTo(ModelLifetime, Model);
         });
 }
 
