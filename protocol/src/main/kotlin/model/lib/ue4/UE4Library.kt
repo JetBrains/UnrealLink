@@ -278,5 +278,44 @@ object UE4Library : Root() {
         field("compileBeforeRun", bool)
         field("runUnderOneProcess", bool)
     }
+
+    // ── Screenshots ──────────────────────────────────────────────────────────
+    // Editor-side capture of the active level viewport, the focused editor
+    // window, or an asset preview pane. PNG bytes are written to
+    // <Project>/Saved/Screenshots/RiderMCP/ and the absolute path is returned
+    // in the result — no binary blob travels through RD.
+
+    val ScreenshotKind = enum("ScreenshotKind") {
+        +"EditorWindow"   // active top-level editor window (chrome + viewport + panels)
+        +"Viewport"       // active level-editor viewport only
+        +"AssetPreview"   // preview pane in BP/Material/Anim/Niagara asset editor
+    }
+
+    val ScreenshotRequest = structdef("ScreenshotRequest") {
+        field("kind", ScreenshotKind)
+        // Required when kind == AssetPreview (long package path, e.g. /Game/Foo/BP_Hero).
+        field("assetPath", FString.nullable)
+        // Pixel dimensions of the rendered PNG. 0 ⇒ use the widget's native size.
+        field("width", int).default(0)
+        field("height", int).default(0)
+        // AssetPreview only: skip the thumbnail-cache fast path and force a
+        // live editor capture (opens the asset editor if not already open).
+        field("forceLive", bool).default(false)
+    }
+
+    val ScreenshotResult = structdef("ScreenshotResult") {
+        field("success", bool)
+        // Absolute path to the written PNG. Empty on failure.
+        field("path", FString)
+        field("width", int)
+        field("height", int)
+        // Diagnostic label for which capture path produced this result
+        // (e.g. "SlateApplication.TakeScreenshot", "ThumbnailTools.Cache",
+        // "AutomationLibrary.HighResScreenshot"). Helps callers reason about
+        // chrome-vs-viewport semantics and cache vs live source.
+        field("sourceApi", FString)
+        // Human-readable diagnostic. Empty on success.
+        field("error", FString)
+    }
 }
 

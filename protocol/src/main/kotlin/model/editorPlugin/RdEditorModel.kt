@@ -64,5 +64,10 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // Live asset search — C# forwards from RdRiderModel.searchUnrealAssetsLive;
         // C++ binds in AssetRegistrySearcher and queries IAssetRegistry on the game thread.
         call("searchAssetsLive", UE4Library.AssetLiveSearchRequest, UE4Library.AssetLiveSearchResponse).async
+
+        // Screenshots — C# forwards from RdRiderModel.takeScreenshot;
+        // C++ binds in ScreenshotCapturer using FSlateApplication::TakeScreenshot
+        // for window/viewport and ThumbnailTools for asset preview cache.
+        call("takeScreenshot", UE4Library.ScreenshotRequest, UE4Library.ScreenshotResult).async
     }
 }

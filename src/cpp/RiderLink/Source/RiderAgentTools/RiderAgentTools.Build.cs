@@ -23,10 +23,24 @@ public class RiderAgentTools : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
+            "ImageWrapper",
             "Json",
             "JsonUtilities",
             "PythonScriptPlugin",
+            "RenderCore",
             "RiderLink",
+            "Slate",
+            "SlateCore",
         });
+
+        // Editor-only screenshot helpers: asset thumbnails (UnrealEd),
+        // level-editor viewport widget (LevelEditor).
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new[] {
+                "LevelEditor",
+                "UnrealEd",
+            });
+        }
     }
 }

@@ -163,6 +163,26 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("overrides", immutableList(UnrealDefaultOverrideInfo))
     }
 
+    // Screenshots — Rider-side payload uses plain strings; the C# bridge in
+    // RiderBackendToUnrealEditor repackages into UE4Library FString types for
+    // the editor-model call. `kind` is the string form of UE4Library.ScreenshotKind
+    // ("EditorWindow" | "Viewport" | "AssetPreview").
+    private val UnrealScreenshotRequest = structdef("UnrealScreenshotRequest") {
+        field("kind", string)
+        field("assetPath", string.nullable)
+        field("width", int).default(0)
+        field("height", int).default(0)
+        field("forceLive", bool).default(false)
+    }
+    private val UnrealScreenshotResponse = structdef("UnrealScreenshotResponse") {
+        field("success", bool)
+        field("path", string)
+        field("width", int)
+        field("height", int)
+        field("sourceApi", string)
+        field("error", string)
+    }
+
     init {
         property("editorId", 0).readonly.async
 
@@ -234,5 +254,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         call("searchGameplayTags",    UnrealGameplayTagsRequest,       UnrealGameplayTagsResponse).async
         call("getAssetProperties",    UnrealAssetPropertiesRequest,    UnrealAssetPropertiesResponse).async
         call("findDefaultOverrides",  UnrealDefaultOverridesRequest,   UnrealDefaultOverridesResponse).async
+
+        // Screenshots — Rider→UE direction; C# backend forwards to RdEditorModel.takeScreenshot.
+        call("takeScreenshot",        UnrealScreenshotRequest,         UnrealScreenshotResponse).async
     }
 }
