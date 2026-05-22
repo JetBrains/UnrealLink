@@ -3,9 +3,9 @@
 
 #include "IRiderLink.hpp"
 
-#include "Model/Library/UE4Library/PlayState.Pregenerated.h"
-#include "Model/Library/UE4Library/RequestFailed.Pregenerated.h"
-#include "Model/Library/UE4Library/RequestSucceed.Pregenerated.h"
+#include "UE4Library/PlayState.Pregenerated.h"
+#include "UE4Library/RequestFailed.Pregenerated.h"
+#include "UE4Library/RequestSucceed.Pregenerated.h"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 
 #include "Async/Async.h"
