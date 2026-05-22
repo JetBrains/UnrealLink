@@ -2,6 +2,7 @@
 #include "AssetRegistrySearcher.hpp"
 #include "PythonExecutor.hpp"
 #include "ScreenshotCapturer.hpp"
+#include "ViewportCameraController.hpp"
 #include "IRiderLink.hpp"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 #include "Modules/ModuleManager.h"
@@ -21,6 +22,7 @@ void FRiderAgentToolsModule::StartupModule()
             PythonExecutor::BindTo(ModelLifetime, Model);
             AssetRegistrySearcher::BindTo(ModelLifetime, Model);
             ScreenshotCapturer::BindTo(ModelLifetime, Model);
+            ViewportCameraController::BindTo(ModelLifetime, Model);
         });
 }
 

@@ -179,6 +179,7 @@ Path to old plugin:</code></pre>
     <extensions defaultExtensionNs="com.intellij.rider">
         <gameEngineAssetIndexProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineAssetIndexProvider"/>
         <gameEngineScreenshotProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineScreenshotProvider"/>
+        <gameEngineViewportCameraProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineViewportCameraProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="rider.cpp">
