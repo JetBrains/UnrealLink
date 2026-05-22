@@ -42,6 +42,45 @@ static void SplitResultOrError(const FPythonCommandEx& Cmd, bool bSuccess, FStri
     }
 }
 
+// Configure FPythonCommandEx for the requested mode.
+// isolated=true keeps the historic "evaluate a single expression and return its value" semantic.
+// isolated=false runs the script as a file (multi-statement supported, shared __main__ globals
+// across calls), matching the AgentBridge reference and avoiding the
+// "multiple statements found while compiling a single statement" failure that
+// EPythonCommandExecutionMode::ExecuteStatement imposes.
+static void ConfigureCommand(FPythonCommandEx& Cmd, const FString& Script, bool bIsolated)
+{
+    Cmd.Command = Script;
+    if (bIsolated)
+    {
+        Cmd.ExecutionMode = EPythonCommandExecutionMode::EvaluateStatement;
+    }
+    else
+    {
+        Cmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteFile;
+        Cmd.FileExecutionScope = EPythonFileExecutionScope::Public;
+    }
+}
+
+// Release Python's UObject refs first, then let UE reclaim — but never call
+// CollectGarbage from inside another GC pass: that re-entrant call spawns
+// TaskGraph work which doesn't inherit FAppTime's game-thread context, tripping
+// EnsureFailed(IsInGameThread()) in AppTime.cpp.
+static void PostExecGarbageCollect(IPythonScriptPlugin* PythonPlugin)
+{
+    if (PythonPlugin && PythonPlugin->IsPythonAvailable())
+    {
+        FPythonCommandEx GcCommand;
+        GcCommand.Command = TEXT("import gc; gc.collect()");
+        GcCommand.ExecutionMode = EPythonCommandExecutionMode::ExecuteStatement;
+        PythonPlugin->ExecPythonCommandEx(GcCommand);
+    }
+    if (!IsGarbageCollecting())
+    {
+        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+    }
+}
+
 static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCallback Callback)
 {
     AsyncTask(ENamedThreads::GameThread, [Script, bIsolated, Callback = MoveTemp(Callback)]()
@@ -61,10 +100,7 @@ static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCa
         }
 
         FPythonCommandEx Cmd;
-        Cmd.Command = Script;
-        Cmd.ExecutionMode = bIsolated
-            ? EPythonCommandExecutionMode::EvaluateStatement
-            : EPythonCommandExecutionMode::ExecuteStatement;
+        ConfigureCommand(Cmd, Script, bIsolated);
 
         const bool bSuccess = PythonPlugin->ExecPythonCommandEx(Cmd);
         FString Output = Cmd.LogOutput.Num() > 0
@@ -74,7 +110,7 @@ static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCa
         FString Error;
         SplitResultOrError(Cmd, bSuccess, Result, Error);
 
-        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+        PostExecGarbageCollect(PythonPlugin);
 
         Callback(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error)));
     });
@@ -120,8 +156,8 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
                     for (int32 i = StartFrom; i < Scripts.Num(); ++i)
                     {
                         FPythonCommandEx Cmd;
-                        Cmd.Command = Scripts[i];
-                        Cmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteStatement;
+                        // Batch scripts run as files (multi-statement, shared globals across steps).
+                        ConfigureCommand(Cmd, Scripts[i], /*bIsolated=*/false);
 
                         const bool bSuccess = PythonPlugin && PythonPlugin->IsPythonAvailable()
                             && PythonPlugin->ExecPythonCommandEx(Cmd);
@@ -133,7 +169,7 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
                         FString Error;
                         SplitResultOrError(Cmd, bSuccess, Result, Error);
 
-                        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+                        PostExecGarbageCollect(PythonPlugin);
 
                         Results.Emplace(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error)));
 
