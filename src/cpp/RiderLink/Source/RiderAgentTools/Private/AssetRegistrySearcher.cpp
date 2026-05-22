@@ -7,6 +7,7 @@
 #include "AssetRegistry/AssetData.h"
 #include "Async/Async.h"
 #include "Misc/PackageName.h"
+#include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/Class.h"
 #include "UObject/TopLevelAssetPath.h"
@@ -30,16 +31,20 @@ namespace
         return nullptr;
     }
 
-    // Convert /Game/Foo/Bar → <Project>/Content/Foo/Bar.uasset (and plugin equivalents).
+    // Convert /Game/Foo/Bar → <ProjectAbsolute>/Content/Foo/Bar.uasset (and plugin equivalents).
+    // TryConvertLongPackageNameToFilename returns a path relative to the engine's
+    // working directory (e.g. ../../../../Projects/MyProject/Content/...). The cache
+    // path returns absolute paths; we match that here so consumers can compare and
+    // dedupe results across sources without further normalisation.
     FString PackageNameToDiskPath(const FString& PackageName)
     {
         FString DiskPath;
-        if (FPackageName::TryConvertLongPackageNameToFilename(
+        if (!FPackageName::TryConvertLongPackageNameToFilename(
                 PackageName, DiskPath, FPackageName::GetAssetPackageExtension()))
         {
-            return DiskPath;
+            return PackageName;
         }
-        return PackageName;
+        return FPaths::ConvertRelativePathToFull(DiskPath);
     }
 
     // Mirror the Python prototype's logic: filter ARFilter results post-fetch
