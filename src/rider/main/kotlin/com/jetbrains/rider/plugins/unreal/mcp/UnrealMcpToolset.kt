@@ -6,6 +6,7 @@ import com.intellij.mcpserver.annotations.McpTool
 import com.intellij.mcpserver.mcpFail
 import com.intellij.mcpserver.project
 import com.intellij.mcpserver.reportToolActivity
+import com.intellij.openapi.application.EDT
 import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rider.plugins.unreal.UnrealHost
 import com.jetbrains.rider.plugins.unreal.actions.PlayStateActionStateService
@@ -14,8 +15,10 @@ import com.jetbrains.rider.plugins.unreal.model.FString
 import com.jetbrains.rider.plugins.unreal.model.PlayNetMode
 import com.jetbrains.rider.plugins.unreal.model.PlaySettings
 import com.jetbrains.rider.plugins.unreal.model.ScriptRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -107,33 +110,37 @@ class UnrealMcpToolset : McpToolset {
         val model = host.model
         val stateService = PlayStateActionStateService.getInstance(currentCoroutineContext().project)
         val requestId = stateService.nextRequestID()
-        when (normalized) {
-            "play" -> {
-                val modeInt = parsePlayMode(mode)
-                val net = parseNetMode(netMode)
-                if (players !in 1..4) mcpFail("players must be 1-4")
-                // New structured signal — superset of the packed-int form. The editor's RiderGameControl
-                // reads playSettingsFromRider AND playModeFromRider; sending the struct alone is enough.
-                model.playSettingsFromRider.fire(
-                    PlaySettings(
-                        playMode = modeInt,
-                        numberOfClients = players,
-                        netMode = net,
-                        dedicatedServer = dedicatedServer,
-                        spawnAtPlayerStart = spawnAtPlayerStart,
-                        compileBeforeRun = compileBeforeRun,
-                        runUnderOneProcess = runUnderOneProcess,
+        // RD signal .fire(...) must run on the protocol scheduler (EDT in Rider frontend).
+        val preActionState = host.playState.name
+        withContext(Dispatchers.EDT) {
+            when (normalized) {
+                "play" -> {
+                    val modeInt = parsePlayMode(mode)
+                    val net = parseNetMode(netMode)
+                    if (players !in 1..4) mcpFail("players must be 1-4")
+                    // New structured signal — superset of the packed-int form. The editor's RiderGameControl
+                    // reads playSettingsFromRider AND playModeFromRider; sending the struct alone is enough.
+                    model.playSettingsFromRider.fire(
+                        PlaySettings(
+                            playMode = modeInt,
+                            numberOfClients = players,
+                            netMode = net,
+                            dedicatedServer = dedicatedServer,
+                            spawnAtPlayerStart = spawnAtPlayerStart,
+                            compileBeforeRun = compileBeforeRun,
+                            runUnderOneProcess = runUnderOneProcess,
+                        )
                     )
-                )
-                model.requestPlayFromRider.fire(requestId)
+                    model.requestPlayFromRider.fire(requestId)
+                }
+                "pause"      -> model.requestPauseFromRider.fire(requestId)
+                "resume"     -> model.requestResumeFromRider.fire(requestId)
+                "stop"       -> model.requestStopFromRider.fire(requestId)
+                "frame_skip" -> model.requestFrameSkipFromRider.fire(requestId)
+                else         -> mcpFail("Unknown action '$action'. Use: state | play | pause | resume | stop | frame_skip")
             }
-            "pause"      -> model.requestPauseFromRider.fire(requestId)
-            "resume"     -> model.requestResumeFromRider.fire(requestId)
-            "stop"       -> model.requestStopFromRider.fire(requestId)
-            "frame_skip" -> model.requestFrameSkipFromRider.fire(requestId)
-            else         -> mcpFail("Unknown action '$action'. Use: state | play | pause | resume | stop | frame_skip")
         }
-        return UnrealPlayResult(state = host.playState.name, requested = normalized)
+        return UnrealPlayResult(state = preActionState, requested = normalized)
     }
 
     private fun parsePlayMode(raw: String): Int {
