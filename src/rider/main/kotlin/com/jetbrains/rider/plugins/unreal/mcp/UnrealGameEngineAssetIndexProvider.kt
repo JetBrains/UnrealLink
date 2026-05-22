@@ -25,7 +25,7 @@ class UnrealGameEngineAssetIndexProvider : IGameEngineAssetIndexProvider {
     override suspend fun searchAssets(project: Project, query: String?, baseClass: String?, limit: Int): List<GameEngineAssetInfo> {
         val model = UnrealHost.getInstance(project).model
         val response = model.searchUnrealAssets.startSuspending(
-            UnrealAssetSearchRequest(query = query, baseClass = baseClass, limit = limit)
+            UnrealAssetSearchRequest(query = query, baseClass = baseClass, packagePath = null, limit = limit)
         )
         return response.assets.map { GameEngineAssetInfo(it.assetPath, it.assetName, it.baseClass) }
     }

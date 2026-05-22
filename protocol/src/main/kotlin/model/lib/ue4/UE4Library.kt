@@ -236,6 +236,27 @@ object UE4Library : Root() {
         field("lastSuccessfulIndex", int)
     }
 
+    // ── Live asset search (UE Editor AssetRegistry) ──────────────────────────
+
+    val AssetLiveSearchRequest = structdef("AssetLiveSearchRequest") {
+        field("query", FString.nullable)
+        field("baseClass", FString.nullable)
+        field("packagePath", FString.nullable)
+        field("limit", int).default(200)
+    }
+
+    val AssetLiveSearchAsset = structdef("AssetLiveSearchAsset") {
+        field("assetPath", FString)
+        field("assetName", FString)
+        field("baseClass", FString.nullable)
+        // assetClass = the asset's own class short name (e.g. "Blueprint", "World").
+        field("assetClass", FString.nullable)
+    }
+
+    val AssetLiveSearchResponse = structdef("AssetLiveSearchResponse") {
+        field("assets", immutableList(AssetLiveSearchAsset))
+    }
+
     // ── PIE settings ─────────────────────────────────────────────────────────
     // Replaces the legacy packed-int playModeFromRider/Editor signals with a
     // structured representation so the new fields (netMode, runUnderOneProcess)
