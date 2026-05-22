@@ -136,6 +136,9 @@ public class UnrealMcpAssetQueryHandler
         var limit = Math.Max(1, Math.Min(request.Limit, 5000));
         var results = new List<UnrealAssetInfo>();
 
+        bool MatchesPath(string fullPath) =>
+            request.PackagePath == null || DiskPathMatchesPackagePrefix(fullPath, request.PackagePath);
+
         if (request.BaseClass != null)
         {
             var query = request.Query;
@@ -149,7 +152,9 @@ public class UnrealMcpAssetQueryHandler
                         if (!cls.ContainingFile.IsValid()) continue;
                         if (query != null && !cls.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
                             continue;
-                        results.Add(new UnrealAssetInfo(cls.ContainingFile.GetLocation().FullPath, cls.Name, request.BaseClass));
+                        var path = cls.ContainingFile.GetLocation().FullPath;
+                        if (!MatchesPath(path)) continue;
+                        results.Add(new UnrealAssetInfo(path, cls.Name, request.BaseClass));
                     }
                 }
             }
@@ -160,11 +165,55 @@ public class UnrealMcpAssetQueryHandler
             foreach (var file in cache.GetAssetFilesContainingWord(request.Query))
             {
                 if (results.Count >= limit) break;
-                results.Add(new UnrealAssetInfo(file.GetLocation().FullPath, file.GetLocation().NameWithoutExtension, null));
+                var path = file.GetLocation().FullPath;
+                if (!MatchesPath(path)) continue;
+                results.Add(new UnrealAssetInfo(path, file.GetLocation().NameWithoutExtension, null));
             }
         }
 
         return new UnrealAssetSearchResponse(results);
+    }
+
+    /// <summary>
+    /// Match a disk asset path against an Unreal package-path prefix
+    /// (e.g. "/Game/Heroes/" or "/MyPlugin/Content/").
+    /// <para/>
+    /// `/Game/X/Y` resolves on disk under `<ProjectDir>/Content/X/Y.uasset`;
+    /// `/PluginName/X/Y` resolves under `…/Plugins/<PluginName>/Content/X/Y.uasset`.
+    /// We invert the convention here: strip the disk path back to its mount-root form
+    /// and compare prefixes (case-insensitive).
+    /// </summary>
+    private static bool DiskPathMatchesPackagePrefix([NotNull] string fullPath, [NotNull] string packagePathPrefix)
+    {
+        if (packagePathPrefix.Length == 0) return true;
+        var normalised = fullPath.Replace('\\', '/');
+        var contentIdx = normalised.LastIndexOf("/Content/", StringComparison.OrdinalIgnoreCase);
+        if (contentIdx < 0) return false;
+
+        var afterContent = normalised.Substring(contentIdx + "/Content".Length);
+        // Strip extension.
+        var dot = afterContent.LastIndexOf('.');
+        if (dot > 0) afterContent = afterContent.Substring(0, dot);
+
+        // Determine the mount root.
+        var beforeContent = normalised.Substring(0, contentIdx);
+        var pluginsIdx = beforeContent.LastIndexOf("/Plugins/", StringComparison.OrdinalIgnoreCase);
+        string mountRoot;
+        if (pluginsIdx >= 0)
+        {
+            var afterPlugins = beforeContent.Substring(pluginsIdx + "/Plugins/".Length);
+            var slash = afterPlugins.IndexOf('/');
+            mountRoot = "/" + (slash > 0 ? afterPlugins.Substring(0, slash) : afterPlugins);
+        }
+        else
+        {
+            mountRoot = "/Game";
+        }
+
+        var reconstructed = mountRoot + afterContent; // e.g. /Game/Heroes/BP_Hero
+        var prefix = packagePathPrefix.TrimEnd('/');
+        return reconstructed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && (reconstructed.Length == prefix.Length || reconstructed[prefix.Length] == '/');
     }
 
     [NotNull]

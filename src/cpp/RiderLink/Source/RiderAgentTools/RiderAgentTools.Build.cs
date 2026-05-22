@@ -19,6 +19,7 @@ public class RiderAgentTools : ModuleRules
         PublicDependencyModuleNames.Add("RD");
 
         PrivateDependencyModuleNames.AddRange(new[] {
+            "AssetRegistry",
             "Core",
             "CoreUObject",
             "Engine",

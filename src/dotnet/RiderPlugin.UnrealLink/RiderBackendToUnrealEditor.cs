@@ -287,6 +287,28 @@ namespace RiderPlugin.UnrealLink
 
                 riderModel.ExecuteBatchScripts.SetAsync((lt, request) =>
                     unrealModel.ExecuteBatchScripts.Start(lt, request).AsTask());
+
+                // Bridge live asset search: RdRiderModel.SearchUnrealAssetsLive → RdEditorModel.SearchAssetsLive.
+                // The Rider-model request uses plain `string?` fields; the editor-model request uses the
+                // UE4Library FString marshaller. Repack at the boundary.
+                riderModel.SearchUnrealAssetsLive.SetAsync(async (lt, request) =>
+                {
+                    static FString ToFString(string s) => s == null ? null : new FString(s);
+                    var editorRequest = new AssetLiveSearchRequest(
+                        ToFString(request.Query),
+                        ToFString(request.BaseClass),
+                        ToFString(request.PackagePath),
+                        request.Limit);
+                    var editorResponse = await unrealModel.SearchAssetsLive.Start(lt, editorRequest).AsTask();
+                    var assets = editorResponse.Assets
+                        .Select(a => new UnrealAssetLiveInfo(
+                            a.AssetPath.Data,
+                            a.AssetName.Data,
+                            a.BaseClass?.Data,
+                            a.AssetClass?.Data))
+                        .ToList();
+                    return new UnrealAssetLiveSearchResponse(assets);
+                });
             });
 
             return unrealModel;
