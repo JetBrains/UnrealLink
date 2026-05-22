@@ -10,6 +10,17 @@ public class RiderAgentTools : ModuleRules
         PCHUsage = PCHUsageMode.NoSharedPCHs;
 #endif
 
+        // Unity builds merge sibling .cpp files into one TU; some files in this
+        // module use `using namespace JetBrains::EditorPlugin;` inside an
+        // anonymous namespace, which (per C++ rules) makes the EP names
+        // reachable from the enclosing scope via the anonymous-namespace
+        // implicit using-directive. That collides with UE engine headers (e.g.
+        // Subsystems/UnrealEditorSubsystem.h) that reference `UClass`
+        // unqualified — `JetBrains::EditorPlugin::UClass` (from UE4Library.kt)
+        // becomes ambiguous with the engine's global `::UClass`. Disabling
+        // unity isolates each .cpp so the leak can't cross files.
+        bUseUnity = false;
+
         bUseRTTI = true;
 
 #if UE_5_2_OR_LATER

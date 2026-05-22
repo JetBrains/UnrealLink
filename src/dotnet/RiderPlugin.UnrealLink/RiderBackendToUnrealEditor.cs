@@ -338,6 +338,46 @@ namespace RiderPlugin.UnrealLink
                         editorResponse.SourceApi.Data ?? string.Empty,
                         editorResponse.Error.Data ?? string.Empty);
                 });
+
+                // Bridge viewport camera: RdRiderModel.ViewportCamera → RdEditorModel.ViewportCamera.
+                // The Rider model uses plain `string` for the action (mirrors TakeScreenshot's
+                // `kind`) and plain UnrealVector3/UnrealRotator3 structs; we translate into the
+                // UE4Library enum + FString-using request, then repack the response back to plain
+                // strings on the way out.
+                riderModel.ViewportCamera.SetAsync(async (lt, request) =>
+                {
+                    static FString ToFString(string s) => s == null ? null : new FString(s);
+                    static ViewportCameraAction ParseAction(string s) => s switch
+                    {
+                        "Get"           => ViewportCameraAction.Get,
+                        "Set"           => ViewportCameraAction.Set,
+                        "Move"          => ViewportCameraAction.Move,
+                        "LookAt"        => ViewportCameraAction.LookAt,
+                        "FocusOnActor"  => ViewportCameraAction.FocusOnActor,
+                        _ => throw new ArgumentException($"Unknown ViewportCameraAction: {s}")
+                    };
+                    static Vector3 ToV3(UnrealVector3 v) => v == null ? null : new Vector3(v.X, v.Y, v.Z);
+                    static Rotator3 ToR3(UnrealRotator3 r) => r == null ? null : new Rotator3(r.Pitch, r.Yaw, r.Roll);
+
+                    var editorRequest = new ViewportCameraRequest(
+                        ParseAction(request.Action),
+                        ToV3(request.Location),
+                        ToR3(request.Rotation),
+                        ToV3(request.Delta),
+                        request.Relative,
+                        ToR3(request.RotationDelta),
+                        ToV3(request.Target),
+                        ToFString(request.ActorName),
+                        request.MinDistance);
+
+                    var editorResponse = await unrealModel.ViewportCamera.Start(lt, editorRequest).AsTask();
+                    return new UnrealViewportCameraResponse(
+                        editorResponse.Success,
+                        new UnrealVector3(editorResponse.Location.X, editorResponse.Location.Y, editorResponse.Location.Z),
+                        new UnrealRotator3(editorResponse.Rotation.Pitch, editorResponse.Rotation.Yaw, editorResponse.Rotation.Roll),
+                        editorResponse.ActorResolved?.Data,
+                        editorResponse.Error.Data ?? string.Empty);
+                });
             });
 
             return unrealModel;

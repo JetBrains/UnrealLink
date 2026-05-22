@@ -183,6 +183,40 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("error", string)
     }
 
+    // Viewport camera — Rider-side payload uses plain doubles + string `action`
+    // so the front-end doesn't have to carry the UE4Library enum across two
+    // protocol boundaries. The C# bridge repackages into UE4Library types.
+    private val UnrealVector3 = structdef("UnrealVector3") {
+        field("x", double)
+        field("y", double)
+        field("z", double)
+    }
+    private val UnrealRotator3 = structdef("UnrealRotator3") {
+        field("pitch", double)
+        field("yaw", double)
+        field("roll", double)
+    }
+    private val UnrealViewportCameraRequest = structdef("UnrealViewportCameraRequest") {
+        // String form of UE4Library.ViewportCameraAction: "Get" | "Set" | "Move" | "LookAt" | "FocusOnActor".
+        field("action", string)
+        field("location", UnrealVector3.nullable)
+        field("rotation", UnrealRotator3.nullable)
+        field("delta", UnrealVector3.nullable)
+        field("relative", bool).default(false)
+        field("rotationDelta", UnrealRotator3.nullable)
+        field("target", UnrealVector3.nullable)
+        field("actorName", string.nullable)
+        // 0.0 ⇒ defer to the C++-side automatic framing distance.
+        field("minDistance", double)
+    }
+    private val UnrealViewportCameraResponse = structdef("UnrealViewportCameraResponse") {
+        field("success", bool)
+        field("location", UnrealVector3)
+        field("rotation", UnrealRotator3)
+        field("actorResolved", string.nullable)
+        field("error", string)
+    }
+
     init {
         property("editorId", 0).readonly.async
 
@@ -257,5 +291,8 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         // Screenshots — Rider→UE direction; C# backend forwards to RdEditorModel.takeScreenshot.
         call("takeScreenshot",        UnrealScreenshotRequest,         UnrealScreenshotResponse).async
+
+        // Viewport camera — Rider→UE direction; C# backend forwards to RdEditorModel.viewportCamera.
+        call("viewportCamera",        UnrealViewportCameraRequest,     UnrealViewportCameraResponse).async
     }
 }

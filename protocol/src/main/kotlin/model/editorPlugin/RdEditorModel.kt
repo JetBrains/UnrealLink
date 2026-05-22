@@ -69,5 +69,9 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // C++ binds in ScreenshotCapturer using FSlateApplication::TakeScreenshot
         // for window/viewport and ThumbnailTools for asset preview cache.
         call("takeScreenshot", UE4Library.ScreenshotRequest, UE4Library.ScreenshotResult).async
+
+        // Viewport camera — C# forwards from RdRiderModel.viewportCamera;
+        // C++ binds in ViewportCameraController using UUnrealEditorSubsystem.
+        call("viewportCamera", UE4Library.ViewportCameraRequest, UE4Library.ViewportCameraResponse).async
     }
 }

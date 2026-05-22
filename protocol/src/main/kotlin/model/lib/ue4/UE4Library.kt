@@ -317,5 +317,63 @@ object UE4Library : Root() {
         // Human-readable diagnostic. Empty on success.
         field("error", FString)
     }
+
+    // ── Viewport camera ──────────────────────────────────────────────────────
+    // Editor-side level viewport camera control. Maps 1:1 to
+    // UUnrealEditorSubsystem::Get/SetLevelViewportCameraInfo plus framing
+    // helpers. Doubles match UE 5.x Large-World-Coordinates FVector/FRotator.
+
+    val Vector3 = structdef("Vector3") {
+        field("x", double)
+        field("y", double)
+        field("z", double)
+    }
+
+    val Rotator3 = structdef("Rotator3") {
+        field("pitch", double)
+        field("yaw", double)
+        field("roll", double)
+    }
+
+    val ViewportCameraAction = enum("ViewportCameraAction") {
+        +"Get"
+        +"Set"
+        +"Move"
+        +"LookAt"
+        +"FocusOnActor"
+    }
+
+    // One request struct services every action; fields that don't apply to the
+    // requested action are simply ignored on the C++ side.
+    //   Get               — no fields used.
+    //   Set               — location and/or rotation replace the current value (others stay).
+    //   Move              — delta + (relative=true ⇒ x/y/z mean forward/right/up); rotationDelta optional.
+    //   LookAt            — target is required; location stays put.
+    //   FocusOnActor      — actorName is required; minDistance lower-bounds the framing distance.
+    val ViewportCameraRequest = structdef("ViewportCameraRequest") {
+        field("action", ViewportCameraAction)
+        field("location", Vector3.nullable)
+        field("rotation", Rotator3.nullable)
+        field("delta", Vector3.nullable)
+        field("relative", bool).default(false)
+        field("rotationDelta", Rotator3.nullable)
+        field("target", Vector3.nullable)
+        field("actorName", FString.nullable)
+        // 0.0 ⇒ use the C++-side automatic framing distance (3×actor extent).
+        field("minDistance", double)
+    }
+
+    val ViewportCameraResponse = structdef("ViewportCameraResponse") {
+        field("success", bool)
+        // Post-action pose. On `Get`, this is the current pose. On other
+        // actions, the pose that was set / computed. On failure, zero-init.
+        field("location", Vector3)
+        field("rotation", Rotator3)
+        // FocusOnActor: the actor label that was actually resolved (may differ
+        // from the requested name if a fallback was applied). Null otherwise.
+        field("actorResolved", FString.nullable)
+        // Human-readable diagnostic. Empty on success.
+        field("error", FString)
+    }
 }
 
