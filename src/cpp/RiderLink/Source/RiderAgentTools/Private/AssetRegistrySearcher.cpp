@@ -13,18 +13,18 @@
 
 namespace
 {
-    // UClass::TryFindTypeSlow is the cross-version short-name lookup.
-    // FindObject<UClass>(ANY_PACKAGE, ...) is deprecated in UE 5.1+; this
-    // template-based API searches the global UClass list (native +
+    // ::UClass::TryFindTypeSlow is the cross-version short-name lookup.
+    // FindObject<::UClass>(ANY_PACKAGE, ...) is deprecated in UE 5.1+; this
+    // template-based API searches the global ::UClass list (native +
     // Blueprint-generated) and works on UE 5.1 through 5.8.
-    UClass* ResolveClassByShortName(const FString& ShortName)
+    ::UClass* ResolveClassByShortName(const FString& ShortName)
     {
         if (ShortName.IsEmpty()) return nullptr;
         static const FString Prefixes[] = { TEXT(""), TEXT("U"), TEXT("A"), TEXT("F") };
         for (const FString& P : Prefixes)
         {
             const FString Candidate = P + ShortName;
-            if (UClass* Cls = UClass::TryFindTypeSlow<UClass>(Candidate))
+            if (::UClass* Cls = ::UClass::TryFindTypeSlow<::UClass>(Candidate))
                 return Cls;
         }
         return nullptr;
@@ -61,7 +61,7 @@ namespace
         Filter.PackagePaths.Add(FName(PackagePathStr.IsEmpty() ? TEXT("/Game") : *PackagePathStr));
         if (!BaseClassStr.IsEmpty())
         {
-            if (UClass* Cls = ResolveClassByShortName(BaseClassStr))
+            if (::UClass* Cls = ResolveClassByShortName(BaseClassStr))
                 Filter.ClassPaths.Add(FTopLevelAssetPath(Cls));
         }
 
