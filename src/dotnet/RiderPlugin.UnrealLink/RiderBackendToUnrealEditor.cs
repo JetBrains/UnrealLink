@@ -309,6 +309,35 @@ namespace RiderPlugin.UnrealLink
                         .ToList();
                     return new UnrealAssetLiveSearchResponse(assets);
                 });
+
+                // Bridge screenshots: RdRiderModel.TakeScreenshot → RdEditorModel.TakeScreenshot.
+                // Rider-model `kind` is the string name of UE4Library.ScreenshotKind so the front-end
+                // doesn't have to carry an enum across two protocol boundaries.
+                riderModel.TakeScreenshot.SetAsync(async (lt, request) =>
+                {
+                    static FString ToFString(string s) => s == null ? null : new FString(s);
+                    static ScreenshotKind ParseKind(string s) => s switch
+                    {
+                        "EditorWindow" => ScreenshotKind.EditorWindow,
+                        "Viewport"     => ScreenshotKind.Viewport,
+                        "AssetPreview" => ScreenshotKind.AssetPreview,
+                        _ => throw new ArgumentException($"Unknown ScreenshotKind: {s}")
+                    };
+                    var editorRequest = new ScreenshotRequest(
+                        ParseKind(request.Kind),
+                        ToFString(request.AssetPath),
+                        request.Width,
+                        request.Height,
+                        request.ForceLive);
+                    var editorResponse = await unrealModel.TakeScreenshot.Start(lt, editorRequest).AsTask();
+                    return new UnrealScreenshotResponse(
+                        editorResponse.Success,
+                        editorResponse.Path.Data ?? string.Empty,
+                        editorResponse.Width,
+                        editorResponse.Height,
+                        editorResponse.SourceApi.Data ?? string.Empty,
+                        editorResponse.Error.Data ?? string.Empty);
+                });
             });
 
             return unrealModel;
