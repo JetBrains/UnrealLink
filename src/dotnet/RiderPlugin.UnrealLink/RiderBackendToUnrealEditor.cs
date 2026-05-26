@@ -339,6 +339,51 @@ namespace RiderPlugin.UnrealLink
                         editorResponse.Error.Data ?? string.Empty);
                 });
 
+                // Bridge input simulation: RdRiderModel.SimulateInput → RdEditorModel.SimulateInput.
+                // The wire format is mode-dispatched with nullable per-mode fields; we just
+                // repack the per-action list (plain string types) into UE4Library FString types
+                // and forward the rest unchanged.
+                riderModel.SimulateInput.SetAsync(async (lt, request) =>
+                {
+                    static FString ToFString(string s) => s == null ? null : new FString(s);
+
+                    var actions = request.Actions
+                        .Select(a => new InputActionEntry(
+                            new FString(a.Type),
+                            ToFString(a.Direction),
+                            a.Scale, a.Yaw, a.Pitch, a.Duration))
+                        .ToList();
+
+                    Vector3 ToV3(UnrealVector3 v) => v == null ? null : new Vector3(v.X, v.Y, v.Z);
+
+                    var editorRequest = new InputSimulationRequest(
+                        new FString(request.Mode),
+                        actions,
+                        ToFString(request.PrimitiveCall),
+                        ToFString(request.PrimitiveDirection),
+                        ToV3(request.PrimitiveWorldVec),
+                        request.PrimitiveScale,
+                        request.PrimitiveValue,
+                        request.PrimitiveDuration,
+                        ToFString(request.EnhancedAssetPath),
+                        ToFString(request.EnhancedValueKind),
+                        request.EnhancedAxis2dX,
+                        request.EnhancedAxis2dY,
+                        request.EnhancedAxis1d,
+                        request.EnhancedBool,
+                        request.EnhancedClear);
+
+                    var editorResponse = await unrealModel.SimulateInput.Start(lt, editorRequest).AsTask();
+                    UnrealVector3 FromV3(Vector3 v) => v == null ? null : new UnrealVector3(v.X, v.Y, v.Z);
+                    return new UnrealInputSimulationResponse(
+                        editorResponse.Success,
+                        editorResponse.Armed,
+                        FromV3(editorResponse.StartLocation),
+                        FromV3(editorResponse.StartVelocity),
+                        editorResponse.NActions,
+                        editorResponse.Error.Data ?? string.Empty);
+                });
+
                 // Bridge viewport camera: RdRiderModel.ViewportCamera → RdEditorModel.ViewportCamera.
                 // The Rider model uses plain `string` for the action (mirrors TakeScreenshot's
                 // `kind`) and plain UnrealVector3/UnrealRotator3 structs; we translate into the

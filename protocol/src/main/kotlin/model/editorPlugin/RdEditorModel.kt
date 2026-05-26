@@ -73,5 +73,10 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // Viewport camera — C# forwards from RdRiderModel.viewportCamera;
         // C++ binds in ViewportCameraController using UUnrealEditorSubsystem.
         call("viewportCamera", UE4Library.ViewportCameraRequest, UE4Library.ViewportCameraResponse).async
+
+        // Input simulation — C# forwards from RdRiderModel.simulateInput;
+        // C++ binds in InputSimulator driving the PIE player via a per-frame
+        // ticker (modes: actions / primitive / enhanced).
+        call("simulateInput", UE4Library.InputSimulationRequest, UE4Library.InputSimulationResponse).async
     }
 }
