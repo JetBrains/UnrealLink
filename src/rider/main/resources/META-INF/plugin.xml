@@ -180,6 +180,7 @@ Path to old plugin:</code></pre>
         <gameEngineAssetIndexProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineAssetIndexProvider"/>
         <gameEngineScreenshotProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineScreenshotProvider"/>
         <gameEngineViewportCameraProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineViewportCameraProvider"/>
+        <gameEngineInputSimulationProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineInputSimulationProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="rider.cpp">

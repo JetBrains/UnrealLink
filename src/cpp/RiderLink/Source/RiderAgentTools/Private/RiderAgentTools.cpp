@@ -1,5 +1,6 @@
 #include "RiderAgentTools.hpp"
 #include "AssetRegistrySearcher.hpp"
+#include "InputSimulator.hpp"
 #include "PythonExecutor.hpp"
 #include "ScreenshotCapturer.hpp"
 #include "ViewportCameraController.hpp"
@@ -23,6 +24,7 @@ void FRiderAgentToolsModule::StartupModule()
             AssetRegistrySearcher::BindTo(ModelLifetime, Model);
             ScreenshotCapturer::BindTo(ModelLifetime, Model);
             ViewportCameraController::BindTo(ModelLifetime, Model);
+            InputSimulator::BindTo(ModelLifetime, Model);
         });
 }
 

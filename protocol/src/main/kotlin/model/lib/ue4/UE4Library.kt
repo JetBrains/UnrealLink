@@ -375,5 +375,77 @@ object UE4Library : Root() {
         // Human-readable diagnostic. Empty on success.
         field("error", FString)
     }
+
+    // ── Input simulation ─────────────────────────────────────────────────────
+    // Drive PIE player input. Three modes: high-level action sequence,
+    // low-level sustained primitive, Enhanced Input injection. Each new arm
+    // cancels any in-flight ticker (see "callback lifetime" pitfall in the
+    // simulate-user-input recipe). The C++ side requires a live PIE world and
+    // a possessed pawn; non-PIE calls fail fast with a clear error.
+    //
+    // String-typed enums on the wire mirror the screenshot tool's `kind`
+    // pattern — keeps the protocol surface lean and lets the MCP layer
+    // accept aliases ("forward" / "Forward" / "FWD") without polluting the
+    // generated enum.
+
+    val InputActionEntry = structdef("InputActionEntry") {
+        // "move" | "jump" | "look" | "wait"
+        field("type", FString)
+        // "forward" | "back" | "left" | "right" — required for "move".
+        field("direction", FString.nullable)
+        // Movement input scale (1.0 = full input).
+        field("scale", double)
+        // Look: per-action yaw / pitch totals in degrees, spread across `duration`.
+        field("yaw", double)
+        field("pitch", double)
+        // Seconds the action holds before the sequencer advances.
+        field("duration", double)
+    }
+
+    val InputSimulationRequest = structdef("InputSimulationRequest") {
+        // "actions" | "primitive" | "enhanced"
+        field("mode", FString)
+
+        // Actions mode — sequenced list driven by a single tick-callback.
+        field("actions", immutableList(InputActionEntry))
+
+        // Primitive mode — one sustained call per frame for `primitiveDuration`.
+        // "add_movement_input" | "add_yaw_input" | "add_pitch_input" | "jump"
+        field("primitiveCall", FString.nullable)
+        // "forward" | "back" | "left" | "right" | "world_vec" (for add_movement_input).
+        field("primitiveDirection", FString.nullable)
+        // Used only when primitiveDirection == "world_vec".
+        field("primitiveWorldVec", Vector3.nullable)
+        field("primitiveScale", double)
+        field("primitiveValue", double)
+        field("primitiveDuration", double)
+
+        // Enhanced Input mode — calls inject_input_for_action / start/stop
+        // continuous injection via UEnhancedInputLocalPlayerSubsystem.
+        // Long package path, e.g. "/Game/Input/Actions/IA_Move".
+        field("enhancedAssetPath", FString.nullable)
+        // "axis2d" | "axis1d" | "bool"
+        field("enhancedValueKind", FString.nullable)
+        field("enhancedAxis2dX", double)
+        field("enhancedAxis2dY", double)
+        field("enhancedAxis1d", double)
+        field("enhancedBool", bool)
+        // true ⇒ stop the previously-armed continuous injection for this asset.
+        field("enhancedClear", bool)
+    }
+
+    val InputSimulationResponse = structdef("InputSimulationResponse") {
+        field("success", bool)
+        // True when a ticker was registered (actions/primitive) or the EIS
+        // call dispatched (enhanced). For one-shot primitives (`jump`,
+        // duration <= 0) the call is applied immediately and `armed` is false.
+        field("armed", bool)
+        // Pawn pose at arm time. Caller polls / sleeps then diffs.
+        field("startLocation", Vector3.nullable)
+        field("startVelocity", Vector3.nullable)
+        // Actions mode: count of actions queued. Other modes: 0.
+        field("nActions", int)
+        field("error", FString)
+    }
 }
 
