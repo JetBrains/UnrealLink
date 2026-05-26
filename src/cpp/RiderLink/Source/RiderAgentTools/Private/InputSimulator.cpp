@@ -105,7 +105,7 @@ namespace
 
     struct ActionsState
     {
-        TArray<EP::InputActionEntry> Actions;
+        TArray<rd::Wrapper<EP::InputActionEntry>> Actions;
         int32 Index = 0;
         double PhaseStart = 0.0;
         bool DoneJumped = false;
@@ -122,7 +122,7 @@ namespace
         if (!Pawn || !PC)
             return false; // pawn gone — unregister
 
-        const EP::InputActionEntry& A = State->Actions[State->Index];
+        const EP::InputActionEntry& A = *State->Actions[State->Index];
         const FString Type = A.get_type();
         const double Duration = A.get_duration();
         const double Now = FPlatformTime::Seconds();
@@ -353,7 +353,7 @@ namespace
             return SimFail(FString::Printf(TEXT("Unknown enhancedValueKind: %s"), *ValueKind));
         }
 
-        EIS->StartContinuousInputInjectionForAction(IA, Value);
+        EIS->StartContinuousInputInjectionForAction(IA, Value, TArray<UInputModifier*>(), TArray<UInputTrigger*>());
         return SimOk(/*armed=*/true, StartLoc, StartVel, 0);
     }
 
