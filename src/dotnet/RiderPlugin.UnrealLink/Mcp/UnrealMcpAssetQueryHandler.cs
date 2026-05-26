@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.Application.Parts;
+using JetBrains.Application.Threading;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
@@ -15,7 +15,6 @@ using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Search;
 using JetBrains.ReSharper.Psi.Cpp.Caches;
 using JetBrains.ReSharper.Psi.Cpp.Symbols;
 using JetBrains.ReSharper.Psi.Cpp.UE4;
-using JetBrains.ReSharper.Resources.Shell;
 using JetBrains.Util;
 using RiderPlugin.UnrealLink.Model.FrontendBackend;
 
@@ -30,26 +29,41 @@ public class UnrealMcpAssetQueryHandler
         {
             model.SearchUnrealAssets.SetAsync((lt, request) =>
             {
-                try { return RdTask.Successful(SearchAssets(solution, assetsCache, request)); }
-                catch (Exception ex) { return RdTask.Faulted<UnrealAssetSearchResponse>(ex); }
+                var rdTask = new RdTask<UnrealAssetSearchResponse>();
+                solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.SearchAssets", () =>
+                {
+                    try { rdTask.Set(SearchAssets(solution, assetsCache, request)); }
+                    catch (Exception ex) { rdTask.Set(ex); }
+                });
+                return rdTask;
             });
 
             model.GetBlueprintHierarchy.SetAsync((lt, request) =>
             {
-                try { return RdTask.Successful(GetBlueprintHierarchy(solution, assetsCache, request)); }
-                catch (Exception ex) { return RdTask.Faulted<UnrealBlueprintHierarchyResponse>(ex); }
+                var rdTask = new RdTask<UnrealBlueprintHierarchyResponse>();
+                solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.GetBlueprintHierarchy", () =>
+                {
+                    try { rdTask.Set(GetBlueprintHierarchy(solution, assetsCache, request)); }
+                    catch (Exception ex) { rdTask.Set(ex); }
+                });
+                return rdTask;
             });
 
             model.SearchGameplayTags.SetAsync((lt, request) =>
             {
-                try { return RdTask.Successful(SearchGameplayTags(assetsCache, request)); }
-                catch (Exception ex) { return RdTask.Faulted<UnrealGameplayTagsResponse>(ex); }
+                var rdTask = new RdTask<UnrealGameplayTagsResponse>();
+                solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.SearchGameplayTags", () =>
+                {
+                    try { rdTask.Set(SearchGameplayTags(assetsCache, request)); }
+                    catch (Exception ex) { rdTask.Set(ex); }
+                });
+                return rdTask;
             });
 
             model.GetAssetProperties.SetAsync((lt, request) =>
             {
                 var rdTask = new RdTask<UnrealAssetPropertiesResponse>();
-                Task.Run(() =>
+                solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.GetAssetProperties", () =>
                 {
                     try { rdTask.Set(GetAssetProperties(solution, assetsCache, request)); }
                     catch (Exception ex) { rdTask.Set(ex); }
@@ -60,7 +74,7 @@ public class UnrealMcpAssetQueryHandler
             model.FindDefaultOverrides.SetAsync((lt, request) =>
             {
                 var rdTask = new RdTask<UnrealDefaultOverridesResponse>();
-                Task.Run(() =>
+                solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.FindDefaultOverrides", () =>
                 {
                     try { rdTask.Set(FindDefaultOverrides(solution, assetsCache, request)); }
                     catch (Exception ex) { rdTask.Set(ex); }
@@ -91,25 +105,22 @@ public class UnrealMcpAssetQueryHandler
         var nameCache = globalSymbolCache.SymbolNameCache;
         var linkageCache = globalSymbolCache.LinkageCache;
 
-        using (ReadLockCookie.Create())
+        foreach (var lookupName in EnumerateCppLookupNames(rootShortName))
         {
-            foreach (var lookupName in EnumerateCppLookupNames(rootShortName))
+            foreach (var classSymbol in UE4Util.GetGlobalClassSymbols(lookupName, nameCache).Where(CppUE4Util.IsUEType))
             {
-                foreach (var classSymbol in UE4Util.GetGlobalClassSymbols(lookupName, nameCache).Where(CppUE4Util.IsUEType))
-                {
-                    var rootEntity = linkageCache.FindEntityBySymbol(classSymbol);
-                    if (rootEntity == null) continue;
+                var rootEntity = linkageCache.FindEntityBySymbol(classSymbol);
+                if (rootEntity == null) continue;
 
-                    foreach (var entry in CppInheritanceUtil.FindAllDerivedLinkageEntities(linkageCache, rootEntity))
-                    {
-                        if (entry.Key.Name.AsQualifiedId() is not {} qualifiedId)
-                            continue;
-                        // Asset index uses prefix-stripped UE form; add both so downstream lookups
-                        // by either convention hit.
-                        closure.Add(qualifiedId.Name);
-                        var derivedStripped = UnrealPrefixes.StripUnrealPrefix(qualifiedId.Name);
-                        if (derivedStripped != null) closure.Add(derivedStripped);
-                    }
+                foreach (var entry in CppInheritanceUtil.FindAllDerivedLinkageEntities(linkageCache, rootEntity))
+                {
+                    if (entry.Key.Name.AsQualifiedId() is not {} qualifiedId)
+                        continue;
+                    // Asset index uses prefix-stripped UE form; add both so downstream lookups
+                    // by either convention hit.
+                    closure.Add(qualifiedId.Name);
+                    var derivedStripped = UnrealPrefixes.StripUnrealPrefix(qualifiedId.Name);
+                    if (derivedStripped != null) closure.Add(derivedStripped);
                 }
             }
         }
@@ -250,36 +261,33 @@ public class UnrealMcpAssetQueryHandler
         // (e.g. ULyraCameraMode) whose CDO overrides live only on Blueprints of its concrete subclasses.
         var closure = BuildCppClassClosure(solution, request.ClassName);
 
-        using (ReadLockCookie.Create())
+        foreach (var shortName in closure)
         {
-            foreach (var shortName in closure)
+            foreach (var baseFqn in cache.GetBaseClassesByShortName(shortName))
             {
-                foreach (var baseFqn in cache.GetBaseClassesByShortName(shortName))
+                foreach (var bpClass in UE4SearchUtil.GetDerivedBlueprintClasses(baseFqn, cache))
                 {
-                    foreach (var bpClass in UE4SearchUtil.GetDerivedBlueprintClasses(baseFqn, cache))
-                    {
-                        if (results.Count >= limit) goto done;
-                        if (!bpClass.ContainingFile.IsValid()) continue;
-                        if (!seenBlueprints.Add(bpClass.Name)) continue;
+                    if (results.Count >= limit) goto done;
+                    if (!bpClass.ContainingFile.IsValid()) continue;
+                    if (!seenBlueprints.Add(bpClass.Name)) continue;
 
-                        var accessor = cache.GetUEAssetFileAccessor(bpClass.ContainingFile);
-                        if (!accessor.TryGetValue(linker => linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject),
-                                out var cdoExport) || cdoExport == null)
-                            continue;
+                    var accessor = cache.GetUEAssetFileAccessor(bpClass.ContainingFile);
+                    if (!accessor.TryGetValue(linker => linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject),
+                            out var cdoExport) || cdoExport == null)
+                        continue;
 
-                        var prop = cdoExport.ReadProperties().FirstOrDefault(p => p.Name == request.FieldName);
-                        if (prop?.ValuePresentation == null) continue;
+                    var prop = cdoExport.ReadProperties().FirstOrDefault(p => p.Name == request.FieldName);
+                    if (prop?.ValuePresentation == null) continue;
 
-                        results.Add(new UnrealDefaultOverrideInfo(
-                            bpClass.ContainingFile.GetLocation().FullPath,
-                            cdoExport.ObjectStringName,
-                            prop.TypeName,
-                            prop.ValuePresentation));
-                    }
+                    results.Add(new UnrealDefaultOverrideInfo(
+                        bpClass.ContainingFile.GetLocation().FullPath,
+                        cdoExport.ObjectStringName,
+                        prop.TypeName,
+                        prop.ValuePresentation));
                 }
             }
-            done: ;
         }
+        done:
 
         return new UnrealDefaultOverridesResponse(results);
     }
@@ -303,24 +311,21 @@ public class UnrealMcpAssetQueryHandler
     {
         var path = VirtualFileSystemPath.Parse(request.AssetPath, solution.GetInteractionContext());
         IPsiSourceFile sourceFile = null;
-        using (ReadLockCookie.Create())
+        // UE assets are tracked via UE4AssetAdditionalFilesModuleFactory as misc project items,
+        // so the IPsiSourceFile lives on the additional-files module — enumerate every PSI source
+        // file the platform attaches to the matched IProjectFile and pick the UnrealAssetFileType one.
+        var psiModules = solution.GetPsiServices().Modules;
+        foreach (var projectFile in solution.FindProjectItemsByLocation(path).OfType<IProjectFile>())
         {
-            // UE assets are tracked via UE4AssetAdditionalFilesModuleFactory as misc project items,
-            // so the IPsiSourceFile lives on the additional-files module — enumerate every PSI source
-            // file the platform attaches to the matched IProjectFile and pick the UnrealAssetFileType one.
-            var psiModules = solution.GetPsiServices().Modules;
-            foreach (var projectFile in solution.FindProjectItemsByLocation(path).OfType<IProjectFile>())
+            foreach (var candidate in psiModules.GetPsiSourceFilesFor(projectFile))
             {
-                foreach (var candidate in psiModules.GetPsiSourceFilesFor(projectFile))
+                if (candidate != null && candidate.IsValid() && candidate.LanguageType.Is<UnrealAssetFileType>())
                 {
-                    if (candidate != null && candidate.IsValid() && candidate.LanguageType.Is<UnrealAssetFileType>())
-                    {
-                        sourceFile = candidate;
-                        break;
-                    }
+                    sourceFile = candidate;
+                    break;
                 }
-                if (sourceFile != null) break;
             }
+            if (sourceFile != null) break;
         }
 
         if (sourceFile == null)
