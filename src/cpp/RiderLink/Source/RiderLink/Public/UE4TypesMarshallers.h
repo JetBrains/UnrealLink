@@ -21,7 +21,7 @@ int32_t size(TArray<T, A> const& value) {
 
 template <typename T, typename A>
 void resize(TArray<T, A>& value, int32_t size) {
-    value.Reserve(size);
+    value.SetNum(size);
 }
 
 namespace rd {
