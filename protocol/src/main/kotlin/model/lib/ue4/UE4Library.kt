@@ -376,6 +376,35 @@ object UE4Library : Root() {
         field("error", FString)
     }
 
+    // ── Scene actor spawn ─────────────────────────────────────────────────────
+    // Place an object on the level-editor scene from an asset (StaticMesh or
+    // Blueprint). The C++ side loads the asset on the game thread and spawns it
+    // via UEditorActorSubsystem::SpawnActorFromObject; editor-only.
+    val SpawnActorRequest = structdef("SpawnActorRequest") {
+        // Long package path to the asset to spawn, e.g. "/Engine/BasicShapes/Cube.Cube"
+        // or "/Game/Heroes/BP_Hero". StaticMesh assets spawn a StaticMeshActor;
+        // Blueprint classes spawn an instance of the generated class.
+        field("assetPath", FString)
+        field("location", Vector3)
+        field("rotation", Rotator3)
+        // Per-axis scale applied after spawn. (1,1,1) leaves the actor at native size.
+        field("scale", Vector3)
+        // Optional Outliner label to assign. Null ⇒ keep the engine-assigned name.
+        field("label", FString.nullable)
+    }
+
+    val SpawnActorResponse = structdef("SpawnActorResponse") {
+        field("success", bool)
+        // Outliner label of the spawned actor (post-SetActorLabel). Null on failure.
+        field("actorLabel", FString.nullable)
+        // Internal FName (GetName) of the spawned actor. Null on failure.
+        field("actorName", FString.nullable)
+        // Final world location of the spawned actor. Zero-init on failure.
+        field("location", Vector3)
+        // Human-readable diagnostic. Empty on success.
+        field("error", FString)
+    }
+
     // ── Input simulation ─────────────────────────────────────────────────────
     // Drive PIE player input. Three modes: high-level action sequence,
     // low-level sustained primitive, Enhanced Input injection. Each new arm

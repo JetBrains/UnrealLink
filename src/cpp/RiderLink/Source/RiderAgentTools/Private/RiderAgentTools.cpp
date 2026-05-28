@@ -2,6 +2,7 @@
 #include "AssetRegistrySearcher.hpp"
 #include "InputSimulator.hpp"
 #include "PythonExecutor.hpp"
+#include "SceneActorSpawner.hpp"
 #include "ScreenshotCapturer.hpp"
 #include "ViewportCameraController.hpp"
 #include "IRiderLink.hpp"
@@ -25,6 +26,7 @@ void FRiderAgentToolsModule::StartupModule()
             ScreenshotCapturer::BindTo(ModelLifetime, Model);
             ViewportCameraController::BindTo(ModelLifetime, Model);
             InputSimulator::BindTo(ModelLifetime, Model);
+            SceneActorSpawner::BindTo(ModelLifetime, Model);
         });
 }
 

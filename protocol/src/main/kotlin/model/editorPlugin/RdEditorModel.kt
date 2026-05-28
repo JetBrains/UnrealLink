@@ -74,6 +74,10 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // C++ binds in ViewportCameraController using UUnrealEditorSubsystem.
         call("viewportCamera", UE4Library.ViewportCameraRequest, UE4Library.ViewportCameraResponse).async
 
+        // Scene actor spawn — C# forwards from RdRiderModel.spawnActor;
+        // C++ binds in SceneActorSpawner using UEditorActorSubsystem on the game thread.
+        call("spawnActor", UE4Library.SpawnActorRequest, UE4Library.SpawnActorResponse).async
+
         // Input simulation — C# forwards from RdRiderModel.simulateInput;
         // C++ binds in InputSimulator driving the PIE player via a per-frame
         // ticker (modes: actions / primitive / enhanced).

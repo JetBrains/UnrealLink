@@ -217,6 +217,23 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("error", string)
     }
 
+    // Scene actor spawn — Rider-side payload mirrors UE4Library.SpawnActorRequest
+    // but with plain `string` instead of FString. The C# bridge repackages.
+    private val UnrealSpawnActorRequest = structdef("UnrealSpawnActorRequest") {
+        field("assetPath", string)
+        field("location", UnrealVector3)
+        field("rotation", UnrealRotator3)
+        field("scale", UnrealVector3)
+        field("label", string.nullable)
+    }
+    private val UnrealSpawnActorResponse = structdef("UnrealSpawnActorResponse") {
+        field("success", bool)
+        field("actorLabel", string.nullable)
+        field("actorName", string.nullable)
+        field("location", UnrealVector3)
+        field("error", string)
+    }
+
     // Input simulation — Rider-side payload mirrors UE4Library.InputSimulationRequest
     // but with plain `string` instead of FString. The C# bridge repackages.
     private val UnrealInputActionEntry = structdef("UnrealInputActionEntry") {
@@ -330,6 +347,9 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         // Viewport camera — Rider→UE direction; C# backend forwards to RdEditorModel.viewportCamera.
         call("viewportCamera",        UnrealViewportCameraRequest,     UnrealViewportCameraResponse).async
+
+        // Scene actor spawn — Rider→UE direction; C# backend forwards to RdEditorModel.spawnActor.
+        call("spawnActor",            UnrealSpawnActorRequest,         UnrealSpawnActorResponse).async
 
         // Input simulation — Rider→UE direction; C# backend forwards to RdEditorModel.simulateInput.
         call("simulateInput",         UnrealInputSimulationRequest,    UnrealInputSimulationResponse).async
