@@ -423,6 +423,30 @@ namespace RiderPlugin.UnrealLink
                         editorResponse.ActorResolved?.Data,
                         editorResponse.Error.Data ?? string.Empty);
                 });
+
+                // Bridge scene actor spawn: RdRiderModel.SpawnActor → RdEditorModel.SpawnActor.
+                // Plain string/UnrealVector3 in, UE4Library FString/Vector3 out; the response is
+                // repacked back to plain strings on the way out.
+                riderModel.SpawnActor.SetAsync(async (lt, request) =>
+                {
+                    static Vector3 ToV3(UnrealVector3 v) => v == null ? null : new Vector3(v.X, v.Y, v.Z);
+                    static Rotator3 ToR3(UnrealRotator3 r) => r == null ? null : new Rotator3(r.Pitch, r.Yaw, r.Roll);
+
+                    var editorRequest = new SpawnActorRequest(
+                        new FString(request.AssetPath),
+                        ToV3(request.Location),
+                        ToR3(request.Rotation),
+                        ToV3(request.Scale),
+                        request.Label == null ? null : new FString(request.Label));
+
+                    var editorResponse = await unrealModel.SpawnActor.Start(lt, editorRequest).AsTask();
+                    return new UnrealSpawnActorResponse(
+                        editorResponse.Success,
+                        editorResponse.ActorLabel?.Data,
+                        editorResponse.ActorName?.Data,
+                        new UnrealVector3(editorResponse.Location.X, editorResponse.Location.Y, editorResponse.Location.Z),
+                        editorResponse.Error.Data ?? string.Empty);
+                });
             });
 
             return unrealModel;
