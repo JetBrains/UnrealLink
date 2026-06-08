@@ -218,7 +218,6 @@ Path to old plugin:</code></pre>
         <statistics.counterUsagesCollector implementationClass="com.jetbrains.rider.plugins.unreal.UnrealPluginUsagesCollector"/>
         <projectSettings service="com.jetbrains.rider.plugins.unreal.UnrealLinkSettings"/>
         <projectSettings service="com.jetbrains.rider.plugins.unreal.toolWindow.log.UnrealLogPanelSettings"/>
-        <projectService serviceImplementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealLogBuffer"/>
     </extensions>
 
     <actions resource-bundle="messages.UnrealLinkBundle">
