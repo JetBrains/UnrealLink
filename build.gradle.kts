@@ -167,6 +167,7 @@ dependencies {
 
         bundledPlugin("com.intellij.cidr.debugger")
         bundledPlugin("com.jetbrains.rider-cpp")
+        bundledPlugin("com.intellij.mcpServer")
 
         // TODO: Temporary I hope hope hope
         bundledLibrary(provider {
