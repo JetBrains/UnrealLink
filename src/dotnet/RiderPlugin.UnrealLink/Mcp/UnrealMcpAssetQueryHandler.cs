@@ -335,17 +335,17 @@ public class UnrealMcpAssetQueryHandler
         string objectName = null;
         var propertyInfos = new List<UnrealAssetPropertyInfo>();
 
-        if (accessor.TryGetValue(linker =>
-            linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject),
-            out var cdoExport) && cdoExport != null)
+        accessor.TryGetValue(linker =>
         {
-            objectName = cdoExport.ObjectStringName;
-            var properties = cdoExport.ReadProperties();
-            propertyInfos = properties
-                .Where(p => p.ValuePresentation != null)
-                .Select(p => new UnrealAssetPropertyInfo(p.Name, p.TypeName, p.ValuePresentation))
+            var export = linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject)
+                         ?? linker.ExportMap.FirstOrDefault(e => !e.IsBlueprintGeneratedClass() && !e.IsFunction());
+            if (export == null) return false;
+            objectName = export.ObjectStringName;
+            propertyInfos = export.ReadProperties()
+                .Select(p => new UnrealAssetPropertyInfo(p.Name, p.TypeName, p.ValuePresentation ?? ""))
                 .ToList();
-        }
+            return true;
+        }, out _);
 
         return new UnrealAssetPropertiesResponse(objectName, propertyInfos);
     }
