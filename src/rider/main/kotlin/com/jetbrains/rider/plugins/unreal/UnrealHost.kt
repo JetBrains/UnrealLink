@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.rd.util.lifetime
 import com.intellij.openapi.util.SystemInfo
 import com.jetbrains.rd.framework.impl.RdTask
 import com.jetbrains.rd.framework.protocolOrThrow
@@ -124,9 +125,15 @@ class UnrealHost(val project: Project) {
                 forceTriggerUIUpdate()
             }
 
+            var tabShownForSession = false
             model.isConnectedToUnrealEditor.whenTrue(lifetime) {
                 val toolWindowsFactory = UnrealToolWindowFactory.getInstance(project)
-                toolWindowsFactory.showTabForNewSession()
+                if (!tabShownForSession) {
+                    tabShownForSession = true
+                    toolWindowsFactory.showTabForNewSession()
+                } else {
+                    toolWindowsFactory.getOrCreateTab(UnrealToolWindowFactory.TITLE_ID, project.lifetime)
+                }
             }
         }
 
