@@ -4,6 +4,8 @@
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 #include "Async/Async.h"
 #include "UObject/GarbageCollection.h"
+#include "Engine/World.h"
+#include "Engine/Engine.h"
 
 static const int32 MAX_OUTPUT_CHARS = 10000;
 
@@ -66,6 +68,10 @@ static void ConfigureCommand(FPythonCommandEx& Cmd, const FString& Script, bool 
 // CollectGarbage from inside another GC pass: that re-entrant call spawns
 // TaskGraph work which doesn't inherit FAppTime's game-thread context, tripping
 // EnsureFailed(IsInGameThread()) in AppTime.cpp.
+// Also skip forced GC while PIE is running: CollectGarbage → ForceDeleteObjects
+// can fail to unload PIE-referenced packages (e.g. BB_Bot Blackboard) and fires
+// an ensure at ObjectTools.cpp:3963. Schedule a deferred pass instead so the
+// released Python refs are still reclaimed without disrupting the PIE session.
 static void PostExecGarbageCollect(IPythonScriptPlugin* PythonPlugin)
 {
     if (PythonPlugin && PythonPlugin->IsPythonAvailable())
@@ -77,7 +83,16 @@ static void PostExecGarbageCollect(IPythonScriptPlugin* PythonPlugin)
     }
     if (!IsGarbageCollecting())
     {
-        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+        const bool bPIEActive = GWorld && GWorld->IsPlayInEditor();
+        if (bPIEActive)
+        {
+            if (GEngine)
+                GEngine->ForceGarbageCollection(false);
+        }
+        else
+        {
+            CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+        }
     }
 }
 
