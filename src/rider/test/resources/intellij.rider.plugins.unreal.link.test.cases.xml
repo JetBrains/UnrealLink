@@ -1,13 +1,13 @@
 <idea-plugin>
     <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
     <dependencies>
-      <plugin id="com.intellij.mcpServer"/>
-      <plugin id="unreal-link"/>
       <module name="intellij.rider.test.framework"/>
       <module name="intellij.rider.test.framework.integration.testng"/>
       <module name="intellij.rider.test.framework.integration.testng.tests"/>
       <module name="intellij.rider.test.framework.core"/>
       <module name="intellij.rider.test.framework.testng"/>
+      <plugin id="com.intellij.mcpServer"/>
+      <plugin id="unreal-link"/>
       <module name="intellij.libraries.gson"/>
       <module name="intellij.libraries.kotlin.reflect"/>
       <module name="intellij.libraries.kotlinx.coroutines.core"/>
@@ -23,6 +23,7 @@
       <module name="intellij.platform.ide.core"/>
       <module name="intellij.platform.ide.impl"/>
       <module name="intellij.platform.lang.impl"/>
+      <module name="intellij.platform.testExtensions"/>
       <module name="intellij.rd.client"/>
       <module name="intellij.rider.languages"/>
       <module name="intellij.xml.impl"/>
