@@ -45,12 +45,21 @@ public class RiderAgentTools : ModuleRules
             "SlateCore",
         });
 
-        // Editor-only screenshot helpers: asset thumbnails (UnrealEd),
-        // level-editor viewport widget (LevelEditor).
+        // Editor-only: screenshot/asset tooling (UnrealEd, LevelEditor, AssetTools),
+        // Blueprint graph (Kismet, BlueprintGraph), UMG (UMG, UMGEditor),
+        // Niagara VFX (Niagara, NiagaraEditor) — used by URiderAgentBridgeLibrary.
         if (Target.bBuildEditor)
         {
             PrivateDependencyModuleNames.AddRange(new[] {
+                "AssetTools",
+                "BlueprintGraph",
+                "EditorScriptingUtilities",
+                "Kismet",
                 "LevelEditor",
+                "Niagara",
+                "NiagaraEditor",
+                "UMG",
+                "UMGEditor",
                 "UnrealEd",
             });
         }
