@@ -4,6 +4,8 @@ import com.intellij.mcpserver.annotations.McpDescription
 import com.intellij.mcpserver.annotations.McpTool
 import com.jetbrains.rider.plugins.unreal.mcp.LogFilter
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealBatchScriptResult
+import com.jetbrains.rider.plugins.unreal.mcp.UnrealExportBlueprintNodesResult
+import com.jetbrains.rider.plugins.unreal.mcp.UnrealImportBlueprintNodesResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealMcpToolset
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealPlayResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealStatusResult
@@ -40,7 +42,7 @@ class UnrealMcpToolsetTest {
 
     @Test
     fun `exposes exactly the expected MCP tools`() {
-        val expected = setOf("ue_health", "ue_play", "ue_get_logs", "ue_execute_python", "ue_status")
+        val expected = setOf("ue_health", "ue_play", "ue_get_logs", "ue_execute_python", "ue_status", "ue_export_blueprint_nodes", "ue_import_blueprint_nodes")
         assertEquals(expected, toolFunctions.map { it.name }.toSet())
     }
 
@@ -171,5 +173,30 @@ class UnrealMcpToolsetTest {
 
         // The single-script return is wrapped as a 1-item batch, so the shape is always UnrealBatchScriptResult.
         assertEquals(UnrealBatchScriptResult::class, tool("ue_execute_python").returnType.classifier)
+    }
+
+    @Test
+    fun `ue_export_blueprint_nodes has the expected params and return type`() {
+        val params = valueParams("ue_export_blueprint_nodes").associateBy { it.name }
+        assertEquals(setOf("blueprintPath", "graphName", "nodeNames"), params.keys)
+        assertFalse(params["blueprintPath"]!!.isOptional, "blueprintPath must be required")
+        assertFalse(params["graphName"]!!.isOptional, "graphName must be required")
+        assertTrue(params["nodeNames"]!!.isOptional, "nodeNames must be optional")
+        assertTrue(params["nodeNames"]!!.type.isMarkedNullable, "nodeNames must be nullable")
+        assertEquals(UnrealExportBlueprintNodesResult::class, tool("ue_export_blueprint_nodes").returnType.classifier)
+    }
+
+    @Test
+    fun `ue_import_blueprint_nodes has the expected params and return type`() {
+        val params = valueParams("ue_import_blueprint_nodes").associateBy { it.name }
+        assertEquals(setOf("blueprintPath", "graphName", "clipboardText", "offsetX", "offsetY"), params.keys)
+        assertFalse(params["blueprintPath"]!!.isOptional, "blueprintPath must be required")
+        assertFalse(params["graphName"]!!.isOptional, "graphName must be required")
+        assertFalse(params["clipboardText"]!!.isOptional, "clipboardText must be required")
+        assertTrue(params["offsetX"]!!.isOptional, "offsetX must have a default")
+        assertTrue(params["offsetY"]!!.isOptional, "offsetY must have a default")
+        assertFalse(params["offsetX"]!!.type.isMarkedNullable, "offsetX must not be nullable")
+        assertFalse(params["offsetY"]!!.type.isMarkedNullable, "offsetY must not be nullable")
+        assertEquals(UnrealImportBlueprintNodesResult::class, tool("ue_import_blueprint_nodes").returnType.classifier)
     }
 }
