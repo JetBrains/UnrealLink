@@ -20,7 +20,18 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.milliseconds
+
+@Serializable
+data class UnrealExportBlueprintNodesResult(
+    val clipboardText: String,
+)
+
+@Serializable
+data class UnrealImportBlueprintNodesResult(
+    val importedNodeNames: List<String>,
+)
 
 class UnrealMcpToolset : McpToolset {
 
@@ -166,6 +177,9 @@ class UnrealMcpToolset : McpToolset {
         "client" -> PlayNetMode.Client
         else -> mcpFail("Unknown netMode '$raw'. Use: standalone | listen | client.")
     }
+
+    private fun pyStr(s: String): String =
+        "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
     private fun buildLogFilter(
         category: String?,
@@ -352,5 +366,90 @@ class UnrealMcpToolset : McpToolset {
                 lastSuccessfulIndex = batch.lastSuccessfulIndex,
             )
         }
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Export Blueprint graph nodes to Unreal clipboard text format.
+        |Uses FEdGraphUtilities::ExportNodesToText internally — the same format used by
+        |the Blueprint editor's Copy/Paste commands.
+        |blueprintPath: long package path to the Blueprint asset, e.g. "/Game/Tmp/BP_Probe.BP_Probe".
+        |graphName:     name of the graph to export from, e.g. "EventGraph".
+        |nodeNames:     list of node names to export (e.g. ["K2Node_CallFunction_0"]).
+        |               Omit or pass an empty list to export all nodes in the graph.
+        |Returns the clipboard text string. Pass it to ue_import_blueprint_nodes to paste
+        |nodes into another graph.
+        |Requires Unreal Editor to be connected with RiderLink installed.
+    """)
+    suspend fun ue_export_blueprint_nodes(
+        @McpDescription("Long package path to the Blueprint asset (e.g. /Game/Tmp/BP_Probe.BP_Probe).") blueprintPath: String,
+        @McpDescription("Name of the graph to export from (e.g. EventGraph).") graphName: String,
+        @McpDescription("Node names to export. Omit or pass an empty list to export all nodes.") nodeNames: List<String>? = null,
+    ): UnrealExportBlueprintNodesResult {
+        currentCoroutineContext().reportToolActivity("Exporting Blueprint nodes from $graphName")
+        val host = requireConnected()
+        if (blueprintPath.isBlank()) mcpFail("blueprintPath must not be blank")
+        if (graphName.isBlank()) mcpFail("graphName must not be blank")
+        val nodeNamesJson = if (nodeNames.isNullOrEmpty()) "[]"
+            else "[" + nodeNames.joinToString(",") { pyStr(it) } + "]"
+        val script = buildString {
+            appendLine("import unreal as _u")
+            append("print(_u.RiderAgentBridgeLibrary.export_blueprint_nodes(")
+            append("${pyStr(blueprintPath)}, ")
+            append("${pyStr(graphName)}, ")
+            append("${pyStr(nodeNamesJson)}))")
+        }
+        val result = host.model.executeScript.startSuspending(
+            ScriptRequest(script = FString(script), isolated = false)
+        )
+        if (!result.success) mcpFail(result.error.data.ifBlank { "export_blueprint_nodes failed" })
+        return UnrealExportBlueprintNodesResult(clipboardText = result.output.data)
+    }
+
+    @McpTool
+    @McpDescription("""
+        |Import Blueprint nodes from Unreal clipboard text format into a graph.
+        |Uses FEdGraphUtilities::ImportNodesFromText internally — the same format produced by
+        |the Blueprint editor's Copy/Paste commands and by ue_export_blueprint_nodes.
+        |blueprintPath: long package path to the Blueprint asset, e.g. "/Game/Tmp/BP_Probe.BP_Probe".
+        |graphName:     name of the graph to import into, e.g. "EventGraph".
+        |clipboardText: the clipboard text string from ue_export_blueprint_nodes (or the editor's clipboard).
+        |offsetX:       horizontal position offset applied to imported nodes. Default 0.
+        |offsetY:       vertical position offset applied to imported nodes. Default 0.
+        |Returns the list of names of the newly imported nodes.
+        |Requires Unreal Editor to be connected with RiderLink installed.
+    """)
+    suspend fun ue_import_blueprint_nodes(
+        @McpDescription("Long package path to the Blueprint asset (e.g. /Game/Tmp/BP_Probe.BP_Probe).") blueprintPath: String,
+        @McpDescription("Name of the graph to import into (e.g. EventGraph).") graphName: String,
+        @McpDescription("Clipboard text from ue_export_blueprint_nodes or the editor clipboard.") clipboardText: String,
+        @McpDescription("Horizontal position offset for imported nodes. Default 0.") offsetX: Int = 0,
+        @McpDescription("Vertical position offset for imported nodes. Default 0.") offsetY: Int = 0,
+    ): UnrealImportBlueprintNodesResult {
+        currentCoroutineContext().reportToolActivity("Importing Blueprint nodes into $graphName")
+        val host = requireConnected()
+        if (blueprintPath.isBlank()) mcpFail("blueprintPath must not be blank")
+        if (graphName.isBlank()) mcpFail("graphName must not be blank")
+        if (clipboardText.isBlank()) mcpFail("clipboardText must not be blank")
+        val b64 = java.util.Base64.getEncoder().encodeToString(clipboardText.toByteArray(Charsets.UTF_8))
+        val script = buildString {
+            appendLine("import unreal as _u, base64 as _b64")
+            appendLine("_cb = _b64.b64decode('$b64').decode('utf-8')")
+            append("print(_u.RiderAgentBridgeLibrary.import_blueprint_nodes(")
+            append("${pyStr(blueprintPath)}, ")
+            append("${pyStr(graphName)}, ")
+            append("_cb, $offsetX, $offsetY))")
+        }
+        val result = host.model.executeScript.startSuspending(
+            ScriptRequest(script = FString(script), isolated = false)
+        )
+        if (!result.success) mcpFail(result.error.data.ifBlank { "import_blueprint_nodes failed" })
+        val outputJson = result.output.data.trim()
+        val importedNames = if (outputJson == "[]" || outputJson.isBlank()) emptyList()
+            else outputJson.removeSurrounding("[", "]")
+                .split(",")
+                .map { it.trim().removeSurrounding("\"") }
+                .filter { it.isNotEmpty() }
+        return UnrealImportBlueprintNodesResult(importedNodeNames = importedNames)
     }
 }
