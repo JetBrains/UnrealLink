@@ -53,7 +53,7 @@ namespace
 
     // ── Spawn handler (game thread, editor-only) ─────────────────────────────
 
-    EP::SpawnActorResponse Handle(EP::SpawnActorRequest const& Req)
+    EP::SpawnActorResponse HandleSpawn(EP::SpawnActorRequest const& Req)
     {
         check(IsInGameThread());
 #if !WITH_EDITOR
@@ -147,7 +147,7 @@ void SceneActorSpawner::BindTo(rd::Lifetime /*ModelLifetime*/,
             AsyncTask(ENamedThreads::GameThread,
                 [Req, Task]() mutable
                 {
-                    Task.set(Handle(Req));
+                    Task.set(HandleSpawn(Req));
                 });
             return Task;
         });
