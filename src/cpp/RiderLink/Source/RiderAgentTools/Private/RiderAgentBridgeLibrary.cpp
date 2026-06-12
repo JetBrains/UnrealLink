@@ -524,7 +524,7 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableCategory(const FString& Bluep
 }
 
 bool URiderAgentBridgeLibrary::SetBlueprintVariableDefaultValue(const FString& BlueprintPath, const FString& VariableName,
-    const FString& ValueJson)
+    const FString& ValueText)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
     if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: BP '%s' not found"), *BlueprintPath); return false; }
@@ -539,9 +539,9 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableDefaultValue(const FString& B
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: property '%s' not found"), *VariableName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(CDO);
-    if (!Prop->ImportText_Direct(*ValueJson, PropData, CDO, PPF_None))
+    if (!Prop->ImportText_Direct(*ValueText, PropData, CDO, PPF_None))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: failed to import value '%s' into property '%s'"), *ValueJson, *VariableName);
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: failed to import value '%s' into property '%s'"), *ValueText, *VariableName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(BP);
@@ -674,7 +674,7 @@ FString URiderAgentBridgeLibrary::ListWidgetsInTree(const FString& WidgetBluepri
 }
 
 bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintPath, const FString& WidgetName,
-    const FString& PropertyName, const FString& ValueJson)
+    const FString& PropertyName, const FString& ValueText)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
     if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
@@ -686,9 +686,9 @@ bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintP
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: property '%s' not found on '%s'"), *PropertyName, *WidgetName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget);
-    if (!Prop->ImportText_Direct(*ValueJson, PropData, Widget, PPF_None))
+    if (!Prop->ImportText_Direct(*ValueText, PropData, Widget, PPF_None))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: failed to import value '%s' into property '%s' on '%s'"), *ValueJson, *PropertyName, *WidgetName);
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: failed to import value '%s' into property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
@@ -696,7 +696,7 @@ bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintP
 }
 
 bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBlueprintPath, const FString& WidgetName,
-    const FString& PropertyName, const FString& ValueJson)
+    const FString& PropertyName, const FString& ValueText)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
     if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
@@ -708,9 +708,9 @@ bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBluepr
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: slot property '%s' not found"), *PropertyName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget->Slot);
-    if (!Prop->ImportText_Direct(*ValueJson, PropData, Widget->Slot, PPF_None))
+    if (!Prop->ImportText_Direct(*ValueText, PropData, Widget->Slot, PPF_None))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: failed to import value '%s' into slot property '%s' on '%s'"), *ValueJson, *PropertyName, *WidgetName);
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: failed to import value '%s' into slot property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
