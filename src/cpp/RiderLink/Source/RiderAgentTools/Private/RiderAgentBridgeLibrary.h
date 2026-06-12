@@ -90,7 +90,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Blueprint")
     static bool SetBlueprintVariableDefaultValue(const FString& BlueprintPath, const FString& VariableName,
-        const FString& ValueJson);
+        const FString& ValueText);
 
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Blueprint")
     static FString ExportBlueprintNodes(const FString& BlueprintPath, const FString& GraphName,
@@ -113,11 +113,11 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Widget")
     static bool SetWidgetProperty(const FString& WidgetBlueprintPath, const FString& WidgetName,
-        const FString& PropertyName, const FString& ValueJson);
+        const FString& PropertyName, const FString& ValueText);
 
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Widget")
     static bool SetWidgetSlotProperty(const FString& WidgetBlueprintPath, const FString& WidgetName,
-        const FString& PropertyName, const FString& ValueJson);
+        const FString& PropertyName, const FString& ValueText);
 
     // ── Niagara ──
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Niagara")
