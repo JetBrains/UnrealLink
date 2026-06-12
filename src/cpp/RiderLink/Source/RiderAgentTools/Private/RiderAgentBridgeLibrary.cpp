@@ -539,7 +539,11 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableDefaultValue(const FString& B
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: property '%s' not found"), *VariableName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(CDO);
-    Prop->ImportText_Direct(*ValueJson, PropData, CDO, PPF_None);
+    if (!Prop->ImportText_Direct(*ValueJson, PropData, CDO, PPF_None))
+    {
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: failed to import value '%s' into property '%s'"), *ValueJson, *VariableName);
+        return false;
+    }
     FBlueprintEditorUtils::MarkBlueprintAsModified(BP);
     return true;
 }
@@ -682,7 +686,11 @@ bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintP
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: property '%s' not found on '%s'"), *PropertyName, *WidgetName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget);
-    Prop->ImportText_Direct(*ValueJson, PropData, Widget, PPF_None);
+    if (!Prop->ImportText_Direct(*ValueJson, PropData, Widget, PPF_None))
+    {
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: failed to import value '%s' into property '%s' on '%s'"), *ValueJson, *PropertyName, *WidgetName);
+        return false;
+    }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
     return true;
 }
@@ -700,7 +708,11 @@ bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBluepr
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: slot property '%s' not found"), *PropertyName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget->Slot);
-    Prop->ImportText_Direct(*ValueJson, PropData, Widget->Slot, PPF_None);
+    if (!Prop->ImportText_Direct(*ValueJson, PropData, Widget->Slot, PPF_None))
+    {
+        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: failed to import value '%s' into slot property '%s' on '%s'"), *ValueJson, *PropertyName, *WidgetName);
+        return false;
+    }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
     return true;
 }
