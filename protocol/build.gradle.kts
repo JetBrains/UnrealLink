@@ -15,6 +15,12 @@ repositories {
     }
 }
 
+kotlin {
+    // Keep compileJava and compileKotlin on the same JVM target regardless of the
+    // JDK running the Gradle daemon (the IDE may run it on a different JDK than gradlew).
+    jvmToolchain(25)
+}
+
 val isMonorepo = rootProject.projectDir != projectDir.parentFile
 val unrealLinkRepoRoot: File = projectDir.parentFile
 

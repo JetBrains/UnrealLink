@@ -4,7 +4,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
@@ -14,11 +13,10 @@ import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import kotlin.io.path.pathString
 
 plugins {
-    id("me.filippov.gradle.jvm.wrapper") version "0.16.0"
-    id("org.jetbrains.changelog") version "2.0.0"
+    id("me.filippov.gradle.jvm.wrapper")
+    id("org.jetbrains.changelog") version "2.5.0"
     id("org.jetbrains.intellij.platform")
     kotlin("jvm")
 }
@@ -27,11 +25,6 @@ interface Injected {
     @get:Inject val exec: ExecOperations
 }
 val injected = objects.newInstance<Injected>()
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
-}
 
 repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
@@ -45,14 +38,17 @@ repositories {
 }
 
 dependencies {
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
-}
-
-apply {
-    plugin("kotlin")
+    // Not used by our tests directly: the bundled IntelliJ/Rider test framework is built on
+    // JUnit 4 and loads its classes (org.junit.runners.model.Statement, ...) at runtime when
+    // the TestNG-based platform tests boot. Hence runtime-only.
+    testRuntimeOnly("junit:junit:4.13.2")
+    // Standalone (non-platform) unit tests under test/.../mcp use JUnit 5 + kotlin.test.
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
 }
 
 kotlin {
+    jvmToolchain(25)
     sourceSets {
         main {
             kotlin.srcDir("src/rider/main/kotlin")
@@ -100,12 +96,6 @@ val riderLinkDir = File("$rootDir/src/cpp/RiderLink")
 
 val currentBranchName = getBranchName()
 
-fun TaskContainerScope.setupCleanup(task: Task) {
-    withType<Delete> {
-        delete(task.outputs.files)
-    }
-}
-
 fun getBranchName(): String {
     val execResult = providers.exec {
         executable = "git"
@@ -119,19 +109,6 @@ fun getBranchName(): String {
             return output
     }
     return "net222"
-}
-
-fun getProductMonorepoRoot(): File? {
-    var currentDir = repoRoot
-
-    while (currentDir.parent != null) {
-        if (currentDir.resolve(".ultimate.root.marker").exists()) {
-            return currentDir
-        }
-        currentDir = currentDir.parentFile
-    }
-
-    return null
 }
 
 changelog {
@@ -157,7 +134,9 @@ dependencies {
         } else {
             val version = "${project.property("majorVersion")}-SNAPSHOT"
             logger.lifecycle("*** Using Rider SDK $version from intellij-snapshots repository")
-            rider(version, useInstaller = false)
+            rider(version) {
+                useInstaller = false
+            }
         }
 
         jetbrainsRuntime()
@@ -169,14 +148,32 @@ dependencies {
         bundledPlugin("com.jetbrains.rider-cpp")
         bundledPlugin("com.intellij.mcpServer")
 
-        // TODO: Temporary I hope hope hope
-        bundledLibrary(provider {
-            project.intellijPlatform.platformPath.resolve("lib/testFramework.jar").pathString
-        })
+        // Modular 2026.3: these were split into separate bundled plugins (2025.3+), the test
+        // IDE won't boot without them ("intellij.platform.structureView is not installed").
+        bundledPlugin("intellij.structureView.plugin")
+        bundledPlugin("intellij.ssh.plugin")
+        bundledPlugin("intellij.bookmarks.plugin")
+        bundledPlugin("intellij.libraries.misc.plugin")
+
+        // Rider .NET + debugger stack the integration-test runtime needs to open a solution
+        // (mirrors the test module's monorepo .iml deps).
+        bundledModule("intellij.platform.debugger.impl")
+        bundledModule("intellij.rider")
+        bundledModule("intellij.rider.rdclient.dotnet")
+        bundledModule("intellij.rider.languages")
+
+        // Rider does not publish test-framework as a resolvable artifact, so the
+        // bundled variant is used (it brings the platform test framework + its deps).
+        testFramework(TestFrameworkType.Bundled)
     }
 }
 
 intellijPlatform {
+    // Rider (RD) does not publish the java-compiler-ant-tasks artifact, and a Rider plugin
+    // needs no Java bytecode instrumentation. Disabling it at the extension level also stops
+    // instrumentTestCode from resolving that (non-existent) dependency.
+    instrumentCode = false
+
     tasks {
         val currentReleaseNotesAsHtml = """
             <body>
@@ -246,10 +243,6 @@ tasks {
         return@lazy sdkPath.toRealPath()
     }
 
-    instrumentCode {
-        enabled = false
-    }
-
     withType<RunIdeTask>().configureEach {
         maxHeapSize = "4096m"
     }
@@ -268,8 +261,14 @@ tasks {
 
     withType<KotlinCompile>().configureEach {
         dependsOn("generateModels")
+        // JVM target is driven by the Kotlin toolchain (jvmToolchain(25) above).
+    }
+
+    // The Rider integration-test scripting API (withRunProgram, waitPumping, ...) relies on
+    // Kotlin context parameters, so the test sources must be compiled with that feature enabled.
+    named<KotlinCompile>("compileTestKotlin") {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_25)
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 
@@ -528,7 +527,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "9.4.1"
+        gradleVersion = "9.5.1"
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
     }
 }
