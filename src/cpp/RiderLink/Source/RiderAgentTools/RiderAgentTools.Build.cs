@@ -21,16 +21,29 @@ public class RiderAgentTools : ModuleRules
         // unity isolates each .cpp so the leak can't cross files.
         bUseUnity = false;
 
-        // NOTE: RTTI must stay OFF here. This module instantiates UE polymorphic
-        // types (TJsonValue* -> FJsonValue, FMemoryArchive/FBufferReaderBase ->
-        // FArchive, URiderAgentBridgeLibrary -> UBlueprintFunctionLibrary). With
-        // RTTI on, Clang emits typeinfo for those derived types that references
-        // the base classes' typeinfo, but the engine modules (Core/Json/
-        // CoreUObject) are compiled WITHOUT RTTI and never emit it -> "Undefined
-        // symbols ... typeinfo for FJsonValue/FArchive/UBlueprintFunctionLibrary"
-        // at link time (notably on Apple/arm64). This module's own code uses no
-        // dynamic_cast/typeid, so RTTI is not needed.
-        bUseRTTI = false;
+        // RTTI is a per-platform compromise, because the two toolchains pull in
+        // opposite directions:
+        //
+        //  * Apple/arm64 (Clang) needs RTTI OFF. This module instantiates UE
+        //    polymorphic types (TJsonValue* -> FJsonValue, FMemoryArchive/
+        //    FBufferReaderBase -> FArchive, URiderAgentBridgeLibrary ->
+        //    UBlueprintFunctionLibrary). With RTTI on, Clang emits typeinfo for
+        //    those derived types referencing the base classes' typeinfo, but the
+        //    engine modules (Core/Json/CoreUObject) are compiled WITHOUT RTTI and
+        //    never emit it -> "Undefined symbols ... typeinfo for FJsonValue/
+        //    FArchive/UBlueprintFunctionLibrary" at link time (RIDER-139854).
+        //
+        //  * Windows (MSVC) needs RTTI ON. The bundled rd library's polymorphic
+        //    deserialization (Wrapper<T>::dynamic -> std::dynamic_pointer_cast,
+        //    reached via RdEditorModel's AbstractPolymorphic signals) does not
+        //    compile under /GR-: MSVC reports the dynamic_pointer_cast overload as
+        //    a deleted function (C2280). Clang tolerates that same path with
+        //    -fno-rtti, which is why only MSVC regressed (RIDER-139853 follow-up).
+        //
+        // So: OFF on Apple (link fix), ON everywhere else (rd needs it, and no
+        // typeinfo link problem exists there).
+        bUseRTTI = Target.Platform != UnrealTargetPlatform.Mac
+                && Target.Platform != UnrealTargetPlatform.IOS;
 
 #if UE_5_2_OR_LATER
         bDisableStaticAnalysis = true;
