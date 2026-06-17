@@ -21,7 +21,16 @@ public class RiderAgentTools : ModuleRules
         // unity isolates each .cpp so the leak can't cross files.
         bUseUnity = false;
 
-        bUseRTTI = true;
+        // NOTE: RTTI must stay OFF here. This module instantiates UE polymorphic
+        // types (TJsonValue* -> FJsonValue, FMemoryArchive/FBufferReaderBase ->
+        // FArchive, URiderAgentBridgeLibrary -> UBlueprintFunctionLibrary). With
+        // RTTI on, Clang emits typeinfo for those derived types that references
+        // the base classes' typeinfo, but the engine modules (Core/Json/
+        // CoreUObject) are compiled WITHOUT RTTI and never emit it -> "Undefined
+        // symbols ... typeinfo for FJsonValue/FArchive/UBlueprintFunctionLibrary"
+        // at link time (notably on Apple/arm64). This module's own code uses no
+        // dynamic_cast/typeid, so RTTI is not needed.
+        bUseRTTI = false;
 
 #if UE_5_2_OR_LATER
         bDisableStaticAnalysis = true;
