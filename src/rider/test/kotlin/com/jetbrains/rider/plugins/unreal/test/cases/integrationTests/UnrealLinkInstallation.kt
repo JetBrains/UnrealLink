@@ -64,6 +64,11 @@ class UnrealLinkInstallation : UnrealLinkBase() {
     unrealApiFacade.disableEnginePlugins = false
   }
 
+  override fun beforeOpenSolution() {
+    super.beforeOpenSolution()
+    unrealApiFacade.pluginsToAddInUproject = listOf("TextureFormatOodle")
+  }
+
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "unrealLinkCombinations")
   @RiderTestTimeout(10, TimeUnit.MINUTES)
