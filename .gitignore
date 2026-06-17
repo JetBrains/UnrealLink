@@ -8,6 +8,8 @@ output
 out/*
 *.generated.*
 NuGet.Config
+# Generated Rd model sources
+src/rider/generated/
 
 # User-specific files
 *.suo
@@ -21,6 +23,10 @@ NuGet.Config
 .vs
 _ReSharper*
 _dotTrace*
+
+# OS / local tooling
+.DS_Store
+.ai/
 
 # Unreal Plugin generated files
 src/cpp/RiderLink/RiderLink.uplugin
