@@ -2,6 +2,8 @@
 #include "RiderAgentTools.hpp"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 
+#include "Runtime/Launch/Resources/Version.h"
+
 #include "AssetRegistry/IAssetRegistry.h"
 #include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetData.h"
@@ -10,14 +12,24 @@
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/Class.h"
+
+// FTopLevelAssetPath (and "UObject/TopLevelAssetPath.h"), FAssetData::AssetClassPath,
+// FARFilter::ClassPaths, FAssetData::IsTopLevelAsset and UClass::TryFindTypeSlow were
+// all introduced in UE 5.1. On UE 4.27 and 5.0 the asset registry still exposes the
+// FName-based class API (FAssetData::AssetClass / FARFilter::ClassNames) and short-name
+// class lookup goes through FindObject(ANY_PACKAGE, ...).
+#define RIDER_USE_TOP_LEVEL_ASSET_PATH (ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1))
+
+#if RIDER_USE_TOP_LEVEL_ASSET_PATH
 #include "UObject/TopLevelAssetPath.h"
+#endif
 
 namespace
 {
-    // ::UClass::TryFindTypeSlow is the cross-version short-name lookup.
-    // FindObject<::UClass>(ANY_PACKAGE, ...) is deprecated in UE 5.1+; this
-    // template-based API searches the global ::UClass list (native +
-    // Blueprint-generated) and works on UE 5.1 through 5.8.
+    // Short-name class lookup, searching the global ::UClass list (native +
+    // Blueprint-generated). On UE 5.1+ this is ::UClass::TryFindTypeSlow; on
+    // UE 4.27 / 5.0 it is FindObject(ANY_PACKAGE, ...), which TryFindTypeSlow
+    // replaced (FindObject<UClass>(ANY_PACKAGE, ...) is deprecated in 5.1+).
     ::UClass* ResolveClassByShortName(const FString& ShortName)
     {
         if (ShortName.IsEmpty()) return nullptr;
@@ -25,8 +37,13 @@ namespace
         for (const FString& P : Prefixes)
         {
             const FString Candidate = P + ShortName;
+#if RIDER_USE_TOP_LEVEL_ASSET_PATH
             if (::UClass* Cls = ::UClass::TryFindTypeSlow<::UClass>(Candidate))
                 return Cls;
+#else
+            if (::UClass* Cls = FindObject<::UClass>(ANY_PACKAGE, *Candidate))
+                return Cls;
+#endif
         }
         return nullptr;
     }
@@ -67,7 +84,13 @@ namespace
         if (!BaseClassStr.IsEmpty())
         {
             if (::UClass* Cls = ResolveClassByShortName(BaseClassStr))
+            {
+#if RIDER_USE_TOP_LEVEL_ASSET_PATH
                 Filter.ClassPaths.Add(FTopLevelAssetPath(Cls));
+#else
+                Filter.ClassNames.Add(Cls->GetFName());
+#endif
+            }
         }
 
         TArray<FAssetData> Found;
@@ -79,15 +102,23 @@ namespace
         for (const FAssetData& A : Found)
         {
             if (Out.Num() >= Limit) break;
+#if RIDER_USE_TOP_LEVEL_ASSET_PATH
             // Skip runtime in-level actor instances (e.g. ChaosDebugDrawActor_UAID_…).
             // Without this, base_class="Actor" returns thousands of placed-actor
             // entries rather than the standalone .uasset/.umap files users browse for.
+            // The UAID instances come from One File Per Actor, a UE 5.1+ feature, so
+            // there is nothing analogous to filter out on UE 4.27 / 5.0.
             if (!A.IsTopLevelAsset()) continue;
+#endif
             const FString Name = A.AssetName.ToString();
             if (!Needle.IsEmpty() && !Name.ToLower().Contains(Needle))
                 continue;
 
+#if RIDER_USE_TOP_LEVEL_ASSET_PATH
             const FString AssetClassShort = A.AssetClassPath.GetAssetName().ToString();
+#else
+            const FString AssetClassShort = A.AssetClass.ToString();
+#endif
             Out.Emplace(AssetLiveSearchAsset(
                 PackageNameToDiskPath(A.PackageName.ToString()),
                 Name,
