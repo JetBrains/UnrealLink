@@ -26,7 +26,7 @@ inline std::string to_string(Void const&)
 {
 	return "void";
 }
-}	 // namespace rd
+} // namespace rd
 
 namespace std
 {
@@ -38,6 +38,6 @@ struct hash<rd::Void>
 		return 0;
 	}
 };
-}	 // namespace std
+} // namespace std
 
 #endif	  // RD_CPP_VOID_H

@@ -20,6 +20,8 @@ public:
 		RdEndpoint<TReq, TRes, ReqSer, ResSer>::on_wire_received(std::move(buffer));
 	}
 
+	IScheduler* get_wire_scheduler() const override { return RdCall<TReq, TRes, ReqSer, ResSer>::get_wire_scheduler(); }
+
 	friend bool operator==(const RdSymmetricCall& lhs, const RdSymmetricCall& rhs)
 	{
 		return &lhs == &rhs;
@@ -30,7 +32,7 @@ public:
 		return !(rhs == lhs);
 	}
 
-	friend std::string to_string(RdSymmetricCall const&)
+	friend std::string to_string(RdSymmetricCall const& value)
 	{
 		return "RdSymmetricCall";
 	}

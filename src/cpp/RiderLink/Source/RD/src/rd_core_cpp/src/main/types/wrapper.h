@@ -126,16 +126,16 @@ public:
 	}
 
 	template <typename F, typename G = typename util::not_string_literal<F&&>::type,
-		typename = typename std::enable_if_t<
-			/*util::negation<
-				util::disjunction<
-					std::is_null_pointer<std::decay_t<F>>,
-					std::is_same<Wrapper<T>, std::decay_t<F>>,
-					detail::is_optional<std::decay_t<F>>
-				>
-			>::value*/
-			util::conjunction<std::is_constructible<std::shared_ptr<T>, std::shared_ptr<G>>,
-				util::negation<std::is_abstract<G>>>::value>>
+	          typename = typename std::enable_if_t<
+		          /*util::negation<
+			          util::disjunction<
+				          std::is_null_pointer<std::decay_t<F>>,
+				          std::is_same<Wrapper<T>, std::decay_t<F>>,
+				          detail::is_optional<std::decay_t<F>>
+			          >
+		          >::value*/
+		          util::conjunction<std::is_constructible<std::shared_ptr<T>, std::shared_ptr<G>>,
+		                            util::negation<std::is_abstract<G>>>::value>>
 	Wrapper(F&& value) : Base(std::allocate_shared<G>(alloc, std::forward<F>(value)))
 	{
 	}
@@ -184,7 +184,7 @@ public:
 		return *static_cast<Base&>(*this);
 	};
 
-	constexpr T const& operator*() const&
+	constexpr T const& operator*() const &
 	{
 		return *static_cast<Base const&>(*this);
 	};
@@ -210,8 +210,8 @@ public:
 
 	friend bool operator==(const Wrapper& lhs, const Wrapper& rhs)
 	{
-		bool is_lhs = (bool) lhs;
-		bool is_rhs = (bool) rhs;
+		bool is_lhs = (bool)lhs;
+		bool is_rhs = (bool)rhs;
 		if (is_lhs != is_rhs)
 		{
 			return false;
@@ -294,9 +294,10 @@ Wrapper<T> allocate_wrapper(const A& alloc, Args&&... args)
 {
 	return Wrapper<T>(std::allocate_shared<T, A>(alloc, std::forward<Args>(args)...));
 }
+
 /*template<typename T>
 constexpr Wrapper<T> null_wrapper = Wrapper<T>(nullptr);*/
-}	 // namespace wrapper
+} // namespace wrapper
 
 template <typename T>
 struct hash<rd::Wrapper<T>>
@@ -306,7 +307,7 @@ struct hash<rd::Wrapper<T>>
 		return rd::hash<T>()(*value);
 	}
 };
-}	 // namespace rd
+} // namespace rd
 
 static_assert(rd::is_wrapper<rd::Wrapper<std::wstring>>::value, "is wrapper doesn't work");
 

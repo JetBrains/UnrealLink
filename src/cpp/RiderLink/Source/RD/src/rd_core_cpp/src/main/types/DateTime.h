@@ -35,7 +35,7 @@ public:
 	//"1970-01-01 03:01:38" for example
 	friend std::string RD_CORE_API to_string(DateTime const& time);
 };
-}	 // namespace rd
+} // namespace rd
 namespace rd
 {
 template <>
@@ -43,6 +43,6 @@ struct RD_CORE_API hash<rd::DateTime>
 {
 	size_t operator()(const rd::DateTime& value) const noexcept;
 };
-}	 // namespace rd
+} // namespace rd
 
 #endif	  // RD_CPP_DATETIME_H

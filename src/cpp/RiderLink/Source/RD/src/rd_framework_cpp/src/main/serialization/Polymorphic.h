@@ -73,6 +73,7 @@ public:
 
 template <template <class, class> class C, typename T, typename A>
 class Polymorphic<C<T, A>, typename std::enable_if_t<!util::is_base_of_v<RdReactiveBase, T> &&
+													 !util::is_base_of_v<RdReactiveBase, C<T, A>> &&
 													 !util::is_same_v<Wrapper<T, A>, C<T, A>>>>
 {
 public:
@@ -149,6 +150,21 @@ public:
 	inline static void write(SerializationCtx& /*ctx*/, Buffer& buffer, DateTime const& value)
 	{
 		buffer.write_date_time(value);
+	}
+};
+
+template <>
+class Polymorphic<TimeSpan>
+{
+public:
+	inline static TimeSpan read(SerializationCtx& /*ctx*/, Buffer& buffer)
+	{
+		return buffer.read_time_span();
+	}
+
+	inline static void write(SerializationCtx& /*ctx*/, Buffer& buffer, TimeSpan const& value)
+	{
+		buffer.write_time_span(value);
 	}
 };
 

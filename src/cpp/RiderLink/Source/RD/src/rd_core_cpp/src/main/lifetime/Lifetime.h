@@ -1,11 +1,6 @@
 #ifndef RD_CPP_CORE_LIFETIMEWRAPPER_H
 #define RD_CPP_CORE_LIFETIMEWRAPPER_H
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable:4251)
-#endif
-
 #include "LifetimeImpl.h"
 
 #include <std/hash.h>
@@ -13,6 +8,8 @@
 #include <memory>
 
 #include <rd_core_export.h>
+
+RD_PUSH_STL_EXPORTS_WARNINGS
 
 namespace rd
 {
@@ -38,7 +35,10 @@ private:
 	std::shared_ptr<LifetimeImpl> ptr;
 
 public:
+	typedef LifetimeImpl::counter_t counter_t;
+
 	static Lifetime const& Eternal();
+	static Lifetime const& Terminated();
 
 	// region ctor/dtor
 
@@ -68,9 +68,7 @@ inline size_t hash<Lifetime>::operator()(const Lifetime& value) const noexcept
 	return hash<std::shared_ptr<LifetimeImpl> >()(value.ptr);
 }
 }	 // namespace rd
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
+RD_POP_STL_EXPORTS_WARNINGS
 
 #endif	  // RD_CPP_CORE_LIFETIMEWRAPPER_H
