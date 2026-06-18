@@ -449,6 +449,13 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             lifetime.ToCancellationToken().ThrowIfCancellationRequested();
 
             var upluginFile = UnrealPluginDetector.GetPathToUpluginFile(pluginTmpDir);
+
+            // RiderAgentTools (and the engine plugins backing it) are UE5-only and don't
+            // compile on UE4. Drop them from the .uplugin that UAT is about to build so the
+            // rest of RiderLink still installs on UE 4.x. See RIDER-139853.
+            if (myPluginDetector.UnrealVersion.IsUE4())
+                StripUe5OnlyModulesFromUplugin(upluginFile);
+
             var pluginBuildOutput = CreateTempDirectory();
             if (pluginBuildOutput.IsNullOrEmpty()) return false;
             
@@ -516,6 +523,41 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 });
             }
             return true;
+        }
+
+        // Modules and engine-plugin references that only exist for the UE5-only RiderAgentTools
+        // module. Removed from the .uplugin before building against UE 4.x.
+        private static readonly string[] ourUe5OnlyModules = { "RiderAgentTools" };
+        private static readonly HashSet<string> ourUe5OnlyPlugins = new()
+            { "EnhancedInput", "PythonScriptPlugin", "EditorScriptingUtilities", "Niagara" };
+
+        private void StripUe5OnlyModulesFromUplugin(VirtualFileSystemPath upluginFile)
+        {
+            if (!upluginFile.ExistsFile) return;
+            try
+            {
+                var jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(upluginFile.FullPath)) as JObject;
+                if (jsonObject == null)
+                {
+                    myLogger.Warn($"[UnrealLink]: {upluginFile} is not a JSON file, couldn't strip UE5-only modules");
+                    return;
+                }
+
+                if (jsonObject["Modules"] is JArray modules)
+                    foreach (var module in modules.Where(m => ourUe5OnlyModules.Contains((string)m["Name"])).ToList())
+                        module.Remove();
+
+                if (jsonObject["Plugins"] is JArray plugins)
+                    foreach (var plugin in plugins.Where(p => ourUe5OnlyPlugins.Contains((string)p["Name"])).ToList())
+                        plugin.Remove();
+
+                File.WriteAllText(upluginFile.FullPath, jsonObject.ToString());
+                myLogger.Info($"[UnrealLink]: Stripped UE5-only modules from {upluginFile} for a UE4 build");
+            }
+            catch (Exception e)
+            {
+                myLogger.Warn($"[UnrealLink]: Couldn't strip UE5-only modules from {upluginFile}", e);
+            }
         }
 
         private bool PatchUpluginFileAfterInstallation(VirtualFileSystemPath pluginBuildOutput)
