@@ -50,4 +50,4 @@ size_t hash<rd::DateTime>::operator()(const rd::DateTime& value) const noexcept
 {
 	return rd::hash<decltype(value.seconds)>()(value.seconds);
 }
-}	 // namespace rd
+} // namespace rd

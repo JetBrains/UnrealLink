@@ -1,23 +1,20 @@
 #ifndef RD_CPP_CORE_SEQUENTIAL_LIFETIMES_H
 #define RD_CPP_CORE_SEQUENTIAL_LIFETIMES_H
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable:4251)
-#endif
-
 #include "LifetimeDefinition.h"
 #include "Lifetime.h"
 
 #include <rd_core_export.h>
 
+RD_PUSH_STL_EXPORTS_WARNINGS
+
 namespace rd
 {
 class RD_CORE_API SequentialLifetimes
 {
-private:
-	std::shared_ptr<LifetimeDefinition> current_def = LifetimeDefinition::get_shared_eternal();
 	Lifetime parent_lifetime;
+	Lifetime current_lifetime = Lifetime::Terminated();
+	void set_current_lifetime(const Lifetime& lifetime);
 
 public:
 	// region ctor/dtor
@@ -31,7 +28,7 @@ public:
 
 	SequentialLifetimes& operator=(SequentialLifetimes&&) = delete;
 
-	explicit SequentialLifetimes(Lifetime parent_lifetime);
+	explicit SequentialLifetimes(const Lifetime& parent_lifetime);
 	// endregion
 
 	Lifetime next();
@@ -39,13 +36,9 @@ public:
 	void terminate_current();
 
 	bool is_terminated() const;
-
-	void set_current_lifetime(std::shared_ptr<LifetimeDefinition> new_def);
 };
 }	 // namespace rd
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
+RD_POP_STL_EXPORTS_WARNINGS
 
 #endif	  // RD_CPP_CORE_SEQUENTIAL_LIFETIMES_H

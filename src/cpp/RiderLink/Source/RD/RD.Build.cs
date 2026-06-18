@@ -75,6 +75,22 @@ public class RD : ModuleRules
 			"nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD");
 		PublicDefinitions.Add("FMT_SHARED");
 
+		if (Target.Platform == UnrealTargetPlatform.Win64 && Target.WindowsPlatform.Compiler.IsMSVC())
+		{
+			string[] disabledWarnings =
+			[
+				"_Pragma(\"warning(disable:4251)\")"
+			];
+			string packedWarnings = string.Join(' ', disabledWarnings);
+			PublicDefinitions.Add($"RD_PUSH_STL_EXPORTS_WARNINGS=_Pragma(\"warning(push)\") {packedWarnings}");
+			PublicDefinitions.Add("RD_POP_STL_EXPORTS_WARNINGS=_Pragma(\"warning(pop)\")");
+		}
+		else
+		{
+			PublicDefinitions.Add("RD_PUSH_STL_EXPORTS_WARNINGS=");
+			PublicDefinitions.Add("RD_POP_STL_EXPORTS_WARNINGS=");
+		}
+
 		string[] Paths =
 		{
 			"src", "src/rd_core_cpp", "src/rd_core_cpp/src/main"
