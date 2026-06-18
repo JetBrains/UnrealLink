@@ -9,11 +9,6 @@
 
 #include <thread>
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 namespace rd
 {
 /**
@@ -102,7 +97,7 @@ public:
 		return start_internal(request, false, responseScheduler ? responseScheduler : get_default_scheduler());
 	}
 
-	void on_wire_received(Buffer) const override
+	void on_wire_received(Buffer buffer) const override
 	{
 		RD_ASSERT_MSG(false, "RdCall.on_wire_received called")
 	}
@@ -156,9 +151,5 @@ public:
 	}
 };
 }	 // namespace rd
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 #endif	  // RD_CPP_RDCALL_H

@@ -76,9 +76,9 @@
 #ifdef _WIN32
 #pragma warning( push )
 #pragma warning( disable:4668 )
-	#include <io.h>
-	#include <winsock2.h>
-	#include <Ws2tcpip.h>
+    #include <io.h>
+    #include <winsock2.h>
+    #include <Ws2tcpip.h>
 #pragma warning( pop )
 
 #define IPTOS_LOWDELAY  0x10
@@ -205,12 +205,14 @@ public:
     ///  @return true if the socket object contains a valid socket descriptor.
     virtual bool IsSocketValid(void) {
         return (m_socket != static_cast<SOCKET>(SocketError));
-    };
+    }
 
     /// Provides a standard error code for cross platform development by
     /// mapping the operating system error to an error defined by the CSocket
     /// class.
-    void TranslateSocketError(void);
+    void TranslateSocketError();
+
+    static CSocketError TranslateLastSocketError();
 
     /// Returns a human-readable description of the given error code
     /// or the last error code of a socket
@@ -324,14 +326,14 @@ public:
     /// call to CSimpleSocket::Open waits until it completes.
     /// @return the length of time in seconds
     int32_t GetConnectTimeoutSec(void) {
-        return  m_stConnectTimeout.tv_sec;
+        return static_cast<int32_t>(m_stConnectTimeout.tv_sec);
     };
 
     /// Gets the timeout value that specifies the maximum number of microseconds
     /// a call to CSimpleSocket::Open waits until it completes.
     /// @return the length of time in microseconds
     int32_t GetConnectTimeoutUSec(void) {
-        return  m_stConnectTimeout.tv_usec;
+        return  static_cast<int32_t>(m_stConnectTimeout.tv_usec);
     };
 
     /// Sets the timeout value that specifies the maximum amount of time a call
@@ -354,7 +356,7 @@ public:
     /// a call to CSimpleSocket::Receive waits until it completes.
     /// @return the length of time in seconds
     int32_t GetReceiveTimeoutSec(void) {
-        return  m_stRecvTimeout.tv_sec;
+        return  static_cast<int32_t>(m_stRecvTimeout.tv_sec);
     };
 
     /// Gets the timeout value that specifies the maximum number of microseconds
@@ -397,7 +399,7 @@ public:
     /// a call to CSimpleSocket::Send waits until it completes.
     /// @return the length of time in seconds
     int32_t GetSendTimeoutSec(void) {
-        return  m_stSendTimeout.tv_sec;
+        return static_cast<int32_t>(m_stSendTimeout.tv_sec);
     };
 
     /// Gets the timeout value that specifies the maximum number of microseconds
@@ -423,13 +425,13 @@ public:
     /// Get the total time the of the last operation in milliseconds.
     ///  @return number of milliseconds of last operation.
     uint32_t GetTotalTimeMs() {
-        return m_timer.GetMilliSeconds();
+        return timer.GetMilliSeconds();
     };
 
     /// Get the total time the of the last operation in microseconds.
     ///  @return number of microseconds or last operation.
     uint32_t GetTotalTimeUsec() {
-        return m_timer.GetMicroSeconds();
+        return timer.GetMicroSeconds();
     };
 
     /// Return Differentiated Services Code Point (DSCP) value currently set on the socket object.
@@ -533,6 +535,7 @@ protected:
         m_socket = socket;
     };
 
+    friend class CSimpleSocketSender;
 private:
     /// Generic function used to get the send/receive window size
     ///  @return zero on failure else the number of bytes of the TCP window size if successful.
@@ -575,7 +578,7 @@ protected:
     struct sockaddr_in   m_stClientSockaddr;  /// client address
     struct sockaddr_in   m_stMulticastGroup;  /// multicast group to bind to
     struct linger        m_stLinger;          /// linger flag
-    CStatTimer           m_timer;             /// internal statistics.
+    thread_local static CStatTimer timer;     /// internal statistics.
 #ifdef _WIN32
     WSADATA              m_hWSAData;          /// Windows
 #endif
@@ -586,4 +589,3 @@ protected:
 
 
 #endif /*  __SOCKET_H__  */
-

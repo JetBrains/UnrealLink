@@ -6,11 +6,6 @@
 #include "serialization/ISerializable.h"
 #include "std/allocator.h"
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 namespace rd
 {
 /**
@@ -48,20 +43,29 @@ public:
 	static RdProperty<T, S> read(SerializationCtx& ctx, Buffer& buffer)
 	{
 		RdId id = RdId::read(buffer);
-		bool not_null = buffer.read_bool();	   // not null/
-		(void) not_null;
-		auto value = S::read(ctx, buffer);
 		RdProperty<T, S> property;
-		property.value = std::move(value);
 		withId(property, id);
+		const bool has_value = buffer.read_bool();
+		if (has_value)
+		{
+			auto value = S::read(ctx, buffer);
+			property.value = std::move(value);
+		}
 		return property;
 	}
 
 	void write(SerializationCtx& ctx, Buffer& buffer) const override
 	{
 		this->rdid.write(buffer);
-		buffer.write_bool(true);
-		S::write(ctx, buffer, this->get());
+		if (this->has_value())
+		{
+			buffer.write_bool(true);
+			S::write(ctx, buffer, this->get());
+		}
+		else
+		{
+			buffer.write_bool(false);
+		}
 	}
 
 	void advise(Lifetime lifetime, std::function<void(T const&)> handler) const override
@@ -100,10 +104,6 @@ public:
 	}
 };
 }	 // namespace rd
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 static_assert(std::is_move_constructible<rd::RdProperty<int>>::value, "Is move constructible from RdProperty<int>");
 

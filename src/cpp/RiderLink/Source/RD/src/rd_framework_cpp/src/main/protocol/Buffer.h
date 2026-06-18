@@ -1,12 +1,8 @@
 #ifndef RD_CPP_UNSAFEBUFFER_H
 #define RD_CPP_UNSAFEBUFFER_H
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable:4251)
-#endif
-
 #include "types/DateTime.h"
+#include "types/TimeSpan.h"
 #include "util/core_util.h"
 #include "types/wrapper.h"
 #include "std/allocator.h"
@@ -18,6 +14,8 @@
 #include <memory>
 
 #include <rd_framework_export.h>
+
+RD_PUSH_STL_EXPORTS_WARNINGS
 
 namespace rd
 {
@@ -128,9 +126,9 @@ public:
 	}
 
 	template <template <class, class> class C, typename T, typename A = allocator<value_or_wrapper<T>>>
-	C<value_or_wrapper<T>, A> read_array(std::function<value_or_wrapper<T>()> reader)
+	C<value_or_wrapper<T>, A> read_array(std::function<T()> reader)
 	{
-		int32_t len = read_integral<int32_t>();
+		auto len = read_integral<int32_t>();
 		C<value_or_wrapper<T>, A> result;
 		using rd::resize;
 		resize(result, len);
@@ -147,16 +145,15 @@ public:
 	{
 		using rd::size;
 		const int32_t& len = rd::size(container);
-		write_integral<int32_t>(static_cast<int32_t>(len));
+		write_integral<int32_t>(len);
 		if (len > 0)
 		{
 			write(reinterpret_cast<word_t const*>(&container[0]), sizeof(T) * len);
 		}
 	}
 
-	template <template <class, class> class C, typename T, typename A = allocator<T>,
-		typename = typename std::enable_if_t<!rd::util::in_heap_v<T>>>
-	void write_array(C<T, A> const& container, std::function<void(T const&)> writer)
+	template <template <class, class> class C, typename T, typename A = allocator<value_or_wrapper<T>>>
+	std::enable_if_t<util::disjunction<util::negation<is_wrapper<value_or_wrapper<T>>>, is_wrapper<T>>::value, void> write_array(C<value_or_wrapper<T>, A> const& container, std::function<void(T const&)> writer)
 	{
 		using rd::size;
 		write_integral<int32_t>(size(container));
@@ -166,8 +163,8 @@ public:
 		}
 	}
 
-	template <template <class, class> class C, typename T, typename A = allocator<Wrapper<T>>>
-	void write_array(C<Wrapper<T>, A> const& container, std::function<void(T const&)> writer)
+	template <template <class, class> class C, typename T, typename A = allocator<value_or_wrapper<T>>>
+	std::enable_if_t<util::conjunction<is_wrapper<value_or_wrapper<T>>, util::negation<is_wrapper<T>>>::value, void> write_array(C<value_or_wrapper<T>, A> const& container, std::function<void(T const&)> writer)
 	{
 		using rd::size;
 		write_integral<int32_t>(size(container));
@@ -210,6 +207,10 @@ public:
 	DateTime read_date_time();
 
 	void write_date_time(DateTime const& date_time);
+
+	TimeSpan read_time_span();
+
+	void write_time_span(TimeSpan const& duration);
 
 	template <typename T, typename = typename std::enable_if_t<util::is_enum_v<T>>>
 	T read_enum()
@@ -322,9 +323,7 @@ public:
 	ByteArray& get_data();
 };
 }	 // namespace rd
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
+RD_POP_STL_EXPORTS_WARNINGS
 
 #endif	  // RD_CPP_UNSAFEBUFFER_H
