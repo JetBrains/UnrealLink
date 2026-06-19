@@ -9,6 +9,7 @@
       <plugin id="com.intellij.mcpServer"/>
       <plugin id="unreal-link"/>
       <module name="intellij.libraries.gson"/>
+      <module name="intellij.libraries.junit5"/>
       <module name="intellij.libraries.kotlin.reflect"/>
       <module name="intellij.libraries.kotlinx.coroutines.core"/>
       <module name="intellij.libraries.kotlinx.serialization.core"/>
