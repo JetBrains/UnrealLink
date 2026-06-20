@@ -45,42 +45,37 @@ static void SplitResultOrError(const FPythonCommandEx& Cmd, bool bSuccess, FStri
 }
 
 // Configure FPythonCommandEx for the requested mode.
-// isolated=true keeps the historic "evaluate a single expression and return its value" semantic.
-// isolated=false runs the script as a file (multi-statement supported, shared __main__ globals
-// across calls), matching the AgentBridge reference and avoiding the
-// "multiple statements found while compiling a single statement" failure that
-// EPythonCommandExecutionMode::ExecuteStatement imposes.
+//
+// isolated=true → ExecuteFile + Private scope: a persistent dict separate from __main__.
+// After execution ClearPrivateScope() wipes all user-set vars, releasing UObject refs so
+// FPyReferenceCollector drops them and UE GC can reclaim the objects. Use for any script
+// that creates, loads, or compiles Blueprint assets — without the explicit clear, the
+// Blueprint stays pinned across calls, blocks deletion/recompile, and can crash the editor.
+//
+// isolated=false → ExecuteFile + Public scope: shared __main__ globals persist across
+// calls (cross-call variable sharing). Appropriate for batch steps that explicitly share
+// state; do NOT use for independent single tool calls.
 static void ConfigureCommand(FPythonCommandEx& Cmd, const FString& Script, bool bIsolated)
 {
 	Cmd.Command = Script;
-	if (bIsolated)
-	{
-		Cmd.ExecutionMode = EPythonCommandExecutionMode::EvaluateStatement;
-	}
-	else
-	{
-		Cmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteFile;
-		Cmd.FileExecutionScope = EPythonFileExecutionScope::Public;
-	}
+	Cmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteFile;
+	Cmd.FileExecutionScope = bIsolated
+		? EPythonFileExecutionScope::Private
+		: EPythonFileExecutionScope::Public;
 }
 
-// Release Python's UObject refs, then ask the engine to reclaim them — but NEVER
-// collect synchronously from here. This runs inside an AsyncTask(GameThread) callback,
-// which is not a guaranteed GC-safe point. An inline full CollectGarbage() can purge
-// objects that are still mid-fixup after a Live Coding re-instance (e.g. a re-instanced
-// character's TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities), freeing an
-// allocation that is then read through a dangling pointer → 0xC0000005 access violation
-// in the allocator destructor.
+// Release Python's UObject refs and schedule engine GC — but NEVER collect synchronously.
 //
-// GEngine->ForceGarbageCollection() only raises a flag; UEngine services it at the
-// engine's normal GC-safe point on a later tick, AFTER re-instancing fixups complete.
-// Deferring also avoids two prior hazards:
-//   - re-entrant GC: calling CollectGarbage inside another GC pass spawns TaskGraph
-//     work that doesn't inherit FAppTime's game-thread context, tripping
-//     EnsureFailed(IsInGameThread()) in AppTime.cpp (guarded below by IsGarbageCollecting).
-//   - PIE: a synchronous CollectGarbage → ForceDeleteObjects can fail to unload
-//     PIE-referenced packages (e.g. BB_Bot Blackboard) and fire an ensure at
-//     ObjectTools.cpp:3963.
+// This runs inside an AsyncTask(GameThread) callback, which is not a guaranteed GC-safe
+// point. An inline CollectGarbage() can purge objects still mid-fixup after a Live Coding
+// re-instance (e.g. a re-instanced character's TArray<TSubclassOf<UGameplayAbility>>),
+// freeing memory that is then read through a dangling pointer → 0xC0000005 access violation.
+//
+// GEngine->ForceGarbageCollection() only raises a flag; UEngine services it at the next
+// GC-safe tick, after re-instancing fixups complete. Deferring also avoids:
+//   - re-entrant GC: CollectGarbage inside another GC pass spawns TaskGraph work that
+//     doesn't inherit FAppTime's game-thread context, tripping EnsureFailed(IsInGameThread).
+//   - PIE: synchronous ForceDeleteObjects can fail to unload PIE-referenced packages.
 static void PostExecGarbageCollect(IPythonScriptPlugin* PythonPlugin)
 {
 	if (PythonPlugin && PythonPlugin->IsPythonAvailable())
@@ -91,45 +86,75 @@ static void PostExecGarbageCollect(IPythonScriptPlugin* PythonPlugin)
 		PythonPlugin->ExecPythonCommandEx(GcCommand);
 	}
 
-	// Always defer to the engine's next safe collection point; never collect inline here.
 	if (GEngine && !IsGarbageCollecting())
 	{
 		GEngine->ForceGarbageCollection(false);
 	}
 }
 
-static void ExecuteOnGameThread(const FString& Script, bool bIsolated, FScriptCallback Callback)
+// EPythonFileExecutionScope::Private is a single persistent dict shared across ALL
+// Private-scoped calls — it is NOT a fresh namespace per call. Variables set in one
+// call accumulate there and keep UObject ref counts alive, blocking GC.
+// After every isolated execution we explicitly clear that dict so Python releases
+// all refs and FPyReferenceCollector can drop the objects before the next GC tick.
+static void ClearPrivateScope(IPythonScriptPlugin* PythonPlugin)
 {
-	AsyncTask(ENamedThreads::GameThread, [Script, bIsolated, Callback = MoveTemp(Callback)]()
+	FPythonCommandEx ClearCmd;
+	// list(globals()) snapshots the keys before we start deleting.
+	// Skip dunder names (__builtins__, __doc__, etc.) which Python needs internally.
+	ClearCmd.Command = TEXT("[globals().pop(k) for k in list(globals()) if not k.startswith('__')]");
+	ClearCmd.ExecutionMode = EPythonCommandExecutionMode::ExecuteFile;
+	ClearCmd.FileExecutionScope = EPythonFileExecutionScope::Private; // same dict as user script
+	PythonPlugin->ExecPythonCommandEx(ClearCmd);
+}
+
+static JetBrains::EditorPlugin::ScriptResult RunScript(
+	IPythonScriptPlugin* PythonPlugin, const FString& Script, bool bIsolated)
+{
+	using namespace JetBrains::EditorPlugin;
+
+	if (!PythonPlugin || !PythonPlugin->IsPythonAvailable())
 	{
-		using namespace JetBrains::EditorPlugin;
+		return ScriptResult(false, FString(), FString(), TEXT("Python plugin not available"));
+	}
 
-		auto* PythonPlugin = IPythonScriptPlugin::Get();
-		if (!PythonPlugin || !PythonPlugin->IsPythonAvailable())
-		{
-			Callback(ScriptResult(
-				false,
-				FString(TEXT("")),
-				FString(TEXT("")),
-				FString(TEXT("Python plugin not available"))
-			));
+	FPythonCommandEx Cmd;
+	ConfigureCommand(Cmd, Script, bIsolated);
+
+	const bool bSuccess = PythonPlugin->ExecPythonCommandEx(Cmd);
+
+	FString Output = Cmd.LogOutput.Num() > 0
+		                 ? CapString(JoinLogOutput(Cmd.LogOutput))
+		                 : FString();
+	FString Result;
+	FString Error;
+	SplitResultOrError(Cmd, bSuccess, Result, Error);
+
+	if (bIsolated)
+	{
+		ClearPrivateScope(PythonPlugin);
+	}
+	PostExecGarbageCollect(PythonPlugin);
+
+	return ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error));
+}
+
+// RequestLifetime is the per-call lifetime that RD terminates when the client
+// cancels or times out. We check it at two points:
+//   1. Before executing Python — skip the work entirely if already cancelled.
+//   2. Before Task.set() — calling set() on a cancelled RdTask corrupts the
+//      model connection and makes all subsequent calls return "Cancelled" forever.
+static void ExecuteOnGameThread(const FString& Script, rd::Lifetime RequestLifetime, FScriptCallback Callback)
+{
+	AsyncTask(ENamedThreads::GameThread, [Script, RequestLifetime, Callback = MoveTemp(Callback)]()
+	{
+		if (RequestLifetime->is_terminated())
 			return;
-		}
-
-		FPythonCommandEx Cmd;
-		ConfigureCommand(Cmd, Script, bIsolated);
-
-		const bool bSuccess = PythonPlugin->ExecPythonCommandEx(Cmd);
-		FString Output = Cmd.LogOutput.Num() > 0
-			                 ? CapString(JoinLogOutput(Cmd.LogOutput))
-			                 : FString(TEXT(""));
-		FString Result;
-		FString Error;
-		SplitResultOrError(Cmd, bSuccess, Result, Error);
-
-		PostExecGarbageCollect(PythonPlugin);
-
-		Callback(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error)));
+		auto* PythonPlugin = IPythonScriptPlugin::Get();
+		// Single tool calls always use Private scope: each call gets a fresh __main__ dict,
+		// so UObject refs (Blueprints, assets) are released as soon as the script returns.
+		// Public scope is only appropriate for batch steps that intentionally share state.
+		Callback(RunScript(PythonPlugin, Script, /*bIsolated=*/true));
 	});
 }
 
@@ -138,19 +163,23 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 	using namespace JetBrains::EditorPlugin;
 
 	Model.get_executeScript().set(
-		[](rd::Lifetime, ScriptRequest const& Request) -> rd::RdTask<ScriptResult>
+		[](rd::Lifetime RequestLifetime, ScriptRequest const& Request) -> rd::RdTask<ScriptResult>
 		{
 			rd::RdTask<ScriptResult> Task;
 			ExecuteOnGameThread(
 				Request.get_script(),
-				Request.get_isolated(),
-				[Task](ScriptResult Result) mutable { Task.set(MoveTemp(Result)); }
+				RequestLifetime,
+				[Task, RequestLifetime](ScriptResult Result) mutable
+				{
+					if (!RequestLifetime->is_terminated())
+						Task.set(MoveTemp(Result));
+				}
 			);
 			return Task;
 		});
 
 	Model.get_executeBatchScripts().set(
-		[](rd::Lifetime, BatchScriptRequest const& Request) -> rd::RdTask<BatchScriptResult>
+		[](rd::Lifetime RequestLifetime, BatchScriptRequest const& Request) -> rd::RdTask<BatchScriptResult>
 		{
 			rd::RdTask<BatchScriptResult> Task;
 			const TArray<FString> Scripts = Request.get_scripts();
@@ -163,8 +192,10 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 			}
 
 			AsyncTask(ENamedThreads::GameThread,
-			          [Scripts, StartFrom, Task]() mutable
+			          [Scripts, StartFrom, Task, RequestLifetime]() mutable
 			          {
+				          if (RequestLifetime->is_terminated())
+					          return;
 				          auto* PythonPlugin = IPythonScriptPlugin::Get();
 				          TArray<rd::Wrapper<ScriptResult>> Results;
 				          Results.Reserve(Scripts.Num() - StartFrom);
@@ -172,34 +203,25 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 
 				          for (int32 i = StartFrom; i < Scripts.Num(); ++i)
 				          {
-					          FPythonCommandEx Cmd;
-					          // Batch scripts run as files (multi-statement, shared globals across steps).
-					          ConfigureCommand(Cmd, Scripts[i], /*bIsolated=*/false);
+					          if (RequestLifetime->is_terminated())
+						          return;
+					          // Batch scripts always run as files (multi-statement, shared globals across steps).
+					          ScriptResult StepResult = RunScript(PythonPlugin, Scripts[i], /*bIsolated=*/false);
+					          const bool bSuccess = StepResult.get_success();
 
-					          const bool bSuccess = PythonPlugin && PythonPlugin->IsPythonAvailable()
-						          && PythonPlugin->ExecPythonCommandEx(Cmd);
-
-					          FString Output = Cmd.LogOutput.Num() > 0
-						                           ? CapString(JoinLogOutput(Cmd.LogOutput))
-						                           : FString(TEXT(""));
-					          FString Result;
-					          FString Error;
-					          SplitResultOrError(Cmd, bSuccess, Result, Error);
-
-					          PostExecGarbageCollect(PythonPlugin);
-
-					          Results.Emplace(ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result),
-					                                       MoveTemp(Error)));
+					          Results.Emplace(MoveTemp(StepResult));
 
 					          if (!bSuccess)
 					          {
-						          Task.set(BatchScriptResult(MoveTemp(Results), LastSuccessful));
+						          if (!RequestLifetime->is_terminated())
+							          Task.set(BatchScriptResult(MoveTemp(Results), LastSuccessful));
 						          return;
 					          }
 					          LastSuccessful = i;
 				          }
 
-				          Task.set(BatchScriptResult(MoveTemp(Results), LastSuccessful));
+				          if (!RequestLifetime->is_terminated())
+					          Task.set(BatchScriptResult(MoveTemp(Results), LastSuccessful));
 			          });
 
 			return Task;
