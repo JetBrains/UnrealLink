@@ -9,6 +9,7 @@
       <plugin id="com.intellij.mcpServer"/>
       <plugin id="unreal-link"/>
       <module name="intellij.libraries.commons.compress"/>
+      <module name="intellij.libraries.commons.logging"/>
       <module name="intellij.libraries.gson"/>
       <module name="intellij.libraries.junit5"/>
       <module name="intellij.libraries.kotlin.reflect"/>
