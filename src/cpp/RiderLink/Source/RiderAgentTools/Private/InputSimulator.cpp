@@ -376,13 +376,24 @@ void InputSimulator::BindTo(rd::Lifetime /*ModelLifetime*/,
     Model.get_simulateInput().set(
         [](rd::Lifetime, EP::InputSimulationRequest const& Request) -> rd::RdTask<EP::InputSimulationResponse>
         {
-            rd::RdTask<EP::InputSimulationResponse> Task;
             EP::InputSimulationRequest Req = Request;
-            AsyncTask(ENamedThreads::GameThread,
-                [Req, Task]() mutable
+            // Dispatch synchronously: block this thread until the Game Thread finishes.
+            // Returning a completed RdTask means RdEndpoint's task.advise() callback fires
+            // immediately (while task is still on the stack), avoiding the UAF in
+            // RdEndpoint.h where the lambda captures task by reference ([&task]) but
+            // task lives on the stack of on_wire_received().
+            auto RunOnGameThread = [&]() -> EP::InputSimulationResponse
+            {
+                if (IsInGameThread())
+                    return Dispatch(Req);
+                TPromise<EP::InputSimulationResponse> Promise;
+                TFuture<EP::InputSimulationResponse> Future = Promise.GetFuture();
+                AsyncTask(ENamedThreads::GameThread, [Req, P = MoveTemp(Promise)]() mutable
                 {
-                    Task.set(Dispatch(Req));
+                    P.SetValue(Dispatch(Req));
                 });
-            return Task;
+                return Future.Get();
+            };
+            return rd::RdTask<EP::InputSimulationResponse>::from_result(RunOnGameThread());
         });
 }
