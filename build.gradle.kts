@@ -155,7 +155,6 @@ dependencies {
         bundledPlugin("intellij.bookmarks.plugin")
         bundledPlugin("intellij.libraries.misc.plugin")
         bundledPlugin("intellij.vcs.plugin")
-        bundledPlugin("intellij.vcs.split.plugin")
         bundledPlugin("Git4Idea")
         bundledPlugin("intellij.problemView.plugin")
 
