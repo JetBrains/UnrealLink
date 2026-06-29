@@ -154,6 +154,10 @@ dependencies {
         bundledPlugin("intellij.ssh.plugin")
         bundledPlugin("intellij.bookmarks.plugin")
         bundledPlugin("intellij.libraries.misc.plugin")
+        bundledPlugin("intellij.vcs.plugin")
+        bundledPlugin("intellij.vcs.split.plugin")
+        bundledPlugin("Git4Idea")
+        bundledPlugin("intellij.problemView.plugin")
 
         // Rider .NET + debugger stack the integration-test runtime needs to open a solution
         // (mirrors the test module's monorepo .iml deps).
