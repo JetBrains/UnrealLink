@@ -55,7 +55,6 @@ public class RiderAgentTools : ModuleRules
             "AssetRegistry",
             "Core",
             "CoreUObject",
-            "EnhancedInput",
             "Engine",
             "ImageWrapper",
             "Json",

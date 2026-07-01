@@ -234,42 +234,6 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         field("error", string)
     }
 
-    // Input simulation — Rider-side payload mirrors UE4Library.InputSimulationRequest
-    // but with plain `string` instead of FString. The C# bridge repackages.
-    private val UnrealInputActionEntry = structdef("UnrealInputActionEntry") {
-        field("type", string)
-        field("direction", string.nullable)
-        field("scale", double)
-        field("yaw", double)
-        field("pitch", double)
-        field("duration", double)
-    }
-    private val UnrealInputSimulationRequest = structdef("UnrealInputSimulationRequest") {
-        field("mode", string)
-        field("actions", immutableList(UnrealInputActionEntry))
-        field("primitiveCall", string.nullable)
-        field("primitiveDirection", string.nullable)
-        field("primitiveWorldVec", UnrealVector3.nullable)
-        field("primitiveScale", double)
-        field("primitiveValue", double)
-        field("primitiveDuration", double)
-        field("enhancedAssetPath", string.nullable)
-        field("enhancedValueKind", string.nullable)
-        field("enhancedAxis2dX", double)
-        field("enhancedAxis2dY", double)
-        field("enhancedAxis1d", double)
-        field("enhancedBool", bool)
-        field("enhancedClear", bool)
-    }
-    private val UnrealInputSimulationResponse = structdef("UnrealInputSimulationResponse") {
-        field("success", bool)
-        field("armed", bool)
-        field("startLocation", UnrealVector3.nullable)
-        field("startVelocity", UnrealVector3.nullable)
-        field("nActions", int)
-        field("error", string)
-    }
-
     init {
         property("editorId", 0).readonly.async
 
@@ -350,8 +314,5 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         // Scene actor spawn — Rider→UE direction; C# backend forwards to RdEditorModel.spawnActor.
         call("spawnActor",            UnrealSpawnActorRequest,         UnrealSpawnActorResponse).async
-
-        // Input simulation — Rider→UE direction; C# backend forwards to RdEditorModel.simulateInput.
-        call("simulateInput",         UnrealInputSimulationRequest,    UnrealInputSimulationResponse).async
     }
 }
