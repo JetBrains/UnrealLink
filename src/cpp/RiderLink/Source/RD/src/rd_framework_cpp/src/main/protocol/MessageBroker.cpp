@@ -92,11 +92,11 @@ void MessageBroker::dispatch(RdId id, Buffer message) const
 				{
 					auto t = std::move(broker[id]);
 					broker.erase(id);
-					for (auto& it : t.custom_scheduler_messages)
+					for (auto& schedMsg : t.custom_scheduler_messages)
 					{
 						RD_ASSERT_MSG(subscription->get_wire_scheduler() != default_scheduler,
 							"require equals of wire and default schedulers")
-						invoke(subscription, std::move(it));
+						invoke(subscription, std::move(schedMsg));
 					}
 				}
 			};
@@ -142,5 +142,10 @@ void MessageBroker::advise_on(Lifetime lifetime, RdReactiveBase const* entity) c
 		subscriptions[key] = entity;
 		lifetime->add_action([this, key]() { subscriptions.erase(key); });
 	}
+}
+
+bool MessageBroker::is_subscribed(const RdId id) const
+{
+	return subscriptions.find(id) != subscriptions.end();
 }
 }	 // namespace rd

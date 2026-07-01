@@ -11,15 +11,14 @@
 
 #include <rd_core_export.h>
 
+RD_PUSH_STL_EXPORTS_WARNINGS
+
 namespace rd
 {
 class RD_CORE_API LifetimeDefinition
 {
 private:
 	friend class SequentialLifetimes;
-
-	bool eternaled = false;
-
 public:
 	Lifetime lifetime;
 
@@ -37,14 +36,13 @@ public:
 
 	virtual ~LifetimeDefinition();
 
-	//    static std::shared_ptr<LifetimeDefinition> eternal;
 	static std::shared_ptr<LifetimeDefinition> get_shared_eternal();
 
 	bool is_terminated() const;
 
 	bool is_eternal() const;
 
-	void terminate();
+	void terminate() const;
 
 	template <typename F>
 	static auto use(F&& block) -> typename util::result_of_t<F(Lifetime)>
@@ -55,5 +53,7 @@ public:
 	}
 };
 }	 // namespace rd
+
+RD_POP_STL_EXPORTS_WARNINGS
 
 #endif	  // RD_CPP_CORE_LIFETIME_DEFINITION_H

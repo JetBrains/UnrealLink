@@ -1,11 +1,6 @@
 #ifndef RD_CPP_CORE_LIFETIME_H
 #define RD_CPP_CORE_LIFETIME_H
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable:4251)
-#endif
-
 #include <std/hash.h>
 
 #include <functional>
@@ -19,13 +14,15 @@
 
 #include <rd_core_export.h>
 
+RD_PUSH_STL_EXPORTS_WARNINGS
+
 namespace rd
 {
 class RD_CORE_API LifetimeImpl final
 {
 public:
 	friend class LifetimeDefinition;
-
+	friend class SequentialLifetimes;
 	friend class Lifetime;
 
 	using counter_t = int32_t;
@@ -78,6 +75,37 @@ public:
 		actions.erase(i);
 	}
 
+
+	// Attach pointer to lifetime. It guarantee that pointer will survive at least lifetime duration.
+	template <typename T, typename ...Args>
+	std::shared_ptr<T> make_attached(Args... args)
+	{
+		auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
+		attach(ptr);
+		return ptr;
+	}
+
+	/// \brief Attach pointer to lifetime. Guarantees that pointer will survive at least lifetime duration.
+	template <typename T>
+	counter_t attach(std::shared_ptr<T> pointer)
+	{
+		// No-op structure wich acts as an action, but preserves pointer until lifetime terminated
+		struct holder
+		{
+			std::shared_ptr<T> pointer;
+
+			explicit holder(const std::shared_ptr<T>& pointer) : pointer(pointer)
+			{
+			}
+
+			void operator()() const
+			{
+			}
+		};
+
+		return add_action(holder(pointer));
+	}
+
 #if __cplusplus >= 201703L
 	static inline counter_t get_id = 0;
 #else
@@ -100,9 +128,7 @@ public:
 	void attach_nested(std::shared_ptr<LifetimeImpl> nested);
 };
 }	 // namespace rd
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
+RD_POP_STL_EXPORTS_WARNINGS
 
 #endif	  // RD_CPP_CORE_LIFETIME_H

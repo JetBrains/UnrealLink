@@ -101,7 +101,7 @@ bool ByteBufferAsyncProcessor::reprocess()
 		logger->debug("{}: reprocessing waited for main processing", id);
 
 		cleanup_pending_queue();
-		for (int i = 0; i < pending_queue.size(); ++i)
+		for (size_t i = 0; i < pending_queue.size(); ++i)
 		{
 			auto const& item = pending_queue[i];
 			if (!processor(item, current_seqn + i))
@@ -149,7 +149,7 @@ void ByteBufferAsyncProcessor::ThreadProc()
 				return;
 			}
 
-			while (data.empty() || interrupt_balance != 0)
+			while ((data.empty() && queue.empty()) || interrupt_balance != 0)
 			{
 				if (state >= StateKind::Stopping)
 				{
@@ -164,8 +164,12 @@ void ByteBufferAsyncProcessor::ThreadProc()
 					return;
 				}
 			}
-			add_data(std::move(data));
-			data.clear();
+
+			if (!data.empty())
+			{
+				add_data(std::move(data));
+				data.clear();
+			}
 		}
 
 		try
