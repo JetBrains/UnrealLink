@@ -7,12 +7,8 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.enums.BuildTool
-import com.jetbrains.rider.test.enums.Mono
-import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
@@ -31,7 +27,6 @@ import java.util.concurrent.TimeUnit
 
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Installation")
-@TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class UnrealLinkInstallation : UnrealLinkBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 

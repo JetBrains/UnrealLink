@@ -7,15 +7,11 @@ import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
-import com.jetbrains.rider.test.enums.BuildTool
-import com.jetbrains.rider.test.enums.Mono
-import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -25,7 +21,6 @@ import java.time.Duration
 
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Notification")
-@TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 class RiderLinkNotification : UnrealLinkBase() {
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @Test(dataProvider = "unrealCombinations")

@@ -15,13 +15,9 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.RiderTestTimeout
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
-import com.jetbrains.rider.test.reporting.SubsystemConstants
-import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.enums.BuildTool
-import com.jetbrains.rider.test.enums.Mono
-import com.jetbrains.rider.test.enums.sdk.SdkVersion
+import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -33,7 +29,6 @@ import java.util.concurrent.TimeUnit
 
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("PlayButtons")
-@TestSettings(buildTool = BuildTool.UNREAL, mono = Mono.UNIX_ONLY, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 @RiderTestTimeout(10, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
   @BeforeMethod

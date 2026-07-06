@@ -10,15 +10,12 @@ import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
-import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.PlatformType
-import com.jetbrains.rider.test.enums.sdk.SdkVersion
-import com.jetbrains.rider.test.scriptingApi.combine
 import com.jetbrains.rider.test.framework.waitBackendAndWorkspaceModel
 import com.jetbrains.rider.test.reporting.SubsystemConstants
+import com.jetbrains.rider.test.scriptingApi.combine
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
@@ -30,7 +27,6 @@ import java.time.Duration
 
 @Subsystem(SubsystemConstants.UNREAL_PROJECT_MODEL)
 @Feature("Refresh Solution")
-@TestSettings(buildTool = BuildTool.UNREAL, sdkVersion = SdkVersion.DOT_NET_8, additionalSdkVersions = [SdkVersion.DOT_NET_6])
 @TestEnvironment(platform = [PlatformType.WINDOWS_X64])
 class RefreshSolution : UnrealTestLevelProject() {
 
