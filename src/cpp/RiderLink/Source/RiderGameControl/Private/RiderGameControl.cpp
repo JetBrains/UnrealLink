@@ -28,6 +28,27 @@
 #include "EditorViewportClient.h"
 #endif
 
+// In UE 6.0 the classic FEditorDelegates::{Begin,End,Pause,Resume,SingleStep}PIE members were
+// relocated out of UnrealEd's Editor.h into Engine's Editor/EditorEngineDelegates.h under the
+// UE::Editor::PIE namespace and renamed to On{Begin,End,Pause,Resume,SingleStep}. The old
+// FEditorDelegates:: spellings are removed (not just deprecated), so we must switch APIs by
+// engine version. See RIDER-140269 and UE commit a97bedd11cda ("Decouple: relocate the
+// runtime-relevant FEditorDelegates members out of UnrealEd's Editor.h into Engine.").
+#if ENGINE_MAJOR_VERSION >= 6
+    #include "Editor/EditorEngineDelegates.h"
+    #define RIDERLINK_PIE_BEGIN   UE::Editor::PIE::OnBegin
+    #define RIDERLINK_PIE_END     UE::Editor::PIE::OnEnd
+    #define RIDERLINK_PIE_PAUSE   UE::Editor::PIE::OnPause
+    #define RIDERLINK_PIE_RESUME  UE::Editor::PIE::OnResume
+    #define RIDERLINK_PIE_STEP    UE::Editor::PIE::OnSingleStep
+#else
+    #define RIDERLINK_PIE_BEGIN   FEditorDelegates::BeginPIE
+    #define RIDERLINK_PIE_END     FEditorDelegates::EndPIE
+    #define RIDERLINK_PIE_PAUSE   FEditorDelegates::PausePIE
+    #define RIDERLINK_PIE_RESUME  FEditorDelegates::ResumePIE
+    #define RIDERLINK_PIE_STEP    FEditorDelegates::SingleStepPIE
+#endif
+
 #define LOCTEXT_NAMESPACE "RiderGameControl"
 
 DEFINE_LOG_CATEGORY(FLogRiderGameControlModule);
@@ -359,35 +380,35 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlu
     Lifetime->bracket(
         [this]()
         {
-            BeginPIEHandle = FEditorDelegates::BeginPIE.AddLambda([this](const bool)
+            BeginPIEHandle = RIDERLINK_PIE_BEGIN.AddLambda([this](const bool)
             {
                 ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Play);
                 });
             });
-            EndPIEHandle = FEditorDelegates::EndPIE.AddLambda([this](const bool)
+            EndPIEHandle = RIDERLINK_PIE_END.AddLambda([this](const bool)
             {
                 ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Idle);
                 });
             });
-            PausePIEHandle = FEditorDelegates::PausePIE.AddLambda([this](const bool)
+            PausePIEHandle = RIDERLINK_PIE_PAUSE.AddLambda([this](const bool)
             {
                 ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Pause);
                 });
             });
-            ResumePIEHandle = FEditorDelegates::ResumePIE.AddLambda([this](const bool)
+            ResumePIEHandle = RIDERLINK_PIE_RESUME.AddLambda([this](const bool)
             {
                 ScheduleModelAction([](RdEditorModel const& model)
                 {
                     model.get_playStateFromEditor().fire(PlayState::Play);
                 });
             });
-            SingleStepPIEHandle = FEditorDelegates::SingleStepPIE.AddLambda([this](const bool)
+            SingleStepPIEHandle = RIDERLINK_PIE_STEP.AddLambda([this](const bool)
             {
                 ScheduleModelAction([](RdEditorModel const& model)
                 {
@@ -417,11 +438,11 @@ FRiderGameControl::FRiderGameControl(rd::Lifetime Lifetime, JetBrains::EditorPlu
         [this]()
         {
             FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnObjectPropertyChangedHandle);
-            FEditorDelegates::SingleStepPIE.Remove(SingleStepPIEHandle);
-            FEditorDelegates::ResumePIE.Remove(ResumePIEHandle);
-            FEditorDelegates::PausePIE.Remove(PausePIEHandle);
-            FEditorDelegates::EndPIE.Remove(EndPIEHandle);
-            FEditorDelegates::BeginPIE.Remove(BeginPIEHandle);
+            RIDERLINK_PIE_STEP.Remove(SingleStepPIEHandle);
+            RIDERLINK_PIE_RESUME.Remove(ResumePIEHandle);
+            RIDERLINK_PIE_PAUSE.Remove(PausePIEHandle);
+            RIDERLINK_PIE_END.Remove(EndPIEHandle);
+            RIDERLINK_PIE_BEGIN.Remove(BeginPIEHandle);
         }
     );
 

@@ -29,7 +29,7 @@ public class RiderBlueprint : ModuleRules
 			"UnrealEd",
 			"UnrealEdMessages",
 			"Engine",
-			"CoreUObject"
+ 			"CoreUObject"
 		});
 	}
 }
