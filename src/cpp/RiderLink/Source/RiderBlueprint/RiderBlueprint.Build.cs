@@ -29,7 +29,8 @@ public class RiderBlueprint : ModuleRules
 			"UnrealEd",
 			"UnrealEdMessages",
 			"Engine",
- 			"CoreUObject"
+			"CoreUObject",
+			"BlueprintGraph" // RIDER-140269, no version guard needed (module exists since UE 4.x)
 		});
 	}
 }
