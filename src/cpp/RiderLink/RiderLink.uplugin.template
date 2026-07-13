@@ -64,7 +64,7 @@
 		},
 		{
 			"Name": "RiderAgentTools",
-			"Type": "Editor",
+			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default"
 		}
 	],
