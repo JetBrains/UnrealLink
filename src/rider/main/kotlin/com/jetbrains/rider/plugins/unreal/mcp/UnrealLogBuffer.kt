@@ -5,7 +5,16 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.RdRiderModel
+import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.TestOnly
+
+@Serializable
+data class UnrealLogEntry(
+    val verbosity: String,
+    val category: String,
+    val message: String,
+    val timestampMs: Long,
+)
 
 data class LogFilter(
     val category: String? = null,

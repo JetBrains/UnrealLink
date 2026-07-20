@@ -160,7 +160,6 @@ Path to old plugin:</code></pre>
     <!-- region Generated dependencies - run `Generate Product Layouts` to regenerate -->
     <dependencies>
       <plugin id="com.jetbrains.rider-cpp"/>
-      <plugin id="com.intellij.mcpServer"/>
       <module name="intellij.cidr.debugger.backend"/>
       <module name="intellij.cidr.debugger.core"/>
       <module name="intellij.cidr.runner"/>
@@ -172,16 +171,10 @@ Path to old plugin:</code></pre>
       <module name="intellij.spellchecker"/>
     </dependencies>
     <!-- endregion -->
-    <extensions defaultExtensionNs="com.intellij.mcpServer">
-        <mcpToolset implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealMcpToolset"/>
-    </extensions>
 
-    <extensions defaultExtensionNs="com.intellij.rider">
-        <gameEngineAssetIndexProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineAssetIndexProvider"/>
-        <gameEngineScreenshotProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineScreenshotProvider"/>
-        <gameEngineViewportCameraProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineViewportCameraProvider"/>
-        <gameEngineSceneProvider implementation="com.jetbrains.rider.plugins.unreal.mcp.UnrealGameEngineSceneProvider"/>
-    </extensions>
+    <content namespace="jetbrains">
+        <module name="intellij.rider.plugins.unreal.link.mcp"/>
+    </content>
 
     <extensions defaultExtensionNs="rider.cpp">
         <debugProcessExtension implementation="com.jetbrains.rider.plugins.unreal.debugger.UnrealDebugProcessExtension"/>

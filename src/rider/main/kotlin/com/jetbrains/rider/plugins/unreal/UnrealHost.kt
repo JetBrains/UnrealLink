@@ -28,6 +28,7 @@ import com.sun.jna.LastErrorException
 import com.sun.jna.Native
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.win32.StdCallLibrary
+import org.jetbrains.annotations.ApiStatus
 
 @Service(Service.Level.PROJECT)
 class UnrealHost(val project: Project) {
@@ -41,7 +42,8 @@ class UnrealHost(val project: Project) {
         get() = playStateModel.value
     var playMode: Int = 0
 
-    internal val model = project.solution.rdRiderModel
+    @get:ApiStatus.Internal
+    val model = project.solution.rdRiderModel
     val isConnectedToUnrealEditor:Boolean
         get() = model.isConnectedToUnrealEditor.value
     val connectionInfo:ConnectionInfo?
