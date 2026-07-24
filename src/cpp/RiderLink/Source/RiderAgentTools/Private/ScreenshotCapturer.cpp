@@ -203,6 +203,35 @@ namespace
         return FSoftObjectPath(WithSuffix).TryLoad();
     }
 
+    bool LoadThumbnailFromPackage(const FAssetData& AssetData, FObjectThumbnail& OutThumb)
+    {
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION <= 2)
+        FString PackageFileName;
+        if (!FPackageName::DoesPackageExist(AssetData.PackageName.ToString(), &PackageFileName))
+        {
+            return false;
+        }
+
+        FNameBuilder FullNameBuilder;
+        AssetData.GetFullName(FullNameBuilder);
+        const FName AssetFullName = FName(FullNameBuilder);
+        TSet<FName> AssetFullNames;
+        AssetFullNames.Add(AssetFullName);
+
+        FThumbnailMap ThumbnailMap;
+        ThumbnailTools::LoadThumbnailsFromPackage(PackageFileName, AssetFullNames, ThumbnailMap);
+        if (FObjectThumbnail* Thumbnail = ThumbnailMap.Find(AssetFullName))
+        {
+            OutThumb = MoveTemp(*Thumbnail);
+            return true;
+        }
+
+        return false;
+#else
+        return ThumbnailTools::LoadThumbnailFromPackage(AssetData, OutThumb);
+#endif
+    }
+
     // Try the on-disk thumbnail cache for an asset that isn't loaded into the editor yet.
     // Returns true and fills OutThumb if a stored thumbnail is found in the .uasset's package.
     bool TryLoadThumbnailFromPackage(const FString& AssetPath, FObjectThumbnail& OutThumb)
@@ -217,9 +246,9 @@ namespace
             const FString WithSuffix = AssetPath + TEXT(".") + FPaths::GetBaseFilename(AssetPath);
             const FAssetData Retry = AR->GetAssetByObjectPath(FSoftObjectPath(WithSuffix));
             if (!Retry.IsValid()) return false;
-            return ThumbnailTools::LoadThumbnailFromPackage(Retry, OutThumb);
+            return LoadThumbnailFromPackage(Retry, OutThumb);
         }
-        return ThumbnailTools::LoadThumbnailFromPackage(Data, OutThumb);
+        return LoadThumbnailFromPackage(Data, OutThumb);
     }
     
     bool IsThumbnailValid(const FObjectThumbnail* Thumbnail)
