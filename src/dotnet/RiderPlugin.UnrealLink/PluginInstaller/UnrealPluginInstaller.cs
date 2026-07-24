@@ -344,6 +344,9 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
 
+            if (myPluginDetector.UnrealVersion.IsUE4())
+                StripUe5OnlyModulesFromUplugin(UnrealPluginDetector.GetPathToUpluginFile(pluginRootFolder));
+
             if (!PatchUpluginFileAfterInstallation(pluginRootFolder))
             {
                 const string failedToPatch = "Failed to patch RiderLink.uplugin";
