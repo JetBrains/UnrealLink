@@ -30,19 +30,19 @@
 
 namespace
 {
-    using namespace JetBrains::EditorPlugin;
+    namespace EP = JetBrains::EditorPlugin;
 
     // Build a failure ScreenshotResult — collapses the positional-constructor
     // boilerplate so the per-kind handlers stay readable.
-    ScreenshotResult Fail(const FString& Error, const FString& SourceApi = FString())
+    EP::ScreenshotResult Fail(const FString& Error, const FString& SourceApi = FString())
     {
-        return ScreenshotResult(/*success=*/false, /*path=*/FString(), /*w=*/0, /*h=*/0,
+        return EP::ScreenshotResult(/*success=*/false, /*path=*/FString(), /*w=*/0, /*h=*/0,
                                 SourceApi, Error);
     }
 
-    ScreenshotResult Ok(const FString& Path, int32 W, int32 H, const FString& SourceApi)
+    EP::ScreenshotResult Ok(const FString& Path, int32 W, int32 H, const FString& SourceApi)
     {
-        return ScreenshotResult(/*success=*/true, Path, W, H, SourceApi, /*error=*/FString());
+        return EP::ScreenshotResult(/*success=*/true, Path, W, H, SourceApi, /*error=*/FString());
     }
 
     // ── Filesystem -----------------------------------------------------------
@@ -111,7 +111,7 @@ namespace
 
     // ── Per-kind handlers ---------------------------------------------------
 
-    ScreenshotResult CaptureEditorWindow()
+    EP::ScreenshotResult CaptureEditorWindow()
     {
         const FString Api(TEXT("SlateApplication.TakeScreenshot(SWindow)"));
         if (!FSlateApplication::IsInitialized())
@@ -154,7 +154,7 @@ namespace
         return Ok(OutPath, Size.X, Size.Y, Api);
     }
 
-    ScreenshotResult CaptureViewport()
+    EP::ScreenshotResult CaptureViewport()
     {
         const FString Api(TEXT("SlateApplication.TakeScreenshot(SLevelViewport)"));
         if (!FSlateApplication::IsInitialized())
@@ -262,7 +262,7 @@ namespace
     }
 #endif
 
-    ScreenshotResult CaptureAssetPreview(const FString& AssetPath, int32 RequestedW, int32 RequestedH, bool bForceLive)
+    EP::ScreenshotResult CaptureAssetPreview(const FString& AssetPath, int32 RequestedW, int32 RequestedH, bool bForceLive)
     {
 #if !WITH_EDITOR
         return Fail(TEXT("Asset preview is editor-only"));
@@ -342,19 +342,19 @@ namespace
 
     // Dispatch on the game thread using primitives only (no rd::Wrapper
     // captures across the AsyncTask boundary).
-    ScreenshotResult Dispatch(
-        ScreenshotKind Kind,
+    EP::ScreenshotResult Dispatch(
+        EP::ScreenshotKind Kind,
         const FString& AssetPath,
         int32 Width, int32 Height, bool bForceLive)
     {
         check(IsInGameThread());
         switch (Kind)
         {
-            case ScreenshotKind::EditorWindow:
+            case EP::ScreenshotKind::EditorWindow:
                 return CaptureEditorWindow();
-            case ScreenshotKind::Viewport:
+            case EP::ScreenshotKind::Viewport:
                 return CaptureViewport();
-            case ScreenshotKind::AssetPreview:
+            case EP::ScreenshotKind::AssetPreview:
                 if (AssetPath.IsEmpty())
                 {
                     return Fail(TEXT("assetPath is required for AssetPreview"));
