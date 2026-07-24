@@ -4,6 +4,7 @@
 
 #include "Async/Async.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "HAL/FileManager.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
@@ -220,6 +221,16 @@ namespace
         }
         return ThumbnailTools::LoadThumbnailFromPackage(Data, OutThumb);
     }
+    
+    bool IsThumbnailValid(const FObjectThumbnail* Thumbnail)
+    {
+        return Thumbnail && !Thumbnail->IsEmpty() &&
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION <= 5)
+        (!Thumbnail->AccessImageData().IsEmpty() || Thumbnail->GetCompressedDataSize() > 0);
+#else
+        Thumbnail->HasValidImageData();
+#endif
+    }
 #endif
 
     ScreenshotResult CaptureAssetPreview(const FString& AssetPath, int32 RequestedW, int32 RequestedH, bool bForceLive)
@@ -240,7 +251,7 @@ namespace
             if (UObject* AlreadyLoaded = FindObject<UObject>(nullptr, *AssetPath))
             {
                 if (const FObjectThumbnail* MemCached = ThumbnailTools::FindCachedThumbnail(AlreadyLoaded->GetFullName());
-                    MemCached && !MemCached->IsEmpty() && MemCached->HasValidImageData())
+                    MemCached && IsThumbnailValid(MemCached))
                 {
                     Source = MemCached;
                     Api = TEXT("ThumbnailTools.CachedThumbnail(Memory)");
@@ -248,8 +259,7 @@ namespace
             }
 
             // Step 2 — on-disk thumbnail in the .uasset package. No asset load required.
-            if (!Source && TryLoadThumbnailFromPackage(AssetPath, Buffer)
-                && !Buffer.IsEmpty() && Buffer.HasValidImageData())
+            if (!Source && TryLoadThumbnailFromPackage(AssetPath, Buffer) && IsThumbnailValid(&Buffer))
             {
                 Source = &Buffer;
                 Api = TEXT("ThumbnailTools.LoadThumbnailFromPackage");
@@ -279,7 +289,7 @@ namespace
             Api = TEXT("ThumbnailTools.RenderThumbnail(NeverFlush)");
         }
 
-        if (!Source || Source->IsEmpty() || !Source->HasValidImageData())
+        if (!Source || !IsThumbnailValid(Source))
         {
             const TCHAR* Hint = bForceLive
                 ? TEXT(": forceLive render produced no data")
