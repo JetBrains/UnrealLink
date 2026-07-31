@@ -1,6 +1,7 @@
 <idea-plugin allow-bundled-update="true" require-restart="true">
     <id>unreal-link</id>
     <name>UnrealLink</name>
+    <category>Game Development</category>
     <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
 
     <description><![CDATA[
