@@ -32,3 +32,5 @@ void FRiderAgentToolsModule::ShutdownModule()
 {
     ModuleLifetimeDef.terminate();
 }
+
+#undef LOCTEXT_NAMESPACE
