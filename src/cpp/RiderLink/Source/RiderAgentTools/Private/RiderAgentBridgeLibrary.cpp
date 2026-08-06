@@ -34,6 +34,7 @@
 #include "NiagaraSystem.h"
 #include "NiagaraEmitterHandle.h"
 #include "NiagaraUserRedirectionParameterStore.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiderAgentBridge, Log, All);
 
@@ -202,6 +203,15 @@ namespace
         for (TObjectIterator<UClass> It; It; ++It)
             if (It->GetName() == Name && It->IsChildOf(UWidget::StaticClass())) return *It;
         return nullptr;
+    }
+
+    bool ImportPropertyText(const FProperty* Prop, const FString& ValueText, void* PropData, UObject* Owner)
+    {
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1)
+        return Prop->ImportText_Direct(*ValueText, PropData, Owner, PPF_None) != nullptr;
+#else
+        return Prop->ImportText(*ValueText, PropData, PPF_None, Owner) != nullptr;
+#endif
     }
 }
 
@@ -539,7 +549,7 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableDefaultValue(const FString& B
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: property '%s' not found"), *VariableName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(CDO);
-    if (!Prop->ImportText_Direct(*ValueText, PropData, CDO, PPF_None))
+    if (!ImportPropertyText(Prop, ValueText, PropData, CDO))
     {
         UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: failed to import value '%s' into property '%s'"), *ValueText, *VariableName);
         return false;
@@ -686,7 +696,7 @@ bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintP
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: property '%s' not found on '%s'"), *PropertyName, *WidgetName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget);
-    if (!Prop->ImportText_Direct(*ValueText, PropData, Widget, PPF_None))
+    if (!ImportPropertyText(Prop, ValueText, PropData, Widget))
     {
         UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: failed to import value '%s' into property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
         return false;
@@ -708,7 +718,7 @@ bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBluepr
     if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: slot property '%s' not found"), *PropertyName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget->Slot);
-    if (!Prop->ImportText_Direct(*ValueText, PropData, Widget->Slot, PPF_None))
+    if (!ImportPropertyText(Prop, ValueText, PropData, Widget->Slot))
     {
         UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: failed to import value '%s' into slot property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
         return false;
