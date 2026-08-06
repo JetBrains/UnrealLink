@@ -42,10 +42,15 @@ public class RiderAgentTools : ModuleRules
         //
         // So: OFF on Clang (Apple, Linux) to fix the link, ON everywhere else
         // (rd needs it, and no typeinfo link problem exists).
+
+#if UE_4_27_OR_LATER
+        bUseRTTI = !Target.Platform.IsInGroup(UnrealPlatformGroup.Apple)
+                && !Target.Platform.IsInGroup(UnrealPlatformGroup.Linux);
+#else
         bUseRTTI = Target.Platform != UnrealTargetPlatform.Mac
                 && Target.Platform != UnrealTargetPlatform.IOS
-                && Target.Platform != UnrealTargetPlatform.Linux
-                && Target.Platform != UnrealTargetPlatform.LinuxArm64;
+                && Target.Platform != UnrealTargetPlatform.Linux;
+#endif
 
 #if UE_5_2_OR_LATER
         bDisableStaticAnalysis = true;
