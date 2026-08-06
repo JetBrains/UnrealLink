@@ -50,7 +50,7 @@ public:
 
 	RdId get_id() const override { return RdBindableBase::get_id(); }
 
-	void bind(Lifetime lf, IRdDynamic const* parent, string_view name) const override { RdBindableBase::bind(lf, parent, name); }
+	void bind(Lifetime lf, IRdDynamic const* inParent, string_view name) const override { RdBindableBase::bind(lf, inParent, name); }
 
 	void identify(Identities const& identities, RdId const& id) const override { RdBindableBase::identify(identities, id); }
 
