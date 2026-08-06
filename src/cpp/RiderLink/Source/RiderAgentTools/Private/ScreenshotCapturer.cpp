@@ -231,6 +231,17 @@ namespace
         return ThumbnailTools::LoadThumbnailFromPackage(AssetData, OutThumb);
 #endif
     }
+    
+    FAssetData GetAssetByObjectPath(IAssetRegistry* Registry, const FString& AssetPath)
+    {
+        if (!Registry) return FAssetData();
+
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0)
+        return Registry->GetAssetByObjectPath(FName(*AssetPath));
+#else
+        return Registry->GetAssetByObjectPath(FSoftObjectPath(AssetPath));
+#endif
+    }
 
     // Try the on-disk thumbnail cache for an asset that isn't loaded into the editor yet.
     // Returns true and fills OutThumb if a stored thumbnail is found in the .uasset's package.
@@ -240,11 +251,11 @@ namespace
         // without forcing a UObject load.
         IAssetRegistry* AR = IAssetRegistry::Get();
         if (!AR) return false;
-        const FAssetData Data = AR->GetAssetByObjectPath(FSoftObjectPath(AssetPath));
+        const FAssetData Data = GetAssetByObjectPath(AR, AssetPath);
         if (!Data.IsValid())
         {
             const FString WithSuffix = AssetPath + TEXT(".") + FPaths::GetBaseFilename(AssetPath);
-            const FAssetData Retry = AR->GetAssetByObjectPath(FSoftObjectPath(WithSuffix));
+            const FAssetData Retry = GetAssetByObjectPath(AR, WithSuffix);
             if (!Retry.IsValid()) return false;
             return LoadThumbnailFromPackage(Retry, OutThumb);
         }
