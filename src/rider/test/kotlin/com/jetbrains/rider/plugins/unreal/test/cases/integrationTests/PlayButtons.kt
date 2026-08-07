@@ -41,11 +41,6 @@ class PlayButtons : UnrealLinkBase() {
     unrealApiFacade.disableEnginePlugins = false
   }
 
-  override fun beforeOpenSolution() {
-    super.beforeOpenSolution()
-    unrealApiFacade.pluginsToAddInUproject = listOf("TextureFormatOodle")
-  }
-
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
   private val context: DataContext get() = SimpleDataContext.getSimpleContext(CommonDataKeys.PROJECT, project)
