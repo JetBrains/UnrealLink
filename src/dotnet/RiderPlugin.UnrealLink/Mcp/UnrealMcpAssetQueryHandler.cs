@@ -10,7 +10,6 @@ using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Reader;
-using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Reader.Entities.Properties;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4.UEAsset.Search;
 using JetBrains.ReSharper.Psi.Cpp.Caches;
 using JetBrains.ReSharper.Psi.Cpp.Symbols;
@@ -62,7 +61,7 @@ public class UnrealMcpAssetQueryHandler
 
             model.GetAssetProperties.SetAsync((lt, request) =>
             {
-                var rdTask = new RdTask<UnrealAssetPropertiesResponse>();
+                var rdTask = new RdTask<IUnrealAssetPropertiesResponse>();
                 solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.GetAssetProperties", () =>
                 {
                     try { rdTask.Set(GetAssetProperties(solution, assetsCache, request)); }
@@ -307,47 +306,88 @@ public class UnrealMcpAssetQueryHandler
     }
 
     [NotNull]
-    private static UnrealAssetPropertiesResponse GetAssetProperties([NotNull] ISolution solution, [NotNull] UE4AssetsCache cache, [NotNull] UnrealAssetPropertiesRequest request)
+    private static IUnrealAssetPropertiesResponse GetAssetProperties([NotNull] ISolution solution, [NotNull] UE4AssetsCache cache, [NotNull] UnrealAssetPropertiesRequest request)
     {
-        var path = VirtualFileSystemPath.Parse(request.AssetPath, solution.GetInteractionContext());
-        IPsiSourceFile sourceFile = null;
-        // UE assets are tracked via UE4AssetAdditionalFilesModuleFactory as misc project items,
-        // so the IPsiSourceFile lives on the additional-files module — enumerate every PSI source
-        // file the platform attaches to the matched IProjectFile and pick the UnrealAssetFileType one.
+        var trimmed = request.AssetPath.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+            return new UnrealAssetPropertiesErrorResponse("assetPath is empty. Pass the absolute .uasset/.umap path, exactly as returned by search_assets.");
+
+        var path = VirtualFileSystemPath.TryParse(trimmed, solution.GetInteractionContext());
+        if (path.IsEmpty)
+            return new UnrealAssetPropertiesErrorResponse($"assetPath '{trimmed}' is not a valid file system path. Pass the absolute .uasset/.umap path, exactly as returned by search_assets.");
+        var sourceFile = ResolveAssetSourceFile(solution, path);
+        if (sourceFile == null)
+            return new UnrealAssetPropertiesErrorResponse($"{trimmed} cannot be found in Rider's assets index." +
+                                                          $" If the file does exist on disk, Rider may not have finished indexing yet," +
+                                                          $" or Blueprint support may be disabled for this solution.");
+        var fullPath = sourceFile.GetLocation().FullPath;
+
+        var accessor = cache.GetUEAssetFileAccessor(sourceFile);
+        // The accessor swallows every parsing exception into a UEAssetExceptionDiagnostic and only reports false,
+        // so both failures below must be raised explicitly — otherwise the caller gets an empty property list
+        // that is indistinguishable from an asset which genuinely has none.
+        if (!accessor.IsValid())
+            return new UnrealAssetPropertiesErrorResponse($"Unreal asset '{fullPath}' could not be parsed by Rider's asset reader " +
+                                                          "(the parsing diagnostic is attached to the file).");
+
+        if (!accessor.TryGetValue(ReadPrimaryExport, out var primaryExport))
+            return new UnrealAssetPropertiesErrorResponse($"Reading object properties of '{fullPath}' failed inside the Unreal asset reader.");
+
+        if (primaryExport == null)
+            return new UnrealAssetPropertiesErrorResponse($"Unreal asset {fullPath} exposes no readable object");
+
+        return new UnrealAssetPropertiesResponse(primaryExport.Value.ObjectName, primaryExport.Value.Properties);
+    }
+
+    /// <summary>
+    /// Reads the export whose UPROPERTY values the caller means: the Class Default Object for Blueprint assets,
+    /// otherwise the first instance export (DataAssets, native UDataAsset subclasses, …).
+    /// Returns null when the asset has no such export — an empty property list is a *valid* answer and is
+    /// deliberately not conflated with it.
+    /// </summary>
+    private static (string ObjectName, List<UnrealAssetPropertyInfo> Properties)? ReadPrimaryExport([NotNull] UELinker linker)
+    {
+        var export = linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject)
+                     ?? linker.ExportMap.FirstOrDefault(e => !e.IsBlueprintGeneratedClass() && !e.IsFunction());
+        if (export == null) return null;
+
+        var properties = export.ReadProperties()
+            .Select(p => new UnrealAssetPropertyInfo(p.Name, p.TypeName, p.ValuePresentation ?? ""))
+            .ToList();
+        return (export.ObjectStringName, properties);
+    }
+
+    /// <summary>
+    /// Resolves the requested asset path to the <see cref="IPsiSourceFile"/> of an indexed UE asset or returns null.
+    /// <para/>
+    /// `.uasset`/`.umap` files are NOT project items: <c>UE4AssetAdditionalFilesModuleFactory</c> scans the
+    /// Content/Plugins directories itself and registers every asset it finds directly into the standalone
+    /// <c>PsiModuleOnFileSystemPaths</c> owned by <see cref="UE4AssetFilesPsiModuleFactory"/>. That module is the
+    /// primary index and must be asked by path — the same pattern as <c>UEGameplayTagsManager.ExtractTableTags</c>.
+    /// <c>ISolution.FindProjectItemsByLocation</c> only ever answers for an asset that is *also* a project item
+    /// (opened in the editor as a Misc File, or added to a project by a test fixture), so it stays as a secondary
+    /// lookup instead of being the only one (RIDER-141607).
+    /// <para/>
+    /// Must be called under a read lock; the RD handler above already runs inside <c>ExecuteOrQueueReadLockEx</c>.
+    /// </summary>
+    [CanBeNull]
+    private static IPsiSourceFile ResolveAssetSourceFile([NotNull] ISolution solution, [NotNull] VirtualFileSystemPath path)
+    {
+        var module = solution.GetComponent<UE4AssetFilesPsiModuleFactory>().PsiModule;
+        if (module != null && module.TryGetFileByPath(path, out var indexed) && indexed != null && indexed.IsValid())
+            return indexed;
+
         var psiModules = solution.GetPsiServices().Modules;
         foreach (var projectFile in solution.FindProjectItemsByLocation(path).OfType<IProjectFile>())
         {
+            if (!projectFile.IsValid()) continue; // GetPsiSourceFilesFor asserts validity
             foreach (var candidate in psiModules.GetPsiSourceFilesFor(projectFile))
             {
                 if (candidate != null && candidate.IsValid() && candidate.LanguageType.Is<UnrealAssetFileType>())
-                {
-                    sourceFile = candidate;
-                    break;
-                }
+                    return candidate;
             }
-            if (sourceFile != null) break;
         }
 
-        if (sourceFile == null)
-            return new UnrealAssetPropertiesResponse(null, new List<UnrealAssetPropertyInfo>());
-
-        var accessor = cache.GetUEAssetFileAccessor(sourceFile);
-        string objectName = null;
-        var propertyInfos = new List<UnrealAssetPropertyInfo>();
-
-        accessor.TryGetValue(linker =>
-        {
-            var export = linker.ExportMap.FirstOrDefault(e => e.IsClassDefaultObject)
-                         ?? linker.ExportMap.FirstOrDefault(e => !e.IsBlueprintGeneratedClass() && !e.IsFunction());
-            if (export == null) return false;
-            objectName = export.ObjectStringName;
-            propertyInfos = export.ReadProperties()
-                .Select(p => new UnrealAssetPropertyInfo(p.Name, p.TypeName, p.ValuePresentation ?? ""))
-                .ToList();
-            return true;
-        }, out _);
-
-        return new UnrealAssetPropertiesResponse(objectName, propertyInfos);
+        return null;
     }
-
 }
