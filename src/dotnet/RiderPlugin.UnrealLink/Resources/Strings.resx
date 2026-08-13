@@ -36,6 +36,9 @@
     <data name="PathContainsNonASCIICharactersBuild_Text" xml:space="preserve">
         <value>The path contains non-ASCII characters, which could cause the build to fail. Change the temp directory or use the 'Extract RiderLink…' action.</value>
     </data>
+    <data name="BuildFolderIsInsideTempFolder_Text" xml:space="preserve">
+        <value>The folder is inside the system temp directory, where Unreal Build Accelerator cannot produce build artifacts. Building RiderLink here will fail. Choose a folder outside the temp directory.</value>
+    </data>
     <data name="RiderLinkIsDeleted_Text" xml:space="preserve">
         <value>RiderLink is deleted</value>
     </data>
