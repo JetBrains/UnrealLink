@@ -144,9 +144,13 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
     private val UnrealAssetPropertiesRequest = structdef("UnrealAssetPropertiesRequest") {
         field("assetPath", string)
     }
-    private val UnrealAssetPropertiesResponse = structdef("UnrealAssetPropertiesResponse") {
+    private val IUnrealAssetPropertiesResponse = basestruct("IUnrealAssetPropertiesResponse")
+    private val UnrealAssetPropertiesResponse = structdef("UnrealAssetPropertiesResponse") extends IUnrealAssetPropertiesResponse {
         field("objectName", string.nullable)
         field("properties", immutableList(UnrealAssetPropertyInfo))
+    }
+    private val UnrealAssetPropertiesErrorResponse = structdef("UnrealAssetPropertiesErrorResponse") extends IUnrealAssetPropertiesResponse {
+      field("error", string.nullable)
     }
     private val UnrealDefaultOverrideInfo = structdef("UnrealDefaultOverrideInfo") {
         field("assetPath", string)
@@ -303,7 +307,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
         call("searchUnrealAssetsLive", UnrealAssetLiveSearchRequest,   UnrealAssetLiveSearchResponse).async
         call("getBlueprintHierarchy", UnrealBlueprintHierarchyRequest, UnrealBlueprintHierarchyResponse).async
         call("searchGameplayTags",    UnrealGameplayTagsRequest,       UnrealGameplayTagsResponse).async
-        call("getAssetProperties",    UnrealAssetPropertiesRequest,    UnrealAssetPropertiesResponse).async
+        call("getAssetProperties",    UnrealAssetPropertiesRequest,    IUnrealAssetPropertiesResponse).async
         call("findDefaultOverrides",  UnrealDefaultOverridesRequest,   UnrealDefaultOverridesResponse).async
 
         // Screenshots — Rider→UE direction; C# backend forwards to RdEditorModel.takeScreenshot.
