@@ -23,10 +23,12 @@ namespace RiderPlugin.UnrealLink.Utils
         private readonly VirtualFileSystemPath myOldDir;
         private readonly VirtualFileSystemPath myBackupDir;
 
-        public BackupDir(VirtualFileSystemPath oldDir, string backupFolderPrefix)
+        // backupRoot must be the root the build tree uses: DeleteTempFolders wipes the shared prefix
+        // folder under it, and that is what cleans the backups up.
+        public BackupDir(VirtualFileSystemPath oldDir, VirtualFileSystemPath backupRoot, string backupFolderPrefix)
         {
             myOldDir = oldDir;
-            myBackupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, null, backupFolderPrefix);
+            myBackupDir = VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, backupRoot, backupFolderPrefix);
             myOldDir.CopyDirectory(myBackupDir);
             myOldDir.Delete();
         }
