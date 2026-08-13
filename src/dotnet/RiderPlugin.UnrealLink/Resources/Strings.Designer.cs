@@ -67,6 +67,7 @@ namespace RiderPlugin.UnrealLink.Resources
     public static string NonASCIICharactersInTheBuildDirectory_Text => ResourceManager.GetString("NonASCIICharactersInTheBuildDirectory_Text");
     public static string PathContainsNonASCIICharactersBuild_Text => ResourceManager.GetString("PathContainsNonASCIICharactersBuild_Text");
     public static string BuildFolderIsInsideTempFolder_Text => ResourceManager.GetString("BuildFolderIsInsideTempFolder_Text");
+    public static string BuildDirectoryPathIsTooLong_Text => ResourceManager.GetString("BuildDirectoryPathIsTooLong_Text");
     public static string RiderLinkIsDeleted_Text => ResourceManager.GetString("RiderLinkIsDeleted_Text");
     public static string UnrealLinkPluginSettings_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Text");
     public static string UnrealLinkPluginSettings_Title_Text => ResourceManager.GetString("UnrealLinkPluginSettings_Title_Text");

@@ -436,6 +436,19 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(nonAsciiCharactersText, ContentType.Error));
             }
 
+            // The deepest file UAT writes under the build root is ~160 characters, measured on a
+            // RiderLink build:
+            // HostProject/Plugins/RiderLink/Intermediate/Build/<Platform>/<Arch>/UnrealEditor/Development/<Module>/<TranslationUnit>.cpp-<hash>.o.tmp
+            // Say so up front instead of failing at an arbitrary compile step.
+            const int deepestBuildTreePathLength = 160;
+            const int maxPath = 260;
+            if (PlatformUtil.RuntimePlatform == JetPlatform.Windows &&
+                pluginTmpDir.FullPath.Length + deepestBuildTreePathLength > maxPath)
+            {
+                myUnrealHost.myModel.RiderLinkInstallMessage(
+                    new InstallMessage(Strings.BuildDirectoryPathIsTooLong_Text, ContentType.Error));
+            }
+
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
