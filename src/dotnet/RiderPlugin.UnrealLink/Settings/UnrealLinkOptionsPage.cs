@@ -113,21 +113,24 @@ namespace RiderPlugin.UnrealLink.Settings
             var intermediateBuildFolder = 
                 OptionsSettingsSmartContext.GetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot);
 
-            var defaultBuildPath = VirtualFileSystemDefinition.GetTempPath(InteractionContext.SolutionContext);
+            // Keep this default in sync with UnrealPluginInstaller.GetTempRoot: on macOS the OS temp
+            // directory is not a usable build location for Unreal Build Accelerator. See RIDER-141850.
+            var defaultBuildPath = RiderLinkBuildFolder.GetDefaultRoot(InteractionContext.SolutionContext)
+                .ToNativeFileSystemPath();
             intermediateBuildFolderProperty.Value = intermediateBuildFolder.IsNullOrEmpty() ? defaultBuildPath.FullPath : intermediateBuildFolder.FullPath;
       
             intermediateBuildFolderProperty.Change.Advise_NoAcknowledgement(lifetime, args =>
             {
                 var newValue = FileSystemPath.Parse(args.New);
                 
-                OptionsSettingsSmartContext.SetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot, (newValue.IsValidOnCurrentOS && newValue.IsAbsolute)? newValue : defaultBuildPath.ToNativeFileSystemPath());
+                OptionsSettingsSmartContext.SetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot, (newValue.IsValidOnCurrentOS && newValue.IsAbsolute)? newValue : defaultBuildPath);
             });
 
             AddControl(Strings.IntermediateBuildFolderRoot_Text.GetBeLabel());
             AddFolderChooserOption(
                 intermediateBuildFolderProperty,
-                defaultBuildPath.ToNativeFileSystemPath(),
-                defaultBuildPath.ToNativeFileSystemPath(),
+                defaultBuildPath,
+                defaultBuildPath,
                 iconHost,
                 commonFileDialogs,
                 null,

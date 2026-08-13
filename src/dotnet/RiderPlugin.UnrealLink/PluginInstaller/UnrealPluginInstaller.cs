@@ -140,17 +140,24 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 ));
         }
 
-        private VirtualFileSystemPath CreateTempDirectory()
+        private VirtualFileSystemPath GetTempRoot()
         {
             var entry = myBoundSettingsStore.GetValue((UnrealLinkSettings s) => s.IntermediateBuildFolderRoot);
-            if (entry.IsNullOrEmpty())
+            if (!entry.IsNullOrEmpty())
             {
-                var defaultBuildPath = VirtualFileSystemDefinition.GetTempPath(InteractionContext.SolutionContext);
-                return VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, defaultBuildPath,
-                    TMP_PREFIX);
+                if (!RiderLinkBuildFolder.IsUnsupported(entry)) return entry.ToVirtualFileSystemPath();
+
+                myLogger.Info(
+                    $"[UnrealLink]: Ignoring intermediate build folder '{entry}': it is inside the OS temp directory, which Unreal Build Accelerator cannot build in");
             }
-            return VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext, entry.ToVirtualFileSystemPath(),
-                TMP_PREFIX);
+
+            return RiderLinkBuildFolder.GetDefaultRoot(InteractionContext.SolutionContext);
+        }
+
+        private VirtualFileSystemPath CreateTempDirectory()
+        {
+            return VirtualFileSystemDefinition.CreateTemporaryDirectory(InteractionContext.SolutionContext,
+                GetTempRoot(), TMP_PREFIX);
         }
 
         private void InstallPluginInGame(
@@ -230,7 +237,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             {
                 try
                 {
-                    result.Add(new BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, TMP_PREFIX));
+                    result.Add(new BackupDir(unrealPluginInstallInfo.EnginePlugin.UnrealPluginRootFolder, GetTempRoot(), TMP_PREFIX));
                 }
                 catch
                 {
@@ -249,7 +256,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 try
                 {
                     if (installDescription.IsPluginAvailable)
-                        result.Add(new BackupDir(installDescription.UnrealPluginRootFolder, TMP_PREFIX));
+                        result.Add(new BackupDir(installDescription.UnrealPluginRootFolder, GetTempRoot(), TMP_PREFIX));
                 }
                 catch
                 {
@@ -428,7 +435,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
                 myUnrealHost.myModel.RiderLinkInstallMessage(new InstallMessage(nonAsciiCharactersText, ContentType.Error));
             }
-            
+
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
