@@ -136,13 +136,18 @@ namespace RiderPlugin.UnrealLink.Settings
                 null,
                 null,
                 new[] { (BeSimplePathValidationRules.SHOULD_BE_ABSOLUTE, ValidationStates.validationWarning) },
-                path => CheckForNonAsciiSymbols(path));
+                path => ValidateIntermediateBuildFolder(path));
       
             AddCommentText(Strings.BuildingRiderLinkMightFailWithNonASCIISymbols_Text);
         }
 
-        private (string, ValidationStates) CheckForNonAsciiSymbols(FileSystemPath path)
+        private (string, ValidationStates) ValidateIntermediateBuildFolder(FileSystemPath path)
         {
+            if (RiderLinkBuildFolder.IsUnsupported(path))
+            {
+                return (Strings.BuildFolderIsInsideTempFolder_Text, ValidationStates.validationWarning);
+            }
+
             if (PlatformUtil.RuntimePlatform == JetPlatform.Windows && path.FullPath.Any(c => c >= 128))
             {
                 return (Strings.PathContainsNonASCIICharactersBuild_Text, ValidationStates.validationWarning);
