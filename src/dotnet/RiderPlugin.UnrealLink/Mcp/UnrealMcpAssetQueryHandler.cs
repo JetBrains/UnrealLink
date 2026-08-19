@@ -145,13 +145,13 @@ public class UnrealMcpAssetQueryHandler
     {
         var limit = Math.Max(1, Math.Min(request.Limit, 5000));
         var results = new List<UnrealAssetInfo>();
-
-        bool MatchesPath(string fullPath) =>
-            request.PackagePath == null || DiskPathMatchesPackagePrefix(fullPath, request.PackagePath);
+        var matchesPackagePath = UE4AssetNameSearch.CreatePackagePathFilter(solution, request.PackagePath);
 
         if (request.BaseClass != null)
         {
-            var query = request.Query;
+            // One Blueprint class can be reached through several bases of the closure; dedupe by file:
+            // two assets with the same name in different folders are two distinct results.
+            var seen = new HashSet<VirtualFileSystemPath>();
             foreach (var shortName in BuildCppClassClosure(solution, request.BaseClass))
             {
                 foreach (var baseFqn in cache.GetBaseClassesByShortName(shortName))
@@ -160,11 +160,12 @@ public class UnrealMcpAssetQueryHandler
                     {
                         if (results.Count >= limit) goto done;
                         if (!cls.ContainingFile.IsValid()) continue;
-                        if (query != null && !cls.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
-                            continue;
-                        var path = cls.ContainingFile.GetLocation().FullPath;
-                        if (!MatchesPath(path)) continue;
-                        results.Add(new UnrealAssetInfo(path, cls.Name, request.BaseClass));
+                        var location = cls.ContainingFile.GetLocation();
+                        // `query` means the same thing whether `baseClass` is set: the asset's file name.
+                        if (!UE4AssetNameSearch.NameMatches(location, request.Query)) continue;
+                        if (!seen.Add(location)) continue;
+                        if (!matchesPackagePath(location)) continue;
+                        results.Add(new UnrealAssetInfo(location.FullPath, location.NameWithoutExtension, request.BaseClass));
                     }
                 }
             }
@@ -172,58 +173,16 @@ public class UnrealMcpAssetQueryHandler
         }
         else if (request.Query != null)
         {
-            foreach (var file in cache.GetAssetFilesContainingWord(request.Query))
+            foreach (var location in UE4AssetNameSearch.EnumerateAssetPaths(solution))
             {
                 if (results.Count >= limit) break;
-                var path = file.GetLocation().FullPath;
-                if (!MatchesPath(path)) continue;
-                results.Add(new UnrealAssetInfo(path, file.GetLocation().NameWithoutExtension, null));
+                if (!UE4AssetNameSearch.NameMatches(location, request.Query)) continue;
+                if (!matchesPackagePath(location)) continue;
+                results.Add(new UnrealAssetInfo(location.FullPath, location.NameWithoutExtension, null));
             }
         }
 
         return new UnrealAssetSearchResponse(results);
-    }
-
-    /// <summary>
-    /// Match a disk asset path against an Unreal package-path prefix
-    /// (e.g. "/Game/Heroes/" or "/MyPlugin/Content/").
-    /// <para/>
-    /// `/Game/X/Y` resolves on disk under `<ProjectDir>/Content/X/Y.uasset`;
-    /// `/PluginName/X/Y` resolves under `…/Plugins/<PluginName>/Content/X/Y.uasset`.
-    /// We invert the convention here: strip the disk path back to its mount-root form
-    /// and compare prefixes (case-insensitive).
-    /// </summary>
-    private static bool DiskPathMatchesPackagePrefix([NotNull] string fullPath, [NotNull] string packagePathPrefix)
-    {
-        if (packagePathPrefix.Length == 0) return true;
-        var normalised = fullPath.Replace('\\', '/');
-        var contentIdx = normalised.LastIndexOf("/Content/", StringComparison.OrdinalIgnoreCase);
-        if (contentIdx < 0) return false;
-
-        var afterContent = normalised.Substring(contentIdx + "/Content".Length);
-        // Strip extension.
-        var dot = afterContent.LastIndexOf('.');
-        if (dot > 0) afterContent = afterContent.Substring(0, dot);
-
-        // Determine the mount root.
-        var beforeContent = normalised.Substring(0, contentIdx);
-        var pluginsIdx = beforeContent.LastIndexOf("/Plugins/", StringComparison.OrdinalIgnoreCase);
-        string mountRoot;
-        if (pluginsIdx >= 0)
-        {
-            var afterPlugins = beforeContent.Substring(pluginsIdx + "/Plugins/".Length);
-            var slash = afterPlugins.IndexOf('/');
-            mountRoot = "/" + (slash > 0 ? afterPlugins.Substring(0, slash) : afterPlugins);
-        }
-        else
-        {
-            mountRoot = "/Game";
-        }
-
-        var reconstructed = mountRoot + afterContent; // e.g. /Game/Heroes/BP_Hero
-        var prefix = packagePathPrefix.TrimEnd('/');
-        return reconstructed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-            && (reconstructed.Length == prefix.Length || reconstructed[prefix.Length] == '/');
     }
 
     [NotNull]
