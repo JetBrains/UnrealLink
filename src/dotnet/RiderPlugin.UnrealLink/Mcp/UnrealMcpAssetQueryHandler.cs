@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using JetBrains.Application.Parts;
 using JetBrains.Application.Threading;
+using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
@@ -31,7 +32,8 @@ public class UnrealMcpAssetQueryHandler
         var rdTask = new RdTask<UnrealAssetSearchResponse>();
         solution.Locks.ExecuteOrQueueReadLockEx(lt, "UnrealMcp.SearchAssets", () =>
         {
-          try { rdTask.Set(SearchAssets(solution, assetsCache, request)); }
+          try { rdTask.Set(SearchAssets(lt, solution, assetsCache, request)); }
+          catch (OperationCanceledException) { rdTask.SetCancelled(); }
           catch (Exception ex) { rdTask.Set(ex); }
         });
         return rdTask;
@@ -141,7 +143,7 @@ public class UnrealMcpAssetQueryHandler
   }
 
   [NotNull]
-  private static UnrealAssetSearchResponse SearchAssets([NotNull] ISolution solution, [NotNull] UE4AssetsCache cache, [NotNull] UnrealAssetSearchRequest request)
+  private static UnrealAssetSearchResponse SearchAssets(Lifetime lifetime, [NotNull] ISolution solution, [NotNull] UE4AssetsCache cache, [NotNull] UnrealAssetSearchRequest request)
   {
     var limit = Math.Max(1, Math.Min(request.Limit, 5000));
     var results = new List<UnrealAssetInfo>();
@@ -159,6 +161,7 @@ public class UnrealMcpAssetQueryHandler
           foreach (var cls in UE4SearchUtil.GetDerivedBlueprintClasses(baseFqn, cache))
           {
             if (results.Count >= limit) goto done;
+            lifetime.ThrowIfNotAlive();
             if (!cls.ContainingFile.IsValid()) continue;
             var location = cls.ContainingFile.GetLocation();
             // `query` means the same thing whether `baseClass` is set: the asset's file name.
@@ -176,6 +179,7 @@ public class UnrealMcpAssetQueryHandler
       foreach (var location in UE4AssetNameSearch.EnumerateAssetPaths(solution))
       {
         if (results.Count >= limit) break;
+        lifetime.ThrowIfNotAlive();
         if (!UE4AssetNameSearch.NameMatches(location, request.Query)) continue;
         if (!matchesPackagePath(location)) continue;
         results.Add(new UnrealAssetInfo(location.FullPath, location.NameWithoutExtension, null));
