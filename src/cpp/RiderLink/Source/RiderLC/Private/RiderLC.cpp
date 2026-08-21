@@ -1,6 +1,7 @@
 ﻿#include "RiderLC.hpp"
 
 #include "IRiderLink.hpp"
+#include "RiderLogMacros.h"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 
 #include "Async/Async.h"
@@ -87,7 +88,7 @@ bool FRiderLCModule::Tick(float DeltaTime)
 
 void FRiderLCModule::StartupModule()
 {
-	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC STARTUP START"));
+	RIDERLINK_LOG(FLogRiderLCModule, Verbose, "RiderLC STARTUP START");
 	
 	const IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
 	ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
@@ -99,12 +100,12 @@ void FRiderLCModule::StartupModule()
 	TickDelegateHandle = FTSTicker::GetCoreTicker().AddTicker(TickDelegate);
 #endif
 	
-	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC STARTUP FINISH"));
+	RIDERLINK_LOG(FLogRiderLCModule, Verbose, "RiderLC STARTUP FINISH");
 }
 
 void FRiderLCModule::ShutdownModule()
 {
-	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN START"));
+	RIDERLINK_LOG(FLogRiderLCModule, Verbose, "RiderLC SHUTDOWN START");
 
 #if ENGINE_MAJOR_VERSION < 5
 	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
@@ -113,7 +114,7 @@ void FRiderLCModule::ShutdownModule()
 #endif
 	ModuleLifetimeDef.terminate();
 	
-	UE_LOG(FLogRiderLCModule, Verbose, TEXT("RiderLC SHUTDOWN FINISH"));
+	RIDERLINK_LOG(FLogRiderLCModule, Verbose, "RiderLC SHUTDOWN FINISH");
 }
 
 #undef LOCTEXT_NAMESPACE

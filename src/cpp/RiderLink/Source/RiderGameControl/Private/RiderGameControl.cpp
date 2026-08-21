@@ -1,4 +1,5 @@
 #include "RiderGameControl.hpp"
+#include "RiderLogMacros.h"
 
 
 #include "IRiderLink.hpp"
@@ -547,7 +548,7 @@ void FRiderGameControlModule::StartupModule()
 {
     using namespace JetBrains::EditorPlugin;
     
-    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("STARTUP START"));
+    RIDERLINK_LOG(FLogRiderGameControlModule, Verbose, "STARTUP START");
 
     // Actions cache is not related to connection and its lifetimes
     ActionsCache = MakeUnique<FRiderGameControlActionsCache>();
@@ -565,15 +566,15 @@ void FRiderGameControlModule::StartupModule()
         }
     );
 
-    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("STARTUP FINISH"));
+    RIDERLINK_LOG(FLogRiderGameControlModule, Verbose, "STARTUP FINISH");
 }
 
 void FRiderGameControlModule::ShutdownModule()
 {
-    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("SHUTDOWN START"));
+    RIDERLINK_LOG(FLogRiderGameControlModule, Verbose, "SHUTDOWN START");
     ModuleLifetimeDefinition.terminate();
     ActionsCache.Reset();
-    UE_LOG(FLogRiderGameControlModule, Verbose, TEXT("SHUTDOWN FINISH"));
+    RIDERLINK_LOG(FLogRiderGameControlModule, Verbose, "SHUTDOWN FINISH");
 }
 
 #undef LOCTEXT_NAMESPACE

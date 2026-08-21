@@ -1,4 +1,5 @@
 #include "RiderAgentBridgeLibrary.h"
+#include "RiderLogMacros.h"
 #include "HAL/IConsoleManager.h"
 #include "Misc/CoreMiscDefines.h"
 #include "Serialization/JsonWriter.h"
@@ -41,15 +42,15 @@ DEFINE_LOG_CATEGORY_STATIC(LogRiderAgentBridge, Log, All);
 FString URiderAgentBridgeLibrary::ReadCVar(const FString& Name)
 {
     IConsoleVariable* CVar = IConsoleManager::Get().FindConsoleVariable(*Name);
-    if (!CVar) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("CVar '%s' not found"), *Name); return FString(); }
+    if (!CVar) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "CVar '%ls' not found", *Name); return FString(); }
     return CVar->GetString();
 }
 
 bool URiderAgentBridgeLibrary::WriteCVar(const FString& Name, const FString& Value)
 {
     IConsoleVariable* CVar = IConsoleManager::Get().FindConsoleVariable(*Name);
-    if (!CVar) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("CVar '%s' not found"), *Name); return false; }
-    if (CVar->TestFlags(ECVF_ReadOnly)) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("CVar '%s' read-only"), *Name); return false; }
+    if (!CVar) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "CVar '%ls' not found", *Name); return false; }
+    if (CVar->TestFlags(ECVF_ReadOnly)) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "CVar '%ls' read-only", *Name); return false; }
     CVar->Set(*Value, ECVF_SetByConsole);
     return true;
 }
@@ -227,7 +228,7 @@ void URiderAgentBridgeLibrary::SetSuppressModalDialogs(bool bSuppress)
     {
         GIsRunningUnattendedScript = GRiderBridgePrevUnattended;
     }
-    UE_LOG(LogRiderAgentBridge, Log, TEXT("Modal dialog suppression: %s"), bSuppress ? TEXT("ON") : TEXT("OFF"));
+    RIDERLINK_LOG(LogRiderAgentBridge, Log, "Modal dialog suppression: %ls", bSuppress ? TEXT("ON") : TEXT("OFF"));
 }
 
 bool URiderAgentBridgeLibrary::IsSuppressingModalDialogs() { return GRiderBridgeDialogsSuppressed; }
@@ -235,7 +236,7 @@ bool URiderAgentBridgeLibrary::IsSuppressingModalDialogs() { return GRiderBridge
 bool URiderAgentBridgeLibrary::ForceDeleteAsset(const FString& PackagePath)
 {
     UObject* Asset = UEditorAssetLibrary::LoadAsset(PackagePath);
-    if (!Asset) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("Asset '%s' not found"), *PackagePath); return false; }
+    if (!Asset) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "Asset '%ls' not found", *PackagePath); return false; }
     TArray<UObject*> ToDelete{ Asset };
     return ObjectTools::ForceDeleteObjects(ToDelete, /*bShowConfirmation=*/false) > 0;
 }
@@ -258,7 +259,7 @@ FString URiderAgentBridgeLibrary::DuplicateAsset(const FString& SourcePath, cons
     UObject* New = Tools.DuplicateAsset(DestName, DestPkg, UEditorAssetLibrary::LoadAsset(SourcePath));
     if (!New)
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("DuplicateAsset: IAssetTools returned null for '%s' -> '%s/%s'"), *SourcePath, *DestPkg, *DestName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "DuplicateAsset: IAssetTools returned null for '%ls' -> '%ls/%ls'", *SourcePath, *DestPkg, *DestName);
         return FString();
     }
     const FString NewPath = New->GetPathName();
@@ -280,7 +281,7 @@ UObject* URiderAgentBridgeLibrary::EnsureAsset(const FString& PackagePath, const
         AssetClass = FindObject<UClass>(nullptr, *ClassName);
     if (!AssetClass)
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("EnsureAsset: unknown class '%s'"), *ClassName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "EnsureAsset: unknown class '%ls'", *ClassName);
         return nullptr;
     }
 
@@ -310,21 +311,21 @@ UObject* URiderAgentBridgeLibrary::EnsureAsset(const FString& PackagePath, const
     }
     if (!Factory)
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("EnsureAsset: no factory for class '%s'"), *ClassName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "EnsureAsset: no factory for class '%ls'", *ClassName);
         return nullptr;
     }
 
     IAssetTools& Tools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     UObject* Created = Tools.CreateAsset(AssetName, PackagePath, AssetClass, Factory);
     if (!Created)
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("EnsureAsset: CreateAsset failed for '%s/%s'"), *PackagePath, *AssetName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "EnsureAsset: CreateAsset failed for '%ls/%ls'", *PackagePath, *AssetName);
     return Created;
 }
 
 FString URiderAgentBridgeLibrary::GetAllBlueprintGraphs(const FString& BlueprintPath)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
-    if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("GetAllBlueprintGraphs: BP '%s' not found"), *BlueprintPath); return TEXT("[]"); }
+    if (!BP) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "GetAllBlueprintGraphs: BP '%ls' not found", *BlueprintPath); return TEXT("[]"); }
 
     TArray<UEdGraph*> All;
     BP->GetAllGraphs(All);
@@ -358,7 +359,7 @@ FString URiderAgentBridgeLibrary::GetBlueprintGraphNodes(const FString& Blueprin
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
     UEdGraph* Graph = FindGraphInBlueprint(BP, GraphName);
-    if (!Graph) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("GetBlueprintGraphNodes: graph '%s' not found in '%s'"), *GraphName, *BlueprintPath); return TEXT("[]"); }
+    if (!Graph) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "GetBlueprintGraphNodes: graph '%ls' not found in '%ls'", *GraphName, *BlueprintPath); return TEXT("[]"); }
 
     FString Out;
     const TSharedRef<TJsonWriter<>> W = TJsonWriterFactory<>::Create(&Out);
@@ -449,7 +450,7 @@ bool URiderAgentBridgeLibrary::ConnectBlueprintPins(const FString& BlueprintPath
     }
     else
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("ConnectBlueprintPins: TryCreateConnection failed '%s'.%s -> '%s'.%s"),
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "ConnectBlueprintPins: TryCreateConnection failed '%ls'.%ls -> '%ls'.%ls",
             *SourceNodeName, *SourcePinName, *TargetNodeName, *TargetPinName);
     }
     return bOk;
@@ -489,7 +490,7 @@ bool URiderAgentBridgeLibrary::AddBlueprintVariable(const FString& BlueprintPath
     const FString& PinSubCategoryObject, const FString& ContainerType, bool bIsReference)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
-    if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("AddBlueprintVariable: BP '%s' not found"), *BlueprintPath); return false; }
+    if (!BP) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "AddBlueprintVariable: BP '%ls' not found", *BlueprintPath); return false; }
 
     FEdGraphPinType PinType;
     PinType.PinCategory = FName(*PinCategoryName);
@@ -510,7 +511,7 @@ bool URiderAgentBridgeLibrary::AddBlueprintVariable(const FString& BlueprintPath
 
     if (!FBlueprintEditorUtils::AddMemberVariable(BP, FName(*VariableName), PinType))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("AddBlueprintVariable: AddMemberVariable failed for '%s'"), *VariableName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "AddBlueprintVariable: AddMemberVariable failed for '%ls'", *VariableName);
         return false;
     }
     return true;
@@ -519,7 +520,7 @@ bool URiderAgentBridgeLibrary::AddBlueprintVariable(const FString& BlueprintPath
 bool URiderAgentBridgeLibrary::RemoveBlueprintVariable(const FString& BlueprintPath, const FString& VariableName)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
-    if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("RemoveBlueprintVariable: BP '%s' not found"), *BlueprintPath); return false; }
+    if (!BP) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "RemoveBlueprintVariable: BP '%ls' not found", *BlueprintPath); return false; }
     FBlueprintEditorUtils::RemoveMemberVariable(BP, FName(*VariableName));
     return true;
 }
@@ -528,7 +529,7 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableCategory(const FString& Bluep
     const FString& CategoryName)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
-    if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableCategory: BP '%s' not found"), *BlueprintPath); return false; }
+    if (!BP) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetBlueprintVariableCategory: BP '%ls' not found", *BlueprintPath); return false; }
     FBlueprintEditorUtils::SetBlueprintVariableCategory(BP, FName(*VariableName), nullptr, FText::FromString(CategoryName));
     return true;
 }
@@ -537,21 +538,21 @@ bool URiderAgentBridgeLibrary::SetBlueprintVariableDefaultValue(const FString& B
     const FString& ValueText)
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
-    if (!BP) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: BP '%s' not found"), *BlueprintPath); return false; }
+    if (!BP) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetBlueprintVariableDefaultValue: BP '%ls' not found", *BlueprintPath); return false; }
 
     UClass* GeneratedClass = BP->GeneratedClass;
-    if (!GeneratedClass) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: no GeneratedClass for '%s'"), *BlueprintPath); return false; }
+    if (!GeneratedClass) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetBlueprintVariableDefaultValue: no GeneratedClass for '%ls'", *BlueprintPath); return false; }
 
     UObject* CDO = GeneratedClass->GetDefaultObject();
     if (!CDO) return false;
 
     FProperty* Prop = GeneratedClass->FindPropertyByName(FName(*VariableName));
-    if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: property '%s' not found"), *VariableName); return false; }
+    if (!Prop) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetBlueprintVariableDefaultValue: property '%ls' not found", *VariableName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(CDO);
     if (!ImportPropertyText(Prop, ValueText, PropData, CDO))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetBlueprintVariableDefaultValue: failed to import value '%s' into property '%s'"), *ValueText, *VariableName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetBlueprintVariableDefaultValue: failed to import value '%ls' into property '%ls'", *ValueText, *VariableName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(BP);
@@ -563,7 +564,7 @@ FString URiderAgentBridgeLibrary::ExportBlueprintNodes(const FString& BlueprintP
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
     UEdGraph* Graph = FindGraphInBlueprint(BP, GraphName);
-    if (!Graph) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("ExportBlueprintNodes: graph '%s' not found"), *GraphName); return FString(); }
+    if (!Graph) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "ExportBlueprintNodes: graph '%ls' not found", *GraphName); return FString(); }
 
     TSet<UEdGraphNode*> Selected;
     if (NodeNamesJson.IsEmpty() || NodeNamesJson == TEXT("[]"))
@@ -597,7 +598,7 @@ FString URiderAgentBridgeLibrary::ImportBlueprintNodes(const FString& BlueprintP
 {
     UBlueprint* BP = LoadBlueprintFromPath(BlueprintPath);
     UEdGraph* Graph = FindGraphInBlueprint(BP, GraphName);
-    if (!Graph) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("ImportBlueprintNodes: graph '%s' not found"), *GraphName); return TEXT("[]"); }
+    if (!Graph) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "ImportBlueprintNodes: graph '%ls' not found", *GraphName); return TEXT("[]"); }
 
     TSet<UEdGraphNode*> Imported;
     FEdGraphUtilities::ImportNodesFromText(Graph, ClipboardText, Imported);
@@ -626,14 +627,14 @@ bool URiderAgentBridgeLibrary::AddWidgetToTree(const FString& WidgetBlueprintPat
     const FString& ChildWidgetClass, const FString& ChildWidgetName)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
-    if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("AddWidgetToTree: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
+    if (!WBP || !WBP->WidgetTree) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "AddWidgetToTree: WBP '%ls' not found", *WidgetBlueprintPath); return false; }
 
     UWidget* ParentWidget = WBP->WidgetTree->FindWidget(FName(*ParentWidgetName));
     UPanelWidget* Panel = Cast<UPanelWidget>(ParentWidget);
-    if (!Panel) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("AddWidgetToTree: parent '%s' not found or not a panel"), *ParentWidgetName); return false; }
+    if (!Panel) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "AddWidgetToTree: parent '%ls' not found or not a panel", *ParentWidgetName); return false; }
 
     UClass* ChildClass = FindWidgetClass(ChildWidgetClass);
-    if (!ChildClass) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("AddWidgetToTree: widget class '%s' not found"), *ChildWidgetClass); return false; }
+    if (!ChildClass) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "AddWidgetToTree: widget class '%ls' not found", *ChildWidgetClass); return false; }
 
     UWidget* NewWidget = WBP->WidgetTree->ConstructWidget<UWidget>(ChildClass, FName(*ChildWidgetName));
     if (!NewWidget) return false;
@@ -645,10 +646,10 @@ bool URiderAgentBridgeLibrary::AddWidgetToTree(const FString& WidgetBlueprintPat
 bool URiderAgentBridgeLibrary::RemoveWidgetFromTree(const FString& WidgetBlueprintPath, const FString& WidgetName)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
-    if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("RemoveWidgetFromTree: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
+    if (!WBP || !WBP->WidgetTree) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "RemoveWidgetFromTree: WBP '%ls' not found", *WidgetBlueprintPath); return false; }
 
     UWidget* Widget = WBP->WidgetTree->FindWidget(FName(*WidgetName));
-    if (!Widget) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("RemoveWidgetFromTree: widget '%s' not found"), *WidgetName); return false; }
+    if (!Widget) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "RemoveWidgetFromTree: widget '%ls' not found", *WidgetName); return false; }
     WBP->WidgetTree->RemoveWidget(Widget);
     if (WBP->WidgetTree->RootWidget == Widget)
     {
@@ -661,7 +662,7 @@ bool URiderAgentBridgeLibrary::RemoveWidgetFromTree(const FString& WidgetBluepri
 FString URiderAgentBridgeLibrary::ListWidgetsInTree(const FString& WidgetBlueprintPath)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
-    if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("ListWidgetsInTree: WBP '%s' not found"), *WidgetBlueprintPath); return TEXT("[]"); }
+    if (!WBP || !WBP->WidgetTree) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "ListWidgetsInTree: WBP '%ls' not found", *WidgetBlueprintPath); return TEXT("[]"); }
 
     FString Out;
     const TSharedRef<TJsonWriter<>> W = TJsonWriterFactory<>::Create(&Out);
@@ -687,18 +688,18 @@ bool URiderAgentBridgeLibrary::SetWidgetProperty(const FString& WidgetBlueprintP
     const FString& PropertyName, const FString& ValueText)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
-    if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
+    if (!WBP || !WBP->WidgetTree) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetProperty: WBP '%ls' not found", *WidgetBlueprintPath); return false; }
 
     UWidget* Widget = WBP->WidgetTree->FindWidget(FName(*WidgetName));
-    if (!Widget) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: widget '%s' not found"), *WidgetName); return false; }
+    if (!Widget) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetProperty: widget '%ls' not found", *WidgetName); return false; }
 
     FProperty* Prop = Widget->GetClass()->FindPropertyByName(FName(*PropertyName));
-    if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: property '%s' not found on '%s'"), *PropertyName, *WidgetName); return false; }
+    if (!Prop) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetProperty: property '%ls' not found on '%ls'", *PropertyName, *WidgetName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget);
     if (!ImportPropertyText(Prop, ValueText, PropData, Widget))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetProperty: failed to import value '%s' into property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetProperty: failed to import value '%ls' into property '%ls' on '%ls'", *ValueText, *PropertyName, *WidgetName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
@@ -709,18 +710,18 @@ bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBluepr
     const FString& PropertyName, const FString& ValueText)
 {
     UWidgetBlueprint* WBP = LoadWidgetBlueprint(WidgetBlueprintPath);
-    if (!WBP || !WBP->WidgetTree) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: WBP '%s' not found"), *WidgetBlueprintPath); return false; }
+    if (!WBP || !WBP->WidgetTree) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetSlotProperty: WBP '%ls' not found", *WidgetBlueprintPath); return false; }
 
     UWidget* Widget = WBP->WidgetTree->FindWidget(FName(*WidgetName));
-    if (!Widget || !Widget->Slot) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: widget '%s' or slot not found"), *WidgetName); return false; }
+    if (!Widget || !Widget->Slot) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetSlotProperty: widget '%ls' or slot not found", *WidgetName); return false; }
 
     FProperty* Prop = Widget->Slot->GetClass()->FindPropertyByName(FName(*PropertyName));
-    if (!Prop) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: slot property '%s' not found"), *PropertyName); return false; }
+    if (!Prop) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetSlotProperty: slot property '%ls' not found", *PropertyName); return false; }
 
     void* PropData = Prop->ContainerPtrToValuePtr<void>(Widget->Slot);
     if (!ImportPropertyText(Prop, ValueText, PropData, Widget->Slot))
     {
-        UE_LOG(LogRiderAgentBridge, Warning, TEXT("SetWidgetSlotProperty: failed to import value '%s' into slot property '%s' on '%s'"), *ValueText, *PropertyName, *WidgetName);
+        RIDERLINK_LOG(LogRiderAgentBridge, Warning, "SetWidgetSlotProperty: failed to import value '%ls' into slot property '%ls' on '%ls'", *ValueText, *PropertyName, *WidgetName);
         return false;
     }
     FBlueprintEditorUtils::MarkBlueprintAsModified(WBP);
@@ -730,7 +731,7 @@ bool URiderAgentBridgeLibrary::SetWidgetSlotProperty(const FString& WidgetBluepr
 FString URiderAgentBridgeLibrary::GetNiagaraSystemParameters(const FString& NiagaraSystemPath)
 {
     UNiagaraSystem* System = Cast<UNiagaraSystem>(UEditorAssetLibrary::LoadAsset(NiagaraSystemPath));
-    if (!System) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("GetNiagaraSystemParameters: system '%s' not found"), *NiagaraSystemPath); return TEXT("[]"); }
+    if (!System) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "GetNiagaraSystemParameters: system '%ls' not found", *NiagaraSystemPath); return TEXT("[]"); }
 
     const FNiagaraUserRedirectionParameterStore& Store = System->GetExposedParameters();
     TArray<FNiagaraVariable> Variables;
@@ -754,7 +755,7 @@ FString URiderAgentBridgeLibrary::GetNiagaraSystemParameters(const FString& Niag
 FString URiderAgentBridgeLibrary::GetNiagaraSystemEmitters(const FString& NiagaraSystemPath)
 {
     UNiagaraSystem* System = Cast<UNiagaraSystem>(UEditorAssetLibrary::LoadAsset(NiagaraSystemPath));
-    if (!System) { UE_LOG(LogRiderAgentBridge, Warning, TEXT("GetNiagaraSystemEmitters: system '%s' not found"), *NiagaraSystemPath); return TEXT("[]"); }
+    if (!System) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "GetNiagaraSystemEmitters: system '%ls' not found", *NiagaraSystemPath); return TEXT("[]"); }
 
     FString Out;
     const TSharedRef<TJsonWriter<>> W = TJsonWriterFactory<>::Create(&Out);

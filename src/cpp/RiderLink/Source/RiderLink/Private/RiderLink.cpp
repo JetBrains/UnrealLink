@@ -1,4 +1,5 @@
 #include "RiderLink.hpp"
+#include "RiderLogMacros.h"
 
 #include "ProtocolFactory.h"
 #include "UE4Library/UE4Library.Pregenerated.h"
@@ -25,23 +26,23 @@ static FString GetProjectName()
 
 void FRiderLinkModule::ShutdownModule()
 {
-	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink SHUTDOWN START"));
+	RIDERLINK_LOG(FLogRiderLinkModule, Verbose, "RiderLink SHUTDOWN START");
 	
 	ModuleLifetimeDef.terminate();
 	ProtocolFactory.Reset();
-	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink SHUTDOWN FINISH"));
+	RIDERLINK_LOG(FLogRiderLinkModule, Verbose, "RiderLink SHUTDOWN FINISH");
 }
 
 void FRiderLinkModule::StartupModule()
 {
-	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP START"));
+	RIDERLINK_LOG(FLogRiderLinkModule, Verbose, "RiderLink STARTUP START");
 	
 	ProtocolFactory = MakeUnique<class ProtocolFactory>(GetProjectName());
 	Scheduler.queue([this]()
 	{
 		InitProtocol();
 	});
-	UE_LOG(FLogRiderLinkModule, Verbose, TEXT("RiderLink STARTUP FINISH"));
+	RIDERLINK_LOG(FLogRiderLinkModule, Verbose, "RiderLink STARTUP FINISH");
 }
 
 void FRiderLinkModule::InitProtocol()
