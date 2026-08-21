@@ -1,4 +1,5 @@
 #include "RiderAgentTools.hpp"
+#include "RiderLogMacros.h"
 #include "AssetRegistrySearcher.hpp"
 #include "PythonExecutor.hpp"
 #include "SceneActorSpawner.hpp"
@@ -14,7 +15,7 @@ IMPLEMENT_MODULE(FRiderAgentToolsModule, RiderAgentTools);
 
 void FRiderAgentToolsModule::StartupModule()
 {
-    UE_LOG(FLogRiderAgentToolsModule, Verbose, TEXT("STARTUP"));
+    RIDERLINK_LOG(FLogRiderAgentToolsModule, Verbose, "STARTUP");
     IRiderLinkModule& RiderLinkModule = IRiderLinkModule::Get();
     ModuleLifetimeDef = RiderLinkModule.CreateNestedLifetimeDefinition();
     RiderLinkModule.ViewModel(ModuleLifetimeDef.lifetime,

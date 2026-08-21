@@ -1,4 +1,5 @@
 #include "RiderLogging.hpp"
+#include "RiderLogMacros.h"
 
 #include "BlueprintProvider.hpp"
 #include "IRiderLink.hpp"
@@ -93,7 +94,7 @@ void ScheduledSendMessage(FString* Msg, const JetBrains::EditorPlugin::LogMessag
 
 void FRiderLoggingModule::StartupModule()
 {
-	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("STARTUP START"));
+	RIDERLINK_LOG(FLogRiderLoggingModule, Verbose, "STARTUP START");
 
 	static const auto START_TIME = FDateTime::UtcNow().ToUnixTimestamp();
 	static const auto GetTimeNow = [](double Time) -> rd::DateTime
@@ -129,14 +130,14 @@ void FRiderLoggingModule::StartupModule()
 		OutputDevice.TearDown();
 	});
 
-	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("STARTUP FINISH"));
+	RIDERLINK_LOG(FLogRiderLoggingModule, Verbose, "STARTUP FINISH");
 }
 
 void FRiderLoggingModule::ShutdownModule()
 {
-	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("SHUTDOWN START"));
+	RIDERLINK_LOG(FLogRiderLoggingModule, Verbose, "SHUTDOWN START");
 	ModuleLifetimeDef.terminate();
-	UE_LOG(FLogRiderLoggingModule, Verbose, TEXT("SHUTDOWN FINISH"));
+	RIDERLINK_LOG(FLogRiderLoggingModule, Verbose, "SHUTDOWN FINISH");
 }
 
 #undef LOCTEXT_NAMESPACE
