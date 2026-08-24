@@ -369,6 +369,7 @@ FString URiderAgentBridgeLibrary::GetBlueprintGraphNodes(const FString& Blueprin
         if (!N) continue;
         W->WriteObjectStart();
         W->WriteValue(TEXT("name"), N->GetName());
+        W->WriteValue(TEXT("guid"), N->NodeGuid.ToString());
         W->WriteValue(TEXT("class"), N->GetClass()->GetName());
         W->WriteValue(TEXT("title"), N->GetNodeTitle(ENodeTitleType::FullTitle).ToString());
         W->WriteArrayStart(TEXT("pins"));
@@ -600,12 +601,41 @@ FString URiderAgentBridgeLibrary::ImportBlueprintNodes(const FString& BlueprintP
     UEdGraph* Graph = FindGraphInBlueprint(BP, GraphName);
     if (!Graph) { RIDERLINK_LOG(LogRiderAgentBridge, Warning, "ImportBlueprintNodes: graph '%ls' not found", *GraphName); return TEXT("[]"); }
 
+    // Importing renames graph objects. Remember the current names so
+    // that a name handed out by an earlier import keeps resolving to the node it originally named.
+    TMap<UEdGraphNode*, FName> NamesBeforeImport;
+    NamesBeforeImport.Reserve(Graph->Nodes.Num());
+    for (UEdGraphNode* N : Graph->Nodes)
+        if (N) NamesBeforeImport.Add(N, N->GetFName());
+
     TSet<UEdGraphNode*> Imported;
     FEdGraphUtilities::ImportNodesFromText(Graph, ClipboardText, Imported);
+
+    // Park every newcomer that took a name away from an existing node. The temporary prefix keeps
+    // MakeUniqueObjectName from handing out a name that a later iteration still has to restore.
+    TArray<UObject*> Parked;
+    for (const TPair<UEdGraphNode*, FName>& Pair : NamesBeforeImport)
+    {
+        if (!IsValid(Pair.Key) || Pair.Key->GetFName() == Pair.Value) continue;
+        if (UObject* Squatter = FindObject<UObject>(Graph, *Pair.Value.ToString()))
+        {
+            Squatter->Rename(*MakeUniqueObjectName(Graph, Squatter->GetClass(), TEXT("RiderImportPending")).ToString(),
+                Graph, REN_DontCreateRedirectors);
+            Parked.Add(Squatter);
+        }
+    }
+    // Give the displaced nodes their original names back
+    for (const TPair<UEdGraphNode*, FName>& Pair : NamesBeforeImport)
+        if (IsValid(Pair.Key) && Pair.Key->GetFName() != Pair.Value)
+            Pair.Key->Rename(*Pair.Value.ToString(), Graph, REN_DontCreateRedirectors);
+    // Settle the new nodes on ordinary unique names.
+    for (UObject* Squatter : Parked)
+        Squatter->Rename(*MakeUniqueObjectName(Graph, Squatter->GetClass()).ToString(), Graph, REN_DontCreateRedirectors);
 
     for (UEdGraphNode* N : Imported)
     {
         if (!N) continue;
+        N->CreateNewGuid();
         N->NodePosX += OffsetX;
         N->NodePosY += OffsetY;
     }
