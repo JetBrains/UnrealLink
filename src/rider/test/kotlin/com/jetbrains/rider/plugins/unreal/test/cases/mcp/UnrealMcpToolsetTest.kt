@@ -9,6 +9,8 @@ import com.jetbrains.rider.plugins.unreal.mcp.UnrealImportBlueprintNodesResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealMcpToolset
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealPlayResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealStatusResult
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.declaredMemberFunctions
@@ -18,6 +20,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
 class UnrealMcpToolsetTest {
     private val toolFunctions: List<KFunction<*>> =
         UnrealMcpToolset::class.declaredMemberFunctions

@@ -2,10 +2,13 @@ package com.jetbrains.rider.plugins.unreal.test.cases.mcp
 
 import com.jetbrains.rider.plugins.unreal.mcp.LogFilter
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealLogBuffer
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
 class UnrealLogBufferTest {
 
     @Test
