@@ -9,58 +9,33 @@ import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
-import com.jetbrains.rider.test.unreal.UnrealTestCombinations
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.DataProvider
-import org.testng.annotations.Test
-import java.lang.reflect.Method
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
+@Tag(TeamCityTags.GameDev.Unreal.Link.Smoke)
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Installation")
 class UnrealLinkInstallation : UnrealLinkBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
-  /**
-   * Extends standard [UnrealTestCombinations] with an additional [PluginInstallLocation] dimension.
-   * Produces (env, location) pairs — engine and openMode are applied automatically by
-   * [com.jetbrains.rider.test.unreal.UnrealBase.applyDataProviderCombination], only location is
-   * test-specific.
-   */
-  @DataProvider(name = "unrealLinkCombinations")
-  fun unrealLinkCombinations(method: Method): Array<Array<Any>> {
-    val combinations = UnrealTestCombinations.combinations(method)
-    val locations = listOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
-
-    val result = combinations.flatMap { (engine, openMode) ->
-      locations.map { location ->
-        arrayOf(UnrealEnvironment(engine, openMode) as Any, location as Any)
-      }
-    }.toTypedArray()
-
-    frameworkLogger.info("unrealLinkCombinations for ${method.name}:" +
-            "combinations=${combinations.size}, " +
-            "locations=${locations.size}, total=${result.size}")
-
-    return result
-  }
-
-  @BeforeMethod
+  @BeforeEach
   fun setOpenSolutionSettings() {
     unrealApiFacade.disableEnginePlugins = false
   }
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "unrealLinkCombinations")
+  @UnrealLinkCombinations
   @RiderTestTimeout(10, TimeUnit.MINUTES)
   @ChecklistItems(["UnrealLink/Installation"])
   fun ul(env: UnrealEnvironment, location: PluginInstallLocation) {

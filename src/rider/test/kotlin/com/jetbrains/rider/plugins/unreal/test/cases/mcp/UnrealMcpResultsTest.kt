@@ -7,13 +7,16 @@ import com.jetbrains.rider.plugins.unreal.mcp.UnrealLogResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealPlayResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealScriptResult
 import com.jetbrains.rider.plugins.unreal.mcp.UnrealStatusResult
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
 class UnrealMcpResultsTest {
     @Test
     fun `UnrealHealthResult serializes connected state`() {

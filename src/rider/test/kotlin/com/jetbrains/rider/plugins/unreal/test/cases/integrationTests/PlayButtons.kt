@@ -17,21 +17,24 @@ import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
+import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
+import org.junit.jupiter.api.BeforeEach
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import org.junit.jupiter.api.Tag
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("PlayButtons")
 @RiderTestTimeout(10, TimeUnit.MINUTES)
 class PlayButtons : UnrealLinkBase() {
-  @BeforeMethod
+  @BeforeEach
   fun setOpenSolutionSettings() {
     unrealApiFacade.disableEnginePlugins = false
   }
@@ -46,7 +49,7 @@ class PlayButtons : UnrealLinkBase() {
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "unrealCombinations")
+  @UnrealCombinations
   @ChecklistItems(["UnrealLink/Play Controls"])
   fun endToEndTest(e: UnrealEnvironment) {
     setConfigurationAndPlatform(project, "Development Editor", "Win64")

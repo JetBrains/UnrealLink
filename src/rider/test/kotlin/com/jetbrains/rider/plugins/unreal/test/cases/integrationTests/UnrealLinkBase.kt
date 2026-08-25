@@ -11,15 +11,27 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLoc
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
 import com.jetbrains.rider.test.scriptingApi.waitPumping
-import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
-import org.testng.annotations.AfterMethod
+import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
+import com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject
+import org.junit.jupiter.api.AfterEach
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedDeque
 
 open class UnrealLinkBase: UnrealTestLevelProject() {
-  @AfterMethod
+  /**
+   * Runs while the solution is still open — [deleteRiderLink] talks to the backend over the protocol.
+   * The base cache cleanup that happens after the solution is closed is invoked separately by
+   * `UnrealMethodLevelLifecycleExtension`.
+   *
+   * The `hasProject` guard replaces TestNG's "skip `@AfterMethod` when a config method failed":
+   * JUnit5 runs `@AfterEach` even when the solution never opened, and without the guard that would
+   * surface as an NPE here instead of the real setup failure.
+   */
+  @AfterEach
   override fun unrealCleanup() {
-    deleteRiderLink()
+    if (solutionApiFacade.hasProject) {
+      deleteRiderLink()
+    }
     super.unrealCleanup()
   }
 

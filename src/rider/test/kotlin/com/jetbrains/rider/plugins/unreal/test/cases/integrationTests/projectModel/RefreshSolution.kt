@@ -18,13 +18,16 @@ import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.combine
 import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.waitPumping
+import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.SlnOnly
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
-import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
-import org.testng.annotations.Test
+import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
+import com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject
 import java.time.Duration
+import org.junit.jupiter.api.Tag
 
+@Tag(TeamCityTags.GameDev.Unreal.Link.General)
 @Subsystem(SubsystemConstants.UNREAL_PROJECT_MODEL)
 @Feature("Refresh Solution")
 @TestEnvironment(platform = [PlatformType.WINDOWS_X64])
@@ -32,7 +35,7 @@ class RefreshSolution : UnrealTestLevelProject() {
 
   @SlnOnly
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @Test(dataProvider = "unrealCombinations")
+  @UnrealCombinations
   @ChecklistItems(["Project Model/Refresh Solution"])
   fun refreshSolution(e: UnrealEnvironment) {
     withDump {
