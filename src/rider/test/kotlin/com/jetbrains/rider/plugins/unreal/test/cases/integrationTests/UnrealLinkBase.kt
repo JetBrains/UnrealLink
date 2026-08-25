@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentLinkedDeque
 open class UnrealLinkBase: UnrealTestLevelProject() {
   /**
    * Runs while the solution is still open — [deleteRiderLink] talks to the backend over the protocol.
-   * The base cache cleanup that happens after the solution is closed is invoked separately by
-   * `UnrealMethodLevelLifecycleExtension`.
+   * The base cache cleanup that happens after the solution is closed lives in
+   * `UnrealTestLevelProject.testTeardown`, the superclass `@AfterEach`, which JUnit5 runs after this one.
    *
    * The `hasProject` guard replaces TestNG's "skip `@AfterMethod` when a config method failed":
    * JUnit5 runs `@AfterEach` even when the solution never opened, and without the guard that would
