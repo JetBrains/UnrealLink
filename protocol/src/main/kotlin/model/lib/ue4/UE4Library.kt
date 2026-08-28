@@ -116,7 +116,7 @@ object UE4Library : Root() {
     private val LogMessageInfo = structdef("LogMessageInfo") {
         field("type", VerbosityType)
         field("category", FString)
-        field("time", dateTime.nullable)
+        field("time", dateTime)
     }
 
     val UnrealLogEvent = structdef("UnrealLogEvent") {
