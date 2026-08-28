@@ -59,7 +59,7 @@ class UnrealLogBuffer {
                 verbosity = event.info.type.name,
                 category = event.info.category.data,
                 message = event.text.data,
-                timestampMs = event.info.time?.time ?: System.currentTimeMillis(),
+                timestampMs = event.info.time.time,
             )
             synchronized(buffer) {
                 buffer.addLast(entry)

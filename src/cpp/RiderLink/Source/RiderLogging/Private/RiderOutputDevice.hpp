@@ -7,11 +7,11 @@
 
 using FOnSerializeMessage =
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
-	TBaseDelegate<void, const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>>;
+	TBaseDelegate<void, const TCHAR*, ELogVerbosity::Type, const FName&>;
 #elif ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
-	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>)>;
+	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&)>;
 #else
-	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, TOptional<double>), FDefaultTSDelegateUserPolicy>;
+	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&), FDefaultTSDelegateUserPolicy>;
 #endif
 
 class FRiderOutputDevice : public FOutputDevice {
@@ -23,7 +23,7 @@ public:
 protected:
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category) override;
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category, double Time) override;
-	
+
 private:
 	FOnSerializeMessage onSerializeMessage;
 	FCriticalSection CriticalSection;

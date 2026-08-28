@@ -6,15 +6,14 @@
 
 void FRiderOutputDevice::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category)
 {
-	Serialize(V, Verbosity, Category, {});
-}
-
-void FRiderOutputDevice::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category,
-                                   const double Time)
-{
 	FScopeLock Lock{&CriticalSection};
 	
-	onSerializeMessage.ExecuteIfBound(V, Verbosity, Category, {Time});
+	onSerializeMessage.ExecuteIfBound(V, Verbosity, Category);
+}
+
+void FRiderOutputDevice::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category, double /*Time*/)
+{
+	Serialize(V, Verbosity, Category);
 }
 
 FRiderOutputDevice::~FRiderOutputDevice()

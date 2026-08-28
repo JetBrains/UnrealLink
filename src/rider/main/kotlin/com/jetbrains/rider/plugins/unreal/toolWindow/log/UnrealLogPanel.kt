@@ -134,13 +134,9 @@ internal class UnrealLogPanel(val tabModel: String, lifetime: Lifetime, val proj
 
     private fun printInfo(s: LogMessageInfo, style: ConsoleViewContentType) {
         if (settings.showTimestamps) {
-            val timeString = s.time?.toString()
-            if (timeString != null) {
-                consoleView.print(timeString, style)
-                printSpaces(TIME_WIDTH + 1 - timeString.length, style)
-            } else {
-                printSpaces(TIME_WIDTH + 1, style)
-            }
+            val timeString = s.time.toString()
+            consoleView.print(timeString, style)
+            printSpaces(TIME_WIDTH + 1 - timeString.length, style)
         }
 
         if (settings.alignMessages) {
