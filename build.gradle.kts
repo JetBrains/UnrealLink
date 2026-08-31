@@ -153,7 +153,6 @@ dependencies {
         bundledPlugin("intellij.structureView.plugin")
         bundledPlugin("intellij.ssh.plugin")
         bundledPlugin("intellij.bookmarks.plugin")
-        bundledPlugin("intellij.libraries.misc.plugin")
         bundledPlugin("intellij.vcs.plugin")
         bundledPlugin("Git4Idea")
         bundledPlugin("intellij.problemView.plugin")
