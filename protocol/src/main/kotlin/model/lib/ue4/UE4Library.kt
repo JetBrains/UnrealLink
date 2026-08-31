@@ -217,6 +217,7 @@ object UE4Library : Root() {
     val ScriptRequest = structdef("ScriptRequest") {
         field("script", FString)
         field("isolated", bool).default(false)
+        field("timeoutMs", int).default(0).doc("Time budget for the whole request. 0 means no deadline.")
     }
 
     val ScriptResult = structdef("ScriptResult") {
@@ -224,11 +225,14 @@ object UE4Library : Root() {
         field("output", FString)
         field("result", FString)
         field("error", FString)
+        field("aborted", bool).default(false)
+        field("elapsedMs", int).default(0)
     }
 
     val BatchScriptRequest = structdef("BatchScriptRequest") {
         field("scripts", immutableList(FString))
         field("startFrom", int).default(0)
+        field("timeoutMs", int).default(0).doc("Time budget for the whole request. 0 means no deadline.")
     }
 
     val BatchScriptResult = structdef("BatchScriptResult") {

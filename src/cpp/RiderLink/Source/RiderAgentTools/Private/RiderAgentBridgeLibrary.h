@@ -26,6 +26,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|CVar")
     static FString GetCVarInfo(const FString& Name);
 
+    // ── Script Progress ──
+    UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Progress")
+    static bool PythonProgressTick(const FString& Message);
+
     // ── Editor Notification ──
     UFUNCTION(BlueprintCallable, Category = "RiderAgentBridge|Notify")
     static void ShowNotification(const FString& Text, const FString& Type = TEXT("info"), float Duration = 0.0f);
