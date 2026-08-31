@@ -1,5 +1,6 @@
 #include "RiderAgentBridgeLibrary.h"
 #include "RiderLogMacros.h"
+#include "PythonRunContext.hpp"
 #include "HAL/IConsoleManager.h"
 #include "Misc/CoreMiscDefines.h"
 #include "Serialization/JsonWriter.h"
@@ -38,6 +39,11 @@
 #include "Runtime/Launch/Resources/Version.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiderAgentBridge, Log, All);
+
+bool URiderAgentBridgeLibrary::PythonProgressTick(const FString& Message)
+{
+    return PythonRunContext::ProgressTick(Message);
+}
 
 FString URiderAgentBridgeLibrary::ReadCVar(const FString& Name)
 {

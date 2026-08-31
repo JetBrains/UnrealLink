@@ -163,7 +163,7 @@ class UnrealMcpToolsetTest {
     @Test
     fun `ue_execute_python is fully optional and always returns a batch result`() {
         val params = valueParams("ue_execute_python").associateBy { it.name }
-        assertEquals(setOf("script", "scripts", "startFrom", "isolated"), params.keys)
+        assertEquals(setOf("script", "scripts", "startFrom", "isolated", "timeoutMs"), params.keys)
 
         // Every parameter is optional (so the toolset can decide based on which is set).
         params.values.forEach { assertTrue(it.isOptional, "${it.name} must be optional") }
