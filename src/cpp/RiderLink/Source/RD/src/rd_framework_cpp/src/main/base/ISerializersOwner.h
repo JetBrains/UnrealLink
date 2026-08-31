@@ -3,6 +3,8 @@
 
 #include <unordered_set>
 
+#include <RDDefines.h>
+
 #include <rd_framework_export.h>
 
 RD_PUSH_STL_EXPORTS_WARNINGS
