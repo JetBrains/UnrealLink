@@ -10,9 +10,8 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDes
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.scriptingApi.waitPumping
-import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
 import com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject
+import com.jetbrains.rider.test.scriptingApi.waitPumping
 import org.junit.jupiter.api.AfterEach
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -35,8 +34,12 @@ open class UnrealLinkBase: UnrealTestLevelProject() {
     super.unrealCleanup()
   }
 
-  protected fun installRiderLink(place: PluginInstallLocation, timeout: Duration = Duration.ofSeconds(240)) {
-    logger.info("Installing RiderLink in ${place.name}")
+  /**
+   * @param useExtract `false` (the default — the "Install" action) compiles RiderLink from source.
+   * `true` (the "Extract" action) unpacks the prebuilt plugin package as-is, skipping the UAT build step.
+   */
+  protected fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(240)) {
+    logger.info("Installing RiderLink in ${place.name}" + if (useExtract) " (extract)" else "")
     Lifetime.using { lifetime ->
       var finished = false
       var installSucceeded = false
@@ -54,7 +57,7 @@ open class UnrealLinkBase: UnrealTestLevelProject() {
       }
 
       project.solution.rdRiderModel.installEditorPlugin.fire(
-        InstallPluginDescription(place, ForceInstall.Yes, true, emptyList(), emptyList())
+        InstallPluginDescription(place, ForceInstall.Yes, buildRequired = !useExtract, emptyList(), emptyList())
       )
 
       // Wait until installation *finishes* (success or failure), not just until it starts.

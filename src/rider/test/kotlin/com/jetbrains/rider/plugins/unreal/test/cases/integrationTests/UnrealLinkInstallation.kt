@@ -38,10 +38,10 @@ class UnrealLinkInstallation : UnrealLinkBase() {
   @UnrealLinkCombinations
   @RiderTestTimeout(10, TimeUnit.MINUTES)
   @ChecklistItems(["UnrealLink/Installation"])
-  fun ul(env: UnrealEnvironment, location: PluginInstallLocation) {
+  fun ul(env: UnrealEnvironment, location: PluginInstallLocation, installMethod: PluginInstallMethod) {
     setUnrealConfigurationAndPlatform(project, UnrealConstants.UnrealConfigurations.DevelopmentEditor)
 
-    installRiderLink(location)
+    installRiderLink(location, installMethod.useExtract)
 
     buildStartupProject()
 
