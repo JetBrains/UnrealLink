@@ -15,18 +15,31 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
 import java.util.stream.Stream
 
 /**
- * Extends the standard `@UnrealCombinations` matrix with an additional [PluginInstallLocation]
- * dimension — the JUnit5 replacement for the TestNG `unrealLinkCombinations` data provider.
+ * Extends the standard `@UnrealCombinations` matrix with an additional [PluginInstallLocation] and
+ * [PluginInstallMethod] dimension — the JUnit5 replacement for the TestNG `unrealLinkCombinations`
+ * data provider.
  *
- * Test method signature: `fun xxx(env: UnrealEnvironment, location: PluginInstallLocation)`.
+ * Test method signature: `fun xxx(env: UnrealEnvironment, location: PluginInstallLocation, installMethod: PluginInstallMethod)`.
  * Engine and openMode are applied by the standard Unreal method-level lifecycle; only the location
- * is specific to these tests.
+ * and the install method are specific to these tests.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @TestTemplate
 @ExtendWith(UnrealLinkCombinationProvider::class)
 annotation class UnrealLinkCombinations
+
+/**
+ * How RiderLink is placed at the target [PluginInstallLocation] — the JUnit5-side counterpart of
+ * `installRiderLink`'s `useExtract` parameter and the frontend's "Install"/"Extract" actions.
+ *
+ * [Build] (the default) compiles RiderLink from source with UAT. [Extract] unpacks the prebuilt
+ * plugin package as-is and skips the build step.
+ */
+enum class PluginInstallMethod(val useExtract: Boolean) {
+  Build(false),
+  Extract(true),
+}
 
 class UnrealLinkCombinationProvider : TestTemplateInvocationContextProvider {
   override fun supportsTestTemplate(context: ExtensionContext): Boolean {
@@ -41,19 +54,29 @@ class UnrealLinkCombinationProvider : TestTemplateInvocationContextProvider {
     val method = context.requiredTestMethod
     val combinations = UnrealTestCombinations.combinations(method)
     val locations = listOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
+    val installMethods = listOf(PluginInstallMethod.Build, PluginInstallMethod.Extract)
 
     val contexts: List<TestTemplateInvocationContext> = combinations.flatMap { (engine, openMode) ->
-      locations.map { location ->
-        UnrealMethodInvocationContext(
-          env = UnrealEnvironment(engine, openMode),
-          extraExtensions = listOf(PluginInstallLocationResolver(location)),
-          displayNameSuffix = ", $location",
-        )
+      locations.flatMap { location ->
+        installMethods
+          // Extracting into the Engine plugins folder drops un-compiled sources there; only a
+          // from-source engine can rebuild its own Editor to pick them up. An installed (EGS)
+          // engine can't, which is why the frontend hides "Extract to Engine" for it too.
+          .filter { location != PluginInstallLocation.Engine || it == PluginInstallMethod.Build || !engine.isInstalledBuild }
+          .map { installMethod ->
+            val suffix = if (installMethod == PluginInstallMethod.Extract) ", $location, Extract" else ", $location"
+            UnrealMethodInvocationContext(
+              env = UnrealEnvironment(engine, openMode),
+              extraExtensions = listOf(PluginInstallLocationResolver(location), PluginInstallMethodResolver(installMethod)),
+              displayNameSuffix = suffix,
+            )
+          }
       }
     }
 
     frameworkLogger.info("unrealLinkCombinations for ${method.name}: " +
-                         "combinations=${combinations.size}, locations=${locations.size}, total=${contexts.size}")
+                         "combinations=${combinations.size}, locations=${locations.size}, " +
+                         "installMethods=${installMethods.size}, total=${contexts.size}")
 
     return contexts.stream()
   }
@@ -64,4 +87,11 @@ private class PluginInstallLocationResolver(private val location: PluginInstallL
     parameterContext.parameter.type == PluginInstallLocation::class.java
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any = location
+}
+
+private class PluginInstallMethodResolver(private val installMethod: PluginInstallMethod) : ParameterResolver {
+  override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean =
+    parameterContext.parameter.type == PluginInstallMethod::class.java
+
+  override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any = installMethod
 }
