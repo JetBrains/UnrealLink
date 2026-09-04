@@ -64,7 +64,11 @@ class UnrealLinkCombinationProvider : TestTemplateInvocationContextProvider {
           // engine can't, which is why the frontend hides "Extract to Engine" for it too.
           .filter { location != PluginInstallLocation.Engine || it == PluginInstallMethod.Build || !engine.isInstalledBuild }
           .map { installMethod ->
-            val suffix = if (installMethod == PluginInstallMethod.Extract) ", $location, Extract" else ", $location"
+            // No ", " here: RiderJUnit5TeamCityListener.getTestName reduces the reported TC name to
+            // `displayName.split(", ")[0]` — a ", "-separated suffix is silently dropped, and every
+            // location/installMethod invocation for one (engine, openMode) collapses onto the same
+            // TC test, so later runs overwrite earlier ones instead of reporting separately.
+            val suffix = "$location" + (if (installMethod == PluginInstallMethod.Extract) "Extract" else "")
             UnrealMethodInvocationContext(
               env = UnrealEnvironment(engine, openMode),
               extraExtensions = listOf(PluginInstallLocationResolver(location), PluginInstallMethodResolver(installMethod)),
