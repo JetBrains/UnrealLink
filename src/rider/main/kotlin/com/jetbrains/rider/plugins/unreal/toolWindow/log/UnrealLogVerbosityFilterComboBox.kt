@@ -15,8 +15,16 @@ class UnrealLogVerbosityFilterComboBox(settings: UnrealLogPanelSettings) : Combo
         presentation.text = UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbositySelection.label")
     }
 
-    private val messagesCheckBox: FilterCheckboxAction =
-            FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Messages.text"), settings::showMessages)
+    private val fatalCheckBox = FilterCheckboxAction(
+        UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Fatal.text"), settings::showFatal)
+    private val displayCheckBox = FilterCheckboxAction(
+        UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Display.text"), settings::showDisplay)
+    private val logCheckBox = FilterCheckboxAction(
+        UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Log.text"), settings::showLog)
+    private val verboseCheckBox = FilterCheckboxAction(
+        UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Verbose.text"), settings::showVerbose)
+    private val veryVerboseCheckBox = FilterCheckboxAction(
+        UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.VeryVerbose.text"), settings::showVeryVerbose)
     private val warningsCheckBox: FilterCheckboxAction =
             FilterCheckboxAction(UnrealLinkBundle.message("toolWindow.UnrealLog.settings.verbosity.Warnings.text"), settings::showWarnings)
     private val errorsCheckBox: FilterCheckboxAction =
@@ -29,9 +37,13 @@ class UnrealLogVerbosityFilterComboBox(settings: UnrealLogPanelSettings) : Combo
 
     inner class VerbosityActionGroup : DefaultActionGroup() {
         init {
-            add(messagesCheckBox)
-            add(warningsCheckBox)
+            add(fatalCheckBox)
             add(errorsCheckBox)
+            add(warningsCheckBox)
+            add(displayCheckBox)
+            add(logCheckBox)
+            add(verboseCheckBox)
+            add(veryVerboseCheckBox)
         }
     }
 

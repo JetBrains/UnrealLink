@@ -29,16 +29,7 @@ class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSe
         // see FOutputLogFilter::IsMessageAllowed from SOutputLog.cpp
 
         // Checking verbosity
-        val verbosity = message.type
-        if (verbosity == VerbosityType.Error && !settings.showErrors) {
-            return false
-        }
-
-        if (verbosity == VerbosityType.Warning && !settings.showWarnings) {
-            return false
-        }
-
-        if (verbosity != VerbosityType.Error && verbosity != VerbosityType.Warning && !settings.showMessages) {
+        if (!isVerbosityEnabled(message.type, settings)) {
             return false
         }
 
@@ -93,4 +84,33 @@ class UnrealLogFilter(lifetime: Lifetime, private val settings: UnrealLogPanelSe
             selectedCategories.addAll(categories)
         }
     }
+}
+
+internal data class VerbositySelection(
+    val fatal: Boolean,
+    val error: Boolean,
+    val warning: Boolean,
+    val display: Boolean,
+    val log: Boolean,
+    val verbose: Boolean,
+    val veryVerbose: Boolean,
+)
+
+private fun UnrealLogPanelSettings.verbositySelection() = VerbositySelection(
+    showFatal, showErrors, showWarnings, showDisplay, showLog, showVerbose, showVeryVerbose)
+
+internal fun isVerbosityEnabled(
+    verbosity: VerbosityType,
+    settings: UnrealLogPanelSettings,
+): Boolean = isVerbosityEnabled(verbosity, settings.verbositySelection())
+
+internal fun isVerbosityEnabled(verbosity: VerbosityType, selection: VerbositySelection): Boolean = when (verbosity) {
+    VerbosityType.Fatal -> selection.fatal
+    VerbosityType.Error -> selection.error
+    VerbosityType.Warning -> selection.warning
+    VerbosityType.Display -> selection.display
+    VerbosityType.Log -> selection.log
+    VerbosityType.Verbose -> selection.verbose
+    VerbosityType.VeryVerbose -> selection.veryVerbose
+    else -> true
 }

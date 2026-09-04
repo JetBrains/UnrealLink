@@ -31,11 +31,43 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
             state.focusOnStart = value
         }
 
-    var showMessages: Boolean
-        get() = state.showMessages
+    var showFatal: Boolean
+        get() = state.showFatal
         set(value) {
-            if (state.showMessages != value) {
-                state.showMessages = value
+            if (state.showFatal != value) {
+                state.showFatal = value
+                fireSettingsChanged()
+            }
+        }
+    var showDisplay: Boolean
+        get() = state.showDisplay
+        set(value) {
+            if (state.showDisplay != value) {
+                state.showDisplay = value
+                fireSettingsChanged()
+            }
+        }
+    var showLog: Boolean
+        get() = state.showLog
+        set(value) {
+            if (state.showLog != value) {
+                state.showLog = value
+                fireSettingsChanged()
+            }
+        }
+    var showVerbose: Boolean
+        get() = state.showVerbose
+        set(value) {
+            if (state.showVerbose != value) {
+                state.showVerbose = value
+                fireSettingsChanged()
+            }
+        }
+    var showVeryVerbose: Boolean
+        get() = state.showVeryVerbose
+        set(value) {
+            if (state.showVeryVerbose != value) {
+                state.showVeryVerbose = value
                 fireSettingsChanged()
             }
         }
@@ -134,7 +166,11 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         var clearOnStart by property(defaultValue = false)
         var focusOnStart by property(defaultValue = true)
 
-        var showMessages by property(defaultValue = true)
+        var showFatal by property(defaultValue = true)
+        var showDisplay by property(defaultValue = true)
+        var showLog by property(defaultValue = true)
+        var showVerbose by property(defaultValue = true)
+        var showVeryVerbose by property(defaultValue = true)
         var showWarnings by property(defaultValue = true)
         var showErrors by property(defaultValue = true)
         var showAllCategories by property(defaultValue = true)
@@ -150,4 +186,3 @@ class UnrealLogPanelSettings(private val project: Project) : SimplePersistentSta
         var showUnrealFrames by property(defaultValue = true)
     }
 }
-
