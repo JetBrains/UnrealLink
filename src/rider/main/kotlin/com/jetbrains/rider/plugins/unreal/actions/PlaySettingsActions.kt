@@ -11,6 +11,8 @@ import com.intellij.openapi.project.DumbAwareToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsActions
 import com.intellij.xdebugger.attach.LocalAttachHost
+import com.intellij.xdebugger.XDebuggerManager
+import com.jetbrains.cidr.execution.debugger.CidrDebugProcess
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rider.UnrealLinkBundle
 import com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration
@@ -89,23 +91,9 @@ class AttachToConnectedEditor : DumbAwareAction() {
             return
         }
 
-        // try to enumerate current debug sessions and find if we have already a debugger attached
-        /*
-        val debuggerManager = XDebuggerManager.getInstance(host.project)
-        for (session in debuggerManager.debugSessions) {
-            val debugProcess = session.debugProcess
-            if (debugProcess is CidrDebugProcess) {
-                // TODO: need to retrieve target pid from process
-                val pid = 0 // debugProcess.processHandler
-                if (pid == connectionInfo.processId) {
-                    e.presentation.isEnabled = false
-                    return
-                }
-            }
-        }
-        */
-
-        e.presentation.isEnabled = true
+        val hasAttachedCppDebugger = XDebuggerManager.getInstance(host.project).debugSessions
+            .any { it.debugProcess is CidrDebugProcess }
+        e.presentation.isEnabled = isAttachToConnectedEditorAvailable(hasAttachedCppDebugger)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -122,6 +110,9 @@ class AttachToConnectedEditor : DumbAwareAction() {
     }
 
 }
+
+internal fun isAttachToConnectedEditorAvailable(hasAttachedCppDebugger: Boolean): Boolean =
+    !hasAttachedCppDebugger
 
 class OpenUnrealLinkSettings : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
