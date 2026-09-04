@@ -10,6 +10,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.DumbAwareToggleAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsActions
+import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.attach.LocalAttachHost
 import com.jetbrains.rd.ide.model.unrealModel
 import com.jetbrains.rider.UnrealLinkBundle
@@ -29,6 +30,7 @@ class PlaySettings : DefaultActionGroup(), DumbAware {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
+        e.presentation.description = UnrealLinkBundle.message("group.RiderLink.UnrealPlaySettings.description")
         UnrealHostOperations.updatePresentationBasedOnUnrealAvailability(e, connectedIcon, disconnectedIcon)
     }
 }
@@ -89,23 +91,13 @@ class AttachToConnectedEditor : DumbAwareAction() {
             return
         }
 
-        // try to enumerate current debug sessions and find if we have already a debugger attached
-        /*
-        val debuggerManager = XDebuggerManager.getInstance(host.project)
-        for (session in debuggerManager.debugSessions) {
-            val debugProcess = session.debugProcess
-            if (debugProcess is CidrDebugProcess) {
-                // TODO: need to retrieve target pid from process
-                val pid = 0 // debugProcess.processHandler
-                if (pid == connectionInfo.processId) {
-                    e.presentation.isEnabled = false
-                    return
-                }
-            }
-        }
-        */
-
-        e.presentation.isEnabled = true
+        val hasActiveDebugSession = XDebuggerManager.getInstance(host.project).debugSessions
+            .any { !it.debugProcess.processHandler.isProcessTerminated }
+        e.presentation.isEnabled = isAttachToConnectedEditorEnabled(
+            isConnected = true,
+            hasConnectionInfo = true,
+            hasActiveDebugSession = hasActiveDebugSession,
+        )
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -122,6 +114,12 @@ class AttachToConnectedEditor : DumbAwareAction() {
     }
 
 }
+
+internal fun isAttachToConnectedEditorEnabled(
+    isConnected: Boolean,
+    hasConnectionInfo: Boolean,
+    hasActiveDebugSession: Boolean,
+): Boolean = isConnected && hasConnectionInfo && !hasActiveDebugSession
 
 class OpenUnrealLinkSettings : DumbAwareAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
