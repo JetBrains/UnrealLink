@@ -25,6 +25,10 @@ class PlaySettings : DefaultActionGroup(), DumbAware {
     private val connectedIcon = UnrealIcons.ConnectionStatus.UnrealEngineConnected
     private val disconnectedIcon = UnrealIcons.ConnectionStatus.UnrealEngineDisconnected
 
+    init {
+        templatePresentation.description = UnrealLinkBundle.message("action.RiderLink.UnrealPlaySettings.description")
+    }
+
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
