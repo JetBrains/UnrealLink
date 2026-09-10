@@ -1,6 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
+import com.jetbrains.rider.test.facades.unreal.RiderUnrealApiFacade
 import com.jetbrains.rider.test.framework.frameworkLogger
 import com.jetbrains.rider.test.junit5.unreal.UnrealMethodInvocationContext
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
@@ -34,7 +35,7 @@ annotation class UnrealLinkCombinations
  * `installRiderLink`'s `useExtract` parameter and the frontend's "Install"/"Extract" actions.
  *
  * [Build] (the default) compiles RiderLink from source with UAT. [Extract] unpacks the prebuilt
- * plugin package as-is and skips the build step.
+ * plugin package as-is and skips the build step. [Extract] runs in the Uproject open mode only.
  */
 enum class PluginInstallMethod(val useExtract: Boolean) {
   Build(false),
@@ -63,6 +64,10 @@ class UnrealLinkCombinationProvider : TestTemplateInvocationContextProvider {
           // from-source engine can rebuild its own Editor to pick them up. An installed (EGS)
           // engine can't, which is why the frontend hides "Extract to Engine" for it too.
           .filter { location != PluginInstallLocation.Engine || it == PluginInstallMethod.Build || !engine.isInstalledBuild }
+          // The install method does not interact with the open mode. It only changes who compiles
+          // RiderLink: UAT before the project build, or the project build itself. Uproject alone
+          // covers it. The full matrix put the Windows run over its TeamCity execution timeout.
+          .filter { it == PluginInstallMethod.Build || openMode == RiderUnrealApiFacade.OpenMode.Uproject }
           .map { installMethod ->
             // No ", " here: RiderJUnit5TeamCityListener.getTestName reduces the reported TC name to
             // `displayName.split(", ")[0]` — a ", "-separated suffix is silently dropped, and every
