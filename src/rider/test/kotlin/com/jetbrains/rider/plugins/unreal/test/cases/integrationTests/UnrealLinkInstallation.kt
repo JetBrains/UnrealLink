@@ -135,15 +135,39 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
    * copy with no `ignoreDirs` filtering, so that backup already holds the exact post-open `Intermediate`
    * (UBT project files for `Sln`, nothing for `Uproject` — [generateSln] is a no-op there) — restoring
    * from it undoes only what a case itself added, the same guarantee the rest of the project gets.
+   *
+   * `BuildRules` is excluded from the restore: `Intermediate/Build/BuildRules/<Project>ModuleRules.dll`
+   * is Unreal Build Tool's own compiled rules assembly, not something [installRiderLink] or
+   * [buildStartupProject] writes as a side effect this restore needs to undo, and this run's own
+   * `ul` case — [withRunProgram]'s launched Unreal Editor process, or a UBT/MSBuild child from
+   * [buildStartupProject] — can still hold it open for a moment after that case's body returns, before
+   * this `@AfterEach` runs. Comparing or overwriting it here raced a transient Windows
+   * `FileSystemException` ("The process cannot access the file because it is being used by another
+   * process"); excluding it removes the race instead of retrying around it. The retry loop stays as a
+   * defense against any other transient hold elsewhere under `Intermediate`.
    */
   override fun restoreInitialProjectState() {
     super.restoreInitialProjectState()
     val liveIntermediate = project.solutionDirectoryPath.resolve("Intermediate")
     val backupIntermediate = testWorkDirectory.resolve("${activeSolution}_backup").resolve("Intermediate")
-    if (backupIntermediate.exists())
-      restoreProject(liveIntermediate, backupIntermediate, BackupRestoreProfile())
-    else
+    if (!backupIntermediate.exists()) {
       liveIntermediate.deleteRecursively()
+      return
+    }
+    val profile = BackupRestoreProfile().apply { ignoreDirs.add("BuildRules") }
+    var attempt = 1
+    while (true) {
+      try {
+        restoreProject(liveIntermediate, backupIntermediate, profile)
+        return
+      }
+      catch (e: java.io.IOException) {
+        if (attempt >= 5) throw e
+        logger.warn("restoreProject(Intermediate) attempt $attempt failed, retrying: ${e.message}")
+        waitPumping(Duration.ofMillis(500))
+        attempt++
+      }
+    }
   }
 
   @ParameterizedTest(name = "{0}")
@@ -181,7 +205,7 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
    * [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject]-rooted, this class is
    * [UnrealClassLevelProject]-rooted, and the two roots share no fitting common ancestor for this.
    */
-  private fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(240)) {
+  private fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(600)) {
     logger.info("Installing RiderLink in ${place.name}" + if (useExtract) " (extract)" else "")
     Lifetime.using { lifetime ->
       var finished = false
