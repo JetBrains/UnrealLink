@@ -205,7 +205,7 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
    * [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject]-rooted, this class is
    * [UnrealClassLevelProject]-rooted, and the two roots share no fitting common ancestor for this.
    */
-  private fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(600)) {
+  private fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(240)) {
     logger.info("Installing RiderLink in ${place.name}" + if (useExtract) " (extract)" else "")
     Lifetime.using { lifetime ->
       var finished = false
