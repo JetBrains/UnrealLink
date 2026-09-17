@@ -320,6 +320,59 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             myUnrealHost.myModel.InstallPluginFinished(success);
         }
 
+        /// <summary>
+        /// Unpacks the zip file at <paramref name="archivePath" /> into <paramref name="destinationPath" />.
+        /// Works as <see cref="ZipFile.ExtractToDirectory(string,string)" />, but sets the unpack time as the
+        /// write time of every extracted file.
+        /// </summary>
+        /// <remarks>
+        /// UBT compares the write time of the source files with the write time of the build output.
+        /// An extracted source file looks older than the output, so UBT keeps the stale output and does not
+        /// rebuild RiderLink. See RIDER-142533.
+        /// </remarks>
+        private void ExtractAndPatchZip(string archivePath, string destinationPath)
+        {
+            var destDirectoryName = Directory.CreateDirectory(destinationPath).FullName;
+            if (destDirectoryName.Length != 0 && destDirectoryName[destDirectoryName.Length - 1] != Path.DirectorySeparatorChar)
+                destDirectoryName += Path.DirectorySeparatorChar;
+
+            var extractTimeUtc = DateTime.UtcNow;
+            var failedToPatchCount = 0;
+            using (var archive = ZipFile.OpenRead(archivePath))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    var fullEntryPath = Path.GetFullPath(Path.Combine(destDirectoryName, entry.FullName));
+                    if (!fullEntryPath.StartsWith(destDirectoryName, StringComparison.OrdinalIgnoreCase))
+                        throw new IOException($"The entry {entry.FullName} is outside of {destDirectoryName}");
+
+                    // An entry with an empty name is a directory
+                    if (entry.Name.Length == 0)
+                    {
+                        if (entry.Length != 0L)
+                            throw new IOException($"The directory entry {entry.FullName} has data");
+                        Directory.CreateDirectory(fullEntryPath);
+                        continue;
+                    }
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(fullEntryPath).NotNull());
+                    entry.ExtractToFile(fullEntryPath, true);
+                    try
+                    {
+                        File.SetLastWriteTimeUtc(fullEntryPath, extractTimeUtc);
+                    }
+                    catch (Exception)
+                    {
+                        // The extracted content is still correct. Only the rebuild detection of UBT can suffer.
+                        failedToPatchCount++;
+                    }
+                }
+            }
+
+            if (failedToPatchCount > 0)
+                myLogger.Warn($"[UnrealLink]: Couldn't set the write time of {failedToPatchCount} file(s) under {destDirectoryName}");
+        }
+
         private bool ExtractPlugin(Lifetime lifetime,
             UnrealPluginInstallInfo.InstallDescription installDescription,
             VirtualFileSystemPath engineRoot, IProperty<double> progressProperty, double range)
@@ -334,7 +387,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             var editorPluginPathFile = myPathsProvider.PathToPackedPlugin;
             try
             {
-                ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginRootFolder.FullPath);
+                ExtractAndPatchZip(editorPluginPathFile.FullPath, pluginRootFolder.FullPath);
                 progressProperty.Value += ZIP_STEP;
             }
             catch (Exception exception)
@@ -452,7 +505,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             def.Lifetime.OnTermination(() => { pluginTmpDir.Delete(); });
             try
             {
-                ZipFile.ExtractToDirectory(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
+                ExtractAndPatchZip(editorPluginPathFile.FullPath, pluginTmpDir.FullPath);
                 progressProperty.Value += ZIP_STEP;
             }
             catch (Exception exception)
