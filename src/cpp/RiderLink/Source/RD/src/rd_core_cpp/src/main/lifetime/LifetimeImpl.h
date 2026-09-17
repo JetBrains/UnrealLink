@@ -12,8 +12,6 @@
 
 #include <thirdparty.hpp>
 
-#include <RDDefines.h>
-
 #include <rd_core_export.h>
 
 RD_PUSH_STL_EXPORTS_WARNINGS
