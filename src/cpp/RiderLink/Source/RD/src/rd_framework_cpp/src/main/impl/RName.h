@@ -3,8 +3,6 @@
 
 #include "thirdparty.hpp"
 
-#include <RDDefines.h>
-
 #include <string>
 #include <rd_framework_export.h>
 
