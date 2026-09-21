@@ -17,6 +17,7 @@ import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject
 import com.jetbrains.rider.test.reporting.SubsystemConstants
+import com.jetbrains.rider.test.scriptingApi.collectAndPublishDumpsToArtifacts
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
@@ -229,7 +230,13 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
 
       // Wait until installation *finishes* (success or failure), not just until it starts.
       // A failed build now satisfies this quickly instead of hanging until a downstream timeout.
-      waitAndPump(timeout, { finished }, { "RiderLink installation did not finish" })
+      try {
+        waitAndPump(timeout, { finished }, { "RiderLink installation did not finish" })
+      }
+      catch (e: Exception) {
+        collectAndPublishDumpsToArtifacts()
+        throw e
+      }
 
       if (!installSucceeded) {
         error("RiderLink installation failed in ${place.name}. Last install output:\n" +
