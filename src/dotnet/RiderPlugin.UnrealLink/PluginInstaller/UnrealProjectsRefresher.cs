@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using JetBrains.Annotations;
 using JetBrains.HabitatDetector;
 using JetBrains.Lifetimes;
@@ -19,6 +20,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
     public static class UnrealProjectsRefresher
     {
         private static readonly ILogger OurLogger = Logger.GetLogger(typeof(UnrealProjectsRefresher));
+
+        // UnrealVersionSelector takes 4 to 10 seconds for a normal project.
+        private static readonly TimeSpan UvsTimeout = TimeSpan.FromSeconds(60);
+
+        private static readonly ConcurrentDictionary<string, bool> ourProjectsWhereUvsTimedOut = new ConcurrentDictionary<string, bool>();
 
         public static void RefreshProjects(Lifetime parentLifetime,
             [NotNull] ISolution solution,
@@ -178,6 +184,12 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                 return false;
             }
             
+            if (ourProjectsWhereUvsTimedOut.ContainsKey(uprojectFile.FullPath))
+            {
+                OurLogger.Info($"[UnrealLink]: {pathToUnrealVersionSelector} did not exit in time for {uprojectFile} before, skipping it");
+                return false;
+            }
+
             var pipeStreams = CreatePipeStreams(unrealHost,"[UVS]:");
             var startInfo = CmdUtils.GetProcessStartInfo(pipeStreams, pathToUnrealVersionSelector,
                 pathToUnrealVersionSelector.Directory,
@@ -185,7 +197,16 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
             try
             {
-                var result = CmdUtils.RunCommandWithLock(lifetime, startInfo, OurLogger) == 0;
+                // A UVS that does not exit would hold the UBT lock and block every next UBT, UAT and refresh run.
+                if (!CmdUtils.TryRunCommandWithLock(lifetime, startInfo, OurLogger, UvsTimeout, out var exitCode))
+                {
+                    ourProjectsWhereUvsTimedOut[uprojectFile.FullPath] = true;
+                    OurLogger.Warn(
+                        $"[UnrealLink]: Failed refresh project files: {pathToUnrealVersionSelector} did not exit in {UvsTimeout}");
+                    return false;
+                }
+
+                var result = exitCode == 0;
                 if (!result)
                 {
                     OurLogger.Warn(
