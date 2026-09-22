@@ -1,5 +1,3 @@
-@file:Suppress("JUnitTestCaseWithNoTests")
-
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.jetbrains.rd.util.lifetime.Lifetime
@@ -10,28 +8,37 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDes
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject
+import com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject
+import com.jetbrains.rider.test.scriptingApi.collectAndPublishDumpsToArtifacts
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import org.junit.jupiter.api.AfterEach
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedDeque
 
-open class UnrealLinkBase: UnrealTestLevelProject() {
+/**
+ * RiderLink install/uninstall shared by every [UnrealClassLevelProject]-rooted UnrealLink test.
+ *
+ * [UnrealLinkBase] is the same thing for [UnrealTestLevelProject][com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject]-rooted
+ * tests. The two roots share no fitting common ancestor for this, hence a separate base here rather
+ * than reusing [UnrealLinkBase].
+ */
+abstract class UnrealLinkClassLevelBase : UnrealClassLevelProject() {
+
   /**
-   * Runs while the solution is still open — [deleteRiderLink] talks to the backend over the protocol.
-   * The base cache cleanup that happens after the solution is closed lives in
-   * `UnrealTestLevelProject.testTeardown`, the superclass `@AfterEach`, which JUnit5 runs after this one.
+   * Undoes [installRiderLink] before [UnrealClassLevelProject.afterEachUnrealClassLevel] (the
+   * superclass `@AfterEach`) restores the rest of the project — JUnit5 runs a subclass's own
+   * `@AfterEach` before an inherited one, so this always goes first. The backend's `DeletePlugin`
+   * handler cleans up both the project-local install and the engine's own plugin folder, whichever one
+   * the test just used, so the next combination starts from a plugin-free project either way.
    *
-   * The `hasProject` guard replaces TestNG's "skip `@AfterMethod` when a config method failed":
-   * JUnit5 runs `@AfterEach` even when the solution never opened, and without the guard that would
-   * surface as an NPE here instead of the real setup failure.
+   * [cleanUpUnrealCaches] also has to be called explicitly here: [UnrealClassLevelProject] never calls
+   * it (only [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject.testTeardown] does, for the
+   * per-test lifecycle these classes no longer use).
    */
   @AfterEach
-  override fun unrealCleanup() {
-    if (solutionApiFacade.hasProject) {
-      deleteRiderLink()
-    }
-    super.unrealCleanup()
+  fun deleteInstalledPlugin() {
+    if (solutionApiFacade.hasProject) deleteRiderLink()
+    cleanUpUnrealCaches()
   }
 
   /**
@@ -62,7 +69,13 @@ open class UnrealLinkBase: UnrealTestLevelProject() {
 
       // Wait until installation *finishes* (success or failure), not just until it starts.
       // A failed build now satisfies this quickly instead of hanging until a downstream timeout.
-      waitAndPump(timeout, { finished }, { "RiderLink installation did not finish" })
+      try {
+        waitAndPump(timeout, { finished }, { "RiderLink installation did not finish" })
+      }
+      catch (e: Exception) {
+        collectAndPublishDumpsToArtifacts()
+        throw e
+      }
 
       if (!installSucceeded) {
         error("RiderLink installation failed in ${place.name}. Last install output:\n" +
