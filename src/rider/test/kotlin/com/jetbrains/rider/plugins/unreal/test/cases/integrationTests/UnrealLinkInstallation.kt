@@ -1,11 +1,7 @@
 package com.jetbrains.rider.plugins.unreal.test.cases.integrationTests
 
 import com.intellij.testFramework.utils.io.deleteRecursively
-import com.jetbrains.rd.util.lifetime.Lifetime
-import com.jetbrains.rd.util.reactive.fire
 import com.jetbrains.rdclient.util.idea.waitAndPump
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.ForceInstall
-import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDescription
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
@@ -17,21 +13,18 @@ import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject
 import com.jetbrains.rider.test.reporting.SubsystemConstants
-import com.jetbrains.rider.test.scriptingApi.collectAndPublishDumpsToArtifacts
 import com.jetbrains.rider.test.scriptingApi.setUnrealConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.UnrealConstants
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.Duration
-import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlin.io.path.exists
@@ -70,7 +63,7 @@ data class InstallCase(val location: PluginInstallLocation, val installMethod: P
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Installation")
 @Solution(RiderTestSolution.Unreal.EmptyUProject)
-class UnrealLinkInstallation : UnrealClassLevelProject() {
+class UnrealLinkInstallation : UnrealLinkClassLevelBase() {
   private val runProgramTimeout: Duration = Duration.ofMinutes(10)
 
   /**
@@ -97,26 +90,6 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
     listOf(PluginInstallLocation.Game, PluginInstallLocation.Engine)
       .flatMap { location -> listOf(PluginInstallMethod.Build, PluginInstallMethod.Extract).map { InstallCase(location, it) } }
       .generateDataProvider { Arguments.of(it.toString(), it) }
-
-  /**
-   * Undoes [installRiderLink] before [UnrealClassLevelProject.afterEachUnrealClassLevel] (the
-   * superclass `@AfterEach`) restores the rest of the project — JUnit5 runs a subclass's own
-   * `@AfterEach` before an inherited one, so this always goes first. The backend's `DeletePlugin`
-   * handler cleans up both the project-local install and the engine's own plugin folder, whichever one
-   * the case just used, so the next case starts from a plugin-free project either way.
-   *
-   * [cleanUpUnrealCaches] also has to be called explicitly here: [UnrealClassLevelProject] never calls
-   * it (only [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject.testTeardown] does, for the
-   * per-test lifecycle this class no longer uses). Every case here compiles or extracts a plugin into
-   * the engine and launches it, which is exactly the kind of run [cleanUpUnrealCaches] guards — leaving
-   * a stale `UnrealEngine/Intermediate` from one case's build/extract could affect the next case's, or
-   * the next engine's.
-   */
-  @AfterEach
-  fun deleteInstalledPlugin() {
-    if (solutionApiFacade.hasProject) deleteRiderLink()
-    cleanUpUnrealCaches()
-  }
 
   /**
    * All 4 cases of one (engine, openMode) share the same on-disk work directory —
@@ -196,58 +169,5 @@ class UnrealLinkInstallation : UnrealClassLevelProject() {
       waitAndPump(runProgramTimeout, { it.solution.rdRiderModel.isConnectedToUnrealEditor.value }, { "Not connected to UnrealEditor" })
       waitPumping(Duration.ofSeconds(15))
     }
-  }
-
-  /**
-   * @param useExtract `false` (the default — the "Install" action) compiles RiderLink from source.
-   * `true` (the "Extract" action) unpacks the prebuilt plugin package as-is, skipping the UAT build step.
-   *
-   * Duplicated from [UnrealLinkBase.installRiderLink] rather than shared: that base is
-   * [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject]-rooted, this class is
-   * [UnrealClassLevelProject]-rooted, and the two roots share no fitting common ancestor for this.
-   */
-  private fun installRiderLink(place: PluginInstallLocation, useExtract: Boolean = false, timeout: Duration = Duration.ofSeconds(240)) {
-    logger.info("Installing RiderLink in ${place.name}" + if (useExtract) " (extract)" else "")
-    Lifetime.using { lifetime ->
-      var finished = false
-      var installSucceeded = false
-      // Compiler/UAT output arrives as ContentType.Normal (stdout), so we keep the tail of
-      // every message regardless of type to surface the real failure reason on a fast-fail.
-      val messageTail = ConcurrentLinkedDeque<String>()
-
-      project.solution.rdRiderModel.riderLinkInstallMessage.advise(lifetime) { msg ->
-        messageTail.addLast("[${msg.type}] ${msg.text}")
-        while (messageTail.size > 50) messageTail.pollFirst()
-      }
-      project.solution.rdRiderModel.installPluginFinished.advise(lifetime) { success ->
-        installSucceeded = success
-        finished = true
-      }
-
-      project.solution.rdRiderModel.installEditorPlugin.fire(
-        InstallPluginDescription(place, ForceInstall.Yes, buildRequired = !useExtract, emptyList(), emptyList())
-      )
-
-      // Wait until installation *finishes* (success or failure), not just until it starts.
-      // A failed build now satisfies this quickly instead of hanging until a downstream timeout.
-      try {
-        waitAndPump(timeout, { finished }, { "RiderLink installation did not finish" })
-      }
-      catch (e: Exception) {
-        collectAndPublishDumpsToArtifacts()
-        throw e
-      }
-
-      if (!installSucceeded) {
-        error("RiderLink installation failed in ${place.name}. Last install output:\n" +
-              messageTail.joinToString("\n"))
-      }
-    }
-  }
-
-  /** Duplicated from [UnrealLinkBase.deleteRiderLink] — see [installRiderLink] for why. */
-  private fun deleteRiderLink() {
-    project.solution.rdRiderModel.deletePlugin.fire()
-    waitPumping(Duration.ofSeconds(5))
   }
 }

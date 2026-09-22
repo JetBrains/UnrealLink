@@ -12,24 +12,23 @@ import com.jetbrains.rider.test.annotations.report.Feature
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
-import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.reopenSolution
 import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
-import com.jetbrains.rider.test.unreal.UnrealEnvironment
 import java.time.Duration
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 
 @Tag(TeamCityTags.GameDev.Unreal.Link.General)
 @Tag(TeamCityTags.GameDev.Unreal.Link.Smoke)
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("Notification")
-class RiderLinkNotification : UnrealLinkBase() {
-  @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @UnrealCombinations
+@Solution(RiderTestSolution.Unreal.EmptyUProject)
+class RiderLinkNotification : UnrealLinkClassLevelBase() {
+  @Test
   @ChecklistItems(["UnrealLink/Installation Notification"])
-  fun installNotification(e: UnrealEnvironment) {
+  fun installNotification() {
     val notification = NotificationsManager.getNotificationsManager()
       .getNotificationsOfType(Notification::class.java, project).single { it.groupId == "OutOfSyncConnection" }
     notification.type.shouldBe(NotificationType.WARNING)

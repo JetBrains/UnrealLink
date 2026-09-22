@@ -17,14 +17,12 @@ import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.report.ChecklistItems
 import com.jetbrains.rider.test.annotations.report.Feature
-import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
 import com.jetbrains.rider.test.reporting.SubsystemConstants
 import com.jetbrains.rider.test.scriptingApi.setConfigurationAndPlatform
 import com.jetbrains.rider.test.scriptingApi.withRunProgram
 import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
-import com.jetbrains.rider.test.unreal.UnrealEnvironment
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import org.junit.jupiter.api.Tag
@@ -33,9 +31,17 @@ import org.junit.jupiter.api.Tag
 @Subsystem(SubsystemConstants.UNREAL_LINK)
 @Feature("PlayButtons")
 @RiderTestTimeout(10, TimeUnit.MINUTES)
-class PlayButtons : UnrealLinkBase() {
-  @BeforeEach
-  fun setOpenSolutionSettings() {
+@Solution(RiderTestSolution.Unreal.EmptyUProject)
+class PlayButtons : UnrealLinkClassLevelBase() {
+  /**
+   * Set here rather than in a `@BeforeEach`: [UnrealClassLevelProject.ensureUnrealSolutionOpen][com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject.ensureUnrealSolutionOpen] —
+   * the superclass `@BeforeEach` that opens the solution — always runs before this class's own
+   * `@BeforeEach` methods, so a `@BeforeEach` here would set the flag one solution-open too late.
+   * [beforeOpenSolution] runs synchronously inside that same open, before the `.uproject` file is
+   * generated, which is early enough.
+   */
+  override fun beforeOpenSolution() {
+    super.beforeOpenSolution()
     unrealApiFacade.disableEnginePlugins = false
   }
 
@@ -48,10 +54,9 @@ class PlayButtons : UnrealLinkBase() {
   private val resumeAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.ResumeUnreal")
   private val stopAction: AnAction get() = ActionManager.getInstance().getAction("RiderLink.StopUnreal")
 
-  @Solution(RiderTestSolution.Unreal.EmptyUProject)
-  @UnrealCombinations
+  @Test
   @ChecklistItems(["UnrealLink/Play Controls"])
-  fun endToEndTest(e: UnrealEnvironment) {
+  fun endToEndTest() {
     setConfigurationAndPlatform(project, "Development Editor", "Win64")
     installRiderLink(PluginInstallLocation.Game)
 
