@@ -52,6 +52,8 @@ public class RiderAgentTools : ModuleRules
                 && Target.Platform != UnrealTargetPlatform.Linux;
 #endif
 
+        bEnableExceptions = true;
+
 #if UE_5_2_OR_LATER
         bDisableStaticAnalysis = true;
 #endif

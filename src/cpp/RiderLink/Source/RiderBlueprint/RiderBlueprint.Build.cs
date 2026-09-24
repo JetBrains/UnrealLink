@@ -11,6 +11,7 @@ public class RiderBlueprint : ModuleRules
 #endif
 		
 		bUseRTTI = true;
+		bEnableExceptions = true;
 
 #if UE_5_2_OR_LATER
 		bDisableStaticAnalysis = true;

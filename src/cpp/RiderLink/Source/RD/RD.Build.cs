@@ -7,6 +7,7 @@ public class RD : ModuleRules
 	{
 		PublicDependencyModuleNames.Add("Core");
 		bUseRTTI = true;
+		bEnableExceptions = true;
 
 #if UE_5_2_OR_LATER
 		bDisableStaticAnalysis = true;
