@@ -150,12 +150,12 @@ dependencies {
 
         // Modular 2026.3: these were split into separate bundled plugins (2025.3+), the test
         // IDE won't boot without them ("intellij.platform.structureView is not installed").
-        bundledPlugin("intellij.structureView.plugin")
-        bundledPlugin("intellij.ssh.plugin")
-        bundledPlugin("intellij.bookmarks.plugin")
-        bundledPlugin("intellij.vcs.plugin")
+        bundledPlugin("com.intellij.structureView")
+        bundledPlugin("com.intellij.platform.ssh")
+        bundledPlugin("com.intellij.bookmarks")
+        bundledPlugin("com.intellij.platform.vcs")
         bundledPlugin("Git4Idea")
-        bundledPlugin("intellij.problemView.plugin")
+        bundledPlugin("com.intellij.problemsView")
 
         // Rider .NET + debugger stack the integration-test runtime needs to open a solution
         // (mirrors the test module's monorepo .iml deps).
