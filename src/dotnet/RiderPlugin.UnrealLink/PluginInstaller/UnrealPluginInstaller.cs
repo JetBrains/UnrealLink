@@ -778,7 +778,7 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                         myBoundSettingsStore.SetValue<UnrealLinkSettings, bool>(s => s.AutoUpdateRiderLinkPlugin, true);
                     });
                 model.RefreshProjects.Advise(Lifetime,
-                    _ => UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, myPluginDetector.InstallInfoProperty.Value));
+                    _ => UnrealProjectsRefresher.RefreshProjects(Lifetime, mySolution, myPluginDetector.InstallInfoProperty.Value, isUserInitiated: true));
             });
         }
 

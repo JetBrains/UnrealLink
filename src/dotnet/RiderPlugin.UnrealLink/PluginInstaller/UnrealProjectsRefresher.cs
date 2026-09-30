@@ -28,15 +28,17 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
 
         public static void RefreshProjects(Lifetime parentLifetime,
             [NotNull] ISolution solution,
-            [NotNull] UnrealPluginInstallInfo installInfo)
+            [NotNull] UnrealPluginInstallInfo installInfo,
+            bool isUserInitiated = false)
         {
-            RefreshProjects(parentLifetime, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot);
+            RefreshProjects(parentLifetime, solution, installInfo.ProjectPlugins.FirstOrDefault(null), installInfo.EngineRoot, isUserInitiated);
         }
-        
+
         public static void RefreshProjects(Lifetime parentLifetime,
             [NotNull] ISolution solution,
             [CanBeNull] UnrealPluginInstallInfo.InstallDescription installDescription,
-            [CanBeNull] VirtualFileSystemPath engineRoot)
+            [CanBeNull] VirtualFileSystemPath engineRoot,
+            bool isUserInitiated = false)
         {
             parentLifetime.UsingNestedAsync(async lt =>
             {
@@ -66,13 +68,14 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
                     uprojectFile = cppUe4SolutionDetector.GetUProjectPath();
                 }
 
-                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, solution, unrealHost, engineRoot, uprojectFile));
+                await lifetime.StartBackground(() => RegenerateProjectFiles(lifetime, solution, unrealHost, engineRoot, uprojectFile, isUserInitiated));
             });
         }
-        
+
         private static void RegenerateProjectFiles(Lifetime lifetime, ISolution solution,
             UnrealHost unrealHost,
-            VirtualFileSystemPath engineRoot, VirtualFileSystemPath uprojectFile)
+            VirtualFileSystemPath engineRoot, VirtualFileSystemPath uprojectFile,
+            bool isUserInitiated)
         {
             void LogFailedRefreshProjectFiles()
             {
@@ -93,6 +96,11 @@ namespace RiderPlugin.UnrealLink.PluginInstaller
             }
 
             if (PlatformUtil.RuntimePlatform != JetPlatform.Windows) return;
+
+            // A user-initiated refresh is an explicit "try again" signal, so give
+            // UnrealVersionSelector one more chance even if it timed out for this
+            // uproject earlier in the session (RIDER-143269).
+            if (isUserInitiated) ourProjectsWhereUvsTimedOut.TryRemove(uprojectFile.FullPath, out _);
 
             var ueVersion = solution.GetComponent<ICppUE4SolutionDetector>().UnrealContext.Value.Version;
             var pathToUnrealBuildToolBin = CppUE4FolderFinder.GetAbsolutePathToUnrealBuildToolBin(engineRoot, ueVersion);
