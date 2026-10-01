@@ -188,7 +188,7 @@ Path to old plugin:</code></pre>
       <module name="intellij.platform.statistics"/>
       <module name="intellij.platform.util.ui"/>
       <module name="intellij.rd.client"/>
-      <module name="intellij.rd.client.base"/>
+      <module name="intellij.rd.client.baseline"/>
       <module name="intellij.rd.ide.model.generated"/>
       <module name="intellij.rd.platform"/>
       <module name="intellij.rider"/>
