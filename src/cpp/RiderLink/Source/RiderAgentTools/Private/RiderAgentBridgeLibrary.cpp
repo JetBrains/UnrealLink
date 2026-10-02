@@ -8,7 +8,9 @@
 #include "Serialization/JsonReader.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "Editor.h"
 #include "EditorAssetLibrary.h"
+#include "Misc/PackageName.h"
 #include "ObjectTools.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
@@ -101,7 +103,15 @@ namespace
 
     UBlueprint* LoadBlueprintFromPath(const FString& Path)
     {
-        return Cast<UBlueprint>(UEditorAssetLibrary::LoadAsset(Path));
+        // UEditorAssetLibrary::LoadAsset refuses to load while PIE is running.
+        if (!(GEditor && GEditor->PlayWorld) && !GIsPlayInEditorWorld)
+            return Cast<UBlueprint>(UEditorAssetLibrary::LoadAsset(Path));
+
+        TGuardValue<bool> UnattendedScriptGuard(GIsRunningUnattendedScript, true);
+        FString ObjectPath = FPackageName::ExportTextPathToObjectPath(Path);
+        if (!FPackageName::GetShortName(ObjectPath).Contains(TEXT(".")))
+            ObjectPath += TEXT(".") + FPackageName::GetShortName(ObjectPath);
+        return LoadObject<UBlueprint>(nullptr, *ObjectPath);
     }
 
     UEdGraph* FindGraphInBlueprint(UBlueprint* BP, const FString& GraphName)
