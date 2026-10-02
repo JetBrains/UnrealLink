@@ -34,11 +34,20 @@ abstract class UnrealLinkClassLevelBase : UnrealClassLevelProject() {
    * [cleanUpUnrealCaches] also has to be called explicitly here: [UnrealClassLevelProject] never calls
    * it (only [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject.testTeardown] does, for the
    * per-test lifecycle these classes no longer use).
+   *
+   * [stopRiderLinkInstall] goes first. A plugin delete must not run while UAT still builds into the plugin folder.
    */
   @AfterEach
   fun deleteInstalledPlugin() {
-    if (solutionApiFacade.hasProject) deleteRiderLink()
-    cleanUpUnrealCaches()
+    try {
+      if (solutionApiFacade.hasProject) {
+        stopRiderLinkInstall()
+        deleteRiderLink()
+      }
+    }
+    finally {
+      cleanUpUnrealCaches()
+    }
   }
 
   /**
@@ -82,6 +91,22 @@ abstract class UnrealLinkClassLevelBase : UnrealClassLevelProject() {
               messageTail.joinToString("\n"))
       }
     }
+  }
+
+  /**
+   * Cancels a RiderLink installation that still runs, for example after [installRiderLink] timed out, and waits until it stops.
+   *
+   * The solution stays open between the cases of a class. Thus, a build that nobody cancels keeps the UBT lock of the backend.
+   * The next install then waits for the lock, and the build also takes memory and CPU from the next case.
+   * The backend runs UAT in a job object, so the cancel also stops the UBT and compiler processes.
+   */
+  protected fun stopRiderLinkInstall(timeout: Duration = Duration.ofSeconds(60)) {
+    val model = project.solution.rdRiderModel
+    if (!model.riderLinkInstallationInProgress.value) return
+
+    logger.info("Cancelling the RiderLink installation that still runs")
+    model.cancelRiderLinkInstall.fire()
+    waitAndPump(timeout, { !model.riderLinkInstallationInProgress.value }, { "RiderLink installation did not stop after the cancel" })
   }
 
   protected fun deleteRiderLink() {
