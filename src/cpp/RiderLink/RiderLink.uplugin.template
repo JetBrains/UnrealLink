@@ -41,6 +41,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "RiderSourceCodeEditor",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "PostEngineInit"
+		},
+		{
 			"Name": "RiderShaderInfo",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "PostEngineInit"
