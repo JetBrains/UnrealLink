@@ -24,6 +24,7 @@ public class RiderSourceCodeEditor : ModuleRules
 			"RD",
 			"RiderLink",
 			"CoreUObject",
+			"MainFrame",
 			"Slate",
 			"SlateCore",
 			"SourceCodeAccess",

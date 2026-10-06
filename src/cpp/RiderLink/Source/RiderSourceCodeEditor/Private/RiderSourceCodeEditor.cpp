@@ -11,6 +11,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "ISourceCodeAccessModule.h"
 #include "ISourceCodeAccessor.h"
+#include "Interfaces/IMainFrameModule.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Modules/ModuleManager.h"
 #include "SourceCodeNavigation.h"
@@ -109,12 +110,46 @@ void FRiderSourceCodeEditorModule::ShutdownModule()
 {
     RIDERLINK_LOG(FLogRiderSourceCodeEditorModule, Verbose, "SHUTDOWN START");
     ModuleLifetimeDefinition.terminate();
+    if (MainFrameCreationFinishedHandle.IsValid())
+    {
+        if (IMainFrameModule* MainFrameModule = FModuleManager::GetModulePtr<IMainFrameModule>(TEXT("MainFrame")))
+        {
+            MainFrameModule->OnMainFrameCreationFinished().Remove(MainFrameCreationFinishedHandle);
+        }
+        MainFrameCreationFinishedHandle.Reset();
+    }
     // The prompt buttons hold raw delegates to this module.
     ClosePrompt();
     RIDERLINK_LOG(FLogRiderSourceCodeEditorModule, Verbose, "SHUTDOWN FINISH");
 }
 
 void FRiderSourceCodeEditorModule::OnRiderConnected()
+{
+    // Rider often connects while the editor is still starting. A notification raised before the main frame
+    // exists is never seen, so wait for the main frame.
+    IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+    if (!MainFrameModule.IsWindowInitialized())
+    {
+        if (!MainFrameCreationFinishedHandle.IsValid())
+        {
+            MainFrameCreationFinishedHandle = MainFrameModule.OnMainFrameCreationFinished().AddRaw(
+                this, &FRiderSourceCodeEditorModule::OnMainFrameCreationFinished);
+        }
+        return;
+    }
+
+    TryShowPrompt();
+}
+
+void FRiderSourceCodeEditorModule::OnMainFrameCreationFinished(TSharedPtr<SWindow> InRootWindow, bool bIsRunningStartupDialog)
+{
+    IMainFrameModule::Get().OnMainFrameCreationFinished().Remove(MainFrameCreationFinishedHandle);
+    MainFrameCreationFinishedHandle.Reset();
+
+    TryShowPrompt();
+}
+
+void FRiderSourceCodeEditorModule::TryShowPrompt()
 {
     // Rider can reconnect several times per editor session; ask once.
     if (bPromptShownThisSession || !FSlateApplication::IsInitialized())
