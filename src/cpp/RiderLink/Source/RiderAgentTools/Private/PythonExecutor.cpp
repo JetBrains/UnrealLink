@@ -5,11 +5,13 @@
 #include "IPythonScriptPlugin.h"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
 #include "Async/Async.h"
+#include "Containers/Ticker.h"
 #include "HAL/PlatformAtomics.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/GarbageCollection.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #include <atomic>
 
@@ -62,9 +64,7 @@ namespace
 	// Admits one Python request at a time and publishes it as the cancellable one.
 	//
 	// Stops a second script starting nested inside the first and overwriting its variables,
-	// since batch scripts share __main__. Nesting needs a Slate pump to drain the game-thread
-	// task queue; engine slow tasks pump constantly, but whether that drains the queue is
-	// unverified. Inert unless it does - only genuine nesting is rejected.
+	// since batch scripts share __main__.
 	class FRunGate
 	{
 	public:
@@ -159,7 +159,7 @@ static void ConfigureCommand(FPythonCommandEx& Cmd, const FString& Script, bool 
 
 // Release Python's UObject refs and schedule engine GC — but NEVER collect synchronously.
 //
-// This runs inside an AsyncTask(GameThread) callback, which is not a guaranteed GC-safe
+// This runs inside a core ticker callback, which is not a guaranteed GC-safe
 // point. An inline CollectGarbage() can purge objects still mid-fixup after a Live Coding
 // re-instance (e.g. a re-instanced character's TArray<TSubclassOf<UGameplayAbility>>),
 // freeing memory that is then read through a dangling pointer → 0xC0000005 access violation.
@@ -392,6 +392,24 @@ static JetBrains::EditorPlugin::ScriptResult RunScript(
 	return ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error), bAborted, ElapsedMs);
 }
 
+static void RunFromCoreTicker(TFunction<void()> Work)
+{
+	FTickerDelegate Delegate = FTickerDelegate::CreateLambda([Work = MoveTemp(Work)](float)
+	{
+		Work();
+		return false;
+	});
+#if ENGINE_MAJOR_VERSION < 5
+	// FTicker is not thread-safe, so register it from the game thread.
+	AsyncTask(ENamedThreads::GameThread, [Delegate = MoveTemp(Delegate)]()
+	{
+		FTicker::GetCoreTicker().AddTicker(Delegate);
+	});
+#else
+	FTSTicker::GetCoreTicker().AddTicker(Delegate);
+#endif
+}
+
 // RequestLifetime is the per-call lifetime that RD terminates when the client
 // cancels or times out. We check it at two points:
 //   1. Before executing Python — skip the work entirely if already cancelled.
@@ -400,7 +418,7 @@ static JetBrains::EditorPlugin::ScriptResult RunScript(
 static void ExecuteOnGameThread(const FString& Script, int32 BudgetMs, uint64 RequestId,
                                 rd::Lifetime RequestLifetime, FScriptCallback Callback)
 {
-	AsyncTask(ENamedThreads::GameThread, [Script, BudgetMs, RequestId, RequestLifetime, Callback = MoveTemp(Callback)]()
+	RunFromCoreTicker([Script, BudgetMs, RequestId, RequestLifetime, Callback = MoveTemp(Callback)]()
 	{
 		if (RequestLifetime->is_terminated())
 			return;
@@ -478,7 +496,7 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 			const uint64 RequestId = GNextRequestId.fetch_add(1);
 			CancelOnLifetimeEnd(RequestLifetime, RequestId);
 
-			AsyncTask(ENamedThreads::GameThread,
+			RunFromCoreTicker(
 			          [Scripts, StartFrom, BudgetMs, RequestId, Task, RequestLifetime]() mutable
 			          {
 				          if (RequestLifetime->is_terminated())
