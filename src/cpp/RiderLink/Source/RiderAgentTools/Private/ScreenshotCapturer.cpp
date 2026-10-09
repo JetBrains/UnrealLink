@@ -8,6 +8,7 @@
 #include "HAL/FileManager.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
+#include "ImageUtils.h"
 #include "ILevelEditor.h"
 #include "LevelEditor.h"
 #include "Misc/DateTime.h"
@@ -30,6 +31,8 @@
 
 namespace
 {
+    constexpr int32 MAX_SCREENSHOT_SIZE = 16384;
+
     namespace EP = JetBrains::EditorPlugin;
 
     // Build a failure ScreenshotResult — collapses the positional-constructor
@@ -43,6 +46,39 @@ namespace
     EP::ScreenshotResult Ok(const FString& Path, int32 W, int32 H, const FString& SourceApi)
     {
         return EP::ScreenshotResult(/*success=*/true, Path, W, H, SourceApi, /*error=*/FString());
+    }
+
+    bool ResizeImage(TArray<FColor>& Pixels, FIntVector& ImgSize, int32 Width, int32 Height)
+    {
+        int32 DstWidth = FMath::Clamp(Width, 0, MAX_SCREENSHOT_SIZE);
+        int32 DstHeight = FMath::Clamp(Height, 0, MAX_SCREENSHOT_SIZE);
+        if (DstWidth == 0 && DstHeight == 0)
+        {
+            return true;
+        }
+
+        // Preserve aspect ratio while not overflowing any of given dimensions
+        const int32 BoxWidth = DstWidth > 0 ? DstWidth : MAX_SCREENSHOT_SIZE;
+        const int32 BoxHeight = DstHeight > 0 ? DstHeight : MAX_SCREENSHOT_SIZE;
+        const float Scale = FMath::Min(static_cast<float>(BoxWidth) / ImgSize.X, static_cast<float>(BoxHeight) / ImgSize.Y);
+        DstWidth = FMath::Clamp(FMath::RoundToInt(ImgSize.X * Scale), 1, BoxWidth);
+        DstHeight = FMath::Clamp(FMath::RoundToInt(ImgSize.Y * Scale), 1, BoxHeight);
+
+        if (DstWidth == ImgSize.X && DstHeight == ImgSize.Y)
+        {
+            return true;
+        }
+
+        TArray<FColor> Resized;
+        FImageUtils::ImageResize(ImgSize.X, ImgSize.Y, Pixels, DstWidth, DstHeight, Resized, /*bResizeSRGBinLinearSpace=*/false, /*bForceOpaqueOutput=*/false);
+        if (Resized.Num() != DstWidth * DstHeight)
+        {
+            return false;
+        }
+        Pixels = MoveTemp(Resized);
+        ImgSize.X = DstWidth;
+        ImgSize.Y = DstHeight;
+        return true;
     }
 
     // ── Filesystem -----------------------------------------------------------
@@ -93,6 +129,8 @@ namespace
     // Safe for editor-time use; expensive but bounded.
     bool CaptureWidget(
         const TSharedRef<SWidget>& Widget,
+        int32 Width,
+        int32 Height,
         TArray<FColor>& OutPixels,
         FIntVector& OutSize)
     {
@@ -106,12 +144,15 @@ namespace
             return false;
         }
         FlushRenderingCommands();
-        return OutPixels.Num() > 0 && OutSize.X > 0 && OutSize.Y > 0;
+        if (OutPixels.Num() <= 0 || OutSize.X <= 0 || OutSize.Y <= 0)
+            return false;
+
+        return ResizeImage(OutPixels, OutSize, Width, Height);
     }
 
     // ── Per-kind handlers ---------------------------------------------------
 
-    EP::ScreenshotResult CaptureEditorWindow()
+    EP::ScreenshotResult CaptureEditorWindow(int32 Width, int32 Height)
     {
         const FString Api(TEXT("SlateApplication.TakeScreenshot(SWindow)"));
         if (!FSlateApplication::IsInitialized())
@@ -141,7 +182,7 @@ namespace
 
         TArray<FColor> Pixels;
         FIntVector Size;
-        if (!CaptureWidget(Window.ToSharedRef(), Pixels, Size))
+        if (!CaptureWidget(Window.ToSharedRef(), Width, Height, Pixels, Size))
         {
             return Fail(TEXT("FSlateApplication::TakeScreenshot failed for window"), Api);
         }
@@ -154,7 +195,7 @@ namespace
         return Ok(OutPath, Size.X, Size.Y, Api);
     }
 
-    EP::ScreenshotResult CaptureViewport()
+    EP::ScreenshotResult CaptureViewport(int32 Width, int32 Height)
     {
         const FString Api(TEXT("SlateApplication.TakeScreenshot(SLevelViewport)"));
         if (!FSlateApplication::IsInitialized())
@@ -179,7 +220,7 @@ namespace
 
         TArray<FColor> Pixels;
         FIntVector Size;
-        if (!CaptureWidget(ViewportWidget.ToSharedRef(), Pixels, Size))
+        if (!CaptureWidget(ViewportWidget.ToSharedRef(), Width, Height, Pixels, Size))
         {
             return Fail(TEXT("FSlateApplication::TakeScreenshot failed for viewport"), Api);
         }
@@ -362,9 +403,9 @@ namespace
         switch (Kind)
         {
             case EP::ScreenshotKind::EditorWindow:
-                return CaptureEditorWindow();
+                return CaptureEditorWindow(Width, Height);
             case EP::ScreenshotKind::Viewport:
-                return CaptureViewport();
+                return CaptureViewport(Width, Height);
             case EP::ScreenshotKind::AssetPreview:
                 if (AssetPath.IsEmpty())
                 {
