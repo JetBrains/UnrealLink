@@ -6,6 +6,7 @@
 #include "Logging/LogMacros.h"
 #include "Logging/LogVerbosity.h"
 #include "Modules/ModuleInterface.h"
+#include "Styling/SlateTypes.h"
 #include "Templates/SharedPointer.h"
 #include "UObject/NameTypes.h"
 
@@ -32,8 +33,9 @@ private:
     void OnMainFrameCreationFinished(TSharedPtr<SWindow> InRootWindow, bool bIsRunningStartupDialog);
     void TryShowPrompt();
     void OnSetRiderClicked(FName RiderAccessorName);
-    void OnDontAskAgainClicked();
-    void OnNotNowClicked();
+    ECheckBoxState GetDontAskAgainCheckBoxState() const;
+    void OnDontAskAgainCheckBoxChanged(ECheckBoxState NewState);
+    void OnDismissClicked();
     void ClosePrompt();
 
 private:
@@ -41,4 +43,5 @@ private:
     FDelegateHandle MainFrameCreationFinishedHandle;
     TWeakPtr<SNotificationItem> PromptItem;
     bool bPromptShownThisSession = false;
+    bool bDontAskAgain = false;
 };

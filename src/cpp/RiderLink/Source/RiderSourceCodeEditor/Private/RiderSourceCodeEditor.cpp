@@ -190,13 +190,13 @@ void FRiderSourceCodeEditorModule::TryShowPrompt()
         LOCTEXT("SetRiderButtonToolTip", "Set Rider as the Source Code Editor in Editor Preferences."),
         FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::OnSetRiderClicked, RiderAccessor->GetFName())));
     Info.ButtonDetails.Add(FNotificationButtonInfo(
-        LOCTEXT("NotNowButton", "Not Now"),
-        LOCTEXT("NotNowButtonToolTip", "Keep the current Source Code Editor for this session."),
-        FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::OnNotNowClicked)));
-    Info.ButtonDetails.Add(FNotificationButtonInfo(
-        LOCTEXT("DontAskAgainButton", "Don't Ask Again"),
-        LOCTEXT("DontAskAgainButtonToolTip", "Keep the current Source Code Editor and stop showing this notification."),
-        FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::OnDontAskAgainClicked)));
+        LOCTEXT("DismissButton", "Dismiss"),
+        LOCTEXT("DismissButtonToolTip", "Keep the current Source Code Editor."),
+        FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::OnDismissClicked)));
+    Info.CheckBoxText = LOCTEXT("DontAskAgainCheckBox", "Don't ask again");
+    Info.CheckBoxState = TAttribute<ECheckBoxState>::Create(
+        TAttribute<ECheckBoxState>::FGetter::CreateRaw(this, &FRiderSourceCodeEditorModule::GetDontAskAgainCheckBoxState));
+    Info.CheckBoxStateChanged = FOnCheckStateChanged::CreateRaw(this, &FRiderSourceCodeEditorModule::OnDontAskAgainCheckBoxChanged);
 
     PromptItem = FSlateNotificationManager::Get().AddNotification(Info);
     if (const TSharedPtr<SNotificationItem> Item = PromptItem.Pin())
@@ -235,14 +235,20 @@ void FRiderSourceCodeEditorModule::OnSetRiderClicked(FName RiderAccessorName)
     PromptItem.Reset();
 }
 
-void FRiderSourceCodeEditorModule::OnDontAskAgainClicked()
+ECheckBoxState FRiderSourceCodeEditorModule::GetDontAskAgainCheckBoxState() const
 {
-    GConfig->SetBool(RiderLinkSection, SuppressPromptKey, true, GEditorSettingsIni);
-    GConfig->Flush(false, GEditorSettingsIni);
-    ClosePrompt();
+    return bDontAskAgain ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
-void FRiderSourceCodeEditorModule::OnNotNowClicked()
+void FRiderSourceCodeEditorModule::OnDontAskAgainCheckBoxChanged(ECheckBoxState NewState)
+{
+    // Save on toggle, so the choice applies whichever button closes the notification.
+    bDontAskAgain = NewState == ECheckBoxState::Checked;
+    GConfig->SetBool(RiderLinkSection, SuppressPromptKey, bDontAskAgain, GEditorSettingsIni);
+    GConfig->Flush(false, GEditorSettingsIni);
+}
+
+void FRiderSourceCodeEditorModule::OnDismissClicked()
 {
     ClosePrompt();
 }
