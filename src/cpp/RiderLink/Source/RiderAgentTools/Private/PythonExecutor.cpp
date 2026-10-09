@@ -4,7 +4,7 @@
 #include "RiderLogMacros.h"
 #include "IPythonScriptPlugin.h"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
-#include "Async/Async.h"
+#include "Containers/Ticker.h"
 #include "HAL/PlatformAtomics.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/GarbageCollection.h"
@@ -159,7 +159,7 @@ static void ConfigureCommand(FPythonCommandEx& Cmd, const FString& Script, bool 
 
 // Release Python's UObject refs and schedule engine GC — but NEVER collect synchronously.
 //
-// This runs inside an AsyncTask(GameThread) callback, which is not a guaranteed GC-safe
+// This runs inside a core ticker callback, which is not a guaranteed GC-safe
 // point. An inline CollectGarbage() can purge objects still mid-fixup after a Live Coding
 // re-instance (e.g. a re-instanced character's TArray<TSubclassOf<UGameplayAbility>>),
 // freeing memory that is then read through a dangling pointer → 0xC0000005 access violation.
@@ -392,6 +392,23 @@ static JetBrains::EditorPlugin::ScriptResult RunScript(
 	return ScriptResult(bSuccess, MoveTemp(Output), MoveTemp(Result), MoveTemp(Error), bAborted, ElapsedMs);
 }
 
+// Scripts must not run from AsyncTask(GameThread): any game-thread wait on the task graph
+// (FGraphEvent::Wait, ProcessThreadUntilRequestReturn, ...) services that queue, so a script
+// can run in the middle of another system's tick. For example, UMassEntityEditorSubsystem::Tick
+// waits on the main game-thread queue when mass.UseProcessingQueue is off; a script that ends up
+// adding Editor Data Storage rows (e.g. through a source control state update) then calls the
+// synchronous Mass API during processing and fails its check. The core ticker only fires from
+// the engine loop, outside those waits.
+static void RunOnGameThreadFromEngineLoop(TUniqueFunction<void()>&& Work)
+{
+	FTSTicker::GetCoreTicker().AddTicker(TEXT("RiderAgentTools.PythonExecutor"), 0.0f,
+		[Work = MoveTemp(Work)](float)
+		{
+			Work();
+			return false;
+		});
+}
+
 // RequestLifetime is the per-call lifetime that RD terminates when the client
 // cancels or times out. We check it at two points:
 //   1. Before executing Python — skip the work entirely if already cancelled.
@@ -400,7 +417,7 @@ static JetBrains::EditorPlugin::ScriptResult RunScript(
 static void ExecuteOnGameThread(const FString& Script, int32 BudgetMs, uint64 RequestId,
                                 rd::Lifetime RequestLifetime, FScriptCallback Callback)
 {
-	AsyncTask(ENamedThreads::GameThread, [Script, BudgetMs, RequestId, RequestLifetime, Callback = MoveTemp(Callback)]()
+	RunOnGameThreadFromEngineLoop([Script, BudgetMs, RequestId, RequestLifetime, Callback = MoveTemp(Callback)]()
 	{
 		if (RequestLifetime->is_terminated())
 			return;
@@ -478,7 +495,7 @@ void PythonExecutor::BindTo(rd::Lifetime ModelLifetime, JetBrains::EditorPlugin:
 			const uint64 RequestId = GNextRequestId.fetch_add(1);
 			CancelOnLifetimeEnd(RequestLifetime, RequestId);
 
-			AsyncTask(ENamedThreads::GameThread,
+			RunOnGameThreadFromEngineLoop(
 			          [Scripts, StartFrom, BudgetMs, RequestId, Task, RequestLifetime]() mutable
 			          {
 				          if (RequestLifetime->is_terminated())
