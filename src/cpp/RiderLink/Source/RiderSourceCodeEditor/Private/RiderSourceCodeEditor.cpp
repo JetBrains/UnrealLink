@@ -12,9 +12,11 @@
 #include "ISourceCodeAccessModule.h"
 #include "ISourceCodeAccessor.h"
 #include "Interfaces/IMainFrameModule.h"
+#include "Misc/App.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Modules/ModuleManager.h"
 #include "SourceCodeNavigation.h"
+#include "Styling/SlateTypes.h"
 #include "UObject/Class.h"
 #include "UObject/UObjectGlobals.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -79,6 +81,15 @@ namespace
 
         return RiderAccessors.Num() > 0 ? RiderAccessors[0] : nullptr;
     }
+
+    // Not bound to the module object, because the notification keeps this delegate for a few seconds
+    // after the prompt closes.
+    // Save on toggle, so the choice applies whichever button closes the notification.
+    void OnDontAskAgainCheckBoxChanged(ECheckBoxState NewState)
+    {
+        GConfig->SetBool(RiderLinkSection, SuppressPromptKey, NewState == ECheckBoxState::Checked, GEditorSettingsIni);
+        GConfig->Flush(false, GEditorSettingsIni);
+    }
 }
 
 void FRiderSourceCodeEditorModule::StartupModule()
@@ -96,8 +107,14 @@ void FRiderSourceCodeEditorModule::StartupModule()
         [this](rd::Lifetime ModelLifetime, RdEditorModel const& Model)
         {
             // ViewModel handlers run on the RiderLink scheduler thread; Slate and the accessor need the game thread.
-            AsyncTask(ENamedThreads::GameThread, [this]()
+            AsyncTask(ENamedThreads::GameThread, [this, ModelLifetime]()
             {
+                // ModelLifetime is nested in ModuleLifetime, which ShutdownModule terminates on the game thread,
+                // so this skips tasks queued before ShutdownModule or before Rider disconnected.
+                if (ModelLifetime->is_terminated())
+                {
+                    return;
+                }
                 OnRiderConnected();
             });
         }
@@ -152,7 +169,14 @@ void FRiderSourceCodeEditorModule::OnMainFrameCreationFinished(TSharedPtr<SWindo
 void FRiderSourceCodeEditorModule::TryShowPrompt()
 {
     // Rider can reconnect several times per editor session; ask once.
-    if (bPromptShownThisSession || !FSlateApplication::IsInitialized())
+    // Unattended sessions have no one to answer a prompt that never expires.
+    if (bPromptShownThisSession || FApp::IsUnattended() || GIsRunningUnattendedScript || !FSlateApplication::IsInitialized())
+    {
+        return;
+    }
+
+    // Without a project, the main frame is the Project Browser, and opening a project starts a new session.
+    if (!FApp::HasProjectName())
     {
         return;
     }
@@ -185,6 +209,8 @@ void FRiderSourceCodeEditorModule::TryShowPrompt()
         LOCTEXT("PromptText", "Rider is connected, but the Source Code Editor is {0}."),
         CurrentAccessor.GetNameText()));
     Info.bFireAndForget = false;
+    // The text constructor enables the throbber, which reads as a running operation.
+    Info.bUseThrobber = false;
     Info.ButtonDetails.Add(FNotificationButtonInfo(
         LOCTEXT("SetRiderButton", "Use Rider"),
         LOCTEXT("SetRiderButtonToolTip", "Set Rider as the Source Code Editor in Editor Preferences."),
@@ -192,11 +218,10 @@ void FRiderSourceCodeEditorModule::TryShowPrompt()
     Info.ButtonDetails.Add(FNotificationButtonInfo(
         LOCTEXT("DismissButton", "Dismiss"),
         LOCTEXT("DismissButtonToolTip", "Keep the current Source Code Editor."),
-        FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::OnDismissClicked)));
+        FSimpleDelegate::CreateRaw(this, &FRiderSourceCodeEditorModule::ClosePrompt)));
+    // CheckBoxState keeps its unbound Unchecked default, so the checkbox tracks its own state.
     Info.CheckBoxText = LOCTEXT("DontAskAgainCheckBox", "Don't ask again");
-    Info.CheckBoxState = TAttribute<ECheckBoxState>::Create(
-        TAttribute<ECheckBoxState>::FGetter::CreateRaw(this, &FRiderSourceCodeEditorModule::GetDontAskAgainCheckBoxState));
-    Info.CheckBoxStateChanged = FOnCheckStateChanged::CreateRaw(this, &FRiderSourceCodeEditorModule::OnDontAskAgainCheckBoxChanged);
+    Info.CheckBoxStateChanged = FOnCheckStateChanged::CreateStatic(&OnDontAskAgainCheckBoxChanged);
 
     PromptItem = FSlateNotificationManager::Get().AddNotification(Info);
     if (const TSharedPtr<SNotificationItem> Item = PromptItem.Pin())
@@ -208,6 +233,7 @@ void FRiderSourceCodeEditorModule::TryShowPrompt()
 
 void FRiderSourceCodeEditorModule::OnSetRiderClicked(FName RiderAccessorName)
 {
+    // Same steps as FSourceCodeNavigation::SetPreferredAccessor, which UE4 does not have.
     GConfig->SetString(SourceCodeAccessSettingsPath, PreferredAccessorKey, *RiderAccessorName.ToString(), GEditorSettingsIni);
     GConfig->Flush(false, GEditorSettingsIni);
 
@@ -233,24 +259,6 @@ void FRiderSourceCodeEditorModule::OnSetRiderClicked(FName RiderAccessorName)
         Item->ExpireAndFadeout();
     }
     PromptItem.Reset();
-}
-
-ECheckBoxState FRiderSourceCodeEditorModule::GetDontAskAgainCheckBoxState() const
-{
-    return bDontAskAgain ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
-
-void FRiderSourceCodeEditorModule::OnDontAskAgainCheckBoxChanged(ECheckBoxState NewState)
-{
-    // Save on toggle, so the choice applies whichever button closes the notification.
-    bDontAskAgain = NewState == ECheckBoxState::Checked;
-    GConfig->SetBool(RiderLinkSection, SuppressPromptKey, bDontAskAgain, GEditorSettingsIni);
-    GConfig->Flush(false, GEditorSettingsIni);
-}
-
-void FRiderSourceCodeEditorModule::OnDismissClicked()
-{
-    ClosePrompt();
 }
 
 void FRiderSourceCodeEditorModule::ClosePrompt()
