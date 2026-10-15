@@ -101,10 +101,10 @@ void FRiderLoggingModule::StartupModule()
 	ModuleLifetimeDef.lifetime->bracket(
 	[this]()
 	{
-		OutputDevice.Setup([this](const TCHAR* msg, ELogVerbosity::Type Type, const FName& Name)
+		OutputDevice.Setup([this](const TCHAR* msg, ELogVerbosity::Type Type, const FName& Name, const FDateTime& Time)
 		{
 			if (Type > ELogVerbosity::All) return;
-			int64 Seconds = FDateTime::UtcNow().ToUnixTimestamp();
+			int64 Seconds = Time.ToUnixTimestamp();
 			const FString PlainName = Name.GetPlainNameString();
 			const JetBrains::EditorPlugin::LogMessageInfo MessageInfo{Type, PlainName, rd::DateTime(Seconds)};
 			
