@@ -3,15 +3,18 @@
 #include "Misc/OutputDevice.h"
 #include "Delegates/Delegate.h"
 #include "Logging/LogVerbosity.h"
+#include "Misc/DateTime.h"
 #include "Runtime/Launch/Resources/Version.h"
+
+#define RIDER_HAS_SERIALIZE_RECORD (ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2))
 
 using FOnSerializeMessage =
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
-	TBaseDelegate<void, const TCHAR*, ELogVerbosity::Type, const FName&>;
+	TBaseDelegate<void, const TCHAR*, ELogVerbosity::Type, const FName&, const FDateTime&>;
 #elif ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
-	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&)>;
+	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, const FDateTime&)>;
 #else
-	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&), FDefaultTSDelegateUserPolicy>;
+	TDelegate<void(const TCHAR*, ELogVerbosity::Type, const FName&, const FDateTime&), FDefaultTSDelegateUserPolicy>;
 #endif
 
 class FRiderOutputDevice : public FOutputDevice {
@@ -23,8 +26,12 @@ public:
 protected:
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category) override;
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category, double Time) override;
+#if RIDER_HAS_SERIALIZE_RECORD
+	virtual void SerializeRecord(const UE::FLogRecord& Record) override;
+#endif
 
 private:
+	void Broadcast(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category, const FDateTime& Time);
 	FOnSerializeMessage onSerializeMessage;
 	FCriticalSection CriticalSection;
 };
