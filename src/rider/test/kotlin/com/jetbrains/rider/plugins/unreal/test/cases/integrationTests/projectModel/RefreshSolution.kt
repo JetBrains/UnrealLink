@@ -7,6 +7,7 @@ import com.jetbrains.rider.ijent.extensions.toRd
 import com.jetbrains.rider.model.RdFsRefreshRequest
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
+import com.jetbrains.rider.test.annotations.Mute
 import com.jetbrains.rider.test.annotations.Solution
 import com.jetbrains.rider.test.annotations.Subsystem
 import com.jetbrains.rider.test.annotations.TestEnvironment
@@ -36,6 +37,7 @@ class RefreshSolution : UnrealTestLevelProject() {
   @SlnOnly
   @Solution(RiderTestSolution.Unreal.EmptyUProject)
   @UnrealCombinations
+  @Mute("RIDER-133309", specificParameters = ["Sln4_27"])
   @ChecklistItems(["Project Model/Refresh Solution"])
   fun refreshSolution(e: UnrealEnvironment) {
     withDump {
