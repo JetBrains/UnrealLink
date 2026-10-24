@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JetBrains.HabitatDetector;
 using JetBrains.Lifetimes;
@@ -30,25 +28,14 @@ namespace RiderPlugin.UnrealLink.Utils
         {
             lock (HACK_getMutexForUBT())
             {
-                using var processLifetimeDefinition = Lifetime.Define(lifetime, "RunCommandWithTimeout");
-                using var timeoutCanceler = new CancellationTokenSource();
-                var timedOut = false;
-                Task.Delay(timeout, timeoutCanceler.Token).ContinueWith(_ =>
-                {
-                    timedOut = true;
-                    logger?.Warn($"[UnrealLink]: The process did not exit in {timeout}, killing it");
-                    processLifetimeDefinition.Terminate();
-                }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
+                var processLifetime = lifetime.CreateTerminatedAfter(timeout);
+                exitCode = InvokeChildProcess.InvokeCore(processLifetime, startinfo,
+                    InvokeChildProcess.SyncAsync.Sync, logger).Result;
 
-                try
-                {
-                    exitCode = InvokeChildProcess.InvokeCore(processLifetimeDefinition.Lifetime, startinfo,
-                        InvokeChildProcess.SyncAsync.Sync, logger).Result;
-                }
-                finally
-                {
-                    timeoutCanceler.Cancel();
-                }
+                // Only the timeout terminates the process lifetime while the outer lifetime is still alive.
+                var timedOut = processLifetime.IsNotAlive && lifetime.IsAlive;
+                if (timedOut)
+                    logger?.Warn($"[UnrealLink]: The process did not exit in {timeout}, it was killed");
 
                 return !timedOut;
             }
