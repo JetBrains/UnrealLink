@@ -47,14 +47,6 @@ enum class PluginInstallMethod(val useExtract: Boolean) {
  * (engine, openMode) class-template invocation — see [UnrealLinkInstallation].
  */
 data class InstallCase(val location: PluginInstallLocation, val installMethod: PluginInstallMethod) {
-  /**
-   * No ", " here: `RiderJUnit5TeamCityListener.getTestName` builds the reported name from the enclosing
-   * class-template invocation (`Uproject5_7`) plus this string, with no separator between them, to
-   * match the legacy TestNG-style name (`ul("Uproject5_7Game")`). A ", " inside this string would still
-   * be safe here — `getTestName` reads a `@ParameterizedTest(name = "{0}")` invocation's `displayName`,
-   * which already carries only this one argument — but earlier `@TestTemplate`-based code depended on
-   * a stricter no-comma rule, so this keeps the same convention.
-   */
   override fun toString(): String = "$location" + (if (installMethod == PluginInstallMethod.Extract) "Extract" else "")
 }
 
