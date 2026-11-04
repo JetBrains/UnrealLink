@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Tag
 @Solution(RiderTestSolution.Unreal.EmptyUProject)
 class PlayButtons : UnrealLinkClassLevelBase() {
   /**
-   * Set here rather than in a `@BeforeEach`: [UnrealClassLevelProject.ensureUnrealSolutionOpen][com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject.ensureUnrealSolutionOpen] —
+   * Set here rather than in a `@BeforeEach`: [UnrealClassLevelProject.ensureUnrealSolutionOpen][com.jetbrains.rider.test.unreal.UnrealClassLevelProject.ensureUnrealSolutionOpen] —
    * the superclass `@BeforeEach` that opens the solution — always runs before this class's own
    * `@BeforeEach` methods, so a `@BeforeEach` here would set the flag one solution-open too late.
    * [beforeOpenSolution] runs synchronously inside that same open, before the `.uproject` file is
