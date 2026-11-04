@@ -8,7 +8,7 @@ import com.jetbrains.rider.plugins.unreal.model.frontendBackend.InstallPluginDes
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.PluginInstallLocation
 import com.jetbrains.rider.plugins.unreal.model.frontendBackend.rdRiderModel
 import com.jetbrains.rider.projectView.solution
-import com.jetbrains.rider.test.junit5.unreal.UnrealClassLevelProject
+import com.jetbrains.rider.test.unreal.UnrealClassLevelProject
 import com.jetbrains.rider.test.scriptingApi.collectAndPublishDumpsToArtifacts
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import org.junit.jupiter.api.AfterEach
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 /**
  * RiderLink install/uninstall shared by every [UnrealClassLevelProject]-rooted UnrealLink test.
  *
- * [UnrealLinkBase] is the same thing for [UnrealTestLevelProject][com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject]-rooted
+ * [UnrealLinkBase] is the same thing for [UnrealTestLevelProject][com.jetbrains.rider.test.unreal.UnrealTestLevelProject]-rooted
  * tests. The two roots share no fitting common ancestor for this, hence a separate base here rather
  * than reusing [UnrealLinkBase].
  */
@@ -32,7 +32,7 @@ abstract class UnrealLinkClassLevelBase : UnrealClassLevelProject() {
    * the test just used, so the next combination starts from a plugin-free project either way.
    *
    * [cleanUpUnrealCaches] also has to be called explicitly here: [UnrealClassLevelProject] never calls
-   * it (only [com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject.testTeardown] does, for the
+   * it (only [com.jetbrains.rider.test.unreal.UnrealTestLevelProject.testTeardown] does, for the
    * per-test lifecycle these classes no longer use).
    *
    * [stopRiderLinkInstall] goes first. A plugin delete must not run while UAT still builds into the plugin folder.
