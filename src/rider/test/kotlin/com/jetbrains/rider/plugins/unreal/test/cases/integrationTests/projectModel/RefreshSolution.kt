@@ -23,8 +23,8 @@ import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
 import com.jetbrains.rider.test.unreal.SlnOnly
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
-import com.jetbrains.rider.test.junit5.unreal.UnrealCombinations
-import com.jetbrains.rider.test.junit5.unreal.UnrealTestLevelProject
+import com.jetbrains.rider.test.unreal.UnrealCombinations
+import com.jetbrains.rider.test.unreal.UnrealTestLevelProject
 import java.time.Duration
 import org.junit.jupiter.api.Tag
 
