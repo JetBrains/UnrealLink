@@ -66,6 +66,7 @@ public class RiderAgentTools : ModuleRules
             "CoreUObject",
             "Engine",
             "ImageWrapper",
+            "InputCore",
             "Json",
             "JsonUtilities",
             "PythonScriptPlugin",

@@ -1,6 +1,7 @@
 #include "RiderAgentTools.hpp"
 #include "RiderLogMacros.h"
 #include "AssetRegistrySearcher.hpp"
+#include "PromptGestureProcessor.hpp"
 #include "PythonExecutor.hpp"
 #include "SceneActorSpawner.hpp"
 #include "ScreenshotCapturer.hpp"
@@ -27,10 +28,12 @@ void FRiderAgentToolsModule::StartupModule()
             ViewportCameraController::BindTo(ModelLifetime, Model);
             SceneActorSpawner::BindTo(ModelLifetime, Model);
         });
+    PromptGestureProcessor = FPromptGestureProcessor::Register();
 }
 
 void FRiderAgentToolsModule::ShutdownModule()
 {
+    FPromptGestureProcessor::Unregister(PromptGestureProcessor);
     ModuleLifetimeDef.terminate();
 }
 

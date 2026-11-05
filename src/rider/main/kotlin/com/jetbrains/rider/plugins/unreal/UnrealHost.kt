@@ -67,6 +67,8 @@ class UnrealHost(val project: Project) {
 
     class ProtocolListener : SolutionExtListener<RdRiderModel> {
         override fun extensionCreated(lifetime: Lifetime, session: ClientProjectSession, model: RdRiderModel) {
+            model.riderProcessId.set(ProcessHandle.current().pid())
+
             model.allowSetForegroundWindow.set { _, id ->
                 if (SystemInfo.isWindows) {
                     return@set if (!user32!!.AllowSetForegroundWindow(id)) {

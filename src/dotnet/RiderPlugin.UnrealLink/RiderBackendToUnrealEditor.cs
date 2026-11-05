@@ -224,6 +224,8 @@ namespace RiderPlugin.UnrealLink
 
             unrealModel.NotificationReplyFromEditor.Advise(lf, myUnrealHost.myModel.NotificationReplyFromEditor);
 
+            unrealModel.RequestPrompt.Advise(lf, myUnrealHost.myModel.RequestPrompt);
+
             unrealModel.IsGameControlModuleInitialized.Advise(lf,
                 myUnrealHost.myModel.IsGameControlModuleInitialized.Set);
 
@@ -240,6 +242,8 @@ namespace RiderPlugin.UnrealLink
 
             myUnrealHost.PerformModelAction(riderModel =>
             {
+                riderModel.RiderProcessId.Advise(lf, pid => unrealModel.RiderProcessId.SetValue(pid) );
+
                 riderModel.FilterLinkCandidates.SetAsync((_, candidates) =>
                     RdTask.Successful(candidates
                         .Select(request => myLinkResolver.ResolveLink(request, unrealModel.IsBlueprintPathName))

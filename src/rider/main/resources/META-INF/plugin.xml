@@ -201,6 +201,7 @@ Path to old plugin:</code></pre>
 
     <content namespace="jetbrains">
         <module name="intellij.rider.plugins.unreal.link.mcp"/>
+        <module name="intellij.rider.plugins.unreal.link.air.integration"/>
     </content>
 
     <extensions defaultExtensionNs="rider.cpp">

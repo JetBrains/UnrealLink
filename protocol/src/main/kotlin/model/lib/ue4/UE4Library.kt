@@ -408,5 +408,14 @@ object UE4Library : Root() {
         // Human-readable diagnostic. Empty on success.
         field("error", FString)
     }
+
+    val PromptRequestKind = enum("PromptRequestKind") {
+        +"Overlay"
+        +"InRider"
+    }
+
+    val PromptContext = structdef("PromptContext") {
+        field("kind", PromptRequestKind)
+    }
 }
 

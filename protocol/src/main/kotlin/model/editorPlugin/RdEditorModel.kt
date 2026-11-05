@@ -22,6 +22,8 @@ object RdEditorRoot : Root() {
 @Suppress("unused")
 object RdEditorModel : Ext(RdEditorRoot) {
     init {
+        property("riderProcessId", long)
+
         property("connectionInfo", UE4Library.ConnectionInfo).readonly
 
         signal("unrealLog", UE4Library.UnrealLogEvent).async
@@ -77,5 +79,7 @@ object RdEditorModel : Ext(RdEditorRoot) {
         // Scene actor spawn — C# forwards from RdRiderModel.spawnActor;
         // C++ binds in SceneActorSpawner using UEditorActorSubsystem on the game thread.
         call("spawnActor", UE4Library.SpawnActorRequest, UE4Library.SpawnActorResponse).async
+
+        sink("requestPrompt", UE4Library.PromptContext)
     }
 }

@@ -240,6 +240,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
     init {
         property("editorId", 0).readonly.async
+        property("riderProcessId", long)
 
         signal("unrealLog", UE4Library.UnrealLogEvent)
 
@@ -318,5 +319,7 @@ object RdRiderModel : Ext(SolutionModel.Solution) {
 
         // Scene actor spawn — Rider→UE direction; C# backend forwards to RdEditorModel.spawnActor.
         call("spawnActor",            UnrealSpawnActorRequest,         UnrealSpawnActorResponse).async
+
+        sink("requestPrompt", UE4Library.PromptContext)
     }
 }
