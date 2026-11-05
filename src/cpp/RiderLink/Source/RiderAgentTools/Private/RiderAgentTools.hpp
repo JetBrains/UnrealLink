@@ -3,6 +3,8 @@
 #include "Modules/ModuleInterface.h"
 #include "lifetime/LifetimeDefinition.h"
 
+class FPromptGestureProcessor;
+
 DECLARE_LOG_CATEGORY_EXTERN(FLogRiderAgentToolsModule, Log, All);
 
 class FRiderAgentToolsModule final : public IModuleInterface
@@ -13,4 +15,5 @@ public:
 
 private:
     rd::LifetimeDefinition ModuleLifetimeDef;
+    TSharedPtr<FPromptGestureProcessor> PromptGestureProcessor;
 };

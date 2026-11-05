@@ -26,4 +26,6 @@ public:
 	virtual void QueueAction(TFunction<void()> Handler) = 0;
 	virtual bool FireAsyncAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) = 0;
 	virtual void QueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) = 0;
+	/** Returns true if at the moment of calling this method the model was alive, false otherwise. */
+	virtual bool TryQueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler) = 0;
 };

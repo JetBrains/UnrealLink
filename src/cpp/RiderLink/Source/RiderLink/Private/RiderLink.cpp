@@ -123,6 +123,18 @@ void FRiderLinkModule::QueueModelAction(TFunction<void(JetBrains::EditorPlugin::
 	});
 }
 
+bool FRiderLinkModule::TryQueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler)
+{
+	{
+		FRWScopeLock Lock(ModelLock, SLT_ReadOnly);
+		if(!RdIsModelAlive.has_value() || !RdIsModelAlive.get())
+			return false;
+	}
+
+	QueueModelAction(Handler);
+	return true;
+}
+
 void FRiderLinkModule::QueueAction(TFunction<void()> Handler)
 {
 	Scheduler.invoke_or_queue([this, Handler]
