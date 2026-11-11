@@ -28,10 +28,7 @@ import org.junit.jupiter.api.Test
 class RiderLinkNotification : UnrealLinkClassLevelBase() {
   /**
    * A no-op override: this class runs one test per (engine, openMode) combination, so there is no
-   * next case in the same combination that needs the project files restored. The default
-   * implementation would also fail here — [installNotification] itself closes and reopens the
-   * solution with [reopenSolution], and the default restore's `closeAllOpenedEditors(project)` then
-   * throws `AlreadyDisposedException` on the pre-reopen `Project` instance it captured.
+   * next case in the same combination that needs the project files restored.
    */
   override fun restoreInitialProjectState() {}
 
@@ -48,7 +45,7 @@ class RiderLinkNotification : UnrealLinkClassLevelBase() {
  
     installRiderLink(PluginInstallLocation.Game)
 
-    reopenSolution(project, Duration.ofMinutes(3))
+    project = reopenSolution(project, Duration.ofMinutes(3))
 
     NotificationsManager.getNotificationsManager().getNotificationsOfType(Notification::class.java,
                                                                           project).none { it.groupId == "OutOfSyncConnection" }.shouldBeTrue()
