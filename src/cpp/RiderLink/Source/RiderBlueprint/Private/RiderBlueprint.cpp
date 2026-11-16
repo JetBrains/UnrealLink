@@ -44,6 +44,31 @@ static void AllowSetForeGroundForEditor(JetBrains::EditorPlugin::RdEditorModel c
     }
 }
 
+bool FRiderBlueprintModule::DrainPendingOpens(float /*DeltaTime*/)
+{
+    if (PendingOpens.IsEmpty())
+        return true;
+
+    auto Window = FGlobalTabmanager::Get()->GetRootWindow();
+    if (!Window.IsValid()) return true;
+
+    if (Window->IsWindowMinimized())
+    {
+        Window->Restore();
+    }
+    else
+    {
+        Window->HACK_ForceToFront();
+    }
+
+    FPendingOpen Open;
+    while (PendingOpens.Dequeue(Open))
+    {
+        BluePrintProvider::OpenBlueprint(Open.AssetPathName, Open.AssetGuid, MessageEndpoint);
+    }
+    return true;
+}
+
 void FRiderBlueprintModule::StartupModule()
 {
     RIDERLINK_LOG(FLogRiderBlueprintModule, Verbose, "STARTUP START");
@@ -54,6 +79,12 @@ void FRiderBlueprintModule::StartupModule()
         (AssetRegistryConstants::ModuleName);
 
     MessageEndpoint = FMessageEndpoint::Builder(FName("FAssetEditorManager")).Build();
+
+#if ENGINE_MAJOR_VERSION >= 5
+    OpenTicker = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FRiderBlueprintModule::DrainPendingOpens));
+#else
+    OpenTicker = FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FRiderBlueprintModule::DrainPendingOpens));
+#endif
 
     AssetRegistryModule->Get().OnAssetAdded().AddLambda([](const FAssetData& AssetData) {
         // TO-DO: Fix loading uasset's on 4.23-
@@ -70,19 +101,7 @@ void FRiderBlueprintModule::StartupModule()
                 try
                 {
                     AllowSetForeGroundForEditor(UnrealToBackendModel);
-
-                    auto Window = FGlobalTabmanager::Get()->GetRootWindow();
-                    if (!Window.IsValid()) return;
-
-                    if (Window->IsWindowMinimized())
-                    {
-                        Window->Restore();
-                    }
-                    else
-                    {
-                        Window->HACK_ForceToFront();
-                    }
-                    BluePrintProvider::OpenBlueprint(s, MessageEndpoint);
+                    PendingOpens.Enqueue(FPendingOpen{ s.get_pathName(), s.get_guid() });
                 }
                 catch (std::exception const& e)
                 {
@@ -103,6 +122,12 @@ void FRiderBlueprintModule::ShutdownModule()
 {
     RIDERLINK_LOG(FLogRiderBlueprintModule, Verbose, "SHUTDOWN START");
     ModuleLifetimeDef.terminate();
+#if ENGINE_MAJOR_VERSION >= 5
+    FTSTicker::RemoveTicker(OpenTicker);
+#else
+    FTicker::GetCoreTicker().RemoveTicker(OpenTicker);
+#endif
+    OpenTicker.Reset();
     RIDERLINK_LOG(FLogRiderBlueprintModule, Verbose, "SHUTDOWN FINISH");
 }
 

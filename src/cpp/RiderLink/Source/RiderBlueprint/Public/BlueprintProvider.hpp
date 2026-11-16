@@ -2,14 +2,6 @@
 
 #include "Delegates/Delegate.h"
 
-namespace JetBrains
-{
-    namespace EditorPlugin
-    {
-        class BlueprintReference;
-    }
-}
-
 struct FAssetData;
 class FMessageEndpoint;
 class UBlueprint;
@@ -21,5 +13,6 @@ public:
 
     static bool IsBlueprint(FString const& pathName);
 
-    static void OpenBlueprint(JetBrains::EditorPlugin::BlueprintReference const& path, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint);
+    // Opens the Blueprint editor on the calling thread
+    static void OpenBlueprint(FString const& AssetPathName, FString const& AssetGuidString, TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> const& messageEndpoint);
 };
