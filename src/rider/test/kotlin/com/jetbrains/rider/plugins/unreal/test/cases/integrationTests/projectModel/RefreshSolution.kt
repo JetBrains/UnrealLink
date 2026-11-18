@@ -21,6 +21,8 @@ import com.jetbrains.rider.test.scriptingApi.copyAdditionalPluginToProject
 import com.jetbrains.rider.test.scriptingApi.waitPumping
 import com.jetbrains.rider.test.shared.constants.TeamCityTags
 import com.jetbrains.rider.test.suplementary.RiderTestSolution
+import com.jetbrains.rider.test.unreal.LatestEngineOnly
+import com.jetbrains.rider.test.unreal.OpenSlnFile
 import com.jetbrains.rider.test.unreal.SlnOnly
 import com.jetbrains.rider.test.unreal.UnrealEnvironment
 import com.jetbrains.rider.test.unreal.UnrealCombinations
@@ -39,7 +41,18 @@ class RefreshSolution : UnrealTestLevelProject() {
   @UnrealCombinations
   @Mute("RIDER-133309", specificParameters = ["Sln4_27"])
   @ChecklistItems(["Project Model/Refresh Solution"])
-  fun refreshSolution(e: UnrealEnvironment) {
+  fun refreshSolution(e: UnrealEnvironment) = doRefreshSolution()
+
+  /** The same check on the `.sln` file, which the engine writes next to the `.slnx` file. */
+  @SlnOnly
+  @LatestEngineOnly
+  @OpenSlnFile
+  @Solution(RiderTestSolution.Unreal.EmptyUProject)
+  @UnrealCombinations
+  @ChecklistItems(["Project Model/Refresh Solution"])
+  fun refreshSolutionFromSln(e: UnrealEnvironment) = doRefreshSolution()
+
+  private fun doRefreshSolution() {
     withDump {
       dumpProfile.dumpDirList.clear()
       dumpProfile.dumpDirList.add(activeSolutionDirectory.resolve("Intermediate/ProjectFiles"))
