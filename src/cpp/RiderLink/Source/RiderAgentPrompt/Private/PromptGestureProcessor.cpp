@@ -1,6 +1,6 @@
 #include "PromptGestureProcessor.hpp"
 
-#include "RiderAgentTools.hpp"
+#include "RiderAgentPrompt.h"
 #include "RiderLogMacros.h"
 #include "IRiderLink.hpp"
 #include "RdEditorModel/RdEditorModel.Pregenerated.h"
@@ -10,6 +10,7 @@
 #include "HAL/PlatformTime.h"
 #include "InputCoreTypes.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "Widgets/SViewport.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -33,6 +34,12 @@ namespace
             && !KeyEvent.IsCommandDown();
     }
 
+    bool IsGameViewportFocused(const FSlateApplication& SlateApp)
+    {
+        const TSharedPtr<SViewport> GameViewport = SlateApp.GetGameViewport();
+        return GameViewport.IsValid() && GameViewport->HasAnyUserFocusOrFocusedDescendants();
+    }
+
     void ShowNotConnectedNotification()
     {
 #if ENGINE_MAJOR_VERSION >= 5
@@ -50,7 +57,7 @@ namespace
     /** Call on the game thread. */
     void RequestPrompt()
     {
-        RIDERLINK_LOG(FLogRiderAgentToolsModule, Verbose, "Ctrl+Ctrl: requesting the prompt overlay");
+        RIDERLINK_LOG(FLogRiderAgentPromptModule, Verbose, "Ctrl+Ctrl: requesting the prompt overlay");
         const bool bQueued = IRiderLinkModule::Get().TryQueueModelAction([](JetBrains::EditorPlugin::RdEditorModel const& Model)
         {
 #if PLATFORM_WINDOWS
@@ -62,7 +69,7 @@ namespace
             }
             else
             {
-                RIDERLINK_LOG(FLogRiderAgentToolsModule, Verbose,
+                RIDERLINK_LOG(FLogRiderAgentPromptModule, Verbose,
                     "Rider process id is not received yet, skipping foreground window permission");
             }
 #endif
@@ -71,7 +78,7 @@ namespace
 
         if (!bQueued)
         {
-            RIDERLINK_LOG(FLogRiderAgentToolsModule, Verbose, "Ctrl+Ctrl: Rider is not connected, showing a notification");
+            RIDERLINK_LOG(FLogRiderAgentPromptModule, Verbose, "Ctrl+Ctrl: Rider is not connected, showing a notification");
             ShowNotConnectedNotification();
         }
     }
@@ -81,7 +88,7 @@ TSharedPtr<FPromptGestureProcessor> FPromptGestureProcessor::Register()
 {
     if (!FSlateApplication::IsInitialized())
     {
-        RIDERLINK_LOG(FLogRiderAgentToolsModule, Warning, "Slate is not initialized. The Ctrl+Ctrl prompt gesture is not available.");
+        RIDERLINK_LOG(FLogRiderAgentPromptModule, Warning, "Slate is not initialized. The Ctrl+Ctrl prompt gesture is not available.");
         return nullptr;
     }
     TSharedPtr<FPromptGestureProcessor> Processor = MakeShared<FPromptGestureProcessor>();
@@ -98,14 +105,14 @@ void FPromptGestureProcessor::Unregister(TSharedPtr<FPromptGestureProcessor>& Pr
     Processor.Reset();
 }
 
-bool FPromptGestureProcessor::HandleKeyDownEvent(FSlateApplication&, const FKeyEvent& InKeyEvent)
+bool FPromptGestureProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
     if (InKeyEvent.IsRepeat())
     {
         return false;
     }
 
-    if (!IsBareCtrlPress(InKeyEvent))
+    if (!IsBareCtrlPress(InKeyEvent) || IsGameViewportFocused(SlateApp))
     {
         LastCtrlTapTime = 0.0;
         return false;
@@ -125,6 +132,12 @@ bool FPromptGestureProcessor::HandleKeyDownEvent(FSlateApplication&, const FKeyE
 }
 
 bool FPromptGestureProcessor::HandleMouseButtonDownEvent(FSlateApplication&, const FPointerEvent&)
+{
+    LastCtrlTapTime = 0.0;
+    return false;
+}
+
+bool FPromptGestureProcessor::HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent&, const FPointerEvent*)
 {
     LastCtrlTapTime = 0.0;
     return false;

@@ -71,6 +71,17 @@
 			"Name": "RiderAgentTools",
 			"Type": "EditorNoCommandlet",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "RiderAgentPrompt",
+			"Type": "EditorNoCommandlet",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			],
+			"WhitelistPlatforms": [
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [
