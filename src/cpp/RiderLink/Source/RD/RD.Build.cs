@@ -19,7 +19,10 @@ public class RD : ModuleRules
 		bEnforceIWYU = false;
 #endif
 
-#if UE_5_6_OR_LATER
+#if UE_6_0_OR_LATER
+		// UE 6.0 engine headers use C++23 features such as `if consteval`
+		CppStandard = CppStandardVersion.Cpp23;
+#elif UE_5_6_OR_LATER
 		CppStandard = CppStandardVersion.Cpp20;
 #elif UE_4_22_OR_LATER
 		CppStandard = CppStandardVersion.Cpp17;
