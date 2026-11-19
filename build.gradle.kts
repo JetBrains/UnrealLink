@@ -27,7 +27,7 @@ interface Injected {
 val injected = objects.newInstance<Injected>()
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+    maven("https://cache-redirector.jetbrains.com/maven/ultimate-public")
     maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
     maven("https://cache-redirector.jetbrains.com/intellij-repository/snapshots")
     maven("https://cache-redirector.jetbrains.com/maven-central")
