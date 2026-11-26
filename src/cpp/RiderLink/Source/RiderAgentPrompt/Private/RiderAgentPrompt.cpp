@@ -8,7 +8,7 @@ IMPLEMENT_MODULE(FRiderAgentPromptModule, RiderAgentPrompt);
 
 void FRiderAgentPromptModule::StartupModule()
 {
-	PromptGestureProcessor = FPromptGestureProcessor::Register();
+    PromptGestureProcessor = FPromptGestureProcessor::Register();
 }
 
 void FRiderAgentPromptModule::ShutdownModule()
