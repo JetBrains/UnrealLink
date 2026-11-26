@@ -115,7 +115,7 @@ void FRiderLinkModule::ViewModel(rd::Lifetime Lifetime,
 
 void FRiderLinkModule::QueueModelAction(TFunction<void(JetBrains::EditorPlugin::RdEditorModel const&)> Handler)
 {	
-	Scheduler.invoke_or_queue([this, Handler]
+	Scheduler.invoke_or_queue([this, Handler = MoveTemp(Handler)]
 	{
 		if(!RdIsModelAlive.has_value() || !RdIsModelAlive.get()) return;
 		
@@ -131,13 +131,13 @@ bool FRiderLinkModule::TryQueueModelAction(TFunction<void(JetBrains::EditorPlugi
 			return false;
 	}
 
-	QueueModelAction(Handler);
+	QueueModelAction(MoveTemp(Handler));
 	return true;
 }
 
 void FRiderLinkModule::QueueAction(TFunction<void()> Handler)
 {
-	Scheduler.invoke_or_queue([this, Handler]
+	Scheduler.invoke_or_queue([this, Handler = MoveTemp(Handler)]
 	{
 		Handler();
 	});
