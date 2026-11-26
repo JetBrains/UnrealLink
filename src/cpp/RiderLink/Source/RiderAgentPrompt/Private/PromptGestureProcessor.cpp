@@ -71,6 +71,7 @@ namespace
             {
                 RIDERLINK_LOG(FLogRiderAgentPromptModule, Verbose,
                     "Rider process id is not received yet, skipping foreground window permission");
+                return;
             }
 #endif
             Model.get_requestPrompt().fire(JetBrains::EditorPlugin::PromptContext(JetBrains::EditorPlugin::PromptRequestKind::Overlay));
